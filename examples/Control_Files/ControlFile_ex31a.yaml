@@ -1,0 +1,159 @@
+# OpenIAM Control File Example 31a
+#
+# This example demonstrates the use of the AoR plot type. To use the AoR plot,
+# you must have OpenWellbores distributed across the area of interest.
+# There are multiple ways of doing that, and this example uses the 'range' option.
+# The OpenWellbore component illustrates setup of the 'range' option, which
+# contains 'xmin', 'xmax', 'dx', 'ymin', 'ymax', and 'dy'. Number of wellbores is
+# calculated from the number of points made with the 'range' option.
+# The placed OpenWellbores are hypothetical and only used to assess the aquifer contamination
+# that could happen if a leakage pathway was present. The spatial extent of such
+# impacts is meant to inform the definition of an Area of Review (AoR). Note that
+# while pressure and CO2saturation results from reservoirs can be displayed in an
+# AoR plot, these results show the conditions within the reservoir rather than
+# aquifer impacts. The OpenWellbore components are placed with the 'grid' option,
+# which contains 'xmin', 'xmax', 'xsize', 'ymin', 'ymax', and 'ysize'.
+#
+# Note that having 'GenerateOutputFiles': False and 'GenerateCombOutputFile': False
+# within the ModelParams section will prevent the creation of individual output
+# and combined outputs files. The combined outputs files can be large
+# due to the number of components used. In this example there is one
+# SimpleReservoir, OpenWellbore, and FutureGen2Aquifer created for each
+# x and y value specified with the 'grid' option, and an output file
+# would be created for each conmponent. Additionally, the AoR plot type creates
+# a csv file with the data used for the plot, and this csv file is much smaller
+# than the combined and individual output files.
+#
+# Both wellTop (in the OpenWellbore component) and depth (within
+# the FutureGen2Aquifer component) should reflect the depth to the
+# bottom of the aquifer being examined for the AoR (here, aquifer 2).
+#
+# Note that the PlotInjectionSites, FigureDPI, and SaveCSVFiles entires for
+# the AoR plots are optional. If those entries are left out, the figure
+# will use the default settings where injection sites are not plotted
+# (PlotInjectionSites: False), the figure dots-per-inch (dpi) is 100
+# (FigureDPI: 100), and .csv files are saved (SaveCSVFiles: True). To
+# demonstrate that these entries are optional, they have all been excluded
+# from the AoR plot of CO2saturation. When using a LookupTableReservoir,
+# the injection site will only be plotted if InjectionCoordx and InjectionCoordy
+# entries are also provided. See Control File example 32a.
+#
+# Last Modified: January 31st, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 10
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [SimpleReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex31a_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    Logging: Debug
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value: 750.0
+        vary: False
+    shale2Thickness:
+        value: 950.0
+        vary: False
+    shale3Thickness:
+        value: 365
+        vary: False
+    aquifer1Thickness:
+        vary: False
+        value: 85
+    aquifer2Thickness:
+        vary: False
+        value: 85
+    reservoirThickness:
+        vary: False
+        value: 150
+#-------------------------------------------------
+SimpleReservoir1:
+    Type: SimpleReservoir
+    Parameters:
+        injRate:
+            value: 1.0
+            vary: False
+        logResPerm:
+            value: -10.15
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: SimpleReservoir1
+    Number: 196   # 14*14
+    LeakTo: aquifer2
+    Locations:
+        grid:
+            xmin: -7500
+            xmax: 7500
+            xsize: 14
+            ymin: -7500
+            ymax: 7500
+            ysize: 14
+    Parameters:
+        wellRadius:
+            value: 0.05
+            vary: False
+        logReservoirTransmissivity:
+            value: -10.97
+            vary: False
+        logAquiferTransmissivity:
+            value: -10.0
+            vary: False
+        brineSalinity:
+            value: 0.2
+            vary: False
+        # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
+        # to stratigraphy (provided LeakTo parameter is setup to the right aquifer)
+        # and don't require to be setup explicitily unless different value
+        # of the parameter is required
+    Outputs: [CO2_aquifer,
+              brine_aquifer]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        # Parameters aqu_thick (85 m) and depth (450 m) are linked
+        # to stratigraphy and don't require to be setup explicitily unless
+        # different value of the parameter is required.
+        por:
+            value: 0.18
+            vary: False
+        log_permh:
+            value: -11.92
+            vary: False
+        log_aniso:
+            value: 0.3
+            vary: False
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
+#-------------------------------------------------
+Plots:
+    Plot1:
+        AoR: [pressure]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+    Plot2:
+        AoR: [CO2saturation]
+    Plot3:
+        AoR: [pH_volume]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+    Plot4:
+        AoR: [TDS_volume]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True

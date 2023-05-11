@@ -1,0 +1,46 @@
+# OpenIAM Control File Example 22
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex22.yaml
+# This example illustrates setup of Chemical Well Sealing component.
+#-------------------------------------------------
+ModelParams:
+    # Time is in years
+    EndTime: 2
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [ChemWellSealing1]
+    OutputDirectory: output/output_ex22_{datetime}
+    Logging: Debug
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    # Thickness is in meters
+    shale1Thickness:
+        min: 500.0
+        max: 550.0
+        value: 525.0
+    shale2Thickness:
+        min: 450.0
+        max: 500.0
+        value: 475.0
+    shale3Thickness:
+        vary: False
+        value: 11.2
+    aquifer1Thickness:
+        vary: False
+        value: 22.4
+    aquifer2Thickness:
+        vary: False
+        value: 19.2
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+ChemWellSealing1:
+    Type: ChemicalWellSealing
+    Parameters:
+        fractureAperture: 2.0e-5
+        fractureLength: 20.0
+        maxOverpressure: 5.0e+6
+    Outputs: [seal_flag, seal_time]

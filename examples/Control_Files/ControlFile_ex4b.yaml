@@ -1,0 +1,111 @@
+# OpenIAM Control File Example 4b
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex4.yaml
+# This example computes the leakage rates from 2 leaky (open) wellbores
+# connected to the simple reservoir model. In one setup (OpenWellbore1)
+# the leakage rates are calculated in standard way; in the second setup
+# (OpenWellbore2) the leakage rates are calculated taking into account
+# a critical pressure.
+#
+# Last Modified: January 16th, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 1
+    TimeStep: 0.05
+    Analysis: forward
+    Components: [SimpleReservoir1, OpenWellbore1, OpenWellbore2]
+    OutputDirectory: output/output_ex4b_{datetime}
+    Logging: Error
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness: 570.0
+    shale2Thickness: 440.0
+    shale3Thickness: 120.0
+    aquifer1Thickness: 95.0
+    aquifer2Thickness: 80.0
+    reservoirThickness: 40.0
+#-------------------------------------------------
+# SimpleReservoir1 is a user defined name for component
+# the type SimpleReservoir is the ROM model name
+#-------------------------------------------------
+SimpleReservoir1:
+    Type: SimpleReservoir
+    InjectionWell:
+        coordx: 100
+        coordy: 200
+    Parameters:
+        injRate: 0.005
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: SimpleReservoir1
+    Number: 2
+    Locations:
+        coordx: [200, 20]
+        coordy: [100, 280]
+    LeakTo: aquifer2
+    Parameters:
+        wellRadius:
+            min: 0.03
+            max: 0.05
+            value: 0.04
+        logReservoirTransmissivity: -10.0
+        logAquiferTransmissivity: -10.0
+        brineSalinity: 0.0
+        brineDensity: 1050.0  # used only if critPressureApproach is True (see OpenWellbore2)
+    Outputs: [CO2_aquifer2, brine_aquifer2]
+#-------------------------------------------------
+OpenWellbore2:
+    Type: OpenWellbore
+    Connection: SimpleReservoir1
+    Number: 2
+    Locations:
+        coordx: [200, 20]
+        coordy: [100, 280]
+    LeakTo: aquifer2
+    Controls:
+        critPressureApproach: True
+    Parameters:
+        wellRadius: 0.04
+        logReservoirTransmissivity: -10.0
+        logAquiferTransmissivity: -10.0
+        brineSalinity: 0.0
+        brineDensity: 1050.0  # used only if critPressureApproach is True
+        # critPressure: 13330450.0  # equivalent way to use critical pressure without Controls
+    Outputs: [CO2_aquifer2, brine_aquifer2]
+#-------------------------------------------------
+Plots:
+    #------------------------------------------------------
+    # Plot pressure at each well
+    #------------------------------------------------------
+    Pressure_subplots:
+        TimeSeriesStats: [pressure, CO2saturation]
+        subplot:
+            use: True
+            ncols: 2
+    #------------------------------------------------------
+    # Plot the CO2 leakage into the aquifer from each well
+    #------------------------------------------------------
+    CO2_Leakage_subplots:
+        TimeSeriesStats: [CO2_aquifer2]
+        Title: $CO_2$ leakage to aquifer 2
+        UseMarkers: True
+        FigureDPI: 100
+        subplot:
+            use: True
+            ncols: 2
+    #------------------------------------------------------
+    # Plot the brine leakage into the aquifer from each well
+    #------------------------------------------------------
+    Brine_Leakage_subplots:
+        TimeSeriesStats: [brine_aquifer2]
+        Title: Brine leakage to aquifer 2
+        UseMarkers: True
+        FigureDPI: 100
+        subplot:
+            ncols: 2
+            use: True

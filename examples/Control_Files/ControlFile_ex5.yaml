@@ -1,0 +1,65 @@
+# OpenIAM Control File Example 5
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex5.yaml
+# This example links an analytical reservoir
+# model (Nordbotten et al., 2011) with a cemented wellbore model.
+# This example runs a parameter study analysis on the uncertain input parameters.
+# Last Modified: February 15, 2018
+#-------------------------------------------------
+ModelParams:
+    Logging: Debug
+    EndTime: 5
+    TimeStep: 1.0
+    Analysis:
+        type: parstudy
+        nvals: 3
+    Components: [SimpleReservoir1,
+                 CementedWellbore1]
+    OutputDirectory: output/output_ex5_{datetime}
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness: 525.0
+    shale2Thickness: 475.0
+    shale3Thickness: 11.2
+    aquifer1Thickness:
+        vary: False
+        value: 22.4
+    aquifer2Thickness:
+        vary: False
+        value: 19.2
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+# SimpleReservoir1 is a user defined name for component
+# the type SimpleReseroir is the ROM model name
+#-------------------------------------------------
+SimpleReservoir1:
+    Type: SimpleReservoir
+#-------------------------------------------------
+CementedWellbore1:
+    Locations:
+        coordx: [100, 540]
+        coordy: [100, 630]
+    Type: CementedWellbore
+    Connection: SimpleReservoir1
+    Parameters:
+        logWellPerm:
+            min: -13.95
+            max: -11.0
+            value: -12.8
+        logThiefPerm:
+            min: -13.95
+            max: -12.05
+            value: -12.2
+    Outputs: [CO2_aquifer1,
+              CO2_aquifer2,
+              CO2_atm,
+              brine_aquifer1,
+              brine_aquifer2]
+#-------------------------------------------------
+Plots:
+    P1:
+        TimeSeries: [CO2_aquifer2]

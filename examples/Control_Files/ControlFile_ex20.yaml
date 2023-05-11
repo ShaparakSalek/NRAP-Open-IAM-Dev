@@ -1,0 +1,83 @@
+# OpenIAM Control File Example 20
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex20.yaml
+#-------------------------------------------------
+ModelParams:
+    EndTime: 5
+    TimeStep: 0.01
+    # Analysis: forward
+    Analysis:
+        type: lhs
+        siz: 10
+        #seed: 721
+    Components: [Reservoir]
+    OutputDirectory: output/output_ex20_{datetime}
+    Logging: Debug
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        min: 930.0
+        max: 1000.0
+        value: 940.0
+    aquifer1Thickness:
+        min: 50.0
+        max: 60.0
+        value: 55.0
+    aquifer2Thickness:
+        min: 30.0
+        max: 50.0
+        value: 45.0
+    shale2Thickness:
+        vary: False
+        value: 250.0
+    shale3Thickness:
+        vary: False
+        value: 250.0
+    reservoirThickness:
+        vary: False
+        value: 50.0
+#-------------------------------------------------
+# Reservoir is a user defined name for component
+# AnalyticalReservoir is the NRAP-Open-IAM class name
+#-------------------------------------------------
+Reservoir:
+    Type: AnalyticalReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Locations:
+        coordx: [100, 150]
+        coordy: [100, 240]
+    Parameters:
+        injRate:
+            value: 1.5
+            vary: False
+        logResPerm:
+            min: -13.0
+            max: -12.0
+            value: -12.5
+        reservoirRadius:
+            value: 700
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+Plots:
+    PressurePlot:
+        TimeSeries: [pressure]
+        subplot:
+            ncols: 2
+            use: True
+            Reservoir_000.pressure: 'Pressure at location 1'
+            Reservoir_001.pressure: 'Pressure at location 2'
+        Title: Reservoir Pressure
+    Saturation:
+        TimeSeries: [CO2saturation]
+        subplot:
+            ncols: 2
+            use: True
+            Reservoir_000.CO2saturation: '$CO_2$ saturation at location 1'
+            Reservoir_001.CO2saturation: '$CO_2$ saturation at location 2'
+        Title: Reservoir CO2 saturation

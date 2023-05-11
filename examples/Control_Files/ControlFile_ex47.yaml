@@ -1,0 +1,77 @@
+# OpenIAM Control File Example 47
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex47.yaml
+#-------------------------------------------------
+ModelParams:
+    EndTime: 5
+    TimeStep: 1
+    Analysis: forward
+    Components: [Reservoir]
+    OutputDirectory: output/output_ex47_{datetime}
+    Logging: Debug
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    reservoirThickness:
+        vary: False
+        value: 70.0
+    shale1Thickness:
+        vary: False
+        value: 240.0
+    aquifer1Thickness:
+        vary: False
+        value: 55.0
+    shale2Thickness:
+        vary: False
+        value: 350.0
+    aquifer2Thickness:
+        vary: False
+        value: 45.0
+    shale3Thickness:
+        vary: False
+        value: 450.0
+#-------------------------------------------------
+# Reservoir is a user defined name for component
+# GenericReservoir is the NRAP-Open-IAM class name
+#-------------------------------------------------
+Reservoir:
+    Type: GenericReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Locations:
+        coordx: [100, 200, 300]
+        coordy: [100, 200, 300]
+    Parameters:
+        injRate:
+            vary: False
+            value: 50.0
+        logResPerm:
+            vary: False
+            value: -13.0
+        resTempGradient:
+            vary: False
+            value: 25.0
+        initialSalinity:
+            vary: False
+            value: 0.04
+        reservoirPorosity:
+            vary: False
+            value: 0.2
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+Plots:
+    pressure_reals:
+        TimeSeries: [pressure]
+        subplot:
+            ncols: 3
+            use: True
+        Title: Reservoir Pressure
+    saturation_reals:
+        TimeSeries: [CO2saturation]
+        subplot:
+            ncols: 3
+            use: True
+        Title: Reservoir CO2 saturation

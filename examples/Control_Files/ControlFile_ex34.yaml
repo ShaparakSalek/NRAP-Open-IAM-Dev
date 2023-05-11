@@ -1,0 +1,133 @@
+# OpenIAM Control File Example 34
+#
+# This example is almost the same as the file Control File Example 33.
+# Please refer to the example description within that file. This example, however,
+# demonstrates the ability to set a variable with string inputs representing
+# a unit's thickness. Here, a Generic Aquifer is also included. The aquifer's
+# thickness (aqu_thick) is specified as aquifer2Thickness and the aquifer's
+# top_depth is specified as shale3Thickness. Because shale 3 is the shallowest shale,
+# shale3Thickness is equal to shale3Depth (the bottom depth of shale 3, which
+# is equal to the top depth of aquifer 2).
+#
+# Last Modified: December 9th, 2022
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [SimpleReservoir1, OpenWellbore1, GenericAquifer1]
+    OutputDirectory: output/output_ex34_{datetime}
+    Logging: Debug
+Stratigraphy:
+    spatiallyVariable:
+        strikeAndDip:
+            strike: 270
+            dip: 5
+            dipDirection: N
+            coordxRefPoint: 0
+            coordyRefPoint: 0
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value: 750.0
+        vary: False
+    shale2Thickness:
+        value: 950.0
+        vary: False
+    shale3Thickness:
+        value: 100
+        vary: False
+    aquifer1Thickness:
+        vary: False
+        value: 200
+    aquifer2Thickness:
+        vary: False
+        value: 150
+    reservoirThickness:
+        vary: False
+        value: 150
+#-------------------------------------------------
+SimpleReservoir1:
+    Type: SimpleReservoir
+    Parameters:
+        injRate:
+            value: 1
+            vary: False
+        logResPerm:
+            value: -10.15
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: SimpleReservoir1
+    Locations:
+        coordx: [1000, 2000]
+        coordy: [1000, 2000]
+    LeakTo: aquifer2
+    Parameters:
+        wellRadius:
+            value: 0.05
+            vary: False
+        logReservoirTransmissivity:
+            value: -10.97
+            vary: False
+        logAquiferTransmissivity:
+            value: -10.0
+            vary: False
+        brineSalinity:
+            value: 0.2
+            vary: False
+        wellTop:
+            value: aquifer2Depth
+            vary: False
+        reservoirDepth:
+            value: shale1Depth
+            vary: False
+    Outputs: [CO2_aquifer,
+              brine_aquifer]
+#-------------------------------------------------
+GenericAquifer1:
+    Type: GenericAquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        aqu_thick: aquifer2Thickness
+        top_depth: shale3Thickness
+    Outputs: [Dissolved_salt_volume, Dissolved_CO2_volume]
+#-------------------------------------------------
+Plots:
+    Plot1:
+        TimeSeries: [pressure]
+        subplot:
+            use: True
+            ncols: 2
+    Plot2:
+        TimeSeries: [CO2saturation]
+        subplot:
+            use: True
+            ncols: 2
+    Plot3:
+        TimeSeries: [CO2_aquifer]
+        subplot:
+            use: True
+            ncols: 2
+    Plot4:
+        TimeSeries: [brine_aquifer]
+        subplot:
+            use: True
+            ncols: 2
+    Plot5:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeries: [Dissolved_salt_volume]
+    Plot6:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeries: [Dissolved_CO2_volume]
+    Plot7:
+        Stratigraphy:

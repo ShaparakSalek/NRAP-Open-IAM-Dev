@@ -1,0 +1,160 @@
+# OpenIAM Control File Example 14
+# This example requires the additional FutureGen 2.0 data set.
+# FutureGen 2.0 data set can be downloaded from the following source:
+# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+#
+# The downloaded data set should be placed here:
+#    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex14.yaml
+#
+# Last Modified: January 13, 2020
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20.
+    TimeStep: 0.125
+    Analysis:
+        type: lhs
+        siz: 50
+    Components: [LookupTableReservoir1, MultisegmentedWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: output/output_ex14_{datetime}
+    Logging: Info
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    shale1Thickness: 198.7
+    shale2Thickness: 74.4
+    shale3Thickness: 110.3
+    shale4Thickness: 118.9
+    shale5Thickness: 530.4
+    aquifer1Thickness: 33.2
+    aquifer2Thickness: 84.1
+    aquifer3Thickness: 31.1
+    aquifer4Thickness: 61.6
+    reservoirThickness: 7
+
+#-------------------------------------------------
+LookupTableReservoir1:
+    Type: LookupTableReservoir
+    FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+    TimeFile: time_points.csv
+    ParameterFilename: parameters_and_filenames_trunc.csv
+    Parameters:
+        index: 5
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+MultisegmentedWellbore1:
+    Type: MultisegmentedWellbore
+    Connection: LookupTableReservoir1
+    Locations:
+        coordx: [236377.0, 236758.0]
+        coordy: [4409269.5, 4410107.6]
+    Parameters:
+        wellRadius: 0.05715
+        logAqu1Perm:
+            min: -13.89
+            max: -12.89
+            value: -13.39
+        logAqu2Perm:
+            min: -11.55
+            max: -10.55
+            value: -11.05
+        logAqu3Perm:
+            min: -12.98
+            max: -11.98
+            value: -12.48
+        logAqu4Perm:
+            min: -12.42
+            max: -11.42
+            value: -11.92
+        logWellPerm:
+            min: -14.0
+            max: -11.0
+            value: -13.0
+        brineDensity: 1030.9
+        CO2Density: 775.0
+        brineViscosity: 7.5e-4
+        CO2Viscosity: 6.6e-5
+    Outputs: [CO2_aquifer1, CO2_aquifer2, CO2_aquifer3, CO2_aquifer4, CO2_atm,
+              brine_aquifer1, brine_aquifer2, brine_aquifer3, brine_aquifer4, brine_atm]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: MultisegmentedWellbore1
+    AquiferName: aquifer4
+    Parameters:
+        por: 0.18
+        log_permh: -11.92
+        log_aniso: 0.3
+        rel_vol_frac_calcite: 0.1
+    Outputs: [pH_volume, TDS_volume, Pressure_volume]
+#-------------------------------------------------
+Plots:
+# To create these plots, remove the # characters.
+#    pressure_plot:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [pressure]
+#    saturation_plot:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [CO2saturation]
+#    CO2_leakage1:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [CO2_aquifer1]
+#    brine_leakage1:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [brine_aquifer1]
+#    CO2_leakage2:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [CO2_aquifer2]
+#    brine_leakage2:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [brine_aquifer2]
+#    CO2_leakage3:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [CO2_aquifer3]
+#    brine_leakage3:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [brine_aquifer3]
+#    CO2_leakage4:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [CO2_aquifer4]
+#    brine_leakage4:
+#        subplot:
+#            use: True
+#            ncols: 2
+#        TimeSeriesAndStats: [brine_aquifer4]
+    pH_plume_volumes:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeriesAndStats: [pH_volume]
+    TDS_plume_volumes:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeriesAndStats: [TDS_volume]
+    Pressure_plume_volumes:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeriesAndStats: [Pressure_volume]

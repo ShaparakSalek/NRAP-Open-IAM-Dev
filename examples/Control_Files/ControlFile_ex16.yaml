@@ -1,0 +1,65 @@
+# OpenIAM Control File Example 16
+# This example requires the additional Kimberlina data set.
+# Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
+# Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following places:
+# 1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
+# 2. https://gitlab.com/NRAP/Kimberlina_data
+#
+# The downloaded data set should be placed here:
+#    source/components/reservoir/lookuptables/Kimb_54_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex16.yaml
+
+# Last Modified: February 10, 2020
+#-------------------------------------------------
+ModelParams:
+    EndTime: 200.
+    TimeStep: 1.0
+    Analysis:
+        type: parstudy
+        nvals: 10
+    Components: [PlumeStabilityCmpnt]
+    OutputDirectory: output/output_ex16_{datetime}
+    Logging: Warning
+#-------------------------------------------------
+PlumeStabilityCmpnt:
+    Type: PlumeStability
+    FileDirectory: source/components/reservoir/lookuptables/Kimb_54_sims
+    TimeFile: time_points.csv
+    ParameterFilename: parameters_and_filenames.csv
+    Variables: [pressure, CO2saturation]
+    Thresholds:
+        pressure: 1.0e+6
+        CO2saturation: 0.01
+    Parameters:
+        index:
+            Values: [1, 2, 4, 5, 7, 10, 12, 15, 21, 36]
+            Weights: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    Outputs: [pressure_areas, pressure_areas_dt, CO2saturation_areas, CO2saturation_areas_dt]
+#-------------------------------------------------
+Plots:
+    Areas_stats:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeriesStats: [pressure_areas, CO2saturation_areas]
+        Title: "Areas: Some statistics"
+    Areas_series:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeries: [pressure_areas, CO2saturation_areas]
+        Title: "Areas"
+    Areas_dt_stats:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeriesStats: [pressure_areas_dt, CO2saturation_areas_dt]
+        Title: "Change of Areas: Some statistics"
+    Areas_dt_series:
+        subplot:
+            use: True
+            ncols: 2
+        TimeSeries: [pressure_areas_dt, CO2saturation_areas_dt]
+        Title: "Change of Areas"

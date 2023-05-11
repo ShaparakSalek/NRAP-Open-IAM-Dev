@@ -1,0 +1,87 @@
+# OpenIAM Control File Example 25
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex25.yaml
+#
+# Last Modified: April 26, 2022
+#-------------------------------------------------
+ModelParams:
+    EndTime: 5.
+    TimeStep: 1.
+    Analysis:
+        type: lhs
+        siz: 10
+    Components: [MultisegmentedWellbore1, GenericAquifer1]
+    OutputDirectory: output/output_ex25_{datetime}
+    Logging: Info
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    shale1Thickness: 198.7
+    shale2Thickness: 74.4
+    shale3Thickness: 110.3
+    shale4Thickness: 118.9
+    shale5Thickness: 530.4
+    aquifer1Thickness: 33.2
+    aquifer2Thickness: 84.1
+    aquifer3Thickness: 31.1
+    aquifer4Thickness: 61.6
+    reservoirThickness: 7
+#-------------------------------------------------
+MultisegmentedWellbore1:
+    Type: MultisegmentedWellbore
+    DynamicParameters:
+        pressure: [27119928.57,
+                   33166857.14,
+                   34104428.57,
+                   34160928.57,
+                   34088642.86,
+                   33982357.14]
+        CO2saturation: [0.,
+                        0.34310857,
+                        0.45430571,
+                        0.47404286,
+                        0.48760786,
+                        0.50069071]
+    Locations:
+        coordx: [236377.0]
+        coordy: [4409269.5]
+    Parameters:
+        wellRadius: 0.05715
+        logAqu1Perm: -13.39
+        logAqu2Perm: -11.05
+        logAqu3Perm: -12.48
+        logAqu4Perm: -11.92
+        logWellPerm:
+            min: -14.0
+            max: -11.0
+            value: -13.0
+        brineDensity: 1030.9
+        CO2Density: 775.0
+        brineViscosity: 7.5e-4
+        CO2Viscosity: 6.6e-5
+    Outputs: [CO2_aquifer1, CO2_aquifer2, CO2_aquifer3, CO2_aquifer4, CO2_atm,
+              brine_aquifer1, brine_aquifer2, brine_aquifer3, brine_aquifer4, brine_atm]
+#-------------------------------------------------
+GenericAquifer1:
+    Type: GenericAquifer
+    Connection: MultisegmentedWellbore1
+    AquiferName: aquifer1
+    Parameters:
+        por: 0.2
+        log_permh: -12.0
+        log_aniso: 0.6
+    Outputs: [Dissolved_salt_volume, Dissolved_CO2_volume,
+              Dissolved_CO2_mass_fraction, Dissolved_salt_mass_fraction]  # gridded observations
+#-------------------------------------------------
+Plots:
+    CO2_leakage1:
+        TimeSeries: [CO2_aquifer1]
+    brine_leakage1:
+        TimeSeries: [brine_aquifer1]
+    salt_volume:
+        TimeSeries: [Dissolved_salt_volume]
+    CO2_volume:
+        TimeSeries: [Dissolved_CO2_volume]
+    CO2_mass_fraction:
+        TimeSeries: [Dissolved_CO2_mass_fraction_coord_50_5]
