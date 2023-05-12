@@ -54,6 +54,8 @@ GFR_PARAMETER_LABEL_WIDTH = 37
 STRATA_PARAMETER_LABEL_WIDTH = 25
 # Width of labels containing names of parameters of fault leakage component
 FL_PARAMETER_LABEL_WIDTH = 35
+# Width of labels containing names of parameters of hydrocarbon leakage component
+HCL_PARAMETER_LABEL_WIDTH = 35
 
 
 # Width of widgets on Model tab
@@ -135,6 +137,7 @@ COMPONENT_TYPES = [
     'Generalized Flow Rate',
     'Fault Flow',
     'Fault Leakage',
+    'Hydrocarbon Leakage',
     'Seal Horizon',
     'Carbonate Aquifer',
     # 'Alluvium Aquifer (LF)',

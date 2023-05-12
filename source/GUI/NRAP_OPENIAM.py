@@ -41,7 +41,7 @@ from dictionarydata import (d, APP_SIZE, TAB_SIZE, componentVars, componentChoic
                             DISTRIBUTION_PARS_LABELS, DISTRIBUTION_PARS_SETUPS)
 
 from cmpnts_tabs import (src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
-                         cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, sh_tab, ca_tab,
+                         cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
                          aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
                          ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, locations)
 from cmpnts_tabs.parameter_entry import ParameterEntry
@@ -1242,6 +1242,7 @@ class NRAPOpenIAM(tk.Tk):
             'GeneralizedFlowRate': (0, 0, 0, 1300),
             'FaultFlow': (0, 0, 0, 2000),
             'FaultLeakage': (0, 0, 0, 800),
+            'HydrocarbonLeakage': (0, 0, 0, 800),
             'SealHorizon': (0, 0, 0, 2000),
             'CarbonateAquifer': (0, 0, 0, 2000),
             'AlluviumAquiferLF': (0, 0, 0, 1500),
@@ -1278,6 +1279,7 @@ class NRAPOpenIAM(tk.Tk):
             'GeneralizedFlowRate': gfr_tab.read_tab_vars,
             'FaultFlow': ff_tab.read_tab_vars,
             'FaultLeakage': fl_tab.read_tab_vars,
+            'HydrocarbonLeakage': hcl_tab.read_tab_vars,
             'SealHorizon': sh_tab.read_tab_vars,
             'CarbonateAquifer': ca_tab.read_tab_vars,
             'AlluviumAquiferLF': aalf_tab.read_tab_vars,
@@ -1315,6 +1317,7 @@ class NRAPOpenIAM(tk.Tk):
             'GeneralizedFlowRate': gfr_tab.add_widgets,
             'FaultFlow': ff_tab.add_widgets,
             'FaultLeakage': fl_tab.add_widgets,
+            'HydrocarbonLeakage': hcl_tab.add_widgets,
             'SealHorizon': sh_tab.add_widgets,
             'CarbonateAquifer': ca_tab.add_widgets,
             'AlluviumAquiferLF': aalf_tab.add_widgets,

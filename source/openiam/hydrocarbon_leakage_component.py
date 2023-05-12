@@ -19,6 +19,7 @@ except ImportError as err:
 
 import components.wellbore.hydrocarbon_leakage.hydrocarbon_leakage_ROM as hydrcarbrom
 from openiam.openiam_cf_commons import process_parameters
+import openiam.openiam_cf_strata as iam_strata
 
 class HydrocarbonLeakage(ComponentModel):
     """
@@ -59,7 +60,7 @@ class HydrocarbonLeakage(ComponentModel):
       reservoir contributing to the flow (default: 0.6)
 
     * **logResPerm** [log10 m^2] (-14.0057 to -13.0057) - logarithm of
-      reservoir permeability (default: -13)
+      reservoir permeability (default: -13.5)
 
     * **reservoirPressureMult** [-] (1.0 to 1.2) - factor used to represent a
       state of the reservoir pressurization post-injection (relative to the
@@ -212,6 +213,7 @@ class HydrocarbonLeakage(ComponentModel):
 
         :returns: None
         """
+
         # Process parameters data if any
         process_parameters(self, component_data, name2obj_dict)
 
@@ -244,7 +246,6 @@ class HydrocarbonLeakage(ComponentModel):
 
             # Depth to the top of reservoir (usually)
             self.add_composite_par('reservoirDepth', res_depth_expr)
-
 
     def simulation_model(self, p, **kwargs):
         """
@@ -308,7 +309,7 @@ if __name__ == "__main__":
     # Define keyword arguments of the system model
     num_years = 410
     t0 = 0.0  # initial time point
-    time_array = 365.25*np.arange(t0, t0+num_years+1, 10)
+    time_array = 365.25*np.arange(t0, t0+num_years+10, 10)
 
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
     sm = SystemModel(model_kwargs=sm_model_kwargs)
@@ -339,7 +340,7 @@ if __name__ == "__main__":
     # Run forward simulation
     sm.forward()
 
-    # Collect ouputs into a dictionary
+    # Collect outputs into a dictionary
     outputs = {obs_nm: sm.collect_observations_as_time_series(hcl_comp, obs_nm)
                for obs_nm in hcl_observations}
 
@@ -360,6 +361,8 @@ if __name__ == "__main__":
     ax[1].set_ylabel(r'Mass of gas CO$_2$ in aquifer, [Kt]', fontsize=label_size)
     fig.suptitle('Results of simulation', fontsize=font_size)
 
+    plt.show()
+
     # Second group of plots
     fig, ax = plt.subplots(1, 2, figsize=(13, 5))
     for ind, obs_nm in enumerate(['mass_methane_oil_aquifer', 'mass_methane_gas_aquifer']):
@@ -370,6 +373,8 @@ if __name__ == "__main__":
     ax[1].set_ylabel('Mass of methane in aquifer, [Kt]', fontsize=label_size)
     fig.suptitle('Results of simulation', fontsize=font_size)
 
+    plt.show()
+
     # Third group of plots
     fig, ax = plt.subplots(1, 2, figsize=(13, 5))
     for ind, obs_nm in enumerate(['mass_oil_aquifer', 'mass_gas_aquifer']):
@@ -379,3 +384,5 @@ if __name__ == "__main__":
     ax[0].set_ylabel('Mass of oil leaked in aquifer, [Kt]', fontsize=label_size)
     ax[1].set_ylabel('Mass of gas leaked in aquifer, [Kt]', fontsize=label_size)
     fig.suptitle('Results of simulation', fontsize=font_size)
+
+    plt.show()
