@@ -2274,7 +2274,7 @@ class Tests(unittest.TestCase):
         true_CO2aq1_logWell = 0.930413351316639
         self.assertTrue(os.path.exists(base_outfile.format(n=1, fmt='png')),
                         'Output image not created')
-        self.assertTrue(os.path.exists(base_outfile.format(n=1, fmt='txt')),
+        self.assertTrue(os.path.exists(base_outfile.format(n=1, fmt='csv')),
                         'Output data file not created')
         self.assertTrue(abs(true_CO2aq1_logWell - CO2_aq1_ssens[0]) < 0.01,
                         'CO2_aq1-logWellPerm is {ov} but should be {tv}'

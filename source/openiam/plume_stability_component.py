@@ -12,6 +12,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from openiam import SystemModel, ComponentModel, IAM_DIR
     from openiam.mesh2D import read_Mesh2D_data
+    from openiam.reservoir_data_interpolator import (check_file_format,
+                                                     read_time_points,
+                                                     read_data_headers)
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
@@ -153,10 +156,14 @@ class PlumeStability(ComponentModel):
             # Read file with info about data files and corresponding parameters
             self.read_parameter_filename()
 
-            # Save name of the file with the time points to use in the model method
-            self.time_file = time_file
-            # Read in time points
-            self.read_time_points()
+            # Check and save name of the file with the time points to use in the model method
+            self.hdf5_time_file, self.time_file = check_file_format(
+                time_file, data_type='time')
+
+            # Read time points
+            _, self.time_points = read_time_points(self.hdf5_time_file,
+                                                   self.file_directory,
+                                                   self.time_file)
 
             # Read names of variables provided in the lookup tables
             self.read_possible_variables()
@@ -208,14 +215,6 @@ class PlumeStability(ComponentModel):
                 # Assumes filename will be the last column
                 self.filenames[int(vs[0])] = vs[-1]
 
-    def read_time_points(self):
-        """ Read in time points. """
-
-        # By default time_file is 'time_points.csv'
-        # For the control file interface the name of the file can be different
-        self.time_points = np.genfromtxt(os.path.join(self.file_directory,
-                                                      self.time_file),
-                                         delimiter=',')
     def set_variable_names(self, variable_names):
         """ Set variable_names attribute content. """
         for var_name in variable_names:
@@ -242,41 +241,42 @@ class PlumeStability(ComponentModel):
         """ Read names of variables provided in the lookup tables."""
 
         # Assume that all data files have identical variables
-        # Assume that 'x','y',and 'area' are the only possible non-variable header entries
+        # Assume that 'x','y', and 'area' are the only possible non-variable header entries
         # Get file with the first index
         ind1 = list(self.filenames.keys())[0]
-        with open(os.path.join(self.file_directory, self.filenames[ind1])) as fh:
-            names = fh.readline().strip().split(',')
-            if not "area" in names:
-                wng_msg = ''.join([
-                    'Areas are not provided in the file directory {}, ',
-                    'uniform areas will be approximated based on ',
-                    'the assumption that the mesh is uniformly spaced.']).format(
-                        self.file_directory)
-                logging.warning(wng_msg)
-            # Remove # symbol from first name if it exists
-            names[0] = sub("^#", '', names[0]).strip()
-            # Remove non-time varying variables assuming that
-            # they will not end in '_[0-9]+' (underscore followed by an interger)
-            tsnames = []
-            for nm in names:
-                if len(split("_[0-9]+$", nm)) == 2:
-                    tsnames.append(nm)
-            # Make sure that the number of variable names is divisible by the number of time_points
-            if (len(tsnames))/(len(self.time_points))%1 == 0.:
-                self.variable_list = []
-                nvars = int((len(tsnames))/(len(self.time_points)))
-                # Assume variable names have time_point number appended
-                # with an underscore (e.g., pressure_1 for pressure)
-                for i in range(nvars):
-                    self.variable_list.append(
-                        split("_[0-9]+$", tsnames[len(self.time_points)*i])[0])
-            else:
-                err_msg = ''.join([
-                    'The number of variable names is not consistent with ',
-                    'the number of time points in {}.']).format(
-                        os.path.join.join(self.file_directory, self.filenames[ind1]))
-                logging.error(err_msg)
+
+        # Check whether file is of appropriate type
+        self.hdf5_data_format, _ = check_file_format(self.filenames[ind1], data_type='data')
+
+        # Read headers in the data file
+        self.data_headers = read_data_headers(
+            self.hdf5_data_format, self.file_directory, self.filenames[ind1])
+
+        if not "area" in self.data_headers:
+            wng_msg = ''.join([
+                'Areas are not provided in the file directory {}, ',
+                'uniform areas will be approximated based on ',
+                'the assumption that the mesh is uniformly spaced.']).format(
+                    self.file_directory)
+            logging.warning(wng_msg)
+        # Remove # symbol from first name if it exists
+        self.data_headers[0] = sub("^#", '', self.data_headers[0]).strip()
+        # Remove non-time varying variables assuming that
+        # they will not end in '_[0-9]+' (underscore followed by an interger)
+        tsnames = []
+        for nm in self.data_headers:
+            split_res = split("_[0-9]+$", nm)
+            if len(split_res) == 2:
+                tsnames.append(split_res[0])
+        # Make sure that the number of variable names is divisible by the number of time_points
+        if (len(tsnames))/(len(self.time_points))%1 == 0.:
+            self.variable_list = np.unique(tsnames)
+        else:
+            err_msg = ''.join([
+                'The number of variable names is not consistent with ',
+                'the number of time points in {}.']).format(
+                    os.path.join.join(self.file_directory, self.filenames[ind1]))
+            logging.error(err_msg)
 
     def add_variable(self, variable, threshold):
         """ Add variable to the variables list if it is not there already."""
@@ -342,11 +342,16 @@ class PlumeStability(ComponentModel):
 
         if 'TimeFile' in component_data:
             self.time_file = component_data['TimeFile']
+            self.hdf5_time_file, self.time_file = check_file_format(
+                self.time_file, data_type='time')
         else:
             self.time_file = 'time_points.csv'
+            self.hdf5_time_file = False
 
         # Read in time points
-        self.read_time_points()
+        _, self.time_points = read_time_points(self.hdf5_time_file,
+                                               self.file_directory,
+                                               self.time_file)
 
         # Read names of variables provided in the lookup tables
         self.read_possible_variables()
@@ -439,7 +444,7 @@ class PlumeStability(ComponentModel):
         # Create Mesh2D object
         M = read_Mesh2D_data(
             os.path.join(self.file_directory, self.filenames[index]),
-            os.path.join(self.file_directory, self.time_file))
+            self.variable_list, self.time_points, self.hdf5_data_format)
 
         # Check that specified variables are valid
         for var_name in self.variable_names:

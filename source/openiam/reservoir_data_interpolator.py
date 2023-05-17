@@ -27,6 +27,67 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 
+def check_file_format(data_file, data_type='data'):
+    """
+    Check whether data comes from *.csv or *.hdf5 file.
+
+    :param data_file: name of *.csv or *.hdf5 file to read observation (e.g.,
+        pressure and |CO2| saturation) data from
+    :type filename: string
+    """
+    if data_file.lower().endswith('.csv'):
+        hdf5_data_file = False
+    elif data_file.lower().endswith('.hdf5') or data_file.lower().endswith('.h5'):
+        hdf5_data_file = True
+    else:
+        err_msg = ''.join([
+            'Format of the provided {} file is not valid: it is neither .csv ',
+            'nor .hdf5. Please check your input.']).format(data_type)
+        logging.error(err_msg)
+        raise Exception(err_msg)
+
+    return hdf5_data_file, data_file
+
+
+def read_time_points(is_hdf5_file, header_file_dir, time_file):
+    """
+    Load time points from user-provided data files.
+    """
+    time_file_full_path = os.path.join(header_file_dir, time_file)
+    # Obtain time points data
+    if not is_hdf5_file: # time file has .csv extension
+        time_points = np.loadtxt(time_file_full_path, delimiter=",", dtype='f8')
+    else:  # time file has .hdf5 extension
+        # Read provided hdf5 file containing key t for time points data
+        with h5py.File(time_file_full_path, 'r') as hf:
+            time_points = hf['t'][()]
+
+    # Determine number of time points in the data
+    num_data_time_points = len(time_points)
+
+    return num_data_time_points, time_points
+
+
+def read_data_headers(is_hdf5_file, header_file_dir, data_file):
+    """
+    Determine type of observation (e.g., x, y, z, pressure, saturation, etc.)
+    in the provided data file.
+    """
+    data_file_full_path = os.path.join(header_file_dir, data_file)
+    # Obtain headers of the data file with observations
+    if not is_hdf5_file:  # csv data file format
+        data = np.genfromtxt(data_file_full_path, names=True, delimiter=',', max_rows=1)
+        data_headers = list(data.dtype.names)
+        msg = 'Data file headers: {}'.format(data_headers)
+        logging.debug(msg)
+
+    else:  # hdf5 data file format
+        with h5py.File(data_file_full_path, 'r') as hf:
+            data_headers = list(hf.keys())
+
+    return data_headers
+
+
 class AnimatedScatterPlot(object):
     def __init__(self, interp_obj, obs_nm='pressure'):
         """
@@ -177,9 +238,13 @@ class ReservoirDataInterpolator(object):
         self.name = name             # name of interpolator
         self.parent = parent         # a system model interpolator belongs to
         self.header_file_dir = header_file_dir  # path to the directory with simulation data files
-        self.check_time_file(time_file)   # name of file with time points data
+        # Name of file with time points data
+        self.hdf5_time_file, self.time_file = check_file_format(
+            time_file, data_type='time')
+
         # data_file is a name of file with pressure and saturation data
-        self.check_data_format(data_file)
+        self.hdf5_data_format, self.data_file = check_file_format(
+            data_file, data_type='data')
 
         # Check type of the provided argument index
         if isinstance(index, int):
@@ -235,78 +300,6 @@ class ReservoirDataInterpolator(object):
         # Log message about creating the interpolator
         msg = 'ReservoirDataInterpolator created with name {name}'.format(name=name)
         logging.debug(msg)
-
-    def check_data_format(self, data_file):
-        """
-        Check whether data comes from *.csv or *.hdf5 file.
-
-        :param data_file: name of *.csv or *.hdf5 file to read observation (e.g.,
-            pressure and |CO2| saturation) data from
-        :type filename: string
-        """
-        if data_file.lower().endswith('.csv'):
-            self.hdf5_data_format = False
-        elif data_file.lower().endswith('.hdf5') or data_file.lower().endswith('.h5'):
-            self.hdf5_data_format = True
-        else:
-            err_msg = ''.join([
-                'Format of the provided data file is not valid for ',
-                'inteprolator {}. Please check your input.']).format(self.name)
-            logging.error(err_msg)
-            raise Exception(err_msg)
-        self.data_file = data_file
-
-    def check_time_file(self, time_file):
-        """
-        Check whether time points come from *.csv or *.hdf5 file.
-
-        :param time_file: name of *.csv or *.hdf5 file containing time points
-        :type filename: string
-        """
-        if time_file.lower().endswith('.csv'):
-            self.hdf5_time_file = False
-        elif time_file.lower().endswith('.hdf5') or time_file.lower().endswith('.h5'):
-            self.hdf5_time_file = True
-        else:
-            err_msg = ''.join([
-                'Format of the provided time file is not valid for ',
-                'inteprolator {}. Please check your input.']).format(self.name)
-            logging.error(err_msg)
-            raise Exception(err_msg)
-        self.time_file = time_file
-
-    def get_time_points(self):
-        """
-        Load time points from user-provided data files.
-        """
-        time_file = os.path.join(self.header_file_dir, self.time_file)
-        # Obtain time points data
-        if not self.hdf5_time_file: # time file has .csv extension
-            self.time_points = np.loadtxt(time_file, delimiter=",", dtype='f8') # in years
-        else:  # time file has .hdf5 extension
-            # Read provided hdf5 file containing key t for time points data
-            with h5py.File(time_file, 'r') as hf:
-                self.time_points = hf['t'][()]
-
-        # Determine number of time points in the data
-        self.num_data_time_points = len(self.time_points)
-
-    def get_data_headers(self):
-        """
-        Determine type of observation (e.g., x, y, z, pressure, saturation, etc.)
-        in the provided data file.
-        """
-        data_file = os.path.join(self.header_file_dir, self.data_file)
-        # Obtain headers of the data file with observations
-        if not self.hdf5_data_format:  # csv data file format
-            with open(data_file, "r") as f:
-                reader = csv.reader(f)
-                self.data_headers = next(reader)
-                msg = 'Data file headers: {}'.format(self.data_headers)
-                logging.debug(msg)
-        else:  # hdf5 data file format
-            with h5py.File(data_file, 'r') as hf:
-                self.data_headers = list(hf.keys())
 
     def process_csv_data_file(self):
         """
@@ -493,10 +486,13 @@ class ReservoirDataInterpolator(object):
         :type triangulation: scipy.spatial.Delaunay
         """
         # Read time points data
-        self.get_time_points()
+        self.num_data_time_points, self.time_points = read_time_points(
+            self.hdf5_time_file, self.header_file_dir, self.time_file)
 
         # Read data headers information
-        self.get_data_headers()
+        self.data_headers = read_data_headers(self.hdf5_data_format,
+                                              self.header_file_dir,
+                                              self.data_file)
 
         # Setup data dictionary
         self.data = {}
@@ -821,142 +817,150 @@ class ReservoirDataInterpolator(object):
         return out
 
 
+def test_case1():
+    # The code below (test 1) tests only interpolator and plotting/animation
+    # capabilities but it needs a system model for the parent parameter.
+    # Thus, we need to create a system model first.
+    # Define logging level
+    logging.basicConfig(level=logging.DEBUG)
+
+    # Create system model
+    sm = SystemModel()
+
+    # Create interpolator
+    int1 = sm.add_interpolator(
+        ReservoirDataInterpolator(
+            name='int1', parent=sm, header_file_dir=os.path.join(
+                '..', 'components', 'reservoir', 'lookuptables', 'Kimb_54_sims'),
+            time_file='time_points.csv',
+            data_file='Reservoir_data_sim02.csv',
+            index=2,
+            signature={'logResPerm': -13.3, 'reservoirPorosity': 0.25,
+                       'logShalePerm': -18.7},
+            default_values={'salinity': 0.1, 'temperature': 50.0}),
+        intr_family='reservoir')
+
+    # Print signature of the interpolator
+    msg = 'Signature of created interpolator is {}'.format(int1.signature)
+    logging.debug(msg)
+
+    # Setup location of interest
+    locX, locY = [37478.0, 48333.0]
+
+    # Calculate weights of the location of interest
+    vertices, weights = interp_weights(int1.triangulation, np.array([[locX, locY]]))
+
+    for t in 365.25*10.*np.arange(11):
+        out = int1(t, vertices, weights)
+        print(' '.join(['At time t = {} years pressure is {} MPa',
+                        'and CO2 saturation is {}.']).format(
+                            t/365.25, out['pressure'][0]/1.0e+6,
+                            out['CO2saturation'][0]))
+
+    # Close all figures
+    plt.close("all")
+
+    # Show all data at 120 years
+    int1.show_data(120.0)
+
+    logging.info(''.join(['If running code in IPython make sure to ',
+                          'switch to the interactive mode to see ',
+                          'the animation.']))
+    # Show all data of interpolator int1 for available time points
+    int1.show_data(obs_to_show=['pressure', 'CO2saturation'])
+
+    # to_save_figure = False
+    # # In order to save the animated figure ffmpeg should be installed.
+    # # If using Anaconda, in Anaconda prompt enter
+    # # conda install -c conda-forge ffmpeg
+    # # Worked on Windows 7
+    # # Advice is taken from:
+    # # https://stackoverflow.com/questions/13316397/
+    # # matplotlib-animation-no-moviewriters-available/14574894#14574894
+    # if to_save_figure:
+    #     for obs_nm in int1.sca_plt:
+    #         int1.sca_plt[obs_nm].ani.save(obs_nm+'_anim.mp4')
+
+
+def test_case2():
+    num_cases = 3
+    points_set = {}
+    points_set[1] = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+    points_set[2] = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+                              [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]])
+    points_set[3] = np.array([[0, 0, 1], [0, 1, 2], [1, 0, 3], [1, 1, 4],
+                              [2, 0, 1], [1, 2, 3]])
+
+    data_val = {}
+    data_val[1] = np.array([1, 2, 2, 3])
+    data_val[2] = np.array([1, 2, 2, 3, 2, 3, 3, 4])
+    data_val[3] = np.array([1, 2, 2, 3, 4, 2])
+
+    # Calculate triangulation for data points
+    triangulation = {}
+    for ind in range(1, num_cases+1):
+        triangulation[ind] = Delaunay(points_set[ind])
+
+    # Plot the triangulation for the first set of points
+    plt.triplot(points_set[1][:, 0], points_set[1][:, 1],
+                triangulation[1].simplices, color='red')
+    plt.title('Triangulation for 2d points')
+
+    for ind in range(1, num_cases+1):
+        print('Triangulation {} simplices:\n'.format(ind),
+              triangulation[ind].simplices)
+
+    # Setup locations of interest
+    location = {}
+    location[1] = [0.3, 0.5]        # 2d
+    location[2] = [0.1, 1, 0.3]     # 3d
+    location[3] = [0.0, 0.5, 1.5]   # 3d
+
+    # Calculate vertices of the simplices and weights of the locations of interest
+    vertices = {}
+    weights = {}
+    for ind in range(1, num_cases+1):
+        vertices[ind], weights[ind] = interp_weights(
+            triangulation[ind], np.array([location[ind]]))
+
+    for ind in range(1, num_cases+1):
+        print('Vertices (indices) and weights for location {} :\n'.format(ind),
+              vertices[ind], '\n', weights[ind])
+
+    # The output
+    # Triangulation 1 simplices:
+    #  [[3 1 0]
+    #  [2 3 0]]
+    # Triangulation 2 simplices:
+    #  [[3 2 4 0]
+    #  [3 1 4 0]
+    #  [3 6 2 4]
+    #  [3 6 7 4]
+    #  [3 5 1 4]
+    #  [3 5 7 4]]
+    # Triangulation 3 simplices:
+    #  [[2 3 5 4]
+    #  [1 2 4 0]
+    #  [1 2 5 4]
+    #  [1 2 3 5]]
+    # Vertices (indices) and weights for location 1 :
+    #  [[3 1 0]]
+    #  [[0.3 0.2 0.5]]
+    # Vertices (indices) and weights for location 2 :
+    #  [[3 6 2 4]]
+    #  [[0.3 0.1 0.6 0. ]]
+    # Vertices (indices) and weights for location 3 :
+    #  [[1 2 4 0]]
+    #  [[0.5 0.  0.  0.5]]
+
+
 if __name__ == "__main__":
 
     # Setup test
     test = 1
 
     if test == 1:
-        # The code below (test 1) tests only interpolator and plotting/animation
-        # capabilities but it needs a system model for the parent parameter.
-        # Thus, we need to create a system model first.
-        # Define logging level
-        logging.basicConfig(level=logging.DEBUG)
-
-        # Create system model
-        sm = SystemModel()
-
-        # Create interpolator
-        int1 = sm.add_interpolator(
-            ReservoirDataInterpolator(
-                name='int1', parent=sm, header_file_dir=os.path.join(
-                    '..', 'components', 'reservoir', 'lookuptables', 'Kimb_54_sims'),
-                time_file='time_points.csv',
-                data_file='Reservoir_data_sim02.csv',
-                index=2,
-                signature={'logResPerm': -13.3, 'reservoirPorosity': 0.25,
-                           'logShalePerm': -18.7},
-                default_values={'salinity': 0.1, 'temperature': 50.0}),
-            intr_family='reservoir')
-
-        # Print signature of the interpolator
-        msg = 'Signature of created interpolator is {}'.format(int1.signature)
-        logging.debug(msg)
-
-        # Setup location of interest
-        locX, locY = [37478.0, 48333.0]
-
-        # Calculate weights of the location of interest
-        vertices, weights = interp_weights(int1.triangulation, np.array([[locX, locY]]))
-
-        for t in 365.25*10.*np.arange(11):
-            out = int1(t, vertices, weights)
-            print(' '.join(['At time t = {} years pressure is {} MPa',
-                            'and CO2 saturation is {}.']).format(
-                                t/365.25, out['pressure'][0]/1.0e+6,
-                                out['CO2saturation'][0]))
-
-        # Close all figures
-        plt.close("all")
-
-        # Show all data at 120 years
-        int1.show_data(120.0)
-
-        logging.info(''.join(['If running code in IPython make sure to ',
-                              'switch to the interactive mode to see ',
-                              'the animation.']))
-        # Show all data of interpolator int1 for available time points
-        int1.show_data(obs_to_show=['pressure', 'CO2saturation'])
-
-        # to_save_figure = False
-        # # In order to save the animated figure ffmpeg should be installed.
-        # # If using Anaconda, in Anaconda prompt enter
-        # # conda install -c conda-forge ffmpeg
-        # # Worked on Windows 7
-        # # Advice is taken from:
-        # # https://stackoverflow.com/questions/13316397/
-        # # matplotlib-animation-no-moviewriters-available/14574894#14574894
-        # if to_save_figure:
-        #     for obs_nm in int1.sca_plt:
-        #         int1.sca_plt[obs_nm].ani.save(obs_nm+'_anim.mp4')
+        test_case1()
 
     elif test == 2:
-        num_cases = 3
-        points_set = {}
-        points_set[1] = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-        points_set[2] = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
-                                  [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]])
-        points_set[3] = np.array([[0, 0, 1], [0, 1, 2], [1, 0, 3], [1, 1, 4],
-                                  [2, 0, 1], [1, 2, 3]])
-
-        data_val = {}
-        data_val[1] = np.array([1, 2, 2, 3])
-        data_val[2] = np.array([1, 2, 2, 3, 2, 3, 3, 4])
-        data_val[3] = np.array([1, 2, 2, 3, 4, 2])
-
-        # Calculate triangulation for data points
-        triangulation = {}
-        for ind in range(1, num_cases+1):
-            triangulation[ind] = Delaunay(points_set[ind])
-
-        # Plot the triangulation for the first set of points
-        plt.triplot(points_set[1][:, 0], points_set[1][:, 1],
-                    triangulation[1].simplices, color='red')
-        plt.title('Triangulation for 2d points')
-
-        for ind in range(1, num_cases+1):
-            print('Triangulation {} simplices:\n'.format(ind),
-                  triangulation[ind].simplices)
-
-        # Setup locations of interest
-        location = {}
-        location[1] = [0.3, 0.5]        # 2d
-        location[2] = [0.1, 1, 0.3]     # 3d
-        location[3] = [0.0, 0.5, 1.5]   # 3d
-
-        # Calculate vertices of the simplices and weights of the locations of interest
-        vertices = {}
-        weights = {}
-        for ind in range(1, num_cases+1):
-            vertices[ind], weights[ind] = interp_weights(
-                triangulation[ind], np.array([location[ind]]))
-
-        for ind in range(1, num_cases+1):
-            print('Vertices (indices) and weights for location {} :\n'.format(ind),
-                  vertices[ind], '\n', weights[ind])
-
-        # The output
-        # Triangulation 1 simplices:
-        #  [[3 1 0]
-        #  [2 3 0]]
-        # Triangulation 2 simplices:
-        #  [[3 2 4 0]
-        #  [3 1 4 0]
-        #  [3 6 2 4]
-        #  [3 6 7 4]
-        #  [3 5 1 4]
-        #  [3 5 7 4]]
-        # Triangulation 3 simplices:
-        #  [[2 3 5 4]
-        #  [1 2 4 0]
-        #  [1 2 5 4]
-        #  [1 2 3 5]]
-        # Vertices (indices) and weights for location 1 :
-        #  [[3 1 0]]
-        #  [[0.3 0.2 0.5]]
-        # Vertices (indices) and weights for location 2 :
-        #  [[3 6 2 4]]
-        #  [[0.3 0.1 0.6 0. ]]
-        # Vertices (indices) and weights for location 3 :
-        #  [[1 2 4 0]]
-        #  [[0.5 0.  0.  0.5]]
+        test_case2()

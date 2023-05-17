@@ -3,6 +3,7 @@
 """
 import os
 import sys
+import h5py
 import numpy as np
 from numpy import ma
 from scipy.interpolate import RegularGridInterpolator
@@ -32,7 +33,7 @@ class Mesh2D():
         :param sparse: If True a sparse grid is returned in order to conserve
             memory. Default is False.
         :type sparse : bool, optional
-        :returns: OpenIAM MeshGrid object
+        :returns: NRAP-Open-IAM MeshGrid object
         """
         # TODO: We could automatically figure out cell areas.
         # Automatically figuring out interior cell areas would be easy,
@@ -82,7 +83,7 @@ class Variable():
         :type name: string
         :param parent: Parent object
         :type parent: Mesh2D object
-        :returns: OpenIAM Variable object
+        :returns: NRAP-Open-IAM Variable object
         """
         self.name = name
         self._parent = parent
@@ -181,7 +182,7 @@ class Variable():
         Calculate the derivative of plume centroid with respect to time
         (https://en.wikipedia.org/wiki/Image_moment).
 
-        :param thresh: Cutoff off value for inclusion in plume
+        :param thresh: Cutoff value for inclusion in plume
         :type thresh: float
         :returns: Numpy array of the derivative of plume centroids with time
             (x,y pairs)
@@ -413,7 +414,7 @@ class DataSet():
         :param time: Time associated with data
         :type time: float
         :param parent: Parent object
-        :type parent: OpenIAM Variable object
+        :type parent: NRAP-Open-IAM Variable object
          """
         if not data.shape == parent.shape:
             print("Error: Shape of data must be {}".format(parent.shape))
@@ -605,29 +606,44 @@ class DataSet():
 
         return degrees(atan2(v[1, 1], v[0, 1])), degrees(atan2(v[1, 0], v[0, 0]))
 
-def read_Mesh2D_data(datafile, timefile):
+def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
     '''
-    Read in OpenIAM formatted data file into an OpenIAM Mesh2D object
+    Read in NRAP-Open-IAM formatted data file into an NRAP-Open-IAM Mesh2D object
 
-    :param datafile: Name of datafile
-    :type datafile: str
-    :param timefile: Name of file containing times associated with data in datafile
-    :type timefile: str
-    :returns: OpenIAM Mesh2D object
+    :param data_file: Name of data file
+    :type data_file: str
+    :param variable_names: Array of names of data to be extracted from data file
+    :type variable_names: array-like
+    :param time_points: Array of time points at which data is to be extracted
+    :type time_points: array-like
+    :param is_hdf5_file: Flag indicating whether data file has hdf5 or h5 format
+    :type is_hdf5_file: boolean
+    :returns: NRAP-Open-IAM Mesh2D object
     '''
-    # Read in data for realization 1 and times
-    d = np.genfromtxt(datafile, names=True, delimiter=',')
-    ts = np.genfromtxt(timefile, delimiter=',')
-
-    # Get unique variable names ignoring 'x', 'y', 'z', and 'area'
-    vnms = np.unique([n.split('_')[0] for n in d.dtype.names if n not in ['x', 'y', 'z', 'area']])
+    # Check whether data file is of hdf5/h5 format
+    if is_hdf5_file:
+        d = {}
+        with h5py.File(data_file, 'r') as hf:
+            all_names = list(hf.keys())
+            for nm in ['x', 'y', 'area']:
+                try:
+                    d[nm] = hf[nm][()]
+                except KeyError:
+                    pass
+            for nm in variable_names:
+                for ind in range(len(time_points)):
+                    f_nm = nm+'_'+str(ind+1)
+                    d[f_nm] = hf[f_nm][()]
+    else:
+        d = np.genfromtxt(data_file, names=True, delimiter=',')
+        all_names = list(d.dtype.names)
 
     # Collect unique values of x and y
     xu = np.unique(d['x'])
     yu = np.unique(d['y'])
 
-    # If areas are provide, collect them
-    if 'area' in d.dtype.names:
+    # If areas are provided, collect them
+    if 'area' in all_names:
         dAc = d['area']
     else:
         # Otherwise, attempt to estimate the area assuming it is a uniform,
@@ -653,11 +669,11 @@ def read_Mesh2D_data(datafile, timefile):
         yud[str(y)] = i
 
     # Add data to variable objects
-    for vnm in vnms:
+    for vnm in variable_names:
         M.add_variable(vnm)
-        for i, t in enumerate(ts):
+        for ind, t in enumerate(time_points):
             V = M.nans_like_data()
-            for x, y, v in zip(d['x'], d['y'], d[vnm+'_'+str(i+1)]):
+            for x, y, v in zip(d['x'], d['y'], d[vnm+'_'+str(ind+1)]):
                 V[xud[str(x)], yud[str(y)]] = v
             M.variables[vnm].add_dataset(V, t)
             del V
