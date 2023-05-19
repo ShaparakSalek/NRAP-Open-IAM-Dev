@@ -54,6 +54,9 @@ if __name__ == "__main__":
     num_years = 50
     time_array = 365.25 * np.arange(0.0, num_years+1)
     seal_model_kwargs = {'time_array': time_array} # time is given in days
+    
+    # Define file type for saving gridded observations
+    grid_save_type = 'npz'
 
     # Create system model
     sm = SystemModel(model_kwargs=seal_model_kwargs)
@@ -119,7 +122,7 @@ if __name__ == "__main__":
         os.mkdir(output_dir)
 
     # Add gridded observations of the reservoir component
-    ltres.add_grid_obs('pressure', constr_type='array', output_dir=output_dir)
+    ltres.add_grid_obs('pressure', constr_type='array', output_dir=output_dir, save_type=grid_save_type)
 
     print('Starting NRAP-Open-IAM simulation.')
     # Run forward simulation
@@ -128,7 +131,7 @@ if __name__ == "__main__":
 
     # Collect gridded observations
     pressure_grid = sm.collect_gridded_observations_as_time_series(
-        ltres, 'pressure', output_dir, rlzn_number=0)
+        ltres, 'pressure', output_dir, rlzn_number=0, save_type=grid_save_type)
 
     print('Starting SOSAT analysis.')
 

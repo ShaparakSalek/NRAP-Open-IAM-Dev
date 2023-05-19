@@ -27,6 +27,9 @@ if __name__ == "__main__":
     file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
+    # Setup save type for gridded observations
+    grid_save_type = 'npz'
+    
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):
         msg = ''.join(['\nKimberlina data set can be downloaded ',
                        'from one of the following places:\n',
@@ -73,8 +76,8 @@ if __name__ == "__main__":
     output_dir = 'sim_data'
 
     # Add gridded observations of the reservoir component
-    ltres.add_grid_obs('pressure', constr_type='array', output_dir=output_dir)
-    ltres.add_grid_obs('CO2saturation', constr_type='array', output_dir=output_dir)
+    ltres.add_grid_obs('pressure', constr_type='array', output_dir=output_dir, save_type=grid_save_type)
+    ltres.add_grid_obs('CO2saturation', constr_type='array', output_dir=output_dir, save_type=grid_save_type)
 
     # Add observations of reservoir component model to be used as input
     # of the SealHorizon component
@@ -100,8 +103,8 @@ if __name__ == "__main__":
                                 obs_type='grid', constr_type='array')
 
     # Add gridded observations of the SealHorizon component
-    shc.add_grid_obs('CO2_aquifer', constr_type='array', output_dir=output_dir)
-    shc.add_grid_obs('brine_aquifer', constr_type='array', output_dir=output_dir)
+    shc.add_grid_obs('CO2_aquifer', constr_type='array', output_dir=output_dir, save_type=grid_save_type)
+    shc.add_grid_obs('brine_aquifer', constr_type='array', output_dir=output_dir, save_type=grid_save_type)
 
     # Add scalar observations of the SealHorizon component
     shc.add_obs('CO2_aquifer_total')
@@ -142,10 +145,10 @@ if __name__ == "__main__":
     for nm in ['pressure', 'CO2saturation']:
         grid_outputs[nm] = []
         for ind in range(num_years+1):
-            filename = 'ltres_{}_sim_0_time_{}.npz'.format(nm, ind)
-            d = np.load(os.sep.join([output_dir, filename]))
-            grid_outputs[nm].append(d['data'])
-            d.close()
+            filename = 'ltres_{}_sim_0_time_{}.{}'.format(nm, ind, grid_save_type)
+            file_loc = os.sep.join([output_dir, filename])
+            d = sm.get_gridded_observation_file(file_loc, grid_save_type)
+            grid_outputs[nm].append(d)
         grid_outputs[nm] = np.array(grid_outputs[nm])
 
     # From SealHorizon component
@@ -153,8 +156,9 @@ if __name__ == "__main__":
         grid_outputs[nm] = []
         for ind in range(num_years+1):
             filename = 'shc_{}_sim_0_time_{}.npz'.format(nm, ind)
-            d = np.load(os.sep.join([output_dir, filename]))
-            grid_outputs[nm].append(d['data'])
+            file_loc = os.sep.join([output_dir, filename])
+            d = sm.get_gridded_observation_file(file_loc, grid_save_type)
+            grid_outputs[nm].append(d)
             d.close()
         grid_outputs[nm] = np.array(grid_outputs[nm])
 

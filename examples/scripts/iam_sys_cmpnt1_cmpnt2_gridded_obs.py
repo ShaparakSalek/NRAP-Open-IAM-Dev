@@ -108,9 +108,10 @@ if __name__ == "__main__":
     grid_obs_ind = list(range(0, 9))
 
     # Add gridded observations
+    grid_save_type = 'csv'
     cm1.add_grid_obs('plane', constr_type='array',
                      output_dir='test_output',
-                     index=grid_obs_ind)
+                     index=grid_obs_ind, save_type=grid_save_type)
 
     # Add local (scalar) observations
     cm1.add_local_obs('plane_loc1', 'plane', constr_type='array', loc_ind=65)
@@ -150,17 +151,19 @@ if __name__ == "__main__":
     # how to read the content of file with gridded observation
     print('Selected content of saved files')
     data = {}
+    
     for ind, val in enumerate(grid_obs_ind):
-        filename = '_'.join(['cm1', 'plane', 'sim_0', 'time_'+str(val)])+'.npz'
-        d = np.load(os.sep.join(['test_output', filename]))
-        data[ind] = d['data'][64]
-        print('Data from file '+filename, d['data'][64])
-        d.close()
+        #load gridded observations based on save data type
+        filename = '_'.join(['cm1', 'plane', 'sim_0', 'time_'+str(val)])+'.'+grid_save_type
+        file_path = os.sep.join(['test_output', filename])
+        d = sm.get_gridded_observation_file(file_path,grid_save_type)
+        data[ind] = d[64]
+        print('Data from file '+filename, data[ind])
 
     # Extract data using collect_gridded_observations_as_time_series method
     data_to_comp = sm.collect_gridded_observations_as_time_series(
         cm1, 'plane', os.sep.join([os.getcwd(), 'test_output']),
-        indices=grid_obs_ind)
+        indices=grid_obs_ind, save_type=grid_save_type)
 
     # Compare data
     for ind in range(len(grid_obs_ind)):
@@ -223,7 +226,7 @@ if __name__ == "__main__":
     for real_num in range(1, 6):
         data[real_num] = sm.collect_gridded_observations_as_time_series(
             cm1, 'plane', os.sep.join([os.getcwd(), 'test_output']),
-            indices=grid_obs_ind, rlzn_number=real_num)
+            indices=grid_obs_ind, rlzn_number=real_num, save_type=grid_save_type)
 
     from mpl_toolkits.mplot3d import Axes3D
     fig2 = plt.figure(figsize=(12, 7))

@@ -224,7 +224,7 @@ class SystemModel(matk):
         return obs_list
 
     def collect_gridded_observations_as_time_series(
-            self, cm_object, obs_nm, output_folder, indices=None, rlzn_number=0):
+            self, cm_object, obs_nm, output_folder, indices=None, rlzn_number=0, save_type='npz'):
         """
         Collect all observations of the component with the provided name.
 
@@ -244,12 +244,14 @@ class SystemModel(matk):
             which corresponds to these indices
         :type indices: list
 
-        rlzn_number: realization number for which the observation values need
-            to be returned. By default, the parameter value is 0 which corresponds
-            to deterministic run with method forward, i.e., value of 0 is reserved
-            only for non-stochastic simulations. For stochastic simulations
-            the value of the parameter should be greater or equal than 1 up
-            to the number of realizations run for the given system model.
+        :param rlzn_number: realization number for which the observation 
+                            values need to be returned. By default, the parameter value is 0 which corresponds
+                            to deterministic run with method forward, i.e., value of 0 is reserved only for non-stochastic simulations. For stochastic simulations the value of the parameter should be greater or equal than 1 up to the number of realizations run for the given system model.
+        :type rlzn_number: int
+            
+        :param save_type: file format for save of gridded observation,
+                          currently supports 'npz' (default), 'csv', and 'npy'
+        :type save_type: str
 
         :returns: numpy array of values of observations
         """
@@ -264,7 +266,7 @@ class SystemModel(matk):
         # Check whether output directory and files exist
         # Setup file name
         filename = '_'.join([cm_object.name, obs_nm, 'sim_{}',
-                             'time_{}.npz']).format(rlzn_number, ind_list[0])
+                             'time_{}']).format(rlzn_number, ind_list[0])+'.'+save_type
         if not os.path.exists(os.path.dirname(output_folder)):
             err_msg = ''.join([
                 'Folder {} is not found. Please check location of the ',
@@ -280,23 +282,22 @@ class SystemModel(matk):
                 'data files for gridded observation {}.']).format(file_path, obs_nm)
             raise FileNotFoundError(err_msg)
 
-        # Get data
-        d = np.load(file_path)
-        # Determine shape of the data for the first index in ind_list
-        data_shape = d['data'].shape
+        # Get data and determine shape of the data for the first index in ind_list
+        d = self.get_gridded_observation_file(file_path, save_type)
+        data_shape = d.shape
 
         # Made obs_list a numpy array to provide opportunity to modify outputs
         # by multiplication, addition etc, right away without changing
         # to numpy array or other suitable type
         obs_list = np.empty((num_indices,)+data_shape)
         # Copy data from the first data file corresponding to the first provided index
-        obs_list[0, :] = d['data']
+        obs_list[0, :] = d
 
         # Loop over remaining files
         for ind in range(1, num_indices):
             # Setup file name
             filename = '_'.join([cm_object.name, obs_nm, 'sim_{}',
-                                 'time_{}.npz']).format(rlzn_number, ind_list[ind])
+                                 'time_{}']).format(rlzn_number, ind_list[ind])+'.'+save_type
             # Create path to the file
             file_path = os.sep.join([output_folder, filename])
             # Check whether the file exists
@@ -306,9 +307,9 @@ class SystemModel(matk):
                     'data files for gridded observation {}.']).format(file_path, obs_nm)
                 raise FileNotFoundError(err_msg)
             # Get data
-            d = np.load(file_path)
+            d = self.get_gridded_observation_file(file_path, save_type)
             # Copy to the obs_list array
-            obs_list[ind, :] = d['data']
+            obs_list[ind, :] = d
 
         return obs_list
 
@@ -605,25 +606,48 @@ class SystemModel(matk):
                     if k in cm.linkobs:
                         cm.linkobs[k].sim = val
 
+                    
                     # Process gridded observations
                     if k in cm.grid_obs:
+                        # Get file type to save gridded observations to
+                        save_type = cm.grid_obs[k].save_type
+
                         t_ind = sm_kwargs['time_index']
                         if t_ind in cm.grid_obs[k].time_indices:
                             if job_number is None:
                                 filename = '_'.join([
-                                    cm.name, k, 'sim_0', 'time_'+str(t_ind)])
+                                    cm.name, k, 'sim_0', 'time_'+str(t_ind)])+'.'+save_type
                             else:
                                 filename = '_'.join([
                                     cm.name, k,
                                     'sim_'+str(job_number),
-                                    'time_'+str(t_ind)])
+                                    'time_'+str(t_ind)])+'.'+save_type
 
                             # Once filename is defined, save data in the file
-                            # Save several arrays into a single file in compressed .npz format.
-                            np.savez_compressed(
-                                os.path.join(cm.grid_obs[k].output_dir, filename),
-                                data=np.asarray(val))
+                            if save_type == 'npz':
+                            
+                                # Save several arrays into a single file in compressed .npz format.
+                            
+                                np.savez_compressed(
+                                    os.path.join(cm.grid_obs[k].output_dir, filename),
+                                    data=np.asarray(val))
+                                    
+                            elif save_type == 'csv':
 
+                                # Save several arrays into a single file in CSV format.
+                            
+                                np.savetxt(
+                                    os.path.join(cm.grid_obs[k].output_dir, filename),
+                                    np.asarray(val), delimiter=',')
+                                    
+                            elif save_type == 'npy':
+                            
+                                # Save several arrays into a single file in Numpy ('npy') format.
+                            
+                                np.save(
+                                    os.path.join(cm.grid_obs[k].output_dir, filename),
+                                    np.asarray(val))
+                                    
                     # We don't want to provide gridded observation
                     # in the output of single_step_model so we mark key k for deletion
                     if k in cm.grid_obs_keys:
@@ -720,6 +744,18 @@ class SystemModel(matk):
         """
         if cm_type not in self.ml_models_components:
             self.ml_models_components.__setitem__(cm_type, cm_object)
+    
+    def get_gridded_observation_file(self,file_path,save_type='npz'):
+        if save_type == 'npz':
+            data_npz = np.load(file_path)
+            data=data_npz['data']
+            data_npz.close()
+        elif save_type == 'csv':
+            data = np.loadtxt(file_path,delimiter=',')
+        elif save_type == 'npy':
+            data = np.load(file_path)
+        
+        return data
 
 
 class ComponentModel():
@@ -1227,7 +1263,7 @@ class ComponentModel():
                         obs_nm, sim=sim, weight=weight, value=val_list[ind_counter]))
                 self.obs[name+'_'+str(ind_val)] = self._parent.obs[obs_nm]
 
-    def add_grid_obs(self, name, constr_type, coordinates=None, output_dir='',
+    def add_grid_obs(self, name, constr_type, coordinates=None, output_dir='', save_type='npz',
                      index='all', sim=None, weight=1.0, value=None):
         """
         Add observation computed on a grid.
@@ -1258,6 +1294,11 @@ class ComponentModel():
         :param output_dir: directory where the observations will be stored
             as compressed binary files
         :type output_dir: str
+        
+        :param save_type: file format for save of gridded observation,
+                          currently supports 'npz' (default), 'csv', and 'npy'
+        :type save_type: str
+
 
         :param index: indices of time points at which observations values are
             of interest; index is a str('all') if all points should be saved, or
@@ -1286,13 +1327,11 @@ class ComponentModel():
         if name in self.grid_obs:
             self.grid_obs[name] = GriddedObservation(
                 '.'.join([self.name, name]), constr_type=constr_type,
-                coordinates=coordinates, output_dir=output_dir,
-                index=ind_array, sim=sim, weight=weight, value=value)
+                coordinates=coordinates, output_dir=output_dir, save_type = save_type, index=ind_array, sim=sim, weight=weight, value=value)
         else:
             self.grid_obs.__setitem__(name, GriddedObservation(
                 '.'.join([self.name, name]), constr_type=constr_type,
-                coordinates=coordinates, output_dir=output_dir,
-                index=ind_array, sim=sim, weight=weight, value=value))
+                coordinates=coordinates, output_dir=output_dir, save_type = save_type, index=ind_array, sim=sim, weight=weight, value=value))
 
     def add_local_obs(self, name, grid_obs_name, constr_type, loc_ind, index='all',
                       sim=None, weight=1.0, value=None):

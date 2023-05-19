@@ -73,7 +73,7 @@ def interpolate(data, vtx, wts):
 
 class GriddedObservation(Observation):
     """ NRAP-Open-IAM GriddedObservation class. """
-    def __init__(self, name, constr_type='', coordinates=None, output_dir='',
+    def __init__(self, name, constr_type='', coordinates=None, output_dir='', save_type='npz',
                  index=None, sim=None, weight=1.0, value=None):
         """
         Constructor method of the GriddedObservation class.
@@ -102,8 +102,12 @@ class GriddedObservation(Observation):
         :type coordinates: dict of array-like objects
 
         :param output_dir: directory where the observations will be stored
-            as compressed binary files
+                           as compressed binary files
         :type output_dir: str
+        
+        :param save_type: file format for save of gridded observation; 
+                          currently supports NPZ, CSV, and NPY formats
+        :type value: str
 
         :param index: indices of time points at which observations values are
             of interest. Default value of None means that no time points should be saved
@@ -154,6 +158,12 @@ class GriddedObservation(Observation):
             self.time_indices = []
         else:
             self.time_indices = index
+        
+        if save_type not in ['npz','csv','npy']:
+            raise ValueError("File type {} not yet supported. Saving will default to NPZ format".format(save_type))
+            self.save_type = 'npz'
+        else:
+            self.save_type = save_type
 
 
 class DataInterpolator():
