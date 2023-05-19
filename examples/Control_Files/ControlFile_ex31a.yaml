@@ -38,7 +38,21 @@
 # the injection site will only be plotted if InjectionCoordx and InjectionCoordy
 # entries are also provided. See Control File example 32a.
 #
-# Last Modified: January 31st, 2023
+# Note that because the entry for the OpenWellbore component includes a
+# Control section containing critPressureApproach: True, leakage through
+# the OpenWellbore can only happen if the reservoir pressures exceed the
+# critical pressure of the aquifer receiving leakage. The critical pressure (Pcrit)
+# is calculated as Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)).
+# Here, rho_w is the density of water (1000 km/m^3), g is 9.81 m/s^2, d_aq is
+# the bottom depth of the aquifer (m), rho_br is the brine density (kg/m^3),
+# and d_res is the depth to the top of the reservoir (m). The critical pressure
+# is therefore sensitive to the brineDensity value used - higher brine densities
+# generally lead to higher critical pressures and lower leaked masses of brine
+# and CO2. Note that flow through an OpenWellbore can happen beneath the critical
+# pressure if a CO2 plume is present in the reservoir at the base of the well
+# (i.e., buoyancy effects from the CO2).
+#
+# Last Modified: April 25th, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
@@ -97,6 +111,8 @@ OpenWellbore1:
             ymin: -7500
             ymax: 7500
             ysize: 14
+    Controls:
+        critPressureApproach: True
     Parameters:
         wellRadius:
             value: 0.05
@@ -110,10 +126,15 @@ OpenWellbore1:
         brineSalinity:
             value: 0.2
             vary: False
+        brineDensity:
+            value: 1050
+            vary: False
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
-        # to stratigraphy (provided LeakTo parameter is setup to the right aquifer)
-        # and don't require to be setup explicitily unless different value
-        # of the parameter is required
+        # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
+        # and don't need to be set explicitly unless different values
+        # are required. The parameters wellTop, reservoirDepth, and brineDensity
+        # are used to calculate critical pressure (if the parameter criticalPressure
+        # is not provided).
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------

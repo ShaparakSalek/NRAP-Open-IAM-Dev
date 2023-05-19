@@ -1,34 +1,39 @@
-# OpenIAM Control File Example 31b
+# OpenIAM Control File Example 31d
 #
-# This example is similar to example 31a, but it includes a
-# GenericAquifer instead of a FutureGen2Aquifer. The AoR plot
-# type can be used with: pressure and CO2saturation results from reservoir
-# components; pH_volume and TDS_volume results from aquifer components like
-# FutureGen2Aquifer, FutureGen2AZMI, and DeepAlluviumAquifer; and
-# Dissolved_CO2_volume and Dissolved_salt_volume results from GenericAquifer
-# components. Model run times can be longer when using GenericAquifers
-# instead of FutureGen2Aquifers, so the number of hypothetical OpenWellbores
-# (wellbores used to consider the leakage that could happen if a pathway was present
-# - and what the Area of Review should be) has been decreased here from 196
-# (14 by 14) to 49 (7 by 7).
+# This example is similar to Control File examples 31c, but it
+# demonstrates the use of the TimeList option with the AoR plot type.
+# If the TimeList entry is not provided, the AoR plot will show the
+# maximum results at all locations across all model times and all
+# model realizations (i.e., the different lhs simulations). If TimeList
+# is provided, however, separate AoR plots will be made for different
+# model times. Having these separate plots can help inform the boundaries
+# of the potentially impacted aquifer region growing over time (i.e., areas
+# that could be impacted if an OpenWellbore was present there). Estimating
+# the spatiotemporal evolution of impacted aquifer regions can help inform
+# the planning of when different areas need to be surveyed for legacy wells.
+# It may be cost prohibitive to survey for legacy wells at arbitrarily large
+# distances from the injection site prior to site operation, so these analyses
+# can help inform how far operators need to survey for and plug legacy wells,
+# e.g., 5, 10, or 20 years into site operation.
 #
-# A GenericAquifer component is made for each OpenWellbore location. With
-# this arrangement (7 by 7, an odd number of rows and columns but with the
-# maximum distances on either side of the injection well being equal), however, an
-# OpenWellbore will be placed on the injection site itself. These conditions
-# cause the pressure results at that OpenWellbore to go to infinity. Regardless,
-# the OpenWellbore is hypothetical and the AoR plot code is set up to exclude
-# such a result.
+# If the AoR plot entry includes 'TimeList: All,' then one plot will be made
+# for each model time step. Alternatively, one can provide a list with specific
+# times (in years; e.g., TimeList: [1, 5, 10, 15, 20]).
+#
+# Because this simulation uses Latin Hypercube Sampling (lhs), the plots made
+# for each time include the maximum results across all model realizations at
+# that time.
 #
 # Last Modified: April 25th, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
     TimeStep: 1.0
-    Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1,
-                 GenericAquifer1]
-    OutputDirectory: 'output/output_ex31b_{datetime}'
+    Analysis:
+        type: lhs
+        siz: 30
+    Components: [SimpleReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex31d_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
@@ -62,7 +67,7 @@ SimpleReservoir1:
             value: 1.0
             vary: False
         logResPerm:
-            value: -10.15
+            value: -11.0
             vary: False
     Outputs: [pressure,
               CO2saturation]
@@ -70,16 +75,16 @@ SimpleReservoir1:
 OpenWellbore1:
     Type: OpenWellbore
     Connection: SimpleReservoir1
-    Number: 49   # (7*7)
+    Number: 25   # 5*5
     LeakTo: aquifer2
     Locations:
         grid:
-            xmin: -7500
-            xmax: 7500
-            xsize: 7
-            ymin: -7500
-            ymax: 7500
-            ysize: 7
+            xmin: -25000
+            xmax: 25000
+            xsize: 5
+            ymin: -25000
+            ymax: 25000
+            ysize: 5
     Controls:
         critPressureApproach: True
     Parameters:
@@ -87,32 +92,33 @@ OpenWellbore1:
             value: 0.05
             vary: False
         logReservoirTransmissivity:
-            value: -10.97
-            vary: False
-        logAquiferTransmissivity:
             value: -10.0
             vary: False
+        logAquiferTransmissivity:
+            value: -10.5
+            min: -11.0
+            max: -10.0
         brineSalinity:
             value: 0.2
             vary: False
         brineDensity:
-            value: 1015
+            value: 1050
             vary: False
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
         # and don't need to be set explicitly unless different values
-        # are required. The parameters wellTop, reservoirDepth, and brineDensity 
-        # are used to calculate critical pressure (if the parameter criticalPressure 
+        # are required. The parameters wellTop, reservoirDepth, and brineDensity
+        # are used to calculate critical pressure (if the parameter criticalPressure
         # is not provided).
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------
-GenericAquifer1:
-    Type: GenericAquifer
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
     Connection: OpenWellbore1
     AquiferName: aquifer2
     Parameters:
-        # Parameters aqu_thick (85 m) and top_depth (365 m) are linked
+        # Parameters aqu_thick (85 m) and depth (450 m) are linked
         # to stratigraphy and don't require to be setup explicitily unless
         # different value of the parameter is required.
         por:
@@ -124,26 +130,29 @@ GenericAquifer1:
         log_aniso:
             value: 0.3
             vary: False
-    Outputs: [Dissolved_CO2_volume, Dissolved_salt_volume]
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
 #-------------------------------------------------
 Plots:
     Plot1:
         AoR: [pressure]
         PlotInjectionSites: True
         FigureDPI: 200
-        SaveCSVFiles: False
+        TimeList: [1, 5, 10]
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True
         FigureDPI: 200
-        SaveCSVFiles: False
+        TimeList: [1, 5, 10]
     Plot3:
-        AoR: [Dissolved_CO2_volume]
+        AoR: [pH_volume]
         PlotInjectionSites: True
         FigureDPI: 200
-        SaveCSVFiles: True
+        TimeList: All
     Plot4:
-        AoR: [Dissolved_salt_volume]
+        AoR: [TDS_volume]
         PlotInjectionSites: True
         FigureDPI: 200
-        SaveCSVFiles: True
+        TimeList: All

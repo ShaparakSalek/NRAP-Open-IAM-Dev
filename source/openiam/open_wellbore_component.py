@@ -38,6 +38,24 @@ class OpenWellbore(ComponentModel):
     or *atmosphere* for leakage to the atmosphere. The default value is
     *aquifer#* where # is an index of the uppermost aquifer.
 
+    The Open Wellbore component can be used to calculate leakage rates following
+    positive change in reservoir pressure or only from changes in reservoir
+    pressure above a critical pressure. To use the latter approach,
+    argument ``crit_pressure_approach`` should be set to *True* for the setup
+    of the component:
+
+        OpenWellbore(name='ow', parent=sm, crit_pressure_approach=True)
+
+    To set ``crit_pressure_approach`` to True in the control
+    file interface, ``Controls`` section in the .yaml entry for the Open Wellbore
+    should be included with additional entry ``critPressureApproach: True``
+    indented beneath Controls``. For example setup, see control file example 31a.
+
+    When a critical pressure is used, flow through an Open Wellbore can still
+    happen beneath the critical pressure (but will not be modeled) if a |CO2|
+    plume is present in the reservoir at the base of the well (i.e., buoyancy
+    effects from the |CO2|).
+
     Component model input definitions:
 
     * **logReservoirTransmissivity** [|log10| |m^3|] (-11.27 to -8.40) - reservoir
@@ -67,10 +85,15 @@ class OpenWellbore(ComponentModel):
 
     * **critPressure** [|Pa|] (1.0e+5 to 9.0e+7) - pressure above which the model
       initiates leakage rates calculations. Default value of this parameter is
-      not defined: either user provides it through component setup or the value
-      is calculated based on the value of **brineDensity** parameter. In both cases
-      argument ``crit_pressure_approach`` should be set to *True* for setup of the
-      component.
+      not defined: either the user provides it through component setup or the
+      value is calculated based on the value of **brineDensity** parameter.
+      If critPressure (Pcrit) is not specified, it is calculated as
+      Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)), where rho_w
+      and rho_br are the densities of water and brine (1000 kg m$^-3$ and the
+      brineDensity parameter), respectivey, g is gravitational acceleration
+      (9.81 m s$^-2$), d_aq is the depth to the bottom of the aquifer receiving
+      leakage (m), and d_res is the depth to the top of the reservoir (m).
+      Higher brine densities will generally lead to lower leakage rates.
 
     * **reservoirDepth** [|m|] (1000 to 4000) - depth of reservoir (well base)
       (default: 2000); *linked to Stratigraphy*. Note that if 'shale1Depth'
@@ -213,7 +236,7 @@ class OpenWellbore(ComponentModel):
             # the brine density value (default or user provided)
             critP = actual_p.get(
                 'critPressure',
-                wellTop*9.8*1000 + brineDensity*9.8*(reservoirDepth-wellTop))
+                wellTop*9.81*1000 + brineDensity*9.81*(reservoirDepth-wellTop))
             # Calculate pressure change above critical
             deltaP = pressure - critP
 
@@ -465,7 +488,7 @@ if __name__ == "__main__":
     print('------------------------------------------------------------------')
     print('Critical Pressure', critical_pres, sep='\n')
 
-    plt.figure(0)
+    plt.figure(1)
     plt.plot(sm.time_array/365.25, pressure, color='#000066', linewidth=1)
     plt.hlines(critical_pres, 0, sm.time_array[-1]/365.25, linestyle='--', color='k')
     plt.xlabel('Time, t (years)')
@@ -473,14 +496,14 @@ if __name__ == "__main__":
     plt.title('Reservoir Pressure vs. time')
     plt.show()
 
-    plt.figure(1)
+    plt.figure(2)
     plt.plot(sm.time_array/365.25, CO2leakrates_aq1, color='#000066', linewidth=1)
     plt.xlabel('Time, t (years)')
     plt.ylabel('Leakage rates, q (kg/s)')
     plt.title(r'Leakage of CO$_2$: Shallow aquifer')
     plt.show()
 
-    plt.figure(2)
+    plt.figure(3)
     plt.plot(sm.time_array/365.25, brine_leakrates_aq1, color='#000066', linewidth=1)
     plt.xlabel('Time, t (years)')
     plt.ylabel('Leakage rates, q (kg/s)')

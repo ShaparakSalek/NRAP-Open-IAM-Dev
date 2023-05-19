@@ -14,7 +14,7 @@ except ImportError as err:
 
 STRAT_FIG_SIZE = (12, 10)
 TIME_SERIES_FIG_SIZE = (13, 8)
-AOR_FIG_SIZE = (7, 6)
+AOR_FIG_SIZE = (10, 8)
 TTFD_FIG_SIZE = (10, 8)
 RADIAL_OBS_FIG_SIZE = (10, 8)
 

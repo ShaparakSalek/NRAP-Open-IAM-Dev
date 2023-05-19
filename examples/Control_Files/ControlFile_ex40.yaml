@@ -2,10 +2,10 @@
 #
 # This Control File demonstrates the use of the time to first detection (TTFD)
 # plot type. Using this plot type requires aquifer component(s) producing
-# the plume dimension metrics for the type of plume specified with plume_type.
+# the plume dimension metrics for the type of plume specified with PlumeType.
 # For example, each of the aquifer components used here produces results for
 # Dissolved_CO2_dx, Dissolved_CO2_dy, and Dissolved_CO2_dz. Note that aquifers
-# to be used for TTDS plots must be included in the aquifer_name_list.
+# to be used for TTDS plots must be included in the ComponentNameList.
 # For an explanation of the MonitoringLocations section of the TTFD plot,
 # see ControlFile_ex39.yaml.
 #
@@ -96,8 +96,8 @@ FutureGen2AZMI1:
     Connection: MultisegmentedWellbore1
     AquiferName: aquifer1
     Parameters:
-        # aqu_thick (33.2 m for aquifer 1) and depth (1044 m) parameter are not needed
-        # to be setup as they are linked to stratigraphy
+        # aqu_thick (33.2 m for aquifer 1) and depth (1044 m) parameter do not need
+        # to be set up as they are linked to stratigraphy
         por: 0.118
         log_permh: -13.39
         log_aniso: 0.3
@@ -110,8 +110,8 @@ FutureGen2AZMI2:
     Connection: MultisegmentedWellbore1
     AquiferName: aquifer3
     Parameters:
-        # aqu_thick (31.1 m for aquifer 3) and depth (742 m) parameter are not needed
-        # to be setup as they are linked to stratigraphy
+        # aqu_thick (31.1 m for aquifer 3) and depth (742 m) parameter do not need
+        # to be set up as they are linked to stratigraphy
         por: 0.132
         log_permh: -12.48
         log_aniso: 0.3
@@ -149,7 +149,7 @@ Plots:
             ncols: 2
     TTFD_Plot:
         TTFD:
-            plume_type: Dissolved_CO2
+            PlumeType: Dissolved_CO2
             FigureDPI: 300
             PlotInjectionSites: True
             InjectionCoordx: 2.37e5
@@ -163,4 +163,4 @@ Plots:
                 coordz: [-1040, -1040, -735, -735] # In aquifers 1 and 3, with the VerticalWindow reaching 5 m up and down
                 HorizontalWindow: 1
                 VerticalWindow: 5
-            aquifer_name_list: [FutureGen2AZMI1, FutureGen2AZMI2]
+            ComponentNameList: [FutureGen2AZMI1, FutureGen2AZMI2]

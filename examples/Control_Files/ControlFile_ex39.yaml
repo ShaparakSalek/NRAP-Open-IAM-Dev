@@ -4,11 +4,11 @@
 # type for a simulation with a simple reservoir, multisegmented wellbores,
 # and aquifer components.
 # Using this plot type requires aquifer component(s) producing the plume dimension
-# metrics for the type of plume specified with plume_type. For example,
+# metrics for the type of plume specified with PlumeType. For example,
 # each of the aquifer components used here produces results for TDS_dx, TDS_dy,
 # and TDS_dz. Note that plume output varies with the type of component used.
 
-# The entries for plume_type and aquifer_name_list are required for the TTFD plot.
+# The entries for PlumeType and ComponentNameList are required for the TTFD plot.
 # All other entries are optional.
 
 # The "SpecifyXandYLims" option allows one to set the x and y (easting and northing)
@@ -115,8 +115,8 @@ FutureGen2AZMI1:
     Connection: MultisegmentedWellbore1
     AquiferName: aquifer1
     Parameters:
-        # aqu_thick (85 m for aquifer 1) and depth (1485 m) parameter are not needed
-        # to be setup as they are linked to stratigraphy
+        # aqu_thick (85 m for aquifer 1) and depth (1485 m) parameter do not need
+        # to be set up as they are linked to stratigraphy
         por: 0.18
         log_permh: -13.0
         log_aniso: 0.3
@@ -130,7 +130,7 @@ Plots:
         TimeSeriesStats: [pH_volume]
     TTFD_Plot:
         TTFD:
-            plume_type: pH
+            PlumeType: pH
             MonitoringLocations:
                 coordx: [50, 75, 150]
                 coordy: [50, 75, 150]
@@ -150,4 +150,4 @@ Plots:
                 gridYLims: [0, 650]
             WriteDreamOutput: False
             SaveCSVFiles: True
-            aquifer_name_list: [FutureGen2AZMI1]
+            ComponentNameList: [FutureGen2AZMI1]

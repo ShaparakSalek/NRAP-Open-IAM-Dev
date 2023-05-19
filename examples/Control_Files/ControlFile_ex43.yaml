@@ -98,5 +98,5 @@ Plots:
                 coordz: [-700, -700]
                 HorizontalWindow: 1
                 VerticalWindow: 2.5
-            plume_type: TDS
-            aquifer_name_list: [DeepAlluviumAquifer1]
+            PlumeType: TDS
+            ComponentNameList: [DeepAlluviumAquifer1]

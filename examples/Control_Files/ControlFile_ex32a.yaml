@@ -36,7 +36,7 @@
 # are not required for AoR plots when using another type of reservoir component
 # (e.g., SimpleReservoir) because those components have injX and injY values tied to them.
 #
-# Last Modified: January 31st, 2023
+# Last Modified: April 21st, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20
@@ -103,6 +103,8 @@ OpenWellbore1:
         min_x_spacing: 10000
         min_y_spacing: 10000
     LeakTo: aquifer4
+    Controls:
+        critPressureApproach: True
     Parameters:
         wellRadius:
             value: 0.05
@@ -116,10 +118,13 @@ OpenWellbore1:
         brineSalinity:
             value: 0.0475
             vary: False
+        brineDensity:
+            value: 1075
+            vary: False
         # Parameters wellTop (480.31 m) and reservoirDepth (1131.01 m) are linked
-        # to stratigraphy (provided LeakTo parameter is setup to the right aquifer)
-        # and don't require to be setup explicitily unless different value
-        # of the parameter is required
+        # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
+        # and don't need to be set explicitly unless different values are
+        # required.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------

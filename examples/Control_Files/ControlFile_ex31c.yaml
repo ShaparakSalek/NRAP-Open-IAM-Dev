@@ -2,17 +2,34 @@
 #
 # This example is similar to Control File Example 31a,
 # but it demonstrates the use of the AoR plot type with
-# Latin Hypercube Sampling (lhs). The AoR figure created
-# specifies the number of lhs samples used.
+# Latin Hypercube Sampling (lhs). The AoR figures created
+# specify the number of lhs samples used.
 #
-# Last Modified: January 31st, 2023
+# Note that when using a large number of OpenWellbore
+# components, as shown here with the grid placement option,
+# simulations using lhs can require a large number of samples
+# (the "siz" entry) in order to run correctly. If the simulation
+# does not include enough realizations, python will raise a numpy
+# LinAlgError error saying "Matrix is not positive definite."
+# This behavior occurs because Latin Hypercube Sampling requires
+# a minimum number of realizations in order to evenly sample
+# the parameter space. If a parameter of the OpenWellbore
+# component is set up to vary (e.g., between minimum and maximum
+# values), then each OpenWellbore component included increases
+# the minimum number of realizations required. Additionally, one
+# reservoir component and one aquifer component will be made
+# for each wellbore location, so any parameter variations for
+# those components will also increase the required number of
+# realizations.
+#
+# Last Modified: April 25th, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
     TimeStep: 1.0
     Analysis:
         type: lhs
-        siz: 70
+        siz: 40
     Components: [SimpleReservoir1, OpenWellbore1, FutureGen2Aquifer1]
     OutputDirectory: 'output/output_ex31c_{datetime}'
     GenerateOutputFiles: False
@@ -56,16 +73,18 @@ SimpleReservoir1:
 OpenWellbore1:
     Type: OpenWellbore
     Connection: SimpleReservoir1
-    Number: 64   # 8*8
+    Number: 36   # 6*6
     LeakTo: aquifer2
     Locations:
         grid:
-            xmin: -7500
-            xmax: 7500
-            xsize: 8
-            ymin: -7500
-            ymax: 7500
-            ysize: 8
+            xmin: -25000
+            xmax: 25000
+            xsize: 6
+            ymin: -25000
+            ymax: 25000
+            ysize: 6
+    Controls:
+        critPressureApproach: True
     Parameters:
         wellRadius:
             value: 0.05
@@ -80,10 +99,15 @@ OpenWellbore1:
         brineSalinity:
             value: 0.2
             vary: False
+        brineDensity:
+            value: 1050
+            vary: False
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
-        # to stratigraphy (provided LeakTo parameter is setup to the right aquifer)
-        # and don't require to be setup explicitily unless different value
-        # of the parameter is required
+        # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
+        # and don't need to be set explicitly unless different values
+        # are required. The parameters wellTop, reservoirDepth, and brineDensity
+        # are used to calculate critical pressure (if the parameter criticalPressure
+        # is not provided).
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------

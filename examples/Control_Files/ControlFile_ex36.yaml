@@ -70,6 +70,8 @@ OpenWellbore1:
             ymax: 1000
             ysize: 2
     LeakTo: aquifer3
+    Controls:
+        critPressureApproach: True
     Parameters:
         wellRadius:
             value: 0.05
@@ -88,6 +90,9 @@ OpenWellbore1:
             vary: False
         reservoirDepth:
             value: shale1Depth
+            vary: False
+        brineDensity:
+            value: 1025
             vary: False
     Outputs: [CO2_aquifer, brine_aquifer]
 #-------------------------------------------------

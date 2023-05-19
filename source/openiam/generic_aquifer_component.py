@@ -104,6 +104,18 @@ class GenericAquifer(ComponentModel):
     * **Dissolved_salt_mass_fraction** [-] - mass fraction of salt in aquifer
       pore water on a 100x10 radial grid surrounding the leaky well
 
+    * **r_coordinate** [m] - radial coordinates of the points in the
+      100x10 radial grid surrounding the leaky well. The 100 radii are within
+      range from 1.62 m to about 77.5 km.
+
+    * **z_coordinate** [m] - depth coordinates of the points in the 100x10
+      radial grid surrounding the leaky well. The 10 depths used are within
+      the aquifer modeled by the GenericAquifer. The minimum depth is 5%
+      of the aquifer's thickness above the base of the aquifer, while
+      the maximum depth is 95% of the aquifer's thickness above the base
+      of the aquifer. The increment used between depth values is 10%
+      of the aquifer's thickness.
+
     """
     def __init__(self, name, parent):
         """

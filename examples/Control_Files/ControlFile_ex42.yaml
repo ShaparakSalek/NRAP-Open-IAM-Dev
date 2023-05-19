@@ -4,7 +4,7 @@
 # with CarbonateAquifer component. Because the CarbonateAquifer component
 # reports dx and dy values for impacted lengths and widths of volumes
 # (i.e., instead of separate dimensions for TDS, pH, Dissovled_salt, or Dissolved_CO2),
-# the TTFD plot must have "plume_type: CarbonateAquifer."
+# the TTFD plot must have "PlumeType: CarbonateAquifer."
 #
 # Last Modified: January 12th, 2023
 #-------------------------------------------------
@@ -113,9 +113,9 @@ Plots:
     TTFD_Plot:
         TTFD:
             PlotInjectionSites: True
-            plume_type: CarbonateAquifer
+            PlumeType: CarbonateAquifer
             MonitoringLocations:
                 coordx: [500, 500, 750, 750]
                 coordy: [500, 500, 750, 750] # No coordz or VerticalWindow when using CarbonateAquifer!
                 HorizontalWindow: 5
-            aquifer_name_list: [CarbonateAquifer1]
+            ComponentNameList: [CarbonateAquifer1]

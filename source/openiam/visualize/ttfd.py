@@ -181,8 +181,8 @@ def ttfd_plot(yaml_data, model_data, sm, s,
 
     :return: None
     """
-    plume_metric_abbrev = yaml_data['Plots'][name]['TTFD']['plume_type']
-    aq_name_list = yaml_data['Plots'][name]['TTFD']['aquifer_name_list']
+    plume_metric_abbrev = yaml_data['Plots'][name]['TTFD']['PlumeType']
+    aq_name_list = yaml_data['Plots'][name]['TTFD']['ComponentNameList']
 
     TTFD_yaml_input_dict = get_ttfd_plot_yaml_input(yaml_data, name)
 
@@ -642,8 +642,8 @@ def get_plume_timings(sm, s, time_array, sample, plume_metric_abbrev,
     TDS_dy, and TDS_dz from FutureGen2Aquifer, Dissolved_salt_dr and
     Dissolved_salt_dz from GenericAquifer, and dx and dx from Carbonate Aquifer.
     The metrics to be used must be produced by (an) aquifer component(s).
-    The metric to be used is specified with plume_type in the TTFD section of
-    the .yaml file. The plume_type can be TDS, pH, Dissolved_salt,
+    The metric to be used is specified with PlumeType in the TTFD section of
+    the .yaml file. The PlumeType can be TDS, pH, Dissolved_salt,
     Dissolved_CO2, or CarbonateAquifer. CarbonateAquifer components produce
     plume dimensions representing the impacted region, and this output does not
     isolate the influences of TDS and pH (for example).
@@ -1286,7 +1286,7 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
 
     :returns: TTFD_yaml_input_dict
     """
-    plume_type = yaml_data['Plots'][name]['TTFD']['plume_type']
+    plume_type = yaml_data['Plots'][name]['TTFD']['PlumeType']
 
     defaultFigureDPI = 100
     FigureDPI = defaultFigureDPI
@@ -2068,9 +2068,11 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
         colorBarLabel = 'Probability (%)'
 
     if plotType in ['plumeTimings', 'monitoringTTFD']:
+        min_level = 0
+        max_level = max(time_array) / 365.25
+        interval = (max_level - min_level) / 100
         levels = np.arange(
-            0, (max(time_array) + min(time_array[time_array != 0])) / 365.25,
-            min(time_array[time_array != 0]) / 365.25)
+            min_level, max_level + interval, interval)
         contourf_norm_factor = 365.25
     elif plotType == 'plumeProbabilities':
         levels = np.arange(MIN_PROBABILITY, 101, 1)
