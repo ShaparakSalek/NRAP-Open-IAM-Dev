@@ -1,4 +1,11 @@
 # OpenIAM Control File Example 23
+#
+# This example demonstrates the uses of the SealHorizon
+# component in a deterministic simulation ('Analysis: forward').
+# Results for specific years (0, 1, 10, 20, 30, 40, and 50) 
+# are displayed with the GriddedMetric plot type. This plot type 
+# is further described in control file examples 18 and 19.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex23.yaml
 #-------------------------------------------------
@@ -118,3 +125,11 @@ Plots:
         TimeSeries: ['mass_CO2_aquifer_cell_3']
     Plot8:
         TimeSeries: ['mass_brine_aquifer_cell_3']
+    Plot9:
+        GriddedMetric:
+            ComponentNameList: [SealLayer1]
+            MetricName: mass_brine_aquifer
+            TimeList: All
+            FigureDPI: 300
+            PlotOverAreas: False
+            TimeList: [0, 1, 10, 20, 30, 40, 50]

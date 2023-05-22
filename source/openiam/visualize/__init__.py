@@ -8,6 +8,7 @@ from .area_of_review import area_of_review_plot
 from .stratigraphic_column import stratigraphic_column
 from .stratigraphy_plot import stratigraphy_plot
 from .gridded_radial_metric_plot import gridded_radial_metric_plot
+from .gridded_metric_plot import gridded_metric_plot
 
 __all__ = [
            'time_series_plot',
@@ -23,4 +24,5 @@ __all__ = [
            'stratigraphy_plot',
            'ttfd_plot',
            'gridded_radial_metric_plot',
+           'gridded_metric_plot'
            ]

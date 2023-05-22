@@ -550,7 +550,8 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
             fig.savefig(savefig)
     else:
         fig.show()
-
+    
+    plt.close()
     # Restore to default matplotlib settings
     # matplotlib.rcdefaults()
 

@@ -1,4 +1,26 @@
 # OpenIAM Control File Example 19
+#
+# This example demonstrates the use of a SealHorizon 
+# component linked to a LookupTableReservoir component. 
+# It also demonstrates the use of the GriddedMetric plot 
+# type with a SealHorizon component. The GriddedMetric plot 
+# is also described in control file example 18.
+#
+# When using the GriddedMetric plot type with a SealHorizon 
+# component, the results can be displayed over the area used 
+# for each cell (i.e., the area entry under the Cells section 
+# of the section for SealLayer1) or as a simple point. To plot 
+# values over the area used, set PlotOverAreas to True (default 
+# setting is False). If PlotOverAreas is set to True, the length 
+# and width of each cell can be specified with the CellLengthX and 
+# CellLengthY entries. These entries take values in meters. If one 
+# of these enties is provided but not the other, the provided entry 
+# will be ignored. If CellLengthX and CellLengthY are not provided, 
+# then the default values are each the square root of the area used. 
+# Depending on the domain and the x and y limits used (see control 
+# file example 18), the resulting square may be too small to see well. 
+# In such cases, we recommend setting PlotOverAreas to False.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex19.yaml
 #-------------------------------------------------
@@ -122,3 +144,12 @@ Plots:
         TimeSeries: ['CO2_aquifer_cell_1']   # output for the first cell
     Plot4:
         TimeSeries: ['CO2_aquifer_cell_2']   # output for the second cell
+    Plot5:
+        GriddedMetric:
+            ComponentNameList: [SealLayer1]
+            MetricName: brine_aquifer
+            FigureDPI: 200
+            PlotOverAreas: False
+            SaveCSVFiles: False
+            # CellLengthX: 10     # These are silenced because PlotOverAreas
+            # CellLengthY: 10     # is set to False.

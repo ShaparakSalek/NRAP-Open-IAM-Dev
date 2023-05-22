@@ -18,6 +18,8 @@ TIME_SERIES_FIG_SIZE = (13, 8)
 AOR_FIG_SIZE = (10, 8)
 TTFD_FIG_SIZE = (10, 8)
 RADIAL_OBS_FIG_SIZE = (10, 8)
+GRIDDED_METRIC_FIG_SIZE = (10, 8)
+
 
 def process_plots(yaml_data, model_data, sm, s, output_list, analysis,
                   time_array, components, locations):
@@ -108,6 +110,14 @@ def process_plots(yaml_data, model_data, sm, s, output_list, analysis,
                 yaml_data, sm, output_dir, name=p,
                 analysis=analysis, savefig=save_filename,
                 figsize=tuple(plots[p].get('figsize', RADIAL_OBS_FIG_SIZE)),
+                genfontsize=12, axislabelfontsize=14, titlefontsize=14,
+                boldlabels=True)
+
+        if 'GriddedMetric' in plots[p]:
+            iam_vis.gridded_metric_plot(
+                yaml_data, model_data, sm, s,
+                output_dir, name=p, analysis=analysis, savefig=save_filename,
+                figsize=tuple(plots[p].get('figsize', GRIDDED_METRIC_FIG_SIZE)),
                 genfontsize=12, axislabelfontsize=14, titlefontsize=14,
                 boldlabels=True)
 
