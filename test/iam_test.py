@@ -1911,6 +1911,8 @@ class Tests(unittest.TestCase):
                 'At time t {} brine mass is {} kg but should be {} kg.'
                 .format(str(t/365.25), str(m), str(tm)))
 
+    @unittest.skipIf(GenericAquifer.model_data_check() == False,
+                     "Generic Aquifer component model files are not present.")
     def test_generic_aquifer(self):
         """Tests generic aquifer component.
 
@@ -1978,7 +1980,7 @@ class Tests(unittest.TestCase):
                             .format(str(t), str(s), str(ts)))
 
     @unittest.skipIf(GenericReservoir.model_data_check() == False,
-                     "Generic Reservoir model files are not present.")
+                     "Generic Reservoir component model files are not present.")
     def test_generic_reservoir_forward(self):
         """Tests generic reservoir component.
 

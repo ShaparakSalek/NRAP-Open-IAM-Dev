@@ -130,6 +130,18 @@ class GenericAquifer(ComponentModel):
 
         :returns: GenericAquifer class object
         """
+        if not self.model_data_check():
+            model_files_folder = os.sep.join([IAM_DIR, 'source', 'components',
+                                              'aquifer', 'generic'])
+            error_msg = ''.join(['Generic Aquifer component {} cannot be created ',
+                                 'as required model files are missing ',
+                                 'in the folder\n {}.']).format(
+                                     name, model_files_folder)
+            # TODO Add instructions on where to download required model files once
+            # we put them on EDX
+            logging.error(error_msg)
+            raise FileNotFoundError(error_msg)
+
         # Set up keyword arguments of the 'model' method provided by the system model
         model_kwargs = {'time_point': 365.25}
 
@@ -423,6 +435,33 @@ class GenericAquifer(ComponentModel):
             out[label] = self.sol.GriddedOutputs[count]
 
         return out
+
+
+    @staticmethod
+    def model_data_check():
+        """
+        Check whether model data files for Generic Aquiferr component were downloaded
+        and placed to the right place.
+        """
+        model_data_dir = os.sep.join([
+            IAM_DIR, 'source', 'components', 'aquifer', 'generic'])
+
+        subfolders = ['{}-{}m'.format(100*ind, 100*(ind+4)-1) \
+                      for ind in range(1, 38, 4)]
+
+        data_files = ['co2_generator.h5', 'co2_input_transformer.pkl',
+                      'co2_output_transformer.pkl', 'salt_generator.h5',
+                      'salt_input_transformer.pkl', 'salt_output_transformer.pkl']
+
+        check_flag = 0   # no issues: data is present
+
+        for subfold in subfolders:
+            for file in data_files:
+                file_path = os.sep.join([model_data_dir, subfold, file])
+                if not os.path.isfile(file_path):
+                    check_flag = check_flag + 1
+
+        return (check_flag == 0)
 
 
 if __name__ == "__main__":
