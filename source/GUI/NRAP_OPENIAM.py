@@ -137,6 +137,12 @@ class NRAPOpenIAM(tk.Tk):
             self.process_parameter_vars(componentVars[choice]['Params'],
                                         d[choice]['Parameters'],
                                         componentVars[choice]['Params'].keys())
+            
+            if 'Controls' in componentVars[choice]:
+                d[choice]['Controls'] = {}
+                self.process_control_vars(componentVars[choice]['Controls'],
+                                          d[choice]['Controls'],
+                                          componentVars[choice]['Controls'].keys())
 
             if componentTypeDictionary[i] == 'SealHorizon':
                 self.process_parameter_vars(
@@ -307,7 +313,19 @@ class NRAPOpenIAM(tk.Tk):
 
                 data_dict_to[key]['discrete_vals'].append(discrete_values)
                 data_dict_to[key]['discrete_vals'].append(discrete_weights)
+    
+    
+    def process_control_vars(self, var_dict_from, data_dict_to, var_keys):
+        """ Read information from componentVars[component_name]['Controls'] kept 
+            in var_dict_from to copy to data_dict_to[component_name]['Controls'].
 
+        Read information from componentVars corresponding to the controls 
+        of the component.
+        """
+        for key in var_keys:
+            data_dict_to[key] = var_dict_from[key].get()
+    
+            
     @staticmethod
     def reformat_list_presentation(val_list):
         """ Reformat list representation for tooltip hints."""
@@ -325,6 +343,7 @@ class NRAPOpenIAM(tk.Tk):
             S = S + ', '.join([str(val) for val in val_list[quotient*10:]]) + ']'
 
         return S
+
 
     def add_remaining_widgets(self, par_name, dist_type, frame, toolTip, vars_dict):
         """ Add widgets related to the parameters setup. """
@@ -530,6 +549,11 @@ class NRAPOpenIAM(tk.Tk):
                     aquiferName = data[key]['LeakTo']
                 except KeyError:
                     aquiferName = 'none'
+            
+            try:
+                controls = data[key]['Controls']
+            except KeyError:
+                controls = {}
 
             if connection_name == 'Dynamic Parameters':
                 if (data[key]['type'].find('Wellbore') != -1) or (
@@ -568,7 +592,7 @@ class NRAPOpenIAM(tk.Tk):
             self.add_component(
                 connection_name, aquiferName, self.tabControl, key,
                 data[key]['type'], self.tabControl.connection_menu,
-                self.tabControl.componentsSetupFrame, self, dyn_data)
+                self.tabControl.componentsSetupFrame, self, dyn_data, controls)
 
             # Call additional widgets setup for selected components
             if data[key]['type'] in ['SimpleReservoir', 'AnalyticalReservoir',
@@ -1094,9 +1118,10 @@ class NRAPOpenIAM(tk.Tk):
 
         return cmpnt_params_dict
 
+
     def add_component(self, conn, aqName, tabControl, compName, compType,
                       connection_menu, componentsSetupFrame, controller,
-                      dyn_data):
+                      dyn_data, controls):
         """
         Add component model.
 
@@ -1197,7 +1222,7 @@ class NRAPOpenIAM(tk.Tk):
             add_widgets = self.get_add_widgets_method(componentType.get())
             add_widgets(controller, tabType, componentName.get(),
                         componentType.get(), toolTip, connection_menu.connection.get(),
-                        dyn_data_list, aquiferName.get())
+                        dyn_data_list, aquiferName.get(), controls)
 
             connection_menu.children['menu'].delete(0, 'end')
             connections.append(componentName.get())
@@ -1238,7 +1263,7 @@ class NRAPOpenIAM(tk.Tk):
             'MultisegmentedWellbore': (0, 0, 0, 1300),
             'CementedWellbore': (0, 0, 0, 800),
             'CementedWellboreWR': (0, 0, 0, 800),
-            'OpenWellbore': (0, 0, 0, 800),
+            'OpenWellbore': (0, 0, 0, 1200),
             'GeneralizedFlowRate': (0, 0, 0, 1300),
             'FaultFlow': (0, 0, 0, 2000),
             'FaultLeakage': (0, 0, 0, 800),

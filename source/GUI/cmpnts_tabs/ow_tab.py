@@ -29,7 +29,7 @@ from cmpnts_tabs.commons import commons_read_tab_vars
 
 
 OW_PARAMETERS = ['logReservoirTransmissivity', 'logAquiferTransmissivity',
-                 'brineSalinity', 'wellRadius']
+                 'brineSalinity', 'brineDensity', 'wellRadius', 'critPressure']
 
 OW_PARAMETERS_SETUP = {
     'logReservoirTransmissivity': ["Reservoir transmissivity [log{} m{}]:".format(
@@ -37,14 +37,18 @@ OW_PARAMETERS_SETUP = {
     'logAquiferTransmissivity': ["Aquifer transmissivity [log{} m{}]:".format(
         u'\u2081'u'\u2080', u'\u00B3'), 'aquifer transmissivity'],
     'brineSalinity': ["Brine salinity [-]:", 'brine salinity'],
-    'wellRadius': ["Well radius [m]:", 'well radius']}
+    'brineDensity': ["Brine density [kg/m{}]".format(u'\u00B3'), 'brine density'], 
+    'wellRadius': ["Well radius [m]:", 'well radius'], 
+    'critPressure': ["Critical pressure [Pa]:", 'critical pressure']}
 
 # Set Open Wellbore parameters names and value, min, max, second value, mean, std, bounds
 OW_PARAMETER_VALUES = {
     'logReservoirTransmissivity': [-10, -11, -9, -10.5, -10, 0.2, -11.27, -8.4],
     'logAquiferTransmissivity': [-10, -11, -9, -10.5, -10, 0.2, -11.27, -8.4],
     'brineSalinity': [0.1, 0, 0.2, 0.15, 0.1, 0.05, 0, 0.2],
-    'wellRadius': [0.05, 0.025, 0.25, 0.1, 0.1, 0.05, 0.025, 0.25]}
+    'brineDensity': [1012, 1000, 1100, 1050, 1025, 50, 900, 1200],
+    'wellRadius': [0.05, 0.025, 0.25, 0.1, 0.1, 0.05, 0.025, 0.25], 
+    'critPressure': [5.0e+6, 1.0e+6, 2.0e+7, 1.0e+7, 5.0e+6, 1.0e+4, 1.0e+5, 9.0e+7]}
 
 OW_DYNAMIC_KWARGS = ['pressure', 'CO2saturation']
 
@@ -77,8 +81,8 @@ def read_tab_vars(cmpnt_nm):
     return cmpnt_data
 
 def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip,
-                cnctn_nm, dyn_data, *args):
-    """ Add widgets to the component tab."""
+                cnctn_nm, dyn_data, aquiferName, controls, *args):
+    """ Add widgets to the component tab. Note that aquiferName will be 'none' and is unused."""
 
     aquifers = ['aquifer{}'.format(ind) for ind in range(
         1, componentVars['strata']['Params']['numberOfShaleLayers'].get())]
@@ -139,7 +143,7 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip,
 
     # Number of wellbores defined by the same parameters
     number_frame = tk.Frame(tab)
-    number_frame.grid(row=5, column=0, sticky='w', padx=PARAMETER_FRAME_PADX)
+    number_frame.grid(row=7, column=0, sticky='w', padx=PARAMETER_FRAME_PADX)
 
     # Leaked to aquifer name
     leak_to_label = ttk.Label(number_frame, text='Leak to:', width=PARAMETER_LABEL_WIDTH)
@@ -173,16 +177,88 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip,
 
     # Wellbore locations frame
     well_locs_frame = tk.Frame(tab)
-    well_locs_frame.grid(row=6, column=0, sticky='w',
+    well_locs_frame.grid(row=8, column=0, sticky='w',
                          padx=PARAMETER_FRAME_PADX, pady=(5, 10))
     add_wellbore_frame_widgets(controller, cmpnt_nm, well_locs_frame, tool_tip)
+    
+    # Critical pressure input in the Controls section
+    componentVars[cmpnt_nm]['Controls'] = {}
+    
+    componentVars[cmpnt_nm]['Controls']['critPressureApproach'] = BooleanVar()
+    componentVars[cmpnt_nm]['Controls']['enforceCritPressure'] = BooleanVar()
+    
+    if len(controls) > 0:
+        if 'critPressureApproach' in controls:
+            componentVars[cmpnt_nm]['Controls']['critPressureApproach'].set(
+                controls['critPressureApproach'])
+        else:
+            componentVars[cmpnt_nm]['Controls']['critPressureApproach'].set(0)
+        
+        if 'enforceCritPressure' in controls:
+            componentVars[cmpnt_nm]['Controls']['enforceCritPressure'].set(
+                controls['enforceCritPressure'])
+        else:
+            componentVars[cmpnt_nm]['Controls']['enforceCritPressure'].set(0)
+    else:
+        componentVars[cmpnt_nm]['Controls']['critPressureApproach'].set(0)
+        componentVars[cmpnt_nm]['Controls']['enforceCritPressure'].set(0)
+    
+    use_critP_frame = tk.Frame(tab)
+    use_critP_frame.grid(row=9, column=0, sticky='w', padx=0)
 
+    use_critP_label = ttk.Label(
+        use_critP_frame,
+        text="Use critical pressure:",
+        width=PARAMETER_LABEL_WIDTH)
+    use_critP_label.grid(row=0, column=0, sticky='w', padx=5)
+    
+    specify_critP_frame = tk.Frame(tab)
+    specify_critP_frame.grid(row=10, column=0, sticky='w', padx=20)
+    
+    critP_frame = tk.Frame(tab)
+    critP_frame.grid(row=10, column=0, sticky='w', padx=20)
+    
+    use_critP_checkbox = tk.Checkbutton(
+        use_critP_frame,
+        variable=componentVars[cmpnt_nm]['Controls']['critPressureApproach'],
+        command=lambda: disable_critP_frame_widgets(
+            componentVars[cmpnt_nm]['Controls'], specify_critP_frame, 
+            use_type='useCritP', additional_frame=critP_frame))
+    use_critP_checkbox.grid(row=0, column=1, sticky='w', padx=5)
+    tool_tip.bind(use_critP_checkbox,
+                  ''.join(['Check to enable the use of a critical pressure in\n',
+                           'leakage calculations.']))
+    
+    specify_critP_label = ttk.Label(
+        specify_critP_frame,
+        text="Use the critical pressure parameter (above), otherwise\nit is calcualted with the default approach:",
+        width = 1.5 * PARAMETER_LABEL_WIDTH)
+    specify_critP_label.grid(row=0, column=0, sticky='w', padx=40)
+     
+    specify_critP_checkbox = tk.Checkbutton(
+        specify_critP_frame,
+        variable=componentVars[cmpnt_nm]['Controls']['enforceCritPressure'])
+    specify_critP_checkbox.grid(row=0, column=1, sticky='w', padx=40)
+    tool_tip.bind(specify_critP_checkbox,
+                  ''.join(['Check to enable the use of a specific critical pressure in\n',
+                           'leakage calculations (the critical pressure parameter\n', 
+                           'shown above). Otherwise, critical pressure is calculated\n', 
+                           'in the default manner (see the User Guide).']))
+    
+    disable_critP_frame_widgets(
+        componentVars[cmpnt_nm]['Controls'], specify_critP_frame, 
+        use_type='useCritP', additional_frame=critP_frame)
+    
+    disable_critP_frame_widgets(
+        componentVars[cmpnt_nm]['Controls'], critP_frame, 
+        use_type='enforceCritP')
+    
     # Outputs
     outputs_label = ttk.Label(tab, text="Outputs", font=LABEL_FONT)
-    outputs_label.grid(row=7, column=0, sticky='w', pady=(5, 10))
+    outputs_label.grid(row=11, column=0, sticky='w', pady=(5, 10))
 
     outputs_frame = ttk.Frame(tab)
-    outputs_frame.grid(row=8, column=0, sticky='w', padx=PARAMETER_FRAME_PADX)
+    outputs_frame.grid(row=12, column=0, sticky='w', padx=PARAMETER_FRAME_PADX)
 
     # Create and place outputs widgets
     output_nms_labels = []
@@ -207,3 +283,22 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip,
             # Bind checkbox to the tip
             tool_tip.bind(output_nms_checkboxes[-1],
                           OW_OBSERVATIONS_SETUP[obs_nm][1])
+
+
+def disable_critP_frame_widgets(variable, frame, use_type='useCritP', 
+                                additional_frame=None):
+    """ Disable/enable widgets for the critical pressure frame."""
+    par_frames_state = {0: 'normal', 1: 'disabled'}
+    
+    if use_type == 'useCritP':
+        check_button_state = variable['critPressureApproach'].get()
+    elif use_type == 'enforceCritP':
+        check_button_state = variable['enforceCritPressure'].get()
+
+    for widget in frame.winfo_children():
+        widget.configure(state=par_frames_state[1-check_button_state])
+    
+    if use_type == 'useCritP' and par_frames_state[1-check_button_state] == 'disabled':
+        for widget in additional_frame.winfo_children():
+            widget.configure(state=par_frames_state[1-check_button_state])
+
