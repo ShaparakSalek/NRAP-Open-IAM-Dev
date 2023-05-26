@@ -4,6 +4,7 @@ import unittest
 import warnings
 import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
+import h5py
 from shutil import copyfile
 import matplotlib.pyplot as plt
 
@@ -2358,7 +2359,8 @@ class Tests(unittest.TestCase):
         ltres = sm.add_component_model_object(
             LookupTableReservoir(
                 name='ltres', parent=sm, intr_family='reservoir',
-                locX=37478.0, locY=48233.0))
+                locX=37478.0, locY=48233.0,
+                parameter_filename='parameters_and_filenames.csv'))
 
         # Add parameters of reservoir component model
         for j in range(num_pars):
@@ -2390,6 +2392,90 @@ class Tests(unittest.TestCase):
             self.assertTrue(abs((ts-s)/ts) < 0.01,
                             'Saturation at time {} is {} but should be {}'
                             .format(str(t), str(s), str(ts)))
+
+
+    def test_lookup_table_reservoir_h5(self):
+        """
+        Tests lookup table reservoir component with .h5 files instead of
+        .csv files.
+
+        Tests the system model with a lookup table reservoir component
+        linked to two interpolators in a forward model against the expected
+        output for 6 years of data.
+        """
+
+        # Define keyword arguments of the system model
+        time_array = 365.25*np.linspace(0.0, 50.0, 6)
+        sm_model_kwargs = {'time_array': time_array}  # time is given in days
+
+        # Create system model
+        sm = SystemModel(model_kwargs=sm_model_kwargs)
+
+        # Define directory containing lookup tables
+        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+                                'lookuptables', 'Test_2d')
+
+        # Read file with signatures of interpolators and names of files with the corresponding data
+        signature_data = np.genfromtxt(
+            os.path.join(file_dir, 'parameters_and_filenames.csv'),
+            delimiter=",", dtype='str')
+
+        # The first row (except the last element) of the file contains names of the parameters
+        par_names = signature_data[0, 1:-1]
+        num_pars = len(par_names)
+
+        # Create and add two interpolators to the system model
+        for ind in range(2):
+            signature = {
+                par_names[j]: float(signature_data[ind+1, j+1]) for j in range(num_pars)}
+
+            sm.add_interpolator(
+                ReservoirDataInterpolator(
+                    name='int'+str(ind+1), parent=sm,
+                    header_file_dir=file_dir,
+                    time_file='time_points.csv',
+                    data_file='Reservoir_data_sim0{}.h5'.format(ind+1),
+                    index=int(signature_data[ind+1, 0]),
+                    signature=signature),
+                intr_family='reservoir')
+
+        # Add reservoir component
+        ltres = sm.add_component_model_object(
+            LookupTableReservoir(
+                name='ltres', parent=sm, intr_family='reservoir',
+                locX=37478.0, locY=48233.0, parameter_filename=''))
+
+        # Add parameters of reservoir component model
+        for j in range(num_pars):
+            # add first line with values from signature_file
+            ltres.add_par(par_names[j], value=float(signature_data[1, j+1]), vary=False)
+
+        # Add observations of reservoir component model
+        ltres.add_obs('pressure')
+        ltres.add_obs('CO2saturation')
+
+        # Run system model using current values of its parameters
+        sm.forward()
+
+        # Collect pressure and saturation observations
+        pressure = sm.collect_observations_as_time_series(ltres, 'pressure')[:] / 1.0e+6
+        saturation = sm.collect_observations_as_time_series(ltres, 'CO2saturation')[:]
+
+        true_pressure = [27.11992857, 33.16685714, 34.10442857, 34.16092857,
+                         34.08864286, 33.98235714]
+        true_saturation = [0., 0.34310857, 0.45430571, 0.47404286,
+                           0.48760786, 0.50069071]
+
+        # Test with helpful message!
+        for tp, p, t in zip(true_pressure, pressure, time_array):
+            self.assertTrue(abs((tp-p)/tp) < 0.01,
+                            'Pressure at time {} is {} MPa but should be {} MPa'
+                            .format(str(t), str(p), str(tp)))
+        for ts, s, t in zip(true_saturation[1:], saturation[1:], time_array[1:]):
+            self.assertTrue(abs((ts-s)/ts) < 0.01,
+                            'Saturation at time {} is {} but should be {}'
+                            .format(str(t), str(s), str(ts)))
+
 
     def test_lookup_table_reservoir_2d(self):
         """
@@ -2453,7 +2539,8 @@ class Tests(unittest.TestCase):
                     name='ltres'+str(comp_ind+1), parent=sm,
                     intr_family='reservoir',
                     locX=res_data[loc_ind, 0],
-                    locY=res_data[loc_ind, 1])))
+                    locY=res_data[loc_ind, 1],
+                    parameter_filename='')))
 
             ltress[-1].add_par('index', value=1, vary=False)
 
@@ -2488,6 +2575,118 @@ class Tests(unittest.TestCase):
                 self.assertTrue(abs((ts-s)/(ts+0.00001)) < 0.001,
                                 'CO2 saturation at t={} days is {} but should be {}'
                                 .format(t, s, ts))
+
+
+    def test_lookup_table_reservoir_2d_h5(self):
+        """
+        Tests lookup table reservoir component 2d interpolation with an .h5 file
+        instead of a .csv file.
+
+        Tests the system model with several lookup table reservoir components
+        linked to one interpolator in a forward model against the expected
+        output for all years of data provided in lookup table.
+        """
+        # Define directory containing lookup tables
+        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+                                'lookuptables', 'Test_2d')
+
+        # Read file with time points
+        time_data = np.genfromtxt(
+            os.path.join(file_dir, 'time_points_QAQC.csv'),
+            delimiter=",")
+
+        # Define keyword arguments of the system model
+        time_array = 365.25*time_data
+        sm_model_kwargs = {'time_array': time_array}  # time is given in days
+
+        # Create system model
+        sm = SystemModel(model_kwargs=sm_model_kwargs)
+
+        # Create and add interpolator to the system model
+        sm.add_interpolator(
+            ReservoirDataInterpolator(
+                name='int1', parent=sm,
+                header_file_dir=file_dir,
+                time_file='time_points_QAQC.csv',
+                data_file='Reservoir_data_QAQC.h5',
+                index=1,
+                signature={}),
+            intr_family='reservoir')
+
+        # Read file with locations and data
+        f = h5py.File(os.path.join(file_dir, 'Reservoir_data_QAQC.h5'),'r')
+
+        x = f['x'][()]
+        y = f['y'][()]
+
+        # Generate randomly indices of points at which observations
+        # from reservoir component will be compared to the values provided
+        # in the tables
+        # np.random.seed(5) # one can use a seed
+        num_points = 5
+        loc_indices = np.random.randint(0, len(x), size=num_points)
+
+        # Initialize list of reservoir components
+        ltress = []
+
+        # Initialize list of true observations
+        true_pressure = [None] * num_points
+        true_saturation = [None] * num_points
+
+        # Add reservoir component for each selected location
+        for comp_ind in range(num_points):
+            loc_ind = loc_indices[comp_ind]
+            ltress.append(sm.add_component_model_object(
+                LookupTableReservoir(
+                    name='ltres'+str(comp_ind+1), parent=sm,
+                    intr_family='reservoir',
+                    locX=x[loc_ind], locY=y[loc_ind],
+                    parameter_filename='')))
+
+            ltress[-1].add_par('index', value=1, vary=False)
+
+            # Add observations of reservoir component model
+            ltress[-1].add_obs('pressure')
+            ltress[-1].add_obs('CO2saturation')
+
+            # Extract pressure/saturation data from lookup table
+            pressure_compiled = np.zeros(len(time_array))
+            sat_compiled = np.zeros(len(time_array))
+            for tRef in range(0, len(time_array)):
+                # Get the pressure and saturation for the current location over time
+                pressure_temp = f['pressure_{:.0f}'.format(tRef + 1)][()]
+                pressure_compiled[tRef] = pressure_temp[loc_ind]
+
+                sat_temp = f['CO2saturation_{:.0f}'.format(tRef + 1)][()]
+                sat_compiled[tRef] = sat_temp[loc_ind]
+
+            true_pressure[comp_ind] = pressure_compiled
+            true_saturation[comp_ind] = sat_compiled
+
+        # Run system model
+        sm.forward()
+
+        # Initialize list of computed observations
+        pressure = []
+        saturation = []
+        for comp_ind in range(num_points):
+            pressure.append(sm.collect_observations_as_time_series(
+                ltress[comp_ind], 'pressure'))
+            saturation.append(sm.collect_observations_as_time_series(
+                ltress[comp_ind], 'CO2saturation'))
+
+        for comp_ind in range(num_points):
+            for tp, p, t in zip(true_pressure[comp_ind], pressure[comp_ind], time_array):
+                self.assertTrue(abs((tp-p)/tp) < 0.001,
+                                'Pressure at time t={} days is {} Pa but should be {} Pa'
+                                .format(str(t), str(p), str(tp)))
+
+            for ts, s, t in zip(true_saturation[comp_ind], saturation[comp_ind], time_array):
+                # Small value at the bottom to avoid division by zero for zero saturation
+                self.assertTrue(abs((ts-s)/(ts+0.00001)) < 0.001,
+                                'CO2 saturation at t={} days is {} but should be {}'
+                                .format(t, s, ts))
+
 
     def test_lookup_table_reservoir_3d(self):
         """
@@ -2553,7 +2752,8 @@ class Tests(unittest.TestCase):
                     intr_family='reservoir',
                     locX=res_data[loc_ind, 0],
                     locY=res_data[loc_ind, 1],
-                    locZ=res_data[loc_ind, 2])))
+                    locZ=res_data[loc_ind, 2],
+                    parameter_filename='')))
 
             ltress[-1].add_par('index', value=1, vary=False)
 
@@ -2564,6 +2764,122 @@ class Tests(unittest.TestCase):
             # Extract pressure/saturation data from lookup table
             true_pressure.append(res_data[loc_ind, 3:3+len(time_array)])
             true_saturation.append(res_data[loc_ind, 3+len(time_array):])
+
+        # Run system model
+        sm.forward()
+
+        # Initialize list of computed observations
+        pressure = []
+        saturation = []
+        for comp_ind in range(num_points):
+            pressure.append(sm.collect_observations_as_time_series(
+                ltress[comp_ind], 'pressure'))
+            saturation.append(sm.collect_observations_as_time_series(
+                ltress[comp_ind], 'CO2saturation'))
+
+        for comp_ind in range(num_points):
+            for tp, p, t in zip(true_pressure[comp_ind], pressure[comp_ind], time_array):
+                self.assertTrue(abs((tp-p)/tp) < 0.001,
+                                'Pressure at time t={} days is {} Pa but should be {} Pa'
+                                .format(str(t), str(p), str(tp)))
+
+            for ts, s, t in zip(true_saturation[comp_ind], saturation[comp_ind], time_array):
+                # Small value at the bottom to avoid division by zero for zero saturation
+                self.assertTrue(abs((ts-s)/(ts+0.00001)) < 0.001,
+                                'CO2 saturation at t={} days is {} but should be {}'
+                                .format(t, s, ts))
+
+
+    def test_lookup_table_reservoir_3d_h5(self):
+        """
+        Tests lookup table reservoir component 3d interpolation with an .h5 file
+        instead of a .csv file.
+
+        Tests the system model with several lookup table reservoir components
+        linked to one interpolator in a forward model against the expected
+        output for all years of data provided in lookup table.
+        """
+        # Define directory containing lookup tables
+        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+                                'lookuptables', 'Test_3d')
+
+        # Read file with time points
+        time_data = np.genfromtxt(
+            os.path.join(file_dir, 'time_points.csv'),
+            delimiter=",")
+
+        # Define keyword arguments of the system model
+        time_array = 365.25*time_data
+        sm_model_kwargs = {'time_array': time_array}  # time is given in days
+
+        # Create system model
+        sm = SystemModel(model_kwargs=sm_model_kwargs)
+
+        # Create and add interpolator to the system model
+        sm.add_interpolator(
+            ReservoirDataInterpolator(
+                name='int1', parent=sm,
+                header_file_dir=file_dir,
+                time_file='time_points.csv',
+                data_file='Reservoir_data_sim01.h5',
+                index=1,
+                signature={},
+                interp_2d=False),
+            intr_family='reservoir')
+
+        # Read file with locations and data
+        # Read file with locations and data
+        f = h5py.File(os.path.join(file_dir, 'Reservoir_data_sim01.h5'),'r')
+
+        x = f['x'][()]
+        y = f['y'][()]
+        z = f['z'][()]
+
+        # Generate randomly indices of points at which observations
+        # from reservoir component will be compared to the values provided
+        # in the tables
+        # np.random.seed(5) # one can use a seed
+        num_points = 5
+        loc_indices = np.random.randint(0, len(x), size=num_points)
+
+        # Initialize list of reservoir components
+        ltress = []
+
+        # Initialize list of true observations
+        true_pressure = [None] * num_points
+        true_saturation = [None] * num_points
+
+        # Add reservoir component for each selected location
+        for comp_ind in range(num_points):
+            loc_ind = loc_indices[comp_ind]
+            ltress.append(sm.add_component_model_object(
+                LookupTableReservoir(
+                    name='ltres'+str(comp_ind+1), parent=sm,
+                    intr_family='reservoir',
+                    locX=x[loc_ind], locY=y[loc_ind], locZ=z[loc_ind],
+                    parameter_filename='')))
+
+            ltress[-1].add_par('index', value=1, vary=False)
+
+            # Add observations of reservoir component model
+            ltress[-1].add_obs('pressure')
+            ltress[-1].add_obs('CO2saturation')
+
+            # Extract pressure/saturation data from lookup table
+
+            # Extract pressure/saturation data from lookup table
+            pressure_compiled = np.zeros(len(time_array))
+            sat_compiled = np.zeros(len(time_array))
+            for tRef in range(0, len(time_array)):
+                # Get the pressure and saturation for the current location over time
+                pressure_temp = f['pressure_{:.0f}'.format(tRef + 1)][()]
+                pressure_compiled[tRef] = pressure_temp[loc_ind]
+
+                sat_temp = f['CO2saturation_{:.0f}'.format(tRef + 1)][()]
+                sat_compiled[tRef] = sat_temp[loc_ind]
+
+            true_pressure[comp_ind] = pressure_compiled
+            true_saturation[comp_ind] = sat_compiled
 
         # Run system model
         sm.forward()
@@ -3434,8 +3750,11 @@ BASE_TESTS = [
     'test_hydrocarbon_leakage_forward',
     'test_lhs',
     'test_lookup_table_reservoir',
+    'test_lookup_table_reservoir_h5',
     'test_lookup_table_reservoir_2d',
+    'test_lookup_table_reservoir_2d_h5',
     'test_lookup_table_reservoir_3d',
+    'test_lookup_table_reservoir_3d_h5',
     'test_parstudy',
     'test_plume_stability_cmpnt',
     'test_rate_to_mass_adapter',
