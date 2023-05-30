@@ -1,6 +1,23 @@
 # OpenIAM Control File Example 10
-# To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex10.yaml
+#
+# This example evaluates the leakage through a CementedWellbore 
+# component connected to a LookupTableReservoir component (requires 
+# the Kimberlina data set - see below). Given the pressures and CO2 
+# saturations provided by the LookupTableReservoir, the CementedWellbore 
+# component simulates the CO2 and brine leakage into the intermediate 
+# and shallow aquifers (aquifers 1 and 2, respectively). A 
+# DeepAlluviumAquifer is then used to simulate the pH and TDS plume 
+# volumes in the intermediate aquifer (aquifer 1). These analyses are 
+# conducted with Latin Hypercube Sampling (lhs), which allows parameter 
+# values to vary between minimum and maximum values across 30 different 
+# realizations (siz: 30).
+#
+# This example produces four plots:
+#   1. Volume of the aquifer below the pH threshold.
+#   2. Volume of the aquifer above the TDS threshold.
+#   3. CO2 leakage into the intermediate aquifer (aquifer1)
+#   4. Brine leakage into the intermediate aquifer (aquifer1)
+#
 # This example requires the additional Kimberlina data set.
 # Kimberlina data set (kimb-closed-200-sims.zip or Kimb_closed_200_sims.zip)
 # can be downloaded from one of the following places:
@@ -9,14 +26,10 @@
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/Kimb_closed_200_sims
-# This example computes the aquifer impact from several leaky
-#   (cemented) wellbores connected to the lookup table reservoir model.
-
-# This example produces four plots:
-#   1. Volume of the aquifer below the pH threshold.
-#   2. Volume of the aquifer above the TDS threshold.
-#   3. CO2 leakage into the intermediate aquifer (aquifer1)
-#   4. Brine leakage into the intermediate aquifer (aquifer1)
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex10.yaml
+#
 # Last Modified: March 9, 2020
 #-------------------------------------------------
 ModelParams:
@@ -52,7 +65,6 @@ Stratigraphy:
     reservoirThickness:
         vary: False
         value: 51.2
-
 #-------------------------------------------------
 ClosedKimberlina:
     Type: LookupTableReservoir

@@ -1,3 +1,24 @@
+# OpenIAM Control File Example 29
+#
+# This example illustrates the use of known and random wellbore locations 
+# in a 3D domain. The reservoir pressures and CO2 saturations are obtained 
+# from a LookupTableReservoir component using 3-dimensional interpolation. 
+# Specifically, having 'Interpolation2D: False' entered for the 
+# LookupTableReservoir makes it interpolate over the x-, y-, and z-directions 
+# instead of just the x- and y-directions (x: easting, y: northing, z: depth).
+# If the bases of the wellbore components are at different depths within the 
+# reservoir (controlled by the 'coordz' entry under 'Locations'), 3-dimensional 
+# interpolation will take such differences into account when providing pressures 
+# and CO2 saturations to the wellbores.
+#
+# The MultisegmentedWellbore component has 3 specified locations. Because the 
+# total number of wellbores is set to 8, there are 5 randomly assigned 
+# MultisegmentedWellbore locations within the x, y, and z bounds contained 
+# in the 'RandomLocDomain' entry. Given the pressure and CO2 saturation inputs 
+# from the LookupTableReservoir, the MultisegmentedWellbore component simulates 
+# the leakage of CO2 and brine into the intermediate and shallow aquifers 
+# (aquifers 1 and 2, respectively) as well as the atmosphere.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex29.yaml
 #
@@ -87,34 +108,53 @@ MultisegmentedWellbore1:
             vary: False
     Outputs: [CO2_aquifer1, CO2_aquifer2, CO2_atm,
               brine_aquifer1, brine_aquifer2, brine_atm]
+#-------------------------------------------------
 Plots:
-    pressure_plot:
-        subplot:
-            use: True
-            ncols: 2
+    Pressure_plot:
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
         TimeSeries: [pressure]
-    saturation_plot:
-        subplot:
-            use: True
-            ncols: 2
+    Saturation_plot:
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
         TimeSeries: [CO2saturation]
     CO2_leakage1:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
         TimeSeries: [CO2_aquifer1]
     brine_leakage1:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
         TimeSeries: [brine_aquifer1]
     CO2_leakage2:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
         TimeSeries: [CO2_aquifer2]
     brine_leakage2:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
         TimeSeries: [brine_aquifer2]
+    CO2_leakage3:
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
+        TimeSeries: [CO2_atm]
+    brine_leakage3:
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [12, 12]
+        TimeSeries: [brine_atm]

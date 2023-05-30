@@ -1,16 +1,19 @@
-# OpenIAM Control File Example 39
+# OpenIAM Control File Example 39a
 #
 # This example demonstrates the use of the time to first detection (TTFD) plot
 # type for a simulation with a simple reservoir, multisegmented wellbores,
-# and aquifer components.
+# and aquifer components. If monitoring locations are given (see below), the TTFD 
+# plot type specifically represents the use of a monitoring well to detect a 
+# contaminant plume in (an) aquifer(s). If no monitoring locations are given, then 
+# this plot type shows the spread of contaminant plumes in (an) aquifer(s).
+#
 # Using this plot type requires aquifer component(s) producing the plume dimension
 # metrics for the type of plume specified with PlumeType. For example,
 # each of the aquifer components used here produces results for TDS_dx, TDS_dy,
 # and TDS_dz. Note that plume output varies with the type of component used.
-
 # The entries for PlumeType and ComponentNameList are required for the TTFD plot.
 # All other entries are optional.
-
+#
 # The "SpecifyXandYLims" option allows one to set the x and y (easting and northing)
 # axis limits for the TTFD plots by entering the lower and upper limits in
 # xLims and yLims. If the MonitoringLocations section is present, as shown here,
@@ -53,7 +56,7 @@ ModelParams:
         siz: 30
     Components: [SimpleReservoir1, MultisegmentedWellbore1,
                  FutureGen2AZMI1]
-    OutputDirectory: output/output_ex39_{datetime}
+    OutputDirectory: output/output_ex39a_{datetime}
     Logging: Info
 #-------------------------------------------------
 Stratigraphy:
@@ -134,9 +137,9 @@ Plots:
             MonitoringLocations:
                 coordx: [50, 75, 150]
                 coordy: [50, 75, 150]
-                coordz: [-1485, -1350, -1200]
+                coordz: [-1405, -1405, -1405]   # 5 m below the top of aquifer 1 (-1400 m)
                 HorizontalWindow: 1
-                VerticalWindow: 2
+                VerticalWindow: 5               # Will detect plumes at z grid points from 5 m above to 5 m below the coordz, from -1410 m to -1400 m. There is still a grid point at -1405 m though, so any plume there will be detected.
             PlotInjectionSites: True
             SpecifyXandYLims:
                 xLims: [-75, 675]

@@ -1,13 +1,31 @@
 # OpenIAM Control File Example 1a
+#
+# This example links a SimpleReservoir component to a CementedWellbore component.
+# Based on the pressures and CO2 saturations provided by the SimpleReservoir, the 
+# CementedWellbore component calculates the leakage rates from 4 leaky wellbores. 
+# The leakage enters aquifers 1 and 2 as well as the atmosphere.
+#
+# This example produces three plots. The first two plots show the CO2 leakage
+# into the intermediate aquifer (aquifer1) and the shallow aquifer (aquifer2). 
+# The third plot shows the reservoir pressures at the wellbore locations. Each 
+# plot has different outputs in separate subplots through the inclusion of 
+# 'Use: True' under the 'Subplot' entry. The 'NumCols: 2' entry in each plot 
+# specifies that each plot will have two columns of subplots. The subplot rows 
+# are determined as the number required to show the number of outputs included 
+# (here, two rows, so there are four subplots for four locations). 
+#
+# In the plot Pressure_plot, the subplot titles are specified through the inclusion 
+# of 'COMPONENTNAME.OUTPUTNAME: SUBPLOT TITLE' under the 'Subplot' entry. In the 
+# control file interface, the component name is a combination of what the user 
+# provides ('SimpleReservoir1') and a location index preceeded by an underscore 
+# and containing three digits ('_000'). For example, the formatting of 
+# 'COMPONENTNAME.OUTPUTNAME' here leads to 'SimpleReservoir1_000.pressure' for the 
+# pressure at location 0 (the indexing starts at 0). If subplot titles are not 
+# specified, they are generated based on the data shown.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex1a.yaml
-# This example links an analytical reservoir model (Nordbotten et al., 2011)
-# with a cemented wellbore model.
-# The leakage from 4 leaky wellbores connected to the simple reservoir model
-# is computed.
-# This example produces three plots, the first two plots is of the CO2 leakage
-# into the intermediate aquifer (aquifer1) and the shallow aquifer (aquifer2).
-# The third plot is of the pressure in the reservoir at the wellbore locations.
+#
 # Last Modified: May 21, 2020
 #-------------------------------------------------
 ModelParams:
@@ -102,14 +120,14 @@ Plots:
     #------------------------------------------------------
     CO2_Leakage1:
         TimeSeries: [CO2_aquifer1]
-        subplot:
-            ncols: 2
-            use: True
+        Subplot:
+            NumCols: 2
+            Use: True
     CO2_Leakage2:
         TimeSeries: [CO2_aquifer2]
-        subplot:
-            ncols: 2
-            use: True
+        Subplot:
+            NumCols: 2
+            Use: True
     #------------------------------------------------------
     # Next do the same thing for the pressure at the base
     # of the leaky wellbores.
@@ -117,11 +135,11 @@ Plots:
     #------------------------------------------------------
     Pressure_plot:
         TimeSeries: [pressure]
-        subplot:
-            ncols: 2
-            use: True
-            SimpleReservoir1_000.pressure: 'Pressure at well #1'
-            SimpleReservoir1_001.pressure: 'Pressure at well #2'
+        Subplot:
+            NumCols: 2
+            Use: True
+            SimpleReservoir1_000.pressure: 'Pressure at well #1'   # the '' are required because the number 
+            SimpleReservoir1_001.pressure: 'Pressure at well #2'   # would be silenced by the # and excluded
             SimpleReservoir1_002.pressure: 'Pressure at well #3'
             SimpleReservoir1_003.pressure: 'Pressure at well #4'
         Title: Reservoir Pressure at Wellbore Location

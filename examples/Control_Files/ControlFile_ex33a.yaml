@@ -118,27 +118,27 @@ OpenWellbore1:
 Plots:
     Plot1:
         TimeSeries: [pressure]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot2:
         TimeSeries: [CO2saturation]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot3:
         TimeSeries: [CO2_aquifer]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot4:
         TimeSeries: [brine_aquifer]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot5:
         Stratigraphy:
-            FigureDPI: 300
+            FigureDPI: 200
             PlotWellbores: True
             PlotWellLabels: True
             PlotStratComponents: True

@@ -930,20 +930,21 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                fontweight='bold', labelpad=axislabel_pad)
     ax.set_zlabel('Depth (m)', fontsize=axislabelfontsize,
                fontweight='bold', labelpad=axislabel_pad)
-    if var_type == 'LookupTable':
-        ax.set_title('Stratigraphy for the Study Area,\nRed Squares: '
-                     + 'Top of Shales, Blue Squares: Top of Aquifers,\nGray '
-                     + 'Squares: Top and Bottom of the Reservoir',
-                     fontsize=titlefontsize, fontweight=selected_labelfontweight,
-                     pad=0)
+    
+    if not title:
+        if var_type == 'LookupTable':
+            ax.set_title('Stratigraphy for the Study Area,\nRed Squares: '
+                         + 'Top of Shales, Blue Squares: Top of Aquifers,\nGray '
+                         + 'Squares: Top and Bottom of the Reservoir',
+                         fontsize=titlefontsize, fontweight=selected_labelfontweight,
+                         pad=0)
+        else:
+            ax.set_title('Stratigraphy for the Study Area,\nTop of Each Unit Shown',
+                         fontsize=titlefontsize, fontweight=selected_labelfontweight,
+                         pad=0)
     else:
-        ax.set_title('Stratigraphy for the Study Area,\nTop of Each Unit Shown',
-                     fontsize=titlefontsize, fontweight=selected_labelfontweight,
-                     pad=0)
-
-    if title:
-        plt.suptitle(title, fontweight=selected_labelfontweight,
-                     fontsize=titlefontsize)
+        ax.set_title(title, fontweight=selected_labelfontweight, 
+                     fontsize=titlefontsize, pad=0)
 
     # Make the x and y axes have equal aspects
     xlim = ax.get_xlim()

@@ -22,9 +22,11 @@
 # representing unit depths can be seen more clearly. Additionally,
 # having "PlotInjectionLocations: True" makes the code plot the injection sites
 # used by the reservoir components. Note that injection sites must be explicity
-# given for Lookup Table Reservoirs. For more details check Control File example 37.
-# This example also demonstrates how you can save the Stratigraphy plot
-# as a certain type of image file (here, .tiff).
+# given with the InjectionCoordx and InjectionCoordy (x and y values, respectively) 
+# for LookupTableReservoir components. Other types of reservoir components store the 
+# x and y values, so InjectionCoordx and InjectionCoordy do not need to be provided. 
+# For more details check Control File example 37. This example also demonstrates how 
+# you can save the Stratigraphy plot as a certain type of image file (here, .tiff).
 #
 # There are also three StratigraphyColumn plots demonstrating how unit thicknesses
 # change across the domain. The top units pinch out to the north - because both shale

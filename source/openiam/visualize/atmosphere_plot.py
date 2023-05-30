@@ -86,10 +86,10 @@ class Plume():
 
 
 def make_plume_plots(plumes, time=None, alpha=0.2, sample=0, extent=None,
-                     analysis='lhs', genfontsize=18, axislabelfontsize=24,
-                     titlefontsize=20, boldlabels=True, savefig=None, title=None,
-                     receptors=None, yaml_input_dict=None, res_comp_injX=None,
-                     res_comp_injY=None):
+                     analysis='lhs', figsize=(15, 10), genfontsize=18, 
+                     axislabelfontsize=24, titlefontsize=20, boldlabels=True, 
+                     savefig=None, title=None, receptors=None, yaml_input_dict=None, 
+                     res_comp_injX=None, res_comp_injY=None):
     """
     Takes in list of plume objects and plot them on a figure.
 
@@ -180,7 +180,7 @@ def make_plume_plots(plumes, time=None, alpha=0.2, sample=0, extent=None,
         InjectionCoordx = None
         InjectionCoordy = None
 
-    fig = plt.figure(figsize=(15, 10))
+    fig = plt.figure(figsize=figsize)
     plt.clf()
 
     ax = fig.add_subplot(1, 1, 1)
@@ -432,8 +432,8 @@ def get_plumes(sm, s, atm_comp, time_index=0, sample=0, analysis='lhs',
     return (plumes, extent)
 
 
-def map_plume_plot_single(plot_data, name, sm, s, satm,
-                          time_array, output_dir, analysis='lhs', sample=0,
+def map_plume_plot_single(plot_data, name, sm, s, satm, time_array, output_dir, 
+                          analysis='lhs', figsize=(15, 10), sample=0,
                           genfontsize=18, axislabelfontsize=24, titlefontsize=20,
                           boldlabels=True, savefig=None, extent=None, title=None):
     """
@@ -558,7 +558,7 @@ def map_plume_plot_single(plot_data, name, sm, s, satm,
                                     time='{:.3f}'.format(time))
         make_plume_plots(
             plumes, time=time, alpha=0.2, sample=sample, extent=extent,
-            analysis=analysis, genfontsize=genfontsize,
+            analysis=analysis, figsize=figsize, genfontsize=genfontsize,
             axislabelfontsize=axislabelfontsize,
             titlefontsize=titlefontsize, boldlabels=boldlabels,
             savefig=savefig_ti, receptors=receptors, title=title_ti,

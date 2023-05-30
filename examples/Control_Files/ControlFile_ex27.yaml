@@ -1,9 +1,12 @@
-# OpenIAM Control File Example, reading temperature data with a LookupTableReservoir
+# OpenIAM Control File Example 27 
+#
+# This example demonstrates reading temperature data with a LookupTableReservoir.
 #
 # This example uses a modified version of the file Reservoir_data_sim01.csv from the
 # Kimberlina data set (https://gitlab.com/NRAP/Kimberlina_data). The file
 # was placed in the following location:
 #     source/components/reservoir/lookuptables/Test_metrics
+#
 # The file from the Kimberlina data set was modified to include columns
 # for the fields temperature_1 through temperature_10 (corresponding to
 # the times in columns 1 through 10 of the time_points.csv file in the same folder).
@@ -14,9 +17,12 @@
 # Reservoir_data_sim01_read_temperature.csv. The parameters are unchanged
 # from the Kimberlina data set, however (logResPerm: -13.3, reservoirPorosity: 0.215,
 # logShalePerm: -18.7).
+#
 # If the above files are not present, this example will produce an error.
-# Although the temperature data are constant, this approach would also work on metrics that
-# vary over space and time.
+# Although the temperature data are constant, this approach would also work 
+# on metrics that vary over space and time. Note that to incorporate the temperature data 
+# from the .csv files into the system model, 'temperature' must be included in 
+# the Outputs of the LookupTableReservoir component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex27.yaml
@@ -97,6 +103,6 @@ Plots:
         TimeSeries: [temperature]
     CO2_leakage_plot:
         TimeSeries: [CO2_aquifer1, CO2_aquifer2]
-        subplot:
-            ncols: 2
-            use: True
+        Subplot:
+            NumCols: 2
+            Use: True

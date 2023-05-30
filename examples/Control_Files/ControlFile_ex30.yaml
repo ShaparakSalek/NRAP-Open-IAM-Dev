@@ -1,8 +1,26 @@
 # OpenIAM Control File Example 30
-# This example illustrates different options of setting Locations both for
-# Lookup Table Reservoir and Multisegmented Wellbore components:
-# through direct entry, through file, as equally spaced array points,
-# and as a grid.
+#
+# This example illustrates six different options of setting Locations for 
+# MultisegmentedWellbore components:
+#
+# (1) through direct entry (e.g., coordx: [235310.172, 235462.572] and 
+#                                 coordy: [4408964.6136, 4408964.6136] under MultisegmentedWellbore1),
+#
+# (2) through a .csv file (file: 'examples/Control_Files/input_data/ex30/locations.csv' under MultisegmentedWellbore2),
+#
+# (3) as equally spaced array points with a specified number of points ('linspace:' under MultisegmentedWellbore5),
+#
+# (4) as equally spaced points with a specified interval ('range:' under MultisegmentedWellbore6),
+#
+# (5) as a grid with a specified number of nodes in the x and y directions ('grid:' under MultisegmentedWellbore3), 
+#
+# and (6) as a grid with nodes that are explicity stated ('grid:' under MultisegmentedWellbore4).
+#
+# Note that one LookuptableReservoir component will be made to provide inputs for each 
+# MultisegmentedWellbore component, so the LookuptableReservoir components will also have 
+# the locations specified. If the MultisegmentedWellbore components were connected to aquifer 
+# components, one aquifer component would be created for each MultisegmentedWellbore component 
+# at each location.
 #
 # This example requires additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
@@ -200,27 +218,26 @@ MultisegmentedWellbore6:
         brineViscosity: 7.5e-4
         CO2Viscosity: 6.6e-5
     Outputs: [CO2_aquifer1, brine_aquifer1]
+#-------------------------------------------------
 Plots:
     pressure_all:
-        savefig: 'pressure.png'
-        VaryLineStyles: True
-        FigureDPI: 150
-        # figsize: [12, 8]  # width, height
-        subplot:
-            use: False
-            ncols: 1
         TimeSeries: [pressure]
+        VaryLineStyles: True
+        FigureSize: [12, 8]  # [width, height] in inches; default for TimeSeries is [10, 8]
+        Subplot:
+            Use: False
+        FigureDPI: 150
     saturation_plot:
-        subplot:
-            use: False
-            ncols: 1
         TimeSeries: [CO2saturation]
         VaryLineStyles: True
+        FigureSize: [12, 8]
+        Subplot:
+            Use: False
         FigureDPI: 150
     leakage_plot:
-        subplot:
-            use: False
-            ncols: 1
         TimeSeries: [CO2_aquifer1]
         VaryLineStyles: True
+        FigureSize: [12, 8]
+        Subplot:
+            Use: False
         FigureDPI: 150

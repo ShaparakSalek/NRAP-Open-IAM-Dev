@@ -14,6 +14,7 @@
 # depth of the aquifer here is fixed at 18.288 m, and the aquifer extends
 # to the surface. The reservoir depth can be changed using the reservoirDepth
 # parameter.
+#
 # When setting the time range with EndTime and TimeStep (as shown here),
 # the range automatically begins at t = 0 years. The HydrocarbonLeakge component
 # produces outputs of values 0 for years 0 to 99. Any results outside
@@ -105,9 +106,9 @@ Plots:
         UseLines: True
         VaryLineStyles: True
         FigureDPI: 100
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
             HydrocarbonLeakage1.mass_CO2_aquifer: 'CO$_2$ Liquid Leaked to Aquifer'
     CH4_Leakage:
         TimeSeries: [mass_methane_oil_aquifer, mass_methane_gas_aquifer]
@@ -115,9 +116,9 @@ Plots:
         UseLines: True
         VaryLineStyles: True
         FigureDPI: 100
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     CO2_and_CH4_Leakage:
         TimeSeries: [mass_CO2_aquifer, mass_CO2_gas_aquifer,
                      mass_methane_oil_aquifer, mass_methane_gas_aquifer]
@@ -125,16 +126,16 @@ Plots:
         UseLines: True
         VaryLineStyles: True
         FigureDPI: 100
-        subplot:
-            use: True
-            ncols: 2
-            nrows: 2
+        Subplot:
+            Use: True
+            NumCols: 2
+            HydrocarbonLeakage1.mass_CO2_aquifer: 'CO$_2$ Liquid Leaked to Aquifer'
     Total_Leakage:
         TimeSeries: [mass_oil_aquifer, mass_gas_aquifer]
         UseMarkers: False
         UseLines: True
         VaryLineStyles: True
         FigureDPI: 100
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2

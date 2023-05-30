@@ -89,7 +89,7 @@ GenericAquifer1:
         aqu_thick: aquifer2Thickness
         top_depth: shale3Depth
     Outputs: [Dissolved_salt_volume, Dissolved_CO2_volume,
-              r_coordinate, z_coordinate,
+              r_coordinate, z_coordinate,                                 # gridded coordinates
               Dissolved_CO2_mass_fraction, Dissolved_salt_mass_fraction]  # gridded observations
 #-------------------------------------------------
 Plots:

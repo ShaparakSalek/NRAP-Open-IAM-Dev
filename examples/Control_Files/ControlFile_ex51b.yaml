@@ -1,10 +1,13 @@
 # OpenIAM Control File Example 51b
-# Example illustrates setup of LHS run for system model with analytical reservoir
-# component providing required input for cemented wellbore (wr) components.
+#
+# This example illustrates the setup of an LHS run (Latin Hypercube Sampling) 
+# for a system model with analytical reservoir component providing pressure and 
+# CO2 saturation inputs for cemented wellbore (wr) components.
 # The setup is standard in a sense that aquifer 1 (deeper one) is a thief zone;
 # while aquifer 2 (under shale 3) is a shallow aquifer.
-# Example also illustrates setup for a random placement of wells within
-# a specified domain.
+# The example also illustrates the set up for a random placement of wells within
+# a specified domain (inputs under the 'RandomLocDomain' entry').
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex51b.yaml
 #-------------------------------------------------
@@ -72,46 +75,46 @@ Wellbore:
 #-------------------------------------------------
 Plots:
     PressurePlot:
-        TimeSeries: [pressure]
-        subplot:
-            ncols: 2
-            use: True
+        TimeSeriesStats: [pressure]
+        Subplot:
+            NumCols: 2
+            Use: True
             Reservoir_000.pressure: 'Pressure at random well 1'
             Reservoir_001.pressure: 'Pressure at random well 2'
         Title: Reservoir Pressure
     SaturationPlot:
-        TimeSeries: [CO2saturation]
-        subplot:
-            ncols: 2
-            use: True
-            Reservoir_000.CO2saturation: '$CO_2$ saturation at random well 1'
-            Reservoir_001.CO2saturation: '$CO_2$ saturation at random well 2'
+        TimeSeriesStats: [CO2saturation]
+        Subplot:
+            NumCols: 2
+            Use: True
+            Reservoir_000.CO2saturation: 'CO$_2$ saturation at random well 1'
+            Reservoir_001.CO2saturation: 'CO$_2$ saturation at random well 2'
         Title: Reservoir CO2 saturation
     CO2Leakage1:
-        TimeSeries: [CO2_aquifer1]
-        subplot:
-            ncols: 2
-            use: True
+        TimeSeriesStats: [CO2_aquifer1]
+        Subplot:
+            NumCols: 2
+            Use: True
             Wellbore_000.CO2_aquifer1: 'Leakage to thief zone, random well 1'
             Wellbore_001.CO2_aquifer1: 'Leakage to thief zone, random well 2'
     BrineLeakage1:
-        TimeSeries: [brine_aquifer1]
-        subplot:
-            ncols: 2
-            use: True
+        TimeSeriesStats: [brine_aquifer1]
+        Subplot:
+            NumCols: 2
+            Use: True
             Wellbore_000.brine_aquifer1: 'Leakage to thief zone, random well 1'
             Wellbore_001.brine_aquifer1: 'Leakage to thief zone, random well 2'
     CO2Leakage2:
-        TimeSeries: [CO2_aquifer2]
-        subplot:
-            ncols: 2
-            use: True
+        TimeSeriesStats: [CO2_aquifer2]
+        Subplot:
+            NumCols: 2
+            Use: True
             Wellbore_000.CO2_aquifer2: 'Leakage to aquifer, random well 1'
             Wellbore_001.CO2_aquifer2: 'Leakage to aquifer, random well 2'
     BrineLeakage2:
-        TimeSeries: [brine_aquifer2]
-        subplot:
-            ncols: 2
-            use: True
+        TimeSeriesStats: [brine_aquifer2]
+        Subplot:
+            NumCols: 2
+            Use: True
             Wellbore_000.brine_aquifer2: 'Leakage to aquifer, random well 1'
             Wellbore_001.brine_aquifer2: 'Leakage to aquifer, random well 2'

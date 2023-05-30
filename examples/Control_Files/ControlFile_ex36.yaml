@@ -7,9 +7,10 @@
 # The wellTop and reservoirDepth parameters within the OpenWellbore
 # component are set as aquifer3Depth and shale1Depth, respectively. These
 # depths represent the bottom of the corresponding unit. The aqu_thick and
-# top_depth parameters of the Generic Aquifer are also set as aquifer2Thickness
-# and shale4Thickness. Because shale 4 is the highest shale, shale4Thickness
-# is equal to shale4Depth, which also represents the top of aquifer 3.
+# top_depth parameters of the GenericAquifer component are also set as
+# aquifer2Thickness and shale4Thickness. Because shale 4 is the top shale
+# (closest to the surface), shale4Thickness is equal to shale4Depth, which also
+# represents the top of aquifer 3.
 #
 #  Last Modified: May, 2023
 #-------------------------------------------------
@@ -110,33 +111,33 @@ GenericAquifer1:
 Plots:
     Plot1:
         TimeSeries: [pressure]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot2:
         TimeSeries: [CO2saturation]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot3:
         TimeSeries: [CO2_aquifer]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot4:
         TimeSeries: [brine_aquifer]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot5:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [Dissolved_salt_volume]
     Plot6:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [Dissolved_CO2_volume]
     Plot7:
         Stratigraphy:

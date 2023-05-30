@@ -121,8 +121,8 @@ GenericAquifer1:
     Connection: OpenWellbore1
     AquiferName: aquifer1
     Parameters:
-        aqu_thick: 200
-        top_depth: 1000.0
+        aqu_thick: aquifer1Thickness
+        top_depth: shale2Depth
         por: 0.118
         log_permh: -13.39
         log_aniso: 0.3
@@ -134,8 +134,8 @@ GenericAquifer2:
     Connection: OpenWellbore2
     AquiferName: aquifer2
     Parameters:
-        aqu_thick: 200
-        top_depth: 400.0
+        aqu_thick: aquifer2Thickness
+        top_depth: shale3Depth
         por: 0.118
         log_permh: -13.39
         log_aniso: 0.3
@@ -143,16 +143,16 @@ GenericAquifer2:
               Dissolved_salt_dr, Dissolved_salt_dz]
 #-------------------------------------------------
 Plots:
-    pH_plume_volumes:
+    Dissolved_CO2_plume_volumes:
         TimeSeries: [Dissolved_CO2_volume]
-        subplot:
-            use: True
-            ncols: 2
-    TDS_plume_volumes:
+        Subplot:
+            Use: True
+            NumCols: 2
+    Dissolved_salt_plume_volumes:
         TimeSeries: [Dissolved_salt_volume]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     TTFD_Plot:
         TTFD:
             PlotInjectionSites: True

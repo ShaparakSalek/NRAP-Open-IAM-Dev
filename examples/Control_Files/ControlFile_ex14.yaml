@@ -1,4 +1,13 @@
 # OpenIAM Control File Example 14
+#
+# This example demonstrates the connection of a LookupTableReservoir, 
+# a MultisegmentedWellbore, and a FutureGen2Aquifer. The pressures and 
+# CO2 saturations provided by the LookupTableReservoir drive the leakage 
+# of brine and CO2 throught the MultisegmentedWellbore and into the four 
+# aquifers. The resulting pressure, pH, and TDS plume volumes in aquifer 
+# 4 are then modeled by the FutureGen2Aquifer component (specified through 
+# the inclusion of 'AquiferName: aquifer4').
+#
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
 # https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
@@ -33,7 +42,6 @@ Stratigraphy:
     aquifer3Thickness: 31.1
     aquifer4Thickness: 61.6
     reservoirThickness: 7
-
 #-------------------------------------------------
 LookupTableReservoir1:
     Type: LookupTableReservoir
@@ -92,69 +100,31 @@ FutureGen2Aquifer1:
     Outputs: [pH_volume, TDS_volume, Pressure_volume]
 #-------------------------------------------------
 Plots:
-# To create these plots, remove the # characters.
-#    pressure_plot:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [pressure]
-#    saturation_plot:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [CO2saturation]
-#    CO2_leakage1:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [CO2_aquifer1]
-#    brine_leakage1:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [brine_aquifer1]
-#    CO2_leakage2:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [CO2_aquifer2]
-#    brine_leakage2:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [brine_aquifer2]
-#    CO2_leakage3:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [CO2_aquifer3]
-#    brine_leakage3:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [brine_aquifer3]
-#    CO2_leakage4:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [CO2_aquifer4]
-#    brine_leakage4:
-#        subplot:
-#            use: True
-#            ncols: 2
-#        TimeSeriesAndStats: [brine_aquifer4]
-    pH_plume_volumes:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeriesAndStats: [pH_volume]
-    TDS_plume_volumes:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeriesAndStats: [TDS_volume]
-    Pressure_plume_volumes:
-        subplot:
-            use: True
-            ncols: 2
+    Reservoir_Conditions:
+        Title: Reservoir Conditions Over Time
+        FigureSize: [16, 12]
+        Subplot:
+            Use: True
+            NumCols: 2
+        TimeSeriesAndStats: [pressure, CO2saturation]
+    Leakage_Aquifer4:
+        Title: CO$_2$ and Brine Leakage Rates to the Shallow Aquifer
+        FigureSize: [16, 12]
+        Subplot:
+            Use: True
+            NumCols: 2
+        TimeSeriesStats: [CO2_aquifer4, brine_aquifer4]
+    Aquifer_Impact:
+        Title: pH and TDS Impacts Upon the Shallow Aquifer
+        FigureSize: [16, 12]
+        Subplot:
+            Use: True
+            NumCols: 2
+        TimeSeriesAndStats: [pH_volume, TDS_volume]
+    Pressure_Plume_Volumes:
+        Title: Pressure Impact Upon the Shallow Aquifer
+        FigureSize: [16, 8]
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeriesAndStats: [Pressure_volume]

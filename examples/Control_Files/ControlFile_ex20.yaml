@@ -1,4 +1,11 @@
 # OpenIAM Control File Example 20
+#
+# This example demonstrates the use of an AnalyticalReservoir 
+# component in a simulation using Latin Hypercube Sampling (lhs). 
+# The logResPerm parameter of the AnalyticalReservoir is varied as 
+# well as several Stratigraphy parameters (shale1Thickness, 
+# aquifer1Thickness, and aquifer2Thickness).
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex20.yaml
 #-------------------------------------------------
@@ -67,17 +74,17 @@ Reservoir:
 Plots:
     PressurePlot:
         TimeSeries: [pressure]
-        subplot:
-            ncols: 2
-            use: True
-            Reservoir_000.pressure: 'Pressure at location 1'
-            Reservoir_001.pressure: 'Pressure at location 2'
+        Subplot:
+            NumCols: 2
+            Use: True
+            Reservoir_000.pressure: 'Pressure at location 0'
+            Reservoir_001.pressure: 'Pressure at location 1'
         Title: Reservoir Pressure
     Saturation:
         TimeSeries: [CO2saturation]
-        subplot:
-            ncols: 2
-            use: True
-            Reservoir_000.CO2saturation: '$CO_2$ saturation at location 1'
-            Reservoir_001.CO2saturation: '$CO_2$ saturation at location 2'
+        Subplot:
+            NumCols: 2
+            Use: True
+            Reservoir_000.CO2saturation: '$CO_2$ saturation at location 0'
+            Reservoir_001.CO2saturation: '$CO_2$ saturation at location 1'
         Title: Reservoir CO2 saturation

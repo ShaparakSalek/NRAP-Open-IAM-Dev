@@ -52,11 +52,11 @@ TITLE_OPTIONS = {
         'CarbonateAquifer':
             'Spatiotemporal Evolution of Plumes (Carbonate Aquifer Component){}'},
     'monitoringTTFD': {
-        'Pressure': 'Time to First Detection (TTFD) for the Pressure Plume{}',
-        'pH': 'Time to First Detection (TTFD) for the pH Plume{}',
-        'TDS': 'Time to First Detection (TTFD) for the TDS Plume{}',
-        'Dissolved_CO2': 'Time to First Detection (TTFD) for the Dissolved CO$_2$ Plume{}',
-        'Dissolved_salt': 'Time to First Detection (TTFD) for the Dissolved Salt Plume{}',
+        'Pressure': 'Time to First Detection (TTFD) for Pressure Plumes{}',
+        'pH': 'Time to First Detection (TTFD) for pH Plumes{}',
+        'TDS': 'Time to First Detection (TTFD) for TDS Plumes{}',
+        'Dissolved_CO2': 'Time to First Detection (TTFD) for Dissolved CO$_2$ Plumes{}',
+        'Dissolved_salt': 'Time to First Detection (TTFD) for Dissolved Salt Plumes{}',
         'CarbonateAquifer':
             'Time to First Detection (TTFD) for Plumes (Carbonate Aquifer Component){}'},
     'plumeProbabilities': {
@@ -274,6 +274,10 @@ def ttfd_plot(yaml_data, model_data, sm, s,
         write_dream_grid(x_grid, y_grid, z_grid, output_dir, var_type=var_type)
 
     checkCarbAq = 'CarbonateAquifer' in aq_component_types
+    
+    if save_results:
+        save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type=var_type, 
+                         checkCarbAq=checkCarbAq)
 
     if analysis in ['lhs', 'parstudy']:
         num_samples =  model_data['Analysis']['siz']
@@ -325,7 +329,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
             genfontsize=genfontsize, axislabelfontsize=axislabelfontsize,
             titlefontsize=titlefontsize, labelfontweight=selected_labelfontweight,
             colormap='viridis', figsize=figsize, res_comp_injX=res_comp_injX,
-            res_comp_injY=res_comp_injY)
+            res_comp_injY=res_comp_injY, var_type=var_type)
 
         if monitoringTTFD:
             monitoringXIndex, monitoringYIndex = get_xandy_monitoring_indices(
@@ -359,7 +363,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
                 genfontsize=genfontsize, axislabelfontsize=axislabelfontsize,
                 titlefontsize=titlefontsize, labelfontweight=selected_labelfontweight,
                 colormap='viridis', figsize=figsize, res_comp_injX=res_comp_injX,
-                res_comp_injY=res_comp_injY)
+                res_comp_injY=res_comp_injY, var_type=var_type)
     # End of loop through LHS samples (or a singular forward simulation)
 
     if analysis in ['lhs', 'parstudy']:
@@ -385,7 +389,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
             genfontsize=genfontsize, axislabelfontsize=axislabelfontsize,
             titlefontsize=titlefontsize, labelfontweight=selected_labelfontweight,
             colormap='plasma', figsize=figsize, res_comp_injX=res_comp_injX,
-            res_comp_injY=res_comp_injY)
+            res_comp_injY=res_comp_injY, var_type=var_type)
 
 
 def get_aquifer_bottom_depths(numShaleLayers, shaleThicknesses, aquiferThicknesses):
@@ -428,8 +432,9 @@ def get_z_values(numShaleLayers, shaleThicknesses, aquiferThicknesses,
 
         for xRef, xVal in enumerate(x_grid):
             for yRef, yVal in enumerate(y_grid[:, 0]):
-                # Reset monitoringCoordZCheck
-                monitoringCoordZCheck = monitoringCoordZCheckOrig[:]
+                # Reset monitoringCoordZCheck, if it is being used
+                if monitoringCoordZ is not None:
+                    monitoringCoordZCheck = monitoringCoordZCheckOrig[:]
 
                 updatedStratigraphy = strata.update_stratigraphy_by_strike_and_dip(
                     numberOfShaleLayers=numShaleLayers,
@@ -2011,7 +2016,8 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                       name='TTFD_Figure1', analysis='lhs', realization=0, output_dir=None,
                       genfontsize=12, axislabelfontsize=14, titlefontsize=14,
                       labelfontweight='bold', colormap='plasma', figsize=(10, 8),
-                      res_comp_injX=None, res_comp_injY=None, min_num_points=25):
+                      res_comp_injX=None, res_comp_injY=None, min_num_points=25, 
+                      var_type='noVariation'):
     """
     Function that creates plots of different plume metrics: earliest plume
     timings over space, earliest plume timings at monitoring locations
@@ -2081,9 +2087,6 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
     X, Y = np.meshgrid(x_grid, y_grid)
 
     checkCarbAq = 'CarbonateAquifer' in aq_component_types
-
-    # This is used to make lower times plot on top of other results
-    zorder_val = 100
 
     # This is used to keep track of whether a monitoring sensor has been shown
     # in a legend yet. It only has to be shown once, not multiple times.
@@ -2200,6 +2203,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
         max_metric_for_subplot = None
 
         checkValid = check_metric_validity(plumeMetric, plotType, valType='multiple')
+        
         if checkValid:
             if plotType == 'plumeProbabilities':
                 plumeMetricValid = plumeMetric[plumeMetric > MIN_PROBABILITY]
@@ -2243,254 +2247,204 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
             plt.ylim(np.min(y_grid) / 1000.0, np.max(y_grid) / 1000.0)
 
     else:
-        # This section is for any aquifer components besides CarbonateAquifer
-        counter = 0
-        first_check = True
-        second_check = True
-        third_check = True
-        first_time_for_subplot = True
-
         # These are the thresholds used to switch between the 4 subplots.
         min_z_subplot1 = np.min(z_grid)
-        max_z_subplot1 = ((np.min(z_grid) - np.max(z_grid)) * 0.75) + (
+        min_z_subplot2 = ((np.min(z_grid) - np.max(z_grid)) * 0.75) + (
             np.max(z_grid))
-        max_z_subplot2 = ((np.min(z_grid) - np.max(z_grid)) * 0.5) + (
+        min_z_subplot3 = ((np.min(z_grid) - np.max(z_grid)) * 0.5) + (
             np.max(z_grid))
-        max_z_subplot3 = ((np.min(z_grid) - np.max(z_grid)) * 0.25) + (
+        min_z_subplot4 = ((np.min(z_grid) - np.max(z_grid)) * 0.25) + (
             np.max(z_grid))
         max_z_subplot4 = np.max(z_grid)
-
-        for zRef in range(len(z_grid)):
-            counter += 1
-
-            if zRef == 0:
-                min_metric_for_subplot = None
-                max_metric_for_subplot = None
-
-                ax = plt.subplot(2, 2, 1)
-
-                sensor_lgnd_check = plot_wells_inj_sites(
-                    ax, aq_component_xvals, aq_component_yvals, min_z_subplot1,
-                    max_z_subplot1, plot_injection_sites, InjectionCoordx,
-                    InjectionCoordy, monitoringTTFD, monitoringCoordX,
-                    monitoringCoordY, monitoringCoordZ, sensor_lgnd_check,
-                    genfontsize, labelWells=True)
-
+        
+        subplot_min_z_vals = [min_z_subplot1, min_z_subplot2, min_z_subplot3, min_z_subplot4]
+        subplot_max_z_vals = [min_z_subplot2, min_z_subplot3, min_z_subplot4, max_z_subplot4]
+        
+        subplot_use_x_label = [False, False, True, True]
+        subplot_use_y_label = [True, False, True, False]
+        
+        subplot_label_wells = [True, False, False, False]
+        
+        for subplotRef in range(0, len(subplot_min_z_vals)):
+            # This is used to make certain results plot on top of other results 
+            # (lowest plume timings or highest plume proabilities).
+            zorder_val = 1e6
+            
+            min_metric_for_subplot = None
+            max_metric_for_subplot = None
+            mean_metric_for_subplot = None
+            
+            ax = plt.subplot(2, 2, subplotRef + 1)
+            
+            sensor_lgnd_check = plot_wells_inj_sites(
+                ax, aq_component_xvals, aq_component_yvals, 
+                subplot_min_z_vals[subplotRef], subplot_max_z_vals[subplotRef], 
+                plot_injection_sites, InjectionCoordx, InjectionCoordy, 
+                monitoringTTFD, monitoringCoordX, monitoringCoordY, 
+                monitoringCoordZ, sensor_lgnd_check, genfontsize, 
+                labelWells=subplot_label_wells[subplotRef])
+            
+            if subplot_use_x_label[subplotRef]:
+                plt.ylabel('Easting (km)', fontsize=axislabelfontsize,
+                           fontweight=labelfontweight)
+            
+            if subplot_use_y_label[subplotRef]:
                 plt.ylabel('Northing (km)', fontsize=axislabelfontsize,
                            fontweight=labelfontweight)
+            
+            # Makes sure the outer edge of the plot stays on top of other elements
+            for _, spine in ax.spines.items():
+                spine.set_zorder(3e6)
 
-            elif np.max(z_grid[zRef, :, :]) >= max_z_subplot1 and first_check:
-                # Display the minimum timing for the current subplot,
-                # then switch to a new subplot.
-                axtitle = gen_ax_title_for_subplot(
-                    plotType, min_z_subplot1, max_z_subplot1,
-                    min_metric_for_subplot, max_metric_for_subplot,
-                    checkCarbAq = checkCarbAq)
+            # Make the colorbar
+            cbar = fig.colorbar(cm.ScalarMappable(cmap=cmap), ax=ax,
+                                values=levels)
+            cbar.set_label(
+                colorBarLabel, rotation=90, fontsize=axislabelfontsize,
+                fontweight=labelfontweight)
+            tick_locator = ticker.MaxNLocator(nbins=5)
+            cbar.locator = tick_locator
+            cbar.update_ticks()
 
-                ax.set_title(axtitle, fontweight=labelfontweight,
-                             fontsize=genfontsize)
+            if EnforceXandYLims:
+                ax.set_xlim(xLims[0] / 1000.0, xLims[1] / 1000.0)
+                ax.set_ylim(yLims[0] / 1000.0, yLims[1] / 1000.0)
+            else:
+                ax.set_xlim(np.min(x_grid) / 1000.0, np.max(x_grid) / 1000.0)
+                ax.set_ylim(np.min(y_grid) / 1000.0, np.max(y_grid) / 1000.0)
 
-                min_metric_for_subplot = None
-                max_metric_for_subplot = None
+            ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+            ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+            
+            if var_type == 'noVariation':
+                zIndices = np.array(range(len(z_grid)))
+                zMask = np.ma.masked_inside(z_grid[:, 0, 0], subplot_min_z_vals[subplotRef], 
+                                            subplot_max_z_vals[subplotRef])
+                zIndices = zIndices[zMask.mask]
+            elif var_type == 'strikeAndDip':
+                zIndices = range(len(z_grid))
+            
+            # Loop through the z_grid values and plume metrics
+            for zRef in zIndices:
+                z_temp = z_grid[zRef, :, :]
+                
+                # Get the plume metric and z values for the current zRef
+                plumeMetric_temp = plumeMetric[zRef, :, :].copy()
+                
+                # Use only the metrics with z values in the current range. Each 
+                # layer of z values (z_grid[zRef, :, :]) is flat-lying / the same 
+                # when spatially uniform stratigraphy is used, but each layer dips 
+                # when dipping stratigraphy is used. This function excludes results 
+                # that fall outside the current depth range.
+                if var_type == 'strikeAndDip':
+                    plumeMetric_temp = clip_results_outside_of_z_range(
+                        plumeMetric_temp, z_temp, plotType, 
+                        subplot_min_z_vals[subplotRef], subplot_max_z_vals[subplotRef])
+                
+                # These are used to make the lower plumeTimings or higher 
+                # plumeProbabilities plot on top of the other results. They are
+                # also used the first time any valid results occur. Using only 
+                # the minimum or maximum values does not consistently put the 
+                # appropriate layer on top, so these are adjusted based on mean values.
+                checkMinPlumeTimings = False
+                checkMaxPlumeProbabilities = False
 
-                ax = plt.subplot(2, 2, 2)
+                checkValid = check_metric_validity(plumeMetric_temp, plotType,
+                                                   valType='multiple')
+                
+                if checkValid:
+                    if plotType == 'plumeTimings':
+                        plumeMetricValid = plumeMetric_temp[
+                            plumeMetric_temp < THRESHOLD_TIME]
+                        
+                        if not mean_metric_for_subplot:
+                            checkMinPlumeTimings = True
+                        elif np.mean(plumeMetricValid) < mean_metric_for_subplot:
+                            checkMinPlumeTimings = True
 
-                first_time_for_subplot = True
-                first_check = False
-
-                sensor_lgnd_check = plot_wells_inj_sites(
-                    ax, aq_component_xvals, aq_component_yvals, max_z_subplot1,
-                    max_z_subplot2, plot_injection_sites, InjectionCoordx,
-                    InjectionCoordy, monitoringTTFD, monitoringCoordX,
-                    monitoringCoordY, monitoringCoordZ, sensor_lgnd_check,
-                    genfontsize, labelWells=False)
-
-            elif np.max(z_grid[zRef, :, :]) >= max_z_subplot2 \
-                    and not first_check and second_check:
-                # Display the minimum timing for the current subplot,
-                # then switch to a new subplot.
-                axtitle = gen_ax_title_for_subplot(
-                    plotType, max_z_subplot1, max_z_subplot2,
-                    min_metric_for_subplot, max_metric_for_subplot,
-                    checkCarbAq=checkCarbAq)
-
-                ax.set_title(axtitle, fontweight=labelfontweight,
-                             fontsize=genfontsize)
-
-                min_metric_for_subplot = None
-                max_metric_for_subplot = None
-
-                ax = plt.subplot(2, 2, 3)
-
-                first_time_for_subplot = True
-                second_check = False
-
-                sensor_lgnd_check = plot_wells_inj_sites(
-                    ax, aq_component_xvals, aq_component_yvals, max_z_subplot2,
-                    max_z_subplot3, plot_injection_sites, InjectionCoordx,
-                    InjectionCoordy, monitoringTTFD, monitoringCoordX,
-                    monitoringCoordY, monitoringCoordZ, sensor_lgnd_check,
-                    genfontsize, labelWells=False)
-
-                plt.xlabel('Easting (km)', fontsize=axislabelfontsize,
-                           fontweight=labelfontweight)
-                plt.ylabel('Northing (km)', fontsize=axislabelfontsize,
-                           fontweight=labelfontweight)
-
-            elif np.max(z_grid[zRef, :, :]) >= max_z_subplot3 \
-                    and not second_check and third_check:
-                axtitle = gen_ax_title_for_subplot(
-                    plotType, max_z_subplot2, max_z_subplot3,
-                    min_metric_for_subplot, max_metric_for_subplot,
-                    checkCarbAq=checkCarbAq)
-
-                ax.set_title(axtitle, fontweight=labelfontweight,
-                             fontsize=genfontsize)
-
-                min_metric_for_subplot = None
-                max_metric_for_subplot = None
-
-                ax = plt.subplot(2, 2, 4)
-
-                first_time_for_subplot = True
-                third_check = False
-
-                sensor_lgnd_check = plot_wells_inj_sites(
-                    ax, aq_component_xvals, aq_component_yvals, max_z_subplot3,
-                    max_z_subplot4, plot_injection_sites, InjectionCoordx,
-                    InjectionCoordy, monitoringTTFD, monitoringCoordX,
-                    monitoringCoordY, monitoringCoordZ, sensor_lgnd_check,
-                    genfontsize, labelWells=False)
-
-                plt.xlabel('Easting (km)', fontsize=axislabelfontsize,
-                           fontweight=labelfontweight)
-
-            # Plot the plume metric for each zRef case
-            plumeMetric_temp = plumeMetric[zRef, :, :]
-
-            # These are used to make the lowest plumeTimings or highest
-            # plumeProbabilities plot on top of the other results. They are
-            # also used the first time any valid results occur.
-            checkMinPlumeTimings = False
-            checkMaxPlumeProbabilities = False
-
-            checkValid = check_metric_validity(plumeMetric_temp, plotType,
-                                               valType='multiple')
-            if checkValid:
-                if plotType == 'plumeTimings':
-                    plumeMetricValid = plumeMetric_temp[
-                        plumeMetric_temp < THRESHOLD_TIME]
+                    elif plotType == 'plumeProbabilities':
+                        plumeMetricValid = plumeMetric_temp[
+                            plumeMetric_temp > MIN_PROBABILITY]
+                        
+                        if not mean_metric_for_subplot:
+                            checkMaxPlumeProbabilities = True
+                        elif np.mean(plumeMetricValid) > mean_metric_for_subplot:
+                            checkMaxPlumeProbabilities = True
 
                     if not min_metric_for_subplot:
-                        checkMinPlumeTimings = True
+                        min_metric_for_subplot = np.min(plumeMetricValid)
                     elif np.min(plumeMetricValid) < min_metric_for_subplot:
-                        checkMinPlumeTimings = True
-
-                elif plotType == 'plumeProbabilities':
-                    plumeMetricValid = plumeMetric_temp[
-                        plumeMetric_temp > MIN_PROBABILITY]
+                        min_metric_for_subplot = np.min(plumeMetricValid)
 
                     if not max_metric_for_subplot:
-                        checkMaxPlumeProbabilities = True
+                        max_metric_for_subplot = np.max(plumeMetricValid)
                     elif np.max(plumeMetricValid) > max_metric_for_subplot:
-                        checkMaxPlumeProbabilities = True
-
-                if not min_metric_for_subplot:
-                    min_metric_for_subplot = np.min(plumeMetricValid)
-                elif np.min(plumeMetricValid) < min_metric_for_subplot:
-                    min_metric_for_subplot = np.min(plumeMetricValid)
-
-                if not max_metric_for_subplot:
-                    max_metric_for_subplot = np.max(plumeMetricValid)
-                elif np.max(plumeMetricValid) > max_metric_for_subplot:
-                    max_metric_for_subplot = np.max(plumeMetricValid)
-
-                # Plot the results with contourf
-                if checkMinPlumeTimings or checkMaxPlumeProbabilities:
-                    if np.min(plumeMetric_temp) > max_metric_for_subplot:
+                        max_metric_for_subplot = np.max(plumeMetricValid)
+                    
+                    if not mean_metric_for_subplot:
+                        mean_metric_for_subplot = np.mean(plumeMetricValid)
+                    elif np.max(plumeMetricValid) > max_metric_for_subplot:
+                        mean_metric_for_subplot = np.mean(plumeMetricValid)
+                        
+                    # Plot the results with contourf
+                    if checkMinPlumeTimings or checkMaxPlumeProbabilities:
                         zorder_val += 1
                         # Make the lowest plumeTiming or highest plumeProbability
                         # plot on top of other values.
-                        _ = plt.contourf(X / 1000.0, Y / 1000.0,
-                                          plumeMetric_temp / contourf_norm_factor,
-                                          levels=levels, cmap=colormap,
-                                          zorder=zorder_val)
+                        ax.contourf(X / 1000.0, Y / 1000.0,
+                                    plumeMetric_temp / contourf_norm_factor,
+                                    levels=levels, cmap=colormap,
+                                    zorder=zorder_val)
                     else:
-                        _ = plt.contourf(X / 1000.0, Y / 1000.0,
-                                          plumeMetric_temp / contourf_norm_factor,
-                                          levels=levels, cmap=colormap)
-                else:
-                    _ = plt.contourf(X / 1000.0, Y / 1000.0,
-                                      plumeMetric_temp / contourf_norm_factor,
-                                      levels=levels, cmap=colormap)
+                        ax.contourf(X / 1000.0, Y / 1000.0,
+                                    plumeMetric_temp / contourf_norm_factor,
+                                    levels=levels, cmap=colormap, zorder=2)
 
-                # If there are very few points with results, the contourf
-                # function won't work and you need to plot the points manually.
-                if len(plumeMetricValid) < min_num_points:
-                    cmap = plt.cm.get_cmap(colormap)
-                    for plumeMetricVal in plumeMetricValid:
-                        X_temp = X[plumeMetric[zRef, :, :] == plumeMetricVal]
-                        Y_temp = Y[plumeMetric[zRef, :, :] == plumeMetricVal]
-                        rgba = cmap(((plumeMetricVal) - np.min(levels))
-                                    / (np.max(levels) - np.min(levels)))
-                        plt.plot(X_temp / 1000, Y_temp / 1000, color=rgba[0:3],
-                                 marker='o', markerfacecolor=rgba[0:3],
-                                 linewidth=1, linestyle='none',
-                                 markersize=plumeMetricMarkerSize, zorder=2)
-
-            if first_time_for_subplot:
-                for _, spine in ax.spines.items():
-                    spine.set_zorder(3e6)
-
-                # Make the colorbar
-                cbar = fig.colorbar(cm.ScalarMappable(cmap=cmap), ax=ax,
-                                    values=levels)
-                cbar.set_label(
-                    colorBarLabel, rotation=90, fontsize=axislabelfontsize,
-                    fontweight=labelfontweight)
-                tick_locator = ticker.MaxNLocator(nbins=5)
-                cbar.locator = tick_locator
-                cbar.update_ticks()
-
-                if EnforceXandYLims:
-                    plt.xlim(xLims[0] / 1000.0, xLims[1] / 1000.0)
-                    plt.ylim(yLims[0] / 1000.0, yLims[1] / 1000.0)
-                else:
-                    plt.xlim(np.min(x_grid) / 1000.0,
-                             np.max(x_grid) / 1000.0)
-                    plt.ylim(np.min(y_grid) / 1000.0,
-                             np.max(y_grid) / 1000.0)
-
-                ax.yaxis.set_major_formatter(
-                    ticker.FormatStrFormatter('%.1f'))
-                ax.xaxis.set_major_formatter(
-                    ticker.FormatStrFormatter('%.1f'))
-
-                first_time_for_subplot = False
-
-    # Display the minimum timing for the last subplot for cases w/o Carb. Aq.
-    # and when not plotting monitoring location ttfd
-    if not checkCarbAq and not plotType == 'monitoringTTFD':
-        axtitle = gen_ax_title_for_subplot(
-            plotType, max_z_subplot3, max_z_subplot4, min_metric_for_subplot,
-            max_metric_for_subplot, checkCarbAq=False)
-
-        ax.set_title(axtitle, fontweight=labelfontweight,
-                     fontsize=genfontsize)
-
-    output_title = TITLE_OPTIONS[plotType].get(plume_metric_abbrev,
-                                               plume_metric_abbrev)
+                    # If there are very few points with results, the contourf
+                    # function won't work and you need to plot the points manually.
+                    if len(plumeMetricValid) < min_num_points:
+                        cmap = plt.cm.get_cmap(colormap)
+                        for plumeMetricVal in plumeMetricValid:
+                            X_temp = X[plumeMetric[zRef, :, :] == plumeMetricVal]
+                            Y_temp = Y[plumeMetric[zRef, :, :] == plumeMetricVal]
+                            
+                            rgba = cmap(((plumeMetricVal) - np.min(levels))
+                                        / (np.max(levels) - np.min(levels)))
+                            
+                            ax.plot(X_temp / 1000, Y_temp / 1000, color=rgba[0:3],
+                                    marker='o', markerfacecolor=rgba[0:3],
+                                    linewidth=1, linestyle='none',
+                                    markersize=plumeMetricMarkerSize, zorder=1)
+            
+            # End of the z loop - now that the min and max metric values are 
+            # known, add the subplot title
+            axtitle = gen_ax_title_for_subplot(
+                plotType, subplot_min_z_vals[subplotRef], subplot_max_z_vals[subplotRef], 
+                min_metric_for_subplot, max_metric_for_subplot, checkCarbAq=checkCarbAq)
+            
+            ax.set_title(axtitle, fontweight=labelfontweight, fontsize=genfontsize)
+    
+    output_title = TITLE_OPTIONS[plotType].get(plume_metric_abbrev, plume_metric_abbrev)
 
     if checkCarbAq:
         output_title = output_title.format('')
     else:
-        output_title = output_title.format(',\nMultiple Depth Intervals in each Subplot')
+        if plotType == 'plumeTimings':
+            title_addition = ',\nLayers with Lower Times Shown Above Other Layers'
+        elif plotType == 'plumeProbabilities':
+            title_addition = ',\nLayers with Higher Probabilities Shown Above Other Layers'
+        elif plotType == 'monitoringTTFD':
+            title_addition = ''
+        output_title = output_title.format(title_addition)
 
     if plotType == 'plumeProbabilities':
         output_title += ',\nNumber of LHS Samples: ' + str(num_samples)
 
     elif analysis in ['lhs', 'parstudy']:
-        output_title += ', Realization {}'.format(str(realization))
+        if plotType == 'monitoringTTFD':
+            output_title += ',\nRealization {}'.format(str(realization))
+        else:
+            output_title += ', Realization {}'.format(str(realization))
 
     plt.suptitle(output_title, fontweight=labelfontweight,
                  fontsize=titlefontsize)
@@ -2612,13 +2566,13 @@ def plot_wells_inj_sites(ax, aq_component_xvals, aq_component_yvals, min_z,
                 plt.plot(InjectionCoordx / 1000, InjectionCoordy / 1000,
                          marker='s', color='k', linestyle='none',
                          markeredgewidth=2, markersize=8,
-                         markerfacecolor='none', zorder=1e6,
+                         markerfacecolor='none', zorder=1e7,
                          label='Injection Site')
             else:
                 plt.plot(InjectionCoordx / 1000, InjectionCoordy / 1000,
                          marker='s', color='k', linestyle='none',
                          markeredgewidth=2, markersize=8,
-                         markerfacecolor='none', zorder=1e6)
+                         markerfacecolor='none', zorder=1e7)
         else:
             for injRef, (icoordX, icoordY) in enumerate(
                     zip(InjectionCoordx, InjectionCoordy)):
@@ -2626,13 +2580,13 @@ def plot_wells_inj_sites(ax, aq_component_xvals, aq_component_yvals, min_z,
                     plt.plot(icoordX / 1000, icoordY / 1000,
                              marker='s', color='k', linestyle='none',
                              markeredgewidth=2, markersize=8,
-                             markerfacecolor='none', zorder=1e6,
+                             markerfacecolor='none', zorder=1e7,
                              label='Injection Site')
                 else:
                     plt.plot(icoordX / 1000, icoordY / 1000,
                              marker='s', color='k', linestyle='none',
                              markeredgewidth=2, markersize=8,
-                             markerfacecolor='none', zorder=1e6)
+                             markerfacecolor='none', zorder=1e7)
 
     if monitoringTTFD and not checkCarbAq:
         monitoringCoordX_temp, monitoringCoordY_temp, \
@@ -2649,28 +2603,28 @@ def plot_wells_inj_sites(ax, aq_component_xvals, aq_component_yvals, min_z,
                                  marker='^', color='k',
                                  linestyle='none', markeredgewidth=1.5,
                                  markersize=10, markerfacecolor='none',
-                                 label='Sensor', zorder=1.5e6)
+                                 label='Sensor', zorder=1.5e7)
                         change_sensor_lgnd_check = True
                     else:
                         plt.plot(mcoordX / 1000, mcoordY / 1000,
                                  marker='^', color='k',
                                  linestyle='none', markeredgewidth=1.5,
                                  markersize=10,  markerfacecolor='none',
-                                 zorder=1.5e6)
+                                 zorder=1.5e7)
             elif not sensor_lgnd_check:
                 plt.plot(monitoringCoordX_temp / 1000,
                          monitoringCoordY_temp / 1000,
                          marker='^', color='k', linestyle='none',
                          markeredgewidth=1.5, markersize=10,
                          markerfacecolor='none',
-                         label='Sensor', zorder=1.5e6)
+                         label='Sensor', zorder=1.5e7)
                 change_sensor_lgnd_check = True
             else:
                 plt.plot(monitoringCoordX_temp / 1000,
                          monitoringCoordY_temp / 1000,
                          marker='^', color='k', linestyle='none',
                          markeredgewidth=1.5, markersize=10,
-                         markerfacecolor='none', zorder=1.5e6)
+                         markerfacecolor='none', zorder=1.5e7)
 
     elif monitoringTTFD and checkCarbAq:
         if isinstance(monitoringCoordX, list):
@@ -2683,42 +2637,88 @@ def plot_wells_inj_sites(ax, aq_component_xvals, aq_component_yvals, min_z,
                              markeredgewidth=1.5,
                              markersize=12,
                              markerfacecolor='none',
-                             label='Sensor', zorder=11)
+                             label='Sensor', zorder=1e7)
                 else:
                     plt.plot(mcoordX / 1000, mcoordY / 1000,
                              marker='^', color='k',
                              linestyle='none',
                              markeredgewidth=1.5,
                              markersize=12,
-                             markerfacecolor='none', zorder=11)
+                             markerfacecolor='none', zorder=1e7)
         else:
             plt.plot(monitoringCoordX / 1000, monitoringCoordY / 1000,
                      marker='^', color='k', linestyle='none',
                      markeredgewidth=1.5, markersize=12,
-                     markerfacecolor='none', label='Sensor', zorder=11)
+                     markerfacecolor='none', label='Sensor', zorder=1e7)
 
     if labelWells:
         plt.plot(np.array(aq_component_xvals) / 1000,
                   np.array(aq_component_yvals) / 1000,
                   linestyle='none', marker='o', color='k',
                   markeredgewidth=1.5, markersize=6,
-                  markerfacecolor='none', zorder=1e6, label='Well')
+                  markerfacecolor='none', zorder=1e7, label='Well')
     else:
         plt.plot(np.array(aq_component_xvals) / 1000,
                   np.array(aq_component_yvals) / 1000,
                   linestyle='none', marker='o', color='k',
                   markeredgewidth=1.5, markersize=6,
-                  markerfacecolor='none', zorder=1e6)
+                  markerfacecolor='none', zorder=1e7)
 
     if labelWells or change_sensor_lgnd_check or checkCarbAq:
         ax.legend(fancybox=False, fontsize=genfontsize - 4,
                   edgecolor=[0, 0, 0], loc='upper left',
-                  framealpha=0.5).set_zorder(2e6)
+                  framealpha=0.5).set_zorder(2e7)
         if change_sensor_lgnd_check:
             # The sensor only needs to be displayed in a legend once
             sensor_lgnd_check = True
 
     return sensor_lgnd_check
+
+
+def check_metric_validity(value, resultsType, valType='single'):
+    """
+    Function that checks if (a) value(s) is/are valid. Invalid times will be
+    equal to MAX_TIME. To avoid the inclusion of very low probabilities, valid
+    plumeProbabilities must be > MIN_PROBABILITY. When resultsType ==
+    'monitoringTTFD', it checks if the ttfd_list provided as value has a length
+    greater than 0.
+    """
+    if resultsType == 'plumeTimings':
+        if valType == 'single':
+            checkValid = (value < THRESHOLD_TIME)
+        elif valType == 'multiple':
+            checkValid = (np.min(value) < THRESHOLD_TIME)
+
+    elif resultsType == 'monitoringTTFD':
+        checkValid = len(value) > 0
+
+    elif resultsType == 'plumeProbabilities':
+        if valType == 'single':
+            checkValid = (value > MIN_PROBABILITY)
+
+        elif valType == 'multiple':
+            checkValid = (np.max(value) > MIN_PROBABILITY)
+
+    return checkValid
+
+
+def clip_results_outside_of_z_range(plumeMetric_temp, z_temp, plotType, 
+                                    subplot_min_z, subplot_max_z):
+    """
+    When using a strike and dip, the z grid values depend on x and y. This function
+    examines z_temp (the current z_grid[zRef, :, :] within the z loop) - for 
+    z values outside the current subplot range, it sets the corresponding 
+    plumeMetric_temp to a value that will be excluded from the plot 
+    (MIN_PROBABILITY or THRESHOLD_TIME).
+    """
+    mask = np.ma.masked_outside(z_temp, subplot_min_z, subplot_max_z)
+    
+    if plotType == 'plumeProbabilities':
+        plumeMetric_temp[mask.mask] = MIN_PROBABILITY
+    elif plotType == 'plumeTimings':
+        plumeMetric_temp[mask.mask] = MAX_TIME
+    
+    return plumeMetric_temp
 
 
 def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
@@ -2880,28 +2880,55 @@ def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
                                     writer.writerow(row_temp)
 
 
-def check_metric_validity(value, resultsType, valType='single'):
+def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type='noVariation', 
+                     checkCarbAq=False):
     """
-    Function that checks if (a) value(s) is/are valid. Invalid times will be
-    equal to MAX_TIME. To avoid the inclusion of very low probabilities, valid
-    plumeProbabilities must be > MIN_PROBABILITY. When resultsType ==
-    'monitoringTTFD', it checks if the ttfd_list provided as value has a length
-    greater than 0.
+    Saves the x, y, and z grid points to a .csv file.
     """
-    if resultsType == 'plumeTimings':
-        if valType == 'single':
-            checkValid = (value < THRESHOLD_TIME)
-        elif valType == 'multiple':
-            checkValid = (np.min(value) < THRESHOLD_TIME)
+    if not os.path.exists(os.path.join(output_dir, 'csv_files')):
+        os.mkdir(os.path.join(output_dir, 'csv_files'))
+    
+    if checkCarbAq:
+        coordinates = ['x', 'y']
+    else:
+        coordinates = ['x', 'y', 'z']
+    
+    if var_type == 'noVariation' or checkCarbAq:
+        for coord in coordinates:
+            filename = 'TTFD_{}_grid_points.csv'.format(coord)
+            filename = os.path.join(output_dir, 'csv_files', filename)
+            
+            first_row = ['{}_grid_points_m'.format(coord)]
+            
+            if coord == 'x':
+                grid = x_grid[:]
+            elif coord == 'y':
+                grid = y_grid[:, 0]
+            elif coord == 'z':
+                grid = z_grid[:, 0, 0]
+            
+            with open(filename, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(first_row)
+                
+                for coordRef in range(len(list(grid))):
+                    writer.writerow([grid[coordRef]])
+        
+    elif var_type == 'strikeAndDip':
+        filename = 'TTFD_xyz_grid_points.csv'
+        filename = os.path.join(output_dir, 'csv_files', filename)
+        
+        first_row = ['x_grid_points_m', 'y_grid_points_m', 'z_grid_points_m']
+        
+        with open(filename, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(first_row)
+            
+            for xRef in range(len(list(x_grid))):
+                for yRef in range(len(list(y_grid[:, 0]))):
+                    for zRef in range(len(z_grid)):
+                        row_temp = [x_grid[xRef], y_grid[yRef, 0],
+                                    z_grid[zRef, yRef, xRef]]
+                    
+                        writer.writerow(row_temp)
 
-    elif resultsType == 'monitoringTTFD':
-        checkValid = len(value) > 0
-
-    elif resultsType == 'plumeProbabilities':
-        if valType == 'single':
-            checkValid = value > MIN_PROBABILITY
-
-        elif valType == 'multiple':
-            checkValid = np.max(value) > MIN_PROBABILITY
-
-    return checkValid

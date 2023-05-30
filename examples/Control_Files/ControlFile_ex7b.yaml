@@ -1,14 +1,18 @@
 # OpenIAM Control File Example 7b
+#
+# This example is similar to control file example 7a, but the pressures 
+# and CO2 saturations provided directly to the MultisegmentedWellbore component
+# (through the DynamicParameters field) are entered with .csv files.
+# Additionally, this example uses a forward analysis type (deterministic) 
+# instead of Latin Hypercube Sampling (lhs, stochastic).
+#
 # To run this file, use the command (\ for Windows and / for Mac or Linux)
 #   python openiam_cf.py --file ../../examples/Control_Files/ControlFile_ex7b.yaml
 # in the folder source/openiam,
 # or command
 #   python ../source/openiam/openiam_cf.py --file ControlFile_ex7b.yaml
 # in the folder examples/Control_Files.
-# This example computes the leakage from a leaky (multisegmented) wellbore
-# using a specified pressure and CO2 saturation instead of connecting
-# to a reservoir component.
-# The output from this example is written into the outputs folder OutputDirectory.
+#
 # Last Modified: July 17, 2019
 #-------------------------------------------------
 ModelParams:
@@ -54,9 +58,11 @@ msw1:
 Plots:
     Plot1:
         TimeSeries: [CO2_aquifer1, CO2_aquifer2]
-    Plot2:
-        TimeSeries: [CO2_aquifer2]
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot3:
-        TimeSeries: [brine_aquifer1]
-    Plot4:
-        TimeSeries: [brine_aquifer2]
+        TimeSeries: [brine_aquifer1, brine_aquifer2]
+        Subplot:
+            Use: True
+            NumCols: 2

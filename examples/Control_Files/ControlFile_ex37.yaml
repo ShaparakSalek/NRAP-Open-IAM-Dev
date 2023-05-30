@@ -18,7 +18,7 @@
 # can be used to set the limits for the three dimensional planes used
 # to represent the tops of each unit. The entries for 'xLims', 'yLims',
 # 'gridXLims', and 'gridYLims' must all have units of meters.
-
+#
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
 # https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
@@ -95,24 +95,24 @@ MultisegmentedWellbore1:
 #-------------------------------------------------
 Plots:
     pressure_plot.tiff:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [pressure]
     saturation_plot.tiff:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [CO2saturation]
     CO2_leakage_rates_aq4.tiff:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [CO2_aquifer4]
     Brine_leakage_rates_aq4.tiff:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [brine_aquifer4]
     StratPlot.tiff:
         Stratigraphy:
@@ -136,3 +136,5 @@ Plots:
              View:
                  ViewAngleElevation: [10, 30]
                  ViewAngleAzimuth: [300, 300]
+    StratCol.tiff:
+        StratigraphicColumn:

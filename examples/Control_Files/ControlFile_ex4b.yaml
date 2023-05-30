@@ -1,11 +1,26 @@
 # OpenIAM Control File Example 4b
+#
+# This example is similar to control file example 4a, but it is deterministic 
+# (a forward model), it includes another OpenWellbore component that leaks 
+# into aquifer 1, and it does not include a CarbonateAquifer component.
+#
+# An OpenWellbore component produces CO2_aquifer and brine_aquifer outputs, 
+# but the outputs can also be named to correspond with the aquifer receiving 
+# leakage (e.g., if LeakTo is aquifer 1, then the output can be CO2_aquifer1).
+# The aquifer name does not have to be included in the output name (CO2_aquifer 
+# or CO2_aquifer1 would work). If the aquifer name is included in the output, 
+# however, the TimeSeries plots created will explicitly display the aquifer name.
+# Otherwise, the plots would show the component name (OpenWellbore1 or 
+# OpenWellbore2) and the viewer would need to know which component corresponds 
+# with which aquifer.
+#
+# The OpenWellbore component also uses a critical pressure in the calculation 
+# of leakage rates. This approach is enforced through the inclusion of 
+# 'critPressureApproach: True' in the 'Controls' entry. For more details 
+# regarding critical pressures, see control file example 31a.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex4.yaml
-# This example computes the leakage rates from 2 leaky (open) wellbores
-# connected to the simple reservoir model. In one setup (OpenWellbore1)
-# the leakage rates are calculated in standard way; in the second setup
-# (OpenWellbore2) the leakage rates are calculated taking into account
-# a critical pressure.
 #
 # Last Modified: January 16th, 2023
 #-------------------------------------------------
@@ -47,17 +62,17 @@ OpenWellbore1:
     Locations:
         coordx: [200, 20]
         coordy: [100, 280]
-    LeakTo: aquifer2
+    LeakTo: aquifer1
+    Controls:
+        critPressureApproach: True
+        enforceCritPressure: False
     Parameters:
-        wellRadius:
-            min: 0.03
-            max: 0.05
-            value: 0.04
+        wellRadius: 0.04
         logReservoirTransmissivity: -10.0
         logAquiferTransmissivity: -10.0
         brineSalinity: 0.0
-        brineDensity: 1050.0  # used only if critPressureApproach is True (see OpenWellbore2)
-    Outputs: [CO2_aquifer2, brine_aquifer2]
+        brineDensity: 1050.0  # used to calculate critical pressure only if critPressureApproach is True and enforceCritPressure is False
+    Outputs: [CO2_aquifer1, brine_aquifer1]
 #-------------------------------------------------
 OpenWellbore2:
     Type: OpenWellbore
@@ -69,13 +84,15 @@ OpenWellbore2:
     LeakTo: aquifer2
     Controls:
         critPressureApproach: True
+        enforceCritPressure: False
     Parameters:
         wellRadius: 0.04
         logReservoirTransmissivity: -10.0
         logAquiferTransmissivity: -10.0
         brineSalinity: 0.0
-        brineDensity: 1050.0  # used only if critPressureApproach is True
-        # critPressure: 13330450.0  # equivalent way to use critical pressure without Controls
+        brineDensity: 1050.0  # used only if critPressureApproach is True and enforceCritPressure is False
+        # critPressure: 13330450.0  # If unsilenced, this value would only be used if both critPressureApproach and enforceCritPressure are set to True. 
+        # If critPressureApproach is True and enforceCritPressure is False (the default settings), a calculated critical pressure is used.
     Outputs: [CO2_aquifer2, brine_aquifer2]
 #-------------------------------------------------
 Plots:
@@ -84,28 +101,27 @@ Plots:
     #------------------------------------------------------
     Pressure_subplots:
         TimeSeriesStats: [pressure, CO2saturation]
-        subplot:
-            use: True
-            ncols: 2
+        FigureSize: [13, 11]
+        Subplot:
+            Use: True
+            NumCols: 2
     #------------------------------------------------------
     # Plot the CO2 leakage into the aquifer from each well
     #------------------------------------------------------
     CO2_Leakage_subplots:
-        TimeSeriesStats: [CO2_aquifer2]
-        Title: $CO_2$ leakage to aquifer 2
-        UseMarkers: True
+        TimeSeriesStats: [CO2_aquifer1, CO2_aquifer2]
+        Title: $CO_2$ leakage to aquifers 1 and 2
         FigureDPI: 100
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     #------------------------------------------------------
     # Plot the brine leakage into the aquifer from each well
     #------------------------------------------------------
     Brine_Leakage_subplots:
-        TimeSeriesStats: [brine_aquifer2]
-        Title: Brine leakage to aquifer 2
-        UseMarkers: True
+        TimeSeriesStats: [brine_aquifer1, brine_aquifer2]
+        Title: Brine leakage to aquifers 1 and 2
         FigureDPI: 100
-        subplot:
-            ncols: 2
-            use: True
+        Subplot:
+            NumCols: 2
+            Use: True

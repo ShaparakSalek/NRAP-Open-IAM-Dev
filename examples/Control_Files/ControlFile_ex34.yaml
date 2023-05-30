@@ -3,7 +3,7 @@
 # This example is similar to the Control File Example 33a.
 # Please refer to the example description within that file. This example, however,
 # demonstrates the ability to set a variable with string inputs representing
-# a unit's thickness. Here, a Generic Aquifer is also included. The aquifer's
+# a unit's thickness. Here, a GenericAquifer component is also included. The aquifer's
 # thickness (aqu_thick) is specified as aquifer2Thickness and the aquifer's
 # top_depth is specified as shale3Thickness. Because shale 3 is the highest shale,
 # shale3Thickness is equal to shale3Depth (the bottom depth of shale 3, which
@@ -110,33 +110,33 @@ GenericAquifer1:
 Plots:
     Plot1:
         TimeSeries: [pressure]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot2:
         TimeSeries: [CO2saturation]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot3:
         TimeSeries: [CO2_aquifer]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot4:
         TimeSeries: [brine_aquifer]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     Plot5:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [Dissolved_salt_volume]
     Plot6:
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
         TimeSeries: [Dissolved_CO2_volume]
     Plot7:
         Stratigraphy:

@@ -50,7 +50,10 @@
 # generally lead to higher critical pressures and lower leaked masses of brine
 # and CO2. Note that flow through an OpenWellbore can happen beneath the critical
 # pressure if a CO2 plume is present in the reservoir at the base of the well
-# (i.e., buoyancy effects from the CO2).
+# (i.e., buoyancy effects from the CO2). If you include 'enforceCritPressure: True' 
+# in the 'Controls' section and also provide a value for the critPressure parameter
+# (in Pa), the critical pressure will be taken as the critPressure parameter. 
+# Otherwise, the default approach is to calculate critical pressure.
 #
 # Last Modified: April 25th, 2023
 #-------------------------------------------------
@@ -113,6 +116,7 @@ OpenWellbore1:
             ysize: 14
     Controls:
         critPressureApproach: True
+        enforceCritPressure: False
     Parameters:
         wellRadius:
             value: 0.05
@@ -132,11 +136,12 @@ OpenWellbore1:
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
         # and don't need to be set explicitly unless different values
-        # are required. The parameters wellTop, reservoirDepth, and brineDensity
-        # are used to calculate critical pressure (if the parameter criticalPressure
-        # is not provided).
-    Outputs: [CO2_aquifer,
-              brine_aquifer]
+        # are required. Because critPressureApproach is True, the parameters 
+        # wellTop, reservoirDepth, and brineDensity are used to calculate critical 
+        # pressure. If enforceCritPressure was also set to True and the critPressure 
+        # parameter was provided, that parameter value would be used instead of a 
+        # calculated critical pressure.
+    Outputs: [CO2_aquifer, brine_aquifer]
 #-------------------------------------------------
 FutureGen2Aquifer1:
     Type: FutureGen2Aquifer
@@ -166,6 +171,7 @@ Plots:
         PlotInjectionSites: True
         FigureDPI: 200
         SaveCSVFiles: True
+        Title: 'AoR: Pressure'
     Plot2:
         AoR: [CO2saturation]
     Plot3:

@@ -130,8 +130,8 @@ atmRom1:
 Plots:
     Receptor_Flags:
         TimeSeries: [outflag_r001, outflag_r003]
-        subplots:
-            use: True
+        Subplots:
+            Use: True
     Receptor_Flags1:
         TimeSeries: [outflag_r001]
     Receptor_Flags2:

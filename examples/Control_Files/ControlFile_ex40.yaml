@@ -120,18 +120,6 @@ FutureGen2AZMI2:
               Dissolved_CO2_dx, Dissolved_CO2_dy, Dissolved_CO2_dz]
 #-------------------------------------------------
 Plots:
-    # CO2_leakage1:
-    #     TimeSeries: [CO2_aquifer1]
-    # CO2_leakage3:
-    #     TimeSeries: [CO2_aquifer3]
-    # CO2_leakage4:
-    #     TimeSeries: [CO2_aquifer4]
-    # brine_leakage1:
-    #     TimeSeries: [brine_aquifer1]
-    # brine_leakage3:
-    #     TimeSeries: [brine_aquifer3]
-    # brine_leakage4:
-    #     TimeSeries: [brine_aquifer4]
     pH_plume_volumes:
         TimeSeriesAndStats: [pH_volume]
         subplot:
@@ -160,7 +148,7 @@ Plots:
                 # coordz: -1040
                 coordx: [236377.0, 236758.0, 236377.0, 236758.0]
                 coordy: [4409269.5, 4410107.6, 4409269.5, 4410107.6]
-                coordz: [-1040, -1040, -735, -735] # In aquifers 1 and 3, with the VerticalWindow reaching 5 m up and down
+                coordz: [-1015, -715, -1015, -715] # Near the tops of aquifers 1 and 3
                 HorizontalWindow: 1
                 VerticalWindow: 5
             ComponentNameList: [FutureGen2AZMI1, FutureGen2AZMI2]

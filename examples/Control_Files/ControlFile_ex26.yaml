@@ -1,7 +1,12 @@
-# OpenIAM Control File Example, 3D Interpolation with a LookupTableReservoir
+# OpenIAM Control File Example 26
+#
+# This example demonstrates the use of 3D interpolation with a LookupTableReservoir.
+# When using 3D interpolation, reservoir conditions like pressure and CO2 saturation 
+# are calculated with x, y, and z values (not just x and y). This approach considers 
+# considers the depth of the wellbore base (coordz under Locations).
 #
 # To have a LookupTableReservoir use 3D interpolation in a Control File interface,
-# it must have 'Interpoolation2D: False,' as shown below. The locations at which conditions
+# it must have 'Interpolation2D: False,' as shown below. The locations at which conditions
 # are interpolated are specified in the wellbore component below (coordx, coordy, and
 # coordz). These locations can be considered the bottom of the MultisegmentedWellbores.
 # Note that an error will occur if the locations used are not within the space covered
@@ -141,48 +146,25 @@ FutureGen2Aquifer1:
     Outputs: [pH_volume, TDS_volume, Pressure_volume]
 #-------------------------------------------------
 Plots:
-    pressure_plot:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [pressure]
-    saturation_plot:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [CO2saturation]
-    CO2_leakage3:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [CO2_aquifer3]
-    brine_leakage3:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [brine_aquifer3]
-    CO2_leakage4:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [CO2_aquifer4]
-    brine_leakage4:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [brine_aquifer4]
-    pH_plume_volumes:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [pH_volume]
-    TDS_plume_volumes:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [TDS_volume]
-    Pressure_plume_volumes:
-        subplot:
-            use: True
-            ncols: 2
-        TimeSeries: [Pressure_volume]
+    Reservoir_Conditions:
+        Subplot:
+            Use: True
+            Numcols: 2
+        TimeSeries: [pressure, CO2saturation]
+    CO2_Leakage_Aq3and4:
+        Subplot:
+            Use: True
+            Numcols: 2
+        TimeSeries: [CO2_aquifer3, CO2_aquifer4]
+    Brine_Leakage_Aq3and4:
+        Subplot:
+            Use: True
+            Numcols: 2
+        TimeSeries: [brine_aquifer3, brine_aquifer4]
+    Plume_Volumes_Aq4:
+        Subplot:
+            Use: True
+            Numcols: 2
+        FigureSize: [12, 10]     # width, height in inches; default for TimeSeries is [10, 8]
+        TimeSeries: [pH_volume, TDS_volume, Pressure_volume]
+

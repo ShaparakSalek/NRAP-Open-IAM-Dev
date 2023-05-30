@@ -677,13 +677,25 @@ def setup_subplots_data(subplot, plot_type, num_plots):
 
     Possible keys: 'use', 'nrows', 'ncols', 'single_plot', 'type' (plus data about
     titles corresponding to different cmpnt_name.obs_name subplots; these data
-    might not be necessarily present)
+    might not be necessarily present). Note that this function is also set up to 
+    read capitalized versions of the in .yaml files (Use, and NumCols instead 
+    of use and ncols), as this approach matches the conventions of other plot 
+    types. The capitalized or non-capitaized inputs will have the same effects, 
+    however.
     """
     # Initialize subplots_data dictionary depending on the input arguments
     if subplot is None:
         subplots_data = {'use': False}
     else:
         subplots_data = subplot
+        
+    if 'Use' in subplots_data:
+        subplots_data['use'] = subplots_data['Use']
+        del subplots_data['Use']
+    
+    if 'NumCols' in subplots_data:
+        subplots_data['ncols'] = subplots_data['NumCols']
+        del subplots_data['NumCols']
 
     # Process plot type
     if plot_type is None:
@@ -698,8 +710,12 @@ def setup_subplots_data(subplot, plot_type, num_plots):
     else:
         subplots_data['single_plot'] = False
         if 'ncols' not in subplots_data:
-            subplots_data['ncols'] = 1
-        subplots_data['nrows'] = math.ceil(float(num_plots)/subplots_data['ncols'])
+            if num_plots <= 3:
+                subplots_data['ncols'] = 1
+            elif num_plots > 3:
+                subplots_data['ncols'] = 2
+        
+        subplots_data['nrows'] = math.ceil(float(num_plots) / subplots_data['ncols'])
 
         # If the user entered 'use': True in the subplot dictionary but there is
         # still only one row and one column in this plot, set single_plot to True.
@@ -1169,7 +1185,14 @@ def check_legend(handle_list, fig_setup, min_fontsize, subplots_data):
 
     if fig_setup['legend_font_size'] > min_fontsize:
         fig_setup['legend_font_size'] = min_fontsize
-
+    
+    if subplots_data['ncols'] == 2:
+        fig_setup['legend_font_size'] *= 0.9
+    elif subplots_data['ncols'] == 3:
+        fig_setup['legend_font_size'] *= 0.75
+    elif subplots_data['ncols'] >= 4:
+        fig_setup['legend_font_size'] *= 0.67
+    
     if subplots_data['single_plot']:
         if LEGEND_ITEM_THRESH1 <= len(handle_list) < LEGEND_ITEM_THRESH2:
             fig_setup['legend_font_size'] *= 0.9

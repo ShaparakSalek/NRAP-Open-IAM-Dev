@@ -1,9 +1,18 @@
-# OpenIAM Control File Example, reading genericMetric data with a LookupTableReservoir
+# OpenIAM Control File Example 28 
+# 
+# This example demonstrates how a LookupTableReservoir component can be used to 
+# read any type of output from .csv files used for LookupTableReservoir components. 
+# The metric used here is called "genericMetric," but the approach demonstrated 
+# could be used to read salinity data, for example. The metric name must 
+# correspond with certain column titles in the .csv file used (e.g., column title of 
+# genericMetric_1 for genericMetric at time step 1) and the metric name must be 
+# included in the Outputs of the LookupTableReservoir component.
 #
 # This example uses a modified version of the file Reservoir_data_sim01.csv from the
 # Kimberlina data set (https://gitlab.com/NRAP/Kimberlina_data). The file
 # was placed in the following location:
 #     source/components/reservoir/lookuptables/Test_metrics
+#
 # The file from the Kimberlina data set was modified to include columns
 # for the fields genericMetric_1 through genericMetric_10 (corresponding
 # to the times in columns 1 through 10 of the time_points.csv file
@@ -14,6 +23,7 @@
 # corresponding for the file Reservoir_data_sim01_read_genericMetric.csv.
 # The parameters are unchanged from the Kimberlina data set,
 # however (logResPerm: -13.3, reservoirPorosity: 0.215, logShalePerm: -18.7).
+#
 # If the above files are not present, this example will produce an error.
 # This example is similar to the example ControlFile_ex27.yaml, but it is intended to
 # demonstrate that LookupTableReservoirs can be used to read any type of data
@@ -99,6 +109,6 @@ Plots:
         TimeSeries: [genericMetric]
     CO2_leakage_plot:
         TimeSeries: [CO2_aquifer1, CO2_aquifer2]
-        subplot:
-            ncols: 2
-            use: True
+        Subplot:
+            NumCols: 2
+            Use: True

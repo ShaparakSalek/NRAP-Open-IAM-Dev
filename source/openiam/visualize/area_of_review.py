@@ -853,7 +853,6 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
 
     plt.subplots_adjust(left=0.001, bottom=0.15, right=0.901,
                         top=0.875, wspace=0.1, hspace=0.1)
-    # plt.tight_layout()
 
     if title:
         plt.suptitle(title, fontweight=selected_labelfontweight,

@@ -1,4 +1,24 @@
 # OpenIAM Control File Example 17
+#
+# This example demonstrate the use of the FaultFlow component. Here, the 
+# component is directly given reservoir pressures and CO2 saturations 
+# though the DynamicParameters entry (in the Fault1 section). Note that 
+# the timing of these values corresponds with the times entered with the 
+# TimePoints entry in the ModelParams section. Based on these inputs and 
+# the parameters used (e.g., fault location, fault strike and dip, and 
+# fault aperture), the FaultFlow component produces the CO2 and brine 
+# leakage rates into an overlying aquifer.
+#
+# Note that the FaultFlow component does not connect with the Stratigraphy 
+# component, so it will ignore the information entered under Stratigraphy. 
+# The characteristics of the aquifer receiving leakage are entered through 
+# FaultFlow parameters like aquiferDepth, aquiferTemperature, and aquiferPressure.
+# Additionally, some details regarding the injection operation are controlled 
+# through the pressure and CO2saturations provided as well as parameters like 
+# injectX, injectY, injectDepth, injectPressure, and finalPressure. A FaultFlow 
+# component can still be provided pressures and CO2 saturations from a 
+# reservoir component, however - see control file example 18.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex17.yaml
 #-------------------------------------------------
@@ -20,12 +40,10 @@ Stratigraphy:
         vary: False
         value: 3
     shale1Thickness:
-        min: 500.0
-        max: 550.0
+        vary: False
         value: 525.0
     shale2Thickness:
-        min: 450.0
-        max: 500.0
+        vary: False
         value: 475.0
     shale3Thickness:
         vary: False
@@ -142,6 +160,7 @@ Fault1:
         minHorizontal: 2.0e+07      # Pa; min. secondary stress at injection depth
         maxTrend: 55.0              # deg; strike of max. stress from North
     Outputs: ['CO2_aquifer_total', 'brine_aquifer_total']
+#------------------------------------------------------------------------------
 Plots:
     Plot1:
         TimeSeries: ['CO2_aquifer_total']

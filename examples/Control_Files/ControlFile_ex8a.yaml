@@ -186,7 +186,7 @@ Plots:
     Reservoir:
         TimeSeriesStats: [pressure, CO2saturation]
         Title: Reservoir Response
-        subplot:
-            ncols: 1
+        Subplot:
+            NumCols: 1
             Reservoir1_000.pressure: 'Pressure at well #0'
             Reservoir1_000.CO2saturation: '$CO_2$ Saturation at well #0'

@@ -1,9 +1,22 @@
 # OpenIAM Control File Example 5
+#
+# This example evaluates the CO2 and brine leakage through a 
+# CementedWellbore component connected to a SimpleReservoir component. 
+# Additionally, this example uses the parameter study analysis type 
+# (parstudy). The entry of 'nvals: 3' under 'Analysis' specifies that 
+# three values will be evaluated for each parameter that varies (i.e., 
+# the parameters that are given with min and max values). Two variables 
+# are set up to vary: logWellPerm and logThiefPerm. There are two locations 
+# given (coordx and coordy entries), and one CementedWellbore component is 
+# made for each location. Two parameters varying for two components (total 
+# of four variable parameters) results in a total of 81 different realizations. 
+# Even though only three parameter values are specified, each realization has 
+# a different combination of the parameter values amongst the four components, 
+# resulting in a large number of realizations.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex5.yaml
-# This example links an analytical reservoir
-# model (Nordbotten et al., 2011) with a cemented wellbore model.
-# This example runs a parameter study analysis on the uncertain input parameters.
+#
 # Last Modified: February 15, 2018
 #-------------------------------------------------
 ModelParams:
@@ -62,4 +75,16 @@ CementedWellbore1:
 #-------------------------------------------------
 Plots:
     P1:
-        TimeSeries: [CO2_aquifer2]
+        TimeSeries: [CO2_aquifer1, CO2_aquifer2]
+        Subplot:
+            Use: True
+            NumCols: 2
+    P2:
+        TimeSeries: [CO2_atm]
+        Subplot:
+            Use: False
+    P3:
+        TimeSeries: [brine_aquifer1, brine_aquifer2]
+        Subplot:
+            Use: True
+            NumCols: 2

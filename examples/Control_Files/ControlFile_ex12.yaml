@@ -1,12 +1,18 @@
 # OpenIAM Control File Example 12
+#
+# This example computes the flow rates of brine and CO2 to aquifer 1 utilizing
+# the generalized flow rate component (heuristic model). This component allows 
+# the user to specify a mitigation time. After this time, the leakage is remediated 
+# and both CO2 and brine leakage rates go to zero. Here, the parameter mitigationTime 
+# is set to 45 years.
+#
 # To run this file, use the command (\ for Windows and / for Mac or Linux)
 #   python ../source/openiam/openiam_cf.py --file ControlFile_ex12.yaml
 # in the folder examples/Control_Files,
 # or command
 #   python openiam_cf.py --file ../../examples/Control_Files/ControlFile_ex12.yaml
 # in the folder source/openiam.
-# This example computes the flow rates of brine and CO2 to aquifer 1 utilizing
-# the generalized flow rate component (heuristic model).
+#
 # Last Modified: July 22, 2019
 #-------------------------------------------------
 ModelParams:
@@ -21,12 +27,10 @@ Stratigraphy:
         vary: False
         value: 3
     shale1Thickness:
-        min: 500.0
-        max: 550.0
+        vary: False
         value: 525.0
     shale2Thickness:
-        min: 450.0
-        max: 500.0
+        vary: False
         value: 475.0
     shale3Thickness:
         vary: False
@@ -84,11 +88,11 @@ FlowComponent1:
 Plots:
     fluid_masses:
         TimeSeries: [mass_CO2_aquifer1, mass_brine_aquifer1]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
     fluid_rates:
         TimeSeries: [CO2_aquifer1, brine_aquifer1]
-        subplot:
-            use: True
-            ncols: 2
+        Subplot:
+            Use: True
+            NumCols: 2
