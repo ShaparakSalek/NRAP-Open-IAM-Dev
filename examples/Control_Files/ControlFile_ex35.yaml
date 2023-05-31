@@ -26,7 +26,15 @@
 # This example also demonstrates how you can save the Stratigraphy plot
 # as a certain type of image file (here, .tiff).
 #
-# Last Modified: December 9th, 2022
+# There are also three StratigraphyColumn plots demonstrating how unit thicknesses
+# change across the domain. The top units pinch out to the north - because both shale
+# 3 and aquifer 2 have thicknesses of 1 m for StratCol3, the labels for those
+# units would overlap each other. To prevent that overlap, the labels have
+# been provided as blank ('') entries. See control file example 33b for more details
+# regarding unit labels. Because the text used to display depths would also overlap,
+# this text is disabled in StratCol2 and StratCol3 with the entry "DepthText: False".
+#
+#  Last Modified: May, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -130,3 +138,22 @@ Plots:
             View:
                 ViewAngleElevation: [10, 30, -2, 0, 2]
                 ViewAngleAzimuth: [300, 300, 0, 0, 0]
+    StratCol1.tiff:
+        StratigraphicColumn:
+            FigureDPI: 200
+            XValue: 0
+            YValue: 0
+    StratCol2.tiff:
+        StratigraphicColumn:
+            FigureDPI: 200
+            XValue: 0
+            YValue: 1000
+            DepthText: False
+    StratCol3.tiff:
+        StratigraphicColumn:
+            Shale3Label: ''
+            Aquifer2Label: ''
+            FigureDPI: 200
+            XValue: 0
+            YValue: 2000
+            DepthText: False

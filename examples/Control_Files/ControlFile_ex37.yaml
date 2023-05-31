@@ -26,7 +26,7 @@
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
 #
-# Last Modified: February 9th, 2023
+# Last Modified: May, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50

@@ -19,7 +19,7 @@
 # the x and y values used by wellbore components must be within a certain distance
 # (MaxPointDistance) of a point within the LookupTable Stratigraphy file. If
 # MaxPointDistance is not entered, it takes on the default value of 100 m. To use
-# the LookupTable Stratigraphy option, one must prepare table(s) with the x and y
+# the LookupTableStratigraphy option, one must prepare table(s) with the x and y
 # values for wells and the unit thicknesses at those locations. They do not need
 # to be the same table if, for example, you want a certain reservoir depth to be
 # displayed in a stratigraphy plot but you do not need a well at that location.
@@ -28,7 +28,12 @@
 # could reduce the unit's thickness to the minimum of 1 m. Note that the maximum
 # limits for stratigraphy parameters also apply when using LookupTableStratigraphy.
 #
-# Last Modified: December 9th, 2022
+# The simulation's stratigraphy is also demonstrated with the StratigraphicColumn
+# plot type. Note that the x and y values provided for the plot type
+# (XValue and YValue) must also be within MaxPointDistance of a location in the
+# .csv file containing the data for the LookupTableStratigraphy option.
+#
+#  Last Modified: May, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5
@@ -110,3 +115,11 @@ Plots:
             View:
                 ViewAngleElevation: [5, 5, 5, 5, 5, 5, 5]
                 ViewAngleAzimuth: [285, 290, 295, 300, 305, 310, 315]
+    StratCol1:
+        StratigraphicColumn:
+            XValue: 3500
+            YValue: 1500
+    StratCol2:
+        StratigraphicColumn:
+            XValue: 6100
+            YValue: 2000

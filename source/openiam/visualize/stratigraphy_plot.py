@@ -4,7 +4,9 @@ openiam_cf_strata.py.
 
 Examples illustrating applications or setup of stratigraphy_plot method:
     ControlFile_ex32b.yaml
-    ControlFile_ex33.yaml
+    ControlFile_ex32c.yaml
+    ControlFile_ex33a.yaml
+    ControlFile_ex33b.yaml
     ControlFile_ex34.yaml
     ControlFile_ex35.yaml
     ControlFile_ex36.yaml
@@ -27,11 +29,13 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import ticker
+import matplotlib.colors as clrs
 
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
 import openiam.openiam_cf_strata as iam_strata
+
 
 reservoir_components = ['LookupTableReservoir',
                         'SimpleReservoir',
@@ -42,9 +46,10 @@ wellbore_components = ['MultisegmentedWellbore',
                        'OpenWellbore',
                        'GeneralizedFlowRate']
 
+
 def stratigraphy_plot(yaml_data, model_data, sm,
                       name='strata_Figure1', savefig=None, title=None,
-                      figsize=(12, 10), figdpi=150, genfontsize=12,
+                      figsize=(12, 10), figdpi=100, genfontsize=12,
                       axislabelfontsize=14, titlefontsize=14,
                       boldlabels=True, plot_wellbore_locations=True,
                       view_elev=None, view_azimuth=None,
@@ -434,16 +439,6 @@ def stratigraphy_plot(yaml_data, model_data, sm,
             SandD_loc_y = np.mean([max_y_val, min_y_val]) + ((max_y_val - min_y_val) / 4)
             SandD_location = [SandD_loc_x, SandD_loc_y]
 
-    # Make the figure
-    font = {'family': 'Arial',
-            'weight': 'normal',
-            'size': genfontsize}
-    plt.rc('font', **font)
-
-    # 3D Stratigraphy Figure
-    plt3d = plt.figure(figsize=figsize, dpi=figdpi).gca(projection='3d')
-    ax = plt.gca()
-
     if var_type == 'LookupTable':
         file_name = yaml_data['Stratigraphy']['spatiallyVariable'][
             'LookupTableStratigraphy']['FileName']
@@ -455,6 +450,34 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
         numShaleLayers = LUTStrat_dict['numberOfShaleLayers']
 
+    else:
+        if var_type == 'strikeAndDip':
+            strataReferencePoint = sm.component_models['strataRefPoint']
+        else:
+            strataReferencePoint = sm.component_models['strata']
+
+        strata_dict = iam_strata.get_strata_info_from_component(strataReferencePoint)
+
+        numShaleLayers = strata_dict['numberOfShaleLayers']
+
+    reservoirColor, reservoirAlpha, reservoirAlphaFill, reservoirLabel, \
+        shaleColor, shaleAlpha, shaleAlphaFill, shaleLabel, \
+            aquiferColor, aquiferAlpha, aquiferAlphaFill, aquiferLabel, \
+                wellColor, wellAlpha, wellAlphaFill, wellLabel = \
+                    iam_strata.get_plotting_setup_for_units(
+                        strat_plot_yaml_input, numShaleLayers)
+
+    # Make the figure
+    font = {'family': 'Arial',
+            'weight': 'normal',
+            'size': genfontsize}
+    plt.rc('font', **font)
+
+    # 3D Stratigraphy Figure
+    plt3d = plt.figure(figsize=figsize, dpi=figdpi).gca(projection='3d')
+    ax = plt.gca()
+
+    if var_type == 'LookupTable':
         plot_SandD_symbol = False
         save_stratigraphy = False
         plot_indiv_strat_comps = True
@@ -466,7 +489,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 maxDepth_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strat_comp_temp,
-                    unitType = 'reservoir', top_or_bottom = 'bottom')
+                    unitType='reservoir', top_or_bottom='bottom')
 
                 if first_time_check:
                     maxDepth = maxDepth_temp
@@ -476,22 +499,13 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
         z0_plane = np.zeros((x_loc.shape[0], x_loc.shape[1]))
         plt3d.plot_surface(x_loc / 1000, y_loc / 1000, z0_plane,
-                           color=[1, 0, 0], alpha=0.25, shade=False)
+                           color=shaleColor[-1], alpha=shaleAlphaFill[-1], shade=False)
 
         ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, z0_plane[0, 0],
-                'Shale ' + str(numShaleLayers), zdir='y', color=[1, 0, 0],
-                fontsize=genfontsize - 2, fontweight='bold')
+                'Shale ' + str(numShaleLayers), zdir='y', color=shaleColor[-1],
+                alpha=shaleAlpha[-1], fontsize=genfontsize - 2, fontweight='bold')
 
     else:
-        if var_type == 'strikeAndDip':
-            strataReferencePoint = sm.component_models['strataRefPoint']
-        else:
-            strataReferencePoint = sm.component_models['strata']
-
-        strata_dict = iam_strata.get_strata_info_from_component(strataReferencePoint)
-
-        numShaleLayers = strata_dict['numberOfShaleLayers']
-
         shaleThicknessesReferencePoint = strata_dict['shaleThicknesses']
 
         aquiferThicknessesReferencePoint = strata_dict['aquiferThicknesses']
@@ -512,31 +526,35 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         # Plot the top of each unit as a 3D surface
         surface = -stratigraphy_by_loc['resBottomDepth'][:, :]
         plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                           color=[0.5, 0.5, 0.5], alpha=0.33, shade=False)
+                           color=reservoirColor, alpha=reservoirAlphaFill, shade=False)
 
         surface = -stratigraphy_by_loc['resTopDepth'][:, :]
         plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                           color=[0.33, 0.33, 0.33], alpha=0.5, shade=False)
+                           color=reservoirColor, alpha=(reservoirAlphaFill / 2), shade=False)
         ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                'Reservoir', zdir='y', color='k', fontsize=genfontsize - 2,
-                fontweight='bold')
+                reservoirLabel, zdir='y', color=reservoirColor, alpha=reservoirAlpha,
+                fontsize=genfontsize - 2, fontweight='bold')
 
         for shaleRef in range(1, numShaleLayers + 1):
             surface = -stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef)][:, :]
             plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                               color=[1, 0, 0], alpha=0.33, shade=False)
+                               color=shaleColor[shaleRef - 1],
+                               alpha=shaleAlphaFill[shaleRef - 1], shade=False)
 
             ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                    'Shale {}'.format(shaleRef), zdir='y', color=[1, 0, 0],
+                    shaleLabel[shaleRef - 1], zdir='y', color=shaleColor[shaleRef - 1],
+                    alpha=shaleAlpha[shaleRef - 1],
                     fontsize=genfontsize - 2, fontweight='bold')
 
             if shaleRef < numShaleLayers:
                 surface = -stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef)][:, :]
                 plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                                   color=[0, 0, 1], alpha=0.33, shade=False)
+                                   color=aquiferColor[shaleRef - 1],
+                                   alpha=aquiferAlphaFill[shaleRef - 1], shade=False)
 
                 ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                        'Aquifer {}'.format(shaleRef), zdir='y', color=[0, 0, 1],
+                        aquiferLabel[shaleRef - 1], zdir='y',
+                        color=aquiferColor[shaleRef - 1], alpha=aquiferAlpha[shaleRef - 1],
                         fontsize=genfontsize - 2, fontweight='bold')
 
     if var_type == 'LookupTable':
@@ -684,7 +702,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 if comp.class_type == 'OpenWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
-                    compName = 'Open\nWellbore {}'.format(number + 1)
+                    compName = 'Open\nWellbore {}'.format(number)
 
                     try:
                         z_min = comp.deterministic_pars['reservoirDepth'].value
@@ -704,7 +722,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 elif comp.class_type == 'MultisegmentedWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
-                    compName = 'M.S.\nWellbore {}'.format(number + 1)
+                    compName = 'M.S.\nWellbore {}'.format(number)
 
                     if var_type in ['strikeAndDip', 'LookupTable']:
                         strata_temp = sm.component_models['strata' + comp.name]
@@ -722,7 +740,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 elif comp.class_type == 'CementedWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
-                    compName = 'Cemented\nWellbore {}'.format(number + 1)
+                    compName = 'Cemented\nWellbore {}'.format(number)
 
                     try:
                         z_min = comp.deterministic_pars['wellDepth'].value
@@ -742,30 +760,53 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 plt.plot([x_vals_well / 1000, x_vals_well / 1000],
                           [y_vals_well / 1000, y_vals_well / 1000],
                           [-z_min, -z_max], marker='o', markersize=3,
-                          color=[0, 0, 1], linewidth=1)
+                          color=wellColor, alpha=wellAlphaFill, linewidth=1)
 
                 if plot_well_labels:
-                    ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_min,
-                            compName, zdir='x', color='k',
-                            fontsize=genfontsize - 4, fontweight='bold')
+                    # Have the label slightly darker, so it doesn't blend in
+                    # too much with the line for the well
+                    rgbWell = clrs.to_rgba(wellColor[:])
+                    rgbWell = np.array(list(rgbWell[:]))
+                    rgbWell *= 0.925
+                    # alpha is one
+                    rgbWell[-1] = 1
+
+                    if not wellLabel is None:
+                        if '{}' in wellLabel:
+                            ax.text(
+                                x_vals_well / 1000, y_vals_well / 1000, -z_min,
+                                str(wellLabel.format(number)), zdir='x', color=rgbWell,
+                                alpha=wellAlpha, fontsize=genfontsize - 4,
+                                fontweight='bold')
+                        else:
+                            ax.text(
+                                x_vals_well / 1000, y_vals_well / 1000, -z_min,
+                                wellLabel, zdir='x', color=rgbWell,
+                                alpha=wellAlpha, fontsize=genfontsize - 4,
+                                fontweight='bold')
+                    else:
+                        ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_min,
+                                compName, zdir='x', color=rgbWell, alpha=wellAlpha,
+                                fontsize=genfontsize - 4, fontweight='bold')
 
                 if comp.class_type == 'OpenWellbore':
                     if z_max != 0:
                         plt.plot([x_vals_well / 1000, x_vals_well / 1000],
                                   [y_vals_well / 1000, y_vals_well / 1000],
                                   [-z_max, 0], marker='o', markersize=3,
-                                  color=[0.67, 0.67, 1], linewidth=1)
+                                  color=wellColor, alpha=0.5, linewidth=1)
 
                     if plot_well_labels:
                         if z_max != 0:
                             ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_max,
-                                    'Well\nTop', zdir='x', color='k',
-                                    fontsize=genfontsize - 4, fontweight='bold')
+                                    'Well\nTop', zdir='x', color=rgbWell,
+                                    alpha=wellAlpha, fontsize=genfontsize - 4,
+                                    fontweight='bold')
                         else:
                             ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_max,
-                                    'Well\nTop', zdir='x', color='k',
-                                    fontsize=genfontsize - 4, fontweight='bold',
-                                    zorder=200)
+                                    'Well\nTop', zdir='x', color=rgbWell,
+                                    alpha=wellAlpha, fontsize=genfontsize - 4,
+                                    fontweight='bold', zorder=200)
 
     if plot_indiv_strat_comps:
         for comp in components:
@@ -785,7 +826,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 plt.plot(x_vals_well / 1000, y_vals_well / 1000,
                          -z_temp, marker='s', markersize=2,
-                         color=[0.5, 0.5, 0.5], linewidth=1)
+                         color=reservoirColor, linewidth=1)
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='reservoir',
@@ -793,7 +834,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 plt.plot(x_vals_well / 1000, y_vals_well / 1000,
                          -z_temp, marker='s', markersize=2,
-                         color=[0.33, 0.33, .33], linewidth=1)
+                         color=reservoirColor, linewidth=1)
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='shale',
@@ -801,7 +842,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 plt.plot(x_vals_well / 1000, y_vals_well / 1000,
                          -z_temp, marker='s', markersize=2,
-                         color=[1, 0, 0], linewidth=1)
+                         color=shaleColor[-1], linewidth=1)
 
                 for shaleRef in range(numShaleLayers - 1):
                     z_temp = iam_strata.get_unit_depth_from_component(
@@ -810,7 +851,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                     plt.plot(x_vals_well / 1000, y_vals_well / 1000,
                              -z_temp, marker='s', markersize=2,
-                             color=[1, 0, 0], linewidth=1)
+                             color=shaleColor[shaleRef], linewidth=1)
 
                     if (shaleRef + 1) < numShaleLayers:
                         z_temp = iam_strata.get_unit_depth_from_component(
@@ -819,7 +860,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                         plt.plot(x_vals_well / 1000, y_vals_well / 1000,
                                  -z_temp, marker='s', markersize=2,
-                                 color=[0, 0, 1], linewidth=1)
+                                 color=aquiferColor[shaleRef], linewidth=1)
 
     # I think 3D graphs are more clear if you add shadows beneath the features
     # (i.e., at the same x and y, but at the minimum z value). The shadows help
@@ -1024,6 +1065,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     else:
         plt.show()
 
+
 def not_boolean_debug_message(input_name, name, default_value):
     """
     Returns string delivering debug message regarding a variable not being
@@ -1036,6 +1078,7 @@ def not_boolean_debug_message(input_name, name, default_value):
                    'boolean type. Using the default value of {}.']).format(
                        input_name, name, default_value)
     return msg
+
 
 def not_of_length_2_message(input_name, name):
     """
@@ -1050,6 +1093,7 @@ def not_of_length_2_message(input_name, name):
         'of length 2. Check your inputs in the .yaml file.']).format(input_name,
                                                                      name)
     return msg
+
 
 def first_present_second_missing_message(input_name1, input_name2, name):
     """
@@ -1070,6 +1114,7 @@ def first_present_second_missing_message(input_name1, input_name2, name):
                    'but {} was not. {}']).format(input_name1, input_name2,
                                                  name, extra_message)
     return msg
+
 
 def not_between_message(input_name, low_bound, upper_bound, name,
                         units='degrees', value_is_list=True):
@@ -1129,6 +1174,11 @@ def read_strata_plot_yaml_input(yaml_data, name):
     strata_plot_data = yaml_data['Plots'][name]['Stratigraphy']
 
     if strata_plot_data is not None:
+        # Checks for and adds colors, alpha values, and labels provided for
+        # units. Excludes any invalid input provided.
+        yaml_input = iam_strata.check_color_alpha_label_yaml_input(
+            yaml_input, strata_plot_data, name)
+
         if 'FigureDPI' in strata_plot_data:
             yaml_input['dpi_input'] = strata_plot_data['FigureDPI']
 

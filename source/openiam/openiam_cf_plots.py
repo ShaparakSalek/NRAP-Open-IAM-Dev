@@ -12,6 +12,7 @@ except ImportError as err:
     print('Unable to load openiam module: {}'.format(err))
 
 
+STRAT_COL_FIG_SIZE = (6, 10)
 STRAT_FIG_SIZE = (12, 10)
 TIME_SERIES_FIG_SIZE = (13, 8)
 AOR_FIG_SIZE = (10, 8)
@@ -77,11 +78,15 @@ def process_plots(yaml_data, model_data, sm, s, output_list, analysis,
             iam_vis.map_plume_plot_ensemble(plots[p], p, sm, s, satm, time_array,
                                             output_dir, analysis=analysis)
 
+        if 'StratigraphicColumn' in plots[p]:
+            iam_vis.stratigraphic_column(
+                yaml_data, sm, name=p, savefig=save_filename, title=title,
+                figsize=tuple(plots[p].get('figsize', STRAT_COL_FIG_SIZE)))
+
         if 'Stratigraphy' in plots[p]:
             iam_vis.stratigraphy_plot(
-                yaml_data, model_data, sm, name=p,
-                savefig=save_filename, title=title, figsize=tuple(plots[p].get(
-                    'figsize', STRAT_FIG_SIZE)))
+                yaml_data, model_data, sm, name=p, savefig=save_filename,
+                title=title, figsize=tuple(plots[p].get('figsize', STRAT_FIG_SIZE)))
 
         if 'AoR' in plots[p]:
             iam_vis.area_of_review_plot(

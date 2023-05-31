@@ -10,6 +10,7 @@ import sys
 import os
 import logging
 import numpy as np
+from matplotlib.colors import is_color_like
 import pandas as pd
 
 
@@ -17,6 +18,55 @@ SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
 import openiam as iam
+
+
+# Functions in this file are used to generate the colors, alpha values, and
+# labels for different units.
+# Color used to plot the unit
+UNIT_COLOR_DICT = {
+    'ReservoirColor': [0.5, 0.5, 0.5],
+    'ShaleColor': [1, 0, 0],
+    'AquiferColor': [0, 0, 1],
+    }
+
+# Default well color and alpha values
+WELL_COLOR = [0, 0, 1]
+WELL_ALPHA = 1
+WELL_ALPHA_FILL = 0.75
+
+# This is used to scale how much higher the alpha of labels / lines is than
+# the alpha for filled areas:
+# alpha = alphaFill + ((1 - alphaFill) * ALPHA_SCALE_FACTOR)
+ALPHA_SCALE_FACTOR = 0.8
+
+# Alpha used when plotting unit labels and the lines on the edges of units
+UNIT_ALPHA_DICT = {
+    'ReservoirAlpha': 0.9,
+    'ShaleAlpha': 0.85,
+    'AquiferAlpha': 0.85,
+    }
+
+# Alpha used when plotting a filled in area
+UNIT_ALPHA_FILL_DICT = {
+    'ReservoirAlphaFill': 0.5,
+    'ShaleAlphaFill': 0.25,
+    'AquiferAlphaFill': 0.25,
+    }
+
+# Labels for each unit. This is used in stratigraphy_plot.py (thickness labels
+# are too long for that plot type).
+UNIT_LABEL_DICT = {
+    'ReservoirLabel': 'Reservoir',
+    'ShaleLabel': 'Shale {:.0f}',
+    'AquiferLabel': 'Aquifer {:.0f}',
+    }
+
+# Labels that include the unit thickness. This is used in stratigraphic_column.py.
+UNIT_LABEL_THICKNESS_DICT = {
+    'ReservoirLabel': 'Reservoir Thickness: {:.2f} m',
+    'ShaleLabel': 'Shale {:.0f} Thickness: {:.2f} m',
+    'AquiferLabel': 'Aquifer {:.0f} Thickness: {:.2f} m',
+    }
 
 DIP_DIRECTION_DEGREE_OPTIONS = [0, 90, 180, 270, 360]
 DIP_DIRECTION_OPTIONS = ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW']
@@ -174,7 +224,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 'in the LookupStratigraphy table must be to a component for ',
                 'the stratigraphy information to be used. The default value ',
                 'of 100 m will be used.'])
-            print(warning_msg)
             logging.debug(warning_msg)
             max_point_distance = 100.0
 
@@ -209,7 +258,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 'The number of shale layers went below the minimum value ',
                 'allowed at x = {} m and y = {} m. Setting the parameter ',
                 'to the minimum value.']).format(comp_x_val, comp_y_val)
-            print(debug_msg)
             logging.debug(debug_msg)
             shaleThickness_List = strata[0].pars_bounds['numberOfShaleLayers'][0]
 
@@ -218,7 +266,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 'The number of shale layers went above the maximum value ',
                 'allowed at x = {} m and y = {} m. Setting the parameter ',
                 'to the maximum value.']).format(comp_x_val, comp_y_val)
-            print(debug_msg)
             logging.debug(debug_msg)
             numShaleLayers = strata[0].pars_bounds['numberOfShaleLayers'][1]
 
@@ -235,7 +282,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 debug_msg = layer_thickness_bound_debug_message(
                     'shale {}'.format(shaleRef+1), 'minimum',
                     comp_x_val, comp_y_val, msg_option=2)
-                print(debug_msg)
                 logging.debug(debug_msg)
                 shaleThickness_List[shaleRef] = strata[0].pars_bounds['shaleThickness'][0]
 
@@ -243,7 +289,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 debug_msg = layer_thickness_bound_debug_message(
                     'shale {}'.format(shaleRef+1), 'maximum',
                     comp_x_val, comp_y_val, msg_option=2)
-                print(debug_msg)
                 logging.debug(debug_msg)
                 shaleThickness_List[shaleRef] = strata[0].pars_bounds['shaleThickness'][1]
 
@@ -266,7 +311,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 debug_msg = layer_thickness_bound_debug_message(
                     'aquifer {}'.format(shaleRef+1), 'minimum',
                     comp_x_val, comp_y_val, msg_option=2)
-                print(debug_msg)
                 logging.debug(debug_msg)
                 shaleThickness_List[shaleRef] = strata[0].pars_bounds['aquiferThickness'][0]
 
@@ -274,7 +318,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                 debug_msg = layer_thickness_bound_debug_message(
                     'aquifer {}'.format(shaleRef+1), 'maximum',
                     comp_x_val, comp_y_val, msg_option=2)
-                print(debug_msg)
                 logging.debug(debug_msg)
                 shaleThickness_List[shaleRef] = strata[0].pars_bounds['aquiferThickness'][1]
 
@@ -308,7 +351,7 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
                     'In the file {}, the entry for depth at x = {} m and ',
                     'y = {} m was not equal to the sum of the unit thicknesses at ',
                     'that location.']).format(file_name, comp_x_val, comp_y_val)
-                print(debug_msg)
+                logging.debug(debug_msg)
                 resDepth = (sum(shaleThickness_List) + sum(aquiferThickness_List))
         else:
             resDepth = (sum(shaleThickness_List) + sum(aquiferThickness_List))
@@ -412,7 +455,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
         if shaleThickness > strata[0].pars_bounds['shaleThickness'][1]:
             debug_msg = layer_thickness_bound_debug_message(
                 'shale {}'.format(numShaleLayers), 'maximum', comp_x_val, comp_y_val)
-            print(debug_msg)
             logging.debug(debug_msg)
             extra_depth_increase = shaleThickness - strata[0].pars_bounds[
                 'shaleThickness'][1]
@@ -477,7 +519,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
             if aquiferThickness > strata[0].pars_bounds['aquiferThickness'][1]:
                 debug_msg = layer_thickness_bound_debug_message(
                     'aquifer {}'.format(shaleRef+1), 'maximum', comp_x_val, comp_y_val)
-                print(debug_msg)
                 logging.debug(debug_msg)
                 extra_depth_increase = aquiferThickness \
                     - strata[0].pars_bounds['aquiferThickness'][1]
@@ -516,7 +557,6 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
             if shaleThickness > strata[0].pars_bounds['shaleThickness'][1]:
                 debug_msg = layer_thickness_bound_debug_message(
                     'shale {}'.format(shaleRef+1), 'maximum', comp_x_val, comp_y_val)
-                print(debug_msg)
                 logging.debug(debug_msg)
                 extra_depth_increase = shaleThickness \
                     - strata[0].pars_bounds['shaleThickness'][1]
@@ -966,7 +1006,6 @@ def update_stratigraphy_by_strike_and_dip(numberOfShaleLayers, shaleThicknessLis
     if shaleThickness > strataRefPoint.pars_bounds['shaleThickness'][1]:
         debug_msg = layer_thickness_bound_debug_message(
             'shale {}'.format(numberOfShaleLayers), 'maximum', location_x, location_y)
-        print(debug_msg)
         logging.debug(debug_msg)
         additional_depth_increase = shaleThickness - strataRefPoint.pars_bounds[
             'shaleThickness'][1]
@@ -1003,7 +1042,6 @@ def update_stratigraphy_by_strike_and_dip(numberOfShaleLayers, shaleThicknessLis
         if aquiferThickness > strataRefPoint.pars_bounds['aquiferThickness'][1]:
             debug_msg = layer_thickness_bound_debug_message(
                 'aquifer {}'.format(shaleRef+1), 'maximum', location_x, location_y)
-            print(debug_msg)
             logging.debug(debug_msg)
             additional_depth_increase = aquiferThickness \
                 - strataRefPoint.pars_bounds['aquiferThickness'][1]
@@ -1037,7 +1075,6 @@ def update_stratigraphy_by_strike_and_dip(numberOfShaleLayers, shaleThicknessLis
         if shaleThickness > strataRefPoint.pars_bounds['shaleThickness'][1]:
             debug_msg = layer_thickness_bound_debug_message(
                 'shale {}'.format(shaleRef+1), 'maximum', location_x, location_y)
-            print(debug_msg)
             logging.debug(debug_msg)
             additional_depth_increase = shaleThickness \
                 - strataRefPoint.pars_bounds['shaleThickness'][1]
@@ -1057,7 +1094,6 @@ def update_stratigraphy_by_strike_and_dip(numberOfShaleLayers, shaleThicknessLis
     if reservoirThicknessUpdated < strataRefPoint.pars_bounds['reservoirThickness'][0]:
         debug_msg = layer_thickness_bound_debug_message(
             'reservoir', 'minimum', location_x, location_y, msg_option=2)
-        print(debug_msg)
         logging.debug(debug_msg)
         reservoirThicknessUpdated = strataRefPoint.pars_bounds[
             'reservoirThickness'][0]
@@ -1065,7 +1101,6 @@ def update_stratigraphy_by_strike_and_dip(numberOfShaleLayers, shaleThicknessLis
     if reservoirThicknessUpdated > strataRefPoint.pars_bounds['reservoirThickness'][1]:
         debug_msg = layer_thickness_bound_debug_message(
             'reservoir', 'maximum', location_x, location_y, msg_option=2)
-        print(debug_msg)
         logging.debug(debug_msg)
         reservoirThicknessUpdated = strataRefPoint.pars_bounds[
             'reservoirThickness'][1]
@@ -1714,8 +1749,7 @@ def get_lut_stratigraphy_dict(file_name, file_directory, comp_locX, comp_locY,
             'valid entry for numberOfShaleLayers. Enter the parameter in its ',
             'own column with only one row. The default value for ',
             'numberOfShaleLayers will be used.'])
-        print(warning_msg)
-        logging.debug(warning_msg)
+        logging.warning(warning_msg)
 
     x_values = data.x
     x_values = x_values.values
@@ -1932,3 +1966,250 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
         unitDepth += reservoirThickness
 
     return unitDepth
+
+
+def check_color_alpha_label_yaml_input(yaml_input, strata_plot_data, name):
+    """
+    Function that checks if color, alpha, or labels provided for stratigraphic
+    units in a .yaml file are acceptable. If the input is recognized and deemed
+    acceptable, the input is added to yaml_input. If not, the input is excluded
+    from yaml_input and a warning message is logged and printed.
+
+    :param yaml_input: Dictionary of keys provided for the plotting function
+        used (e.g., stratigraphy_plot() or stratigraphic_column).
+    :type yaml_input: dict
+
+    :param strata_plot_data: Input values provided for the plot in the Plots
+        section of a .yaml file.
+    :type strata_plot_data: dict
+
+    :param name: Name of the plot
+    :type name: str
+    """
+    alphaNames = ['ReservoirAlpha', 'ShaleAlpha', 'AquiferAlpha', 'WellAlpha']
+
+    alphaNames += ['Shale' + str(num) + 'Alpha' for num in range(1, 31)]
+    alphaNames += ['Aquifer' + str(num) + 'Alpha' for num in range(1, 30)]
+
+    colorNames = ['ReservoirColor', 'ShaleColor', 'AquiferColor', 'WellColor']
+
+    colorNames += ['Shale' + str(num) + 'Color' for num in range(1, 31)]
+    colorNames += ['Aquifer' + str(num) + 'Color' for num in range(1, 30)]
+
+    labelNames = ['ReservoirLabel', 'WellLabel']
+
+    labelNames += ['Shale' + str(num) + 'Label' for num in range(1, 31)]
+    labelNames += ['Aquifer' + str(num) + 'Label' for num in range(1, 30)]
+
+    for input_type in alphaNames:
+        if input_type in strata_plot_data:
+            try:
+                if 0 < strata_plot_data[input_type] <= 1:
+                    # The alpha input corresponds with the alpha used for filled areas
+                    yaml_input[input_type + 'Fill'] = strata_plot_data[input_type]
+
+                    # The alpha value used for lines is higher
+                    yaml_input[input_type] = strata_plot_data[input_type] + (
+                        (1 - strata_plot_data[input_type]) * ALPHA_SCALE_FACTOR)
+                else:
+                    color_alpha_label_error_msg(
+                        input_type, strata_plot_data[input_type], 'alpha', name)
+            except:
+                color_alpha_label_error_msg(
+                    input_type, strata_plot_data[input_type], 'alpha', name)
+
+    for input_type in colorNames:
+        if input_type in strata_plot_data:
+            if isinstance(strata_plot_data[input_type], str):
+                if is_color_like(strata_plot_data[input_type]):
+                    yaml_input[input_type] = strata_plot_data[input_type]
+                else:
+                    color_alpha_label_error_msg(
+                        input_type, strata_plot_data[input_type], 'str', name)
+
+            elif isinstance(strata_plot_data[input_type], list):
+                if not is_color_like(strata_plot_data[input_type]):
+                    color_alpha_label_error_msg(
+                        input_type, strata_plot_data[input_type], 'list', name)
+                else:
+                    yaml_input[input_type] = strata_plot_data[input_type]
+            else:
+                color_alpha_label_error_msg(
+                    input_type, strata_plot_data[input_type], 'neither', name)
+
+    for input_type in labelNames:
+        if input_type in strata_plot_data:
+            if isinstance(strata_plot_data[input_type], str):
+                yaml_input[input_type] = strata_plot_data[input_type]
+            else:
+                color_alpha_label_error_msg(
+                    input_type, strata_plot_data[input_type], 'label', name)
+
+    return yaml_input
+
+
+def color_alpha_label_error_msg(input_type, input_value, error_type, name):
+    """
+    Function that logs and prints an error message when invalid input is
+    provided for a unit color, unit alpha, or unit label.
+    """
+    err_msg_pt1 = ''.join(['The ', input_type, ' input provided for the figure ',
+                           name, '(', input_type, ':', ' ', input_value, ')'])
+    if error_type == 'alpha':
+        err_msg_pt2 = ''.join([' was not a value between 0 and 1.'])
+    elif error_type == 'str':
+        err_msg_pt2 = ''.join([' was a string input, but not one that matplotlib ',
+                               'recognized as a color (e.g., "r", "teal", ',
+                               'or "#030764").'])
+    elif error_type == 'list':
+        err_msg_pt2 = ''.join([' was a list, but not a list of length three ',
+                               'that matplotlib recognized as a color (e.g., ',
+                               '"[1, 0, 0]" or "[0.67, 0.33, 0]"). The three ',
+                               'values in the list must be between 0 and 1 ',
+                               '(for fractions of [Red, Green, Blue]).'])
+    elif error_type == 'neither':
+        err_msg_pt2 = ''.join([' was neither a string nor a list that matplotlib ',
+                               'recognized as a color (e.g., "r", "teal", "#030764", ',
+                               '"[1, 0, 0]," or "[0.67, 0.33, 0]"). If given as ',
+                               'a list, the three values in the list must be ',
+                               'between 0 and 1 (for fractions of [Red, Green, Blue]).'])
+    elif error_type == 'label':
+        err_msg_pt2 = ''.join([' was not a string. Only string inputs (e.g., ',
+                               '"AZMI", "BGWP", or "Freshwater Aquifer") can be ',
+                               'provided for unit labels. '])
+
+    err_msg_pt3 = ' The figure {} will use the default approach for setting {}.'.format(
+        name, input_type)
+
+    err_msg = err_msg_pt1 + err_msg_pt2 + err_msg_pt3
+
+    logging.debug(err_msg)
+
+
+def get_plotting_setup_for_units(strat_plot_yaml_input, numShaleLayers,
+                                 reservoirThickness=None, shaleThicknessList=None,
+                                 aquiferThicknessList=None, include_thickness=False):
+    """
+    Function that provides the colors, alphas, and labels for each unit. The
+    input provided in strat_plot_yaml_input is used if present. Otherwise,
+    default values are used.
+
+    :param strata_plot_data: Dictionary containing input values for a plot.
+        This dictionary should already have been updated with the function
+        check_color_alpha_label_yaml_input().
+    :type strata_plot_data: dict
+
+    :param numShaleLayers: Number of shale layers.
+    :type numShaleLayers: int
+
+    :param reservoirThickness: Thickness of the reservoir (m)
+    :type reservoirThickness: int or float
+
+    :param shaleThicknessList: List of shale thicknesses (m)
+    :type shaleThicknessList: list
+
+    :param aquiferThicknessList: List of aquifer thicknesses (m)
+    :type aquiferThicknessList: list
+    """
+    reservoirColor = strat_plot_yaml_input.get(
+        'ReservoirColor', UNIT_COLOR_DICT['ReservoirColor'])
+    reservoirAlpha = strat_plot_yaml_input.get(
+        'ReservoirAlpha', UNIT_ALPHA_DICT['ReservoirAlpha'])
+    reservoirAlphaFill = strat_plot_yaml_input.get(
+        'ReservoirAlphaFill', UNIT_ALPHA_FILL_DICT['ReservoirAlphaFill'])
+    if include_thickness and not reservoirThickness is None:
+        reservoirLabel = strat_plot_yaml_input.get(
+            'ReservoirLabel', UNIT_LABEL_THICKNESS_DICT['ReservoirLabel'].format(
+                reservoirThickness))
+    else:
+        reservoirLabel = strat_plot_yaml_input.get(
+            'ReservoirLabel', UNIT_LABEL_DICT['ReservoirLabel'])
+
+    wellColor = strat_plot_yaml_input.get('WellColor', WELL_COLOR)
+    wellAlpha = strat_plot_yaml_input.get('WellAlpha', WELL_ALPHA)
+    wellAlphaFill = strat_plot_yaml_input.get('WellAlphaFill', WELL_ALPHA_FILL)
+    wellLabel = strat_plot_yaml_input.get('WellLabel', None)
+
+    shaleColor = [None] * numShaleLayers
+    shaleAlpha = [None] * numShaleLayers
+    shaleAlphaFill = [None] * numShaleLayers
+    shaleLabel = [None] * numShaleLayers
+
+    aquiferColor = [None] * (numShaleLayers - 1)
+    aquiferAlpha = [None] * (numShaleLayers - 1)
+    aquiferAlphaFill = [None] * (numShaleLayers - 1)
+    aquiferLabel = [None] * (numShaleLayers - 1)
+
+    for shaleRef in range(0, numShaleLayers):
+        shaleColor[shaleRef] = strat_plot_yaml_input.get(
+            'ShaleColor', UNIT_COLOR_DICT['ShaleColor'])
+
+        # More specific color input overrides the more general color input
+        if 'Shale{:.0f}Color'.format(shaleRef + 1) in strat_plot_yaml_input:
+            shaleColor[shaleRef] = strat_plot_yaml_input[
+                'Shale{:.0f}Color'.format(shaleRef + 1)]
+
+        shaleAlpha[shaleRef] = strat_plot_yaml_input.get(
+            'ShaleAlpha', UNIT_ALPHA_DICT['ShaleAlpha'])
+
+        shaleAlphaFill[shaleRef] = strat_plot_yaml_input.get(
+            'ShaleAlphaFill', UNIT_ALPHA_FILL_DICT['ShaleAlphaFill'])
+
+        # More specific alpha input overrides the more general color input
+        if 'Shale{:.0f}Alpha'.format(shaleRef + 1) in strat_plot_yaml_input:
+            shaleAlpha[shaleRef] = strat_plot_yaml_input[
+                'Shale{:.0f}Alpha'.format(shaleRef + 1)]
+
+        if 'Shale{:.0f}AlphaFill'.format(shaleRef + 1) in strat_plot_yaml_input:
+            shaleAlphaFill[shaleRef] = strat_plot_yaml_input[
+                'Shale{:.0f}AlphaFill'.format(shaleRef + 1)]
+
+        if include_thickness and not shaleThicknessList is None:
+            shaleLabel[shaleRef] = strat_plot_yaml_input.get(
+                'Shale{:.0f}Label'.format(shaleRef + 1),
+                UNIT_LABEL_THICKNESS_DICT['ShaleLabel'].format(
+                    shaleRef + 1, shaleThicknessList[shaleRef]))
+        else:
+            shaleLabel[shaleRef] = strat_plot_yaml_input.get(
+                'Shale{:.0f}Label'.format(shaleRef + 1),
+                UNIT_LABEL_DICT['ShaleLabel'].format(shaleRef + 1))
+
+        # Get input for aquifers
+        if shaleRef != (numShaleLayers - 1):
+            aquiferColor[shaleRef] = strat_plot_yaml_input.get(
+                'Aquifer{:.0f}Color'.format(shaleRef + 1), UNIT_COLOR_DICT['AquiferColor'])
+
+            # More specific color input overrides the more general color input
+            if 'Aquifer{:.0f}Color'.format(shaleRef + 1) in strat_plot_yaml_input:
+                aquiferColor[shaleRef] = strat_plot_yaml_input[
+                    'Aquifer{:.0f}Color'.format(shaleRef + 1)]
+
+            aquiferAlpha[shaleRef] = strat_plot_yaml_input.get(
+                'AquiferAlpha', UNIT_ALPHA_DICT['AquiferAlpha'])
+
+            aquiferAlphaFill[shaleRef] = strat_plot_yaml_input.get(
+                'AquiferAlphaFill', UNIT_ALPHA_FILL_DICT['AquiferAlphaFill'])
+
+            # More specific alpha input overrides the more general color input
+            if 'Aquifer{:.0f}Alpha'.format(shaleRef + 1) in strat_plot_yaml_input:
+                aquiferAlpha[shaleRef] = strat_plot_yaml_input[
+                    'Aquifer{:.0f}Alpha'.format(shaleRef + 1)]
+
+            if 'Aquifer{:.0f}AlphaFill'.format(shaleRef + 1) in strat_plot_yaml_input:
+                aquiferAlphaFill[shaleRef] = strat_plot_yaml_input[
+                    'Aquifer{:.0f}AlphaFill'.format(shaleRef + 1)]
+
+            if include_thickness and not aquiferThicknessList is None:
+                aquiferLabel[shaleRef] = strat_plot_yaml_input.get(
+                    'Aquifer{:.0f}Label'.format(shaleRef + 1),
+                    UNIT_LABEL_THICKNESS_DICT['AquiferLabel'].format(
+                        shaleRef + 1, aquiferThicknessList[shaleRef]))
+            else:
+                aquiferLabel[shaleRef] = strat_plot_yaml_input.get(
+                    'Aquifer{:.0f}Label'.format(shaleRef + 1),
+                    UNIT_LABEL_DICT['AquiferLabel'].format(shaleRef + 1))
+
+    return reservoirColor, reservoirAlpha, reservoirAlphaFill, reservoirLabel, \
+        shaleColor, shaleAlpha, shaleAlphaFill, shaleLabel, \
+            aquiferColor, aquiferAlpha, aquiferAlphaFill, aquiferLabel, \
+                wellColor, wellAlpha, wellAlphaFill, wellLabel
