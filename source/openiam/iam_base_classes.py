@@ -224,7 +224,8 @@ class SystemModel(matk):
         return obs_list
 
     def collect_gridded_observations_as_time_series(
-            self, cm_object, obs_nm, output_folder, indices=None, rlzn_number=0, save_type='npz'):
+            self, cm_object, obs_nm, output_folder, indices=None,
+            rlzn_number=0, save_type='npz'):
         """
         Collect all observations of the component with the provided name.
 
@@ -244,13 +245,17 @@ class SystemModel(matk):
             which corresponds to these indices
         :type indices: list
 
-        :param rlzn_number: realization number for which the observation 
-                            values need to be returned. By default, the parameter value is 0 which corresponds
-                            to deterministic run with method forward, i.e., value of 0 is reserved only for non-stochastic simulations. For stochastic simulations the value of the parameter should be greater or equal than 1 up to the number of realizations run for the given system model.
+        :param rlzn_number: realization number for which the observation
+            values need to be returned. By default, the parameter value is 0
+            which corresponds to deterministic run with method forward,
+            i.e., value of 0 is reserved only for non-stochastic simulations.
+            For stochastic simulations the value of the parameter should be
+            greater or equal than 1 up to the number of realizations run
+            for the given system model.
         :type rlzn_number: int
-            
-        :param save_type: file format for save of gridded observation,
-                          currently supports 'npz' (default), 'csv', and 'npy'
+
+        :param save_type: file format to be used to save gridded observations.
+            Currently supported values are 'npz' (default), 'csv', and 'npy'.
         :type save_type: str
 
         :returns: numpy array of values of observations
@@ -283,7 +288,7 @@ class SystemModel(matk):
             raise FileNotFoundError(err_msg)
 
         # Get data and determine shape of the data for the first index in ind_list
-        d = self.get_gridded_observation_file(file_path, save_type)
+        d = self.get_gridded_observation_file(file_path, file_extension=save_type)
         data_shape = d.shape
 
         # Made obs_list a numpy array to provide opportunity to modify outputs
@@ -307,7 +312,7 @@ class SystemModel(matk):
                     'data files for gridded observation {}.']).format(file_path, obs_nm)
                 raise FileNotFoundError(err_msg)
             # Get data
-            d = self.get_gridded_observation_file(file_path, save_type)
+            d = self.get_gridded_observation_file(file_path, file_extension=save_type)
             # Copy to the obs_list array
             obs_list[ind, :] = d
 
@@ -606,7 +611,7 @@ class SystemModel(matk):
                     if k in cm.linkobs:
                         cm.linkobs[k].sim = val
 
-                    
+
                     # Process gridded observations
                     if k in cm.grid_obs:
                         # Get file type to save gridded observations to
@@ -615,39 +620,18 @@ class SystemModel(matk):
                         t_ind = sm_kwargs['time_index']
                         if t_ind in cm.grid_obs[k].time_indices:
                             if job_number is None:
-                                filename = '_'.join([
-                                    cm.name, k, 'sim_0', 'time_'+str(t_ind)])+'.'+save_type
+                                filename = '_'.join([cm.name, k, 'sim_0',
+                                                     'time_'+str(t_ind)])+'.'+save_type
                             else:
                                 filename = '_'.join([
                                     cm.name, k,
                                     'sim_'+str(job_number),
                                     'time_'+str(t_ind)])+'.'+save_type
 
-                            # Once filename is defined, save data in the file
-                            if save_type == 'npz':
-                            
-                                # Save several arrays into a single file in compressed .npz format.
-                            
-                                np.savez_compressed(
-                                    os.path.join(cm.grid_obs[k].output_dir, filename),
-                                    data=np.asarray(val))
-                                    
-                            elif save_type == 'csv':
+                            self.save_gridded_observation(
+                                os.path.join(cm.grid_obs[k].output_dir, filename),
+                                val, file_extension=save_type)
 
-                                # Save several arrays into a single file in CSV format.
-                            
-                                np.savetxt(
-                                    os.path.join(cm.grid_obs[k].output_dir, filename),
-                                    np.asarray(val), delimiter=',')
-                                    
-                            elif save_type == 'npy':
-                            
-                                # Save several arrays into a single file in Numpy ('npy') format.
-                            
-                                np.save(
-                                    os.path.join(cm.grid_obs[k].output_dir, filename),
-                                    np.asarray(val))
-                                    
                     # We don't want to provide gridded observation
                     # in the output of single_step_model so we mark key k for deletion
                     if k in cm.grid_obs_keys:
@@ -744,18 +728,71 @@ class SystemModel(matk):
         """
         if cm_type not in self.ml_models_components:
             self.ml_models_components.__setitem__(cm_type, cm_object)
-    
-    def get_gridded_observation_file(self,file_path,save_type='npz'):
-        if save_type == 'npz':
+
+    @staticmethod
+    def get_gridded_observation_file(file_path, file_extension=None):
+        """
+        Load file with data using method dependent on the file type.
+
+        :param file_path: Path to the file with data to be loaded.
+        :type file_path: str
+
+        :param file_extension: Extension of file to be loaded. The default is 'npz'.
+        :type file_extension: str
+
+        :returns: data, numpy.ndarray
+            Array containing data loaded from file.
+
+        """
+        if file_extension is None:
+            # Find occurence of last period in file name and assume that what follows
+            # is a file extension
+            extension_index = file_path.rfind('.') + 1
+            file_extension = file_path[extension_index:]
+
+        if file_extension == 'npz':
             data_npz = np.load(file_path)
-            data=data_npz['data']
+            data = data_npz['data']
             data_npz.close()
-        elif save_type == 'csv':
-            data = np.loadtxt(file_path,delimiter=',')
-        elif save_type == 'npy':
+        elif file_extension == 'csv':
+            data = np.loadtxt(file_path, delimiter=',')
+        elif file_extension == 'npy':
             data = np.load(file_path)
-        
+        else:
+            err_msg = 'File extension {} is not supported.'.format(file_extension)
+            raise ValueError(err_msg)
+
         return data
+
+    @staticmethod
+    def save_gridded_observation(filename, grid_obs_data, file_extension='npz'):
+        """
+        Save gridded observation data in a selected format.
+
+        :param filename: Path to the file for data to be saved
+        :type filename: str
+
+        :param grid_obs_data: Data to be saved
+        :type grid_obs_data: Array or matrix like.
+
+        :param file_extension: File format to be used to save data
+        :type file_extension: str
+
+        :returns: None
+
+        """
+        # Once filename is defined, save data in the file
+        if file_extension == 'npz':
+            # Save several arrays into a single file in compressed .npz format.
+            np.savez_compressed(filename, data=np.asarray(grid_obs_data))
+
+        elif file_extension == 'csv':
+            # Save several arrays into a single file in CSV format.
+            np.savetxt(filename, np.asarray(grid_obs_data), delimiter=',')
+
+        elif file_extension == 'npy':
+            # Save several arrays into a single file in Numpy ('npy') format.
+            np.save(filename, np.asarray(grid_obs_data))
 
 
 class ComponentModel():
@@ -1294,7 +1331,7 @@ class ComponentModel():
         :param output_dir: directory where the observations will be stored
             as compressed binary files
         :type output_dir: str
-        
+
         :param save_type: file format for save of gridded observation,
                           currently supports 'npz' (default), 'csv', and 'npy'
         :type save_type: str

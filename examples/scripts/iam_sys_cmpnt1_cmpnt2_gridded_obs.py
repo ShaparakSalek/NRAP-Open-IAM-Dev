@@ -151,14 +151,14 @@ if __name__ == "__main__":
     # how to read the content of file with gridded observation
     print('Selected content of saved files')
     data = {}
-    
+
     for ind, val in enumerate(grid_obs_ind):
-        #load gridded observations based on save data type
+        # Load gridded observations based on save data type
         filename = '_'.join(['cm1', 'plane', 'sim_0', 'time_'+str(val)])+'.'+grid_save_type
         file_path = os.sep.join(['test_output', filename])
-        d = sm.get_gridded_observation_file(file_path,grid_save_type)
+        d = sm.get_gridded_observation_file(file_path)
         data[ind] = d[64]
-        print('Data from file '+filename, data[ind])
+        print('Data from file ' + filename, data[ind])
 
     # Extract data using collect_gridded_observations_as_time_series method
     data_to_comp = sm.collect_gridded_observations_as_time_series(

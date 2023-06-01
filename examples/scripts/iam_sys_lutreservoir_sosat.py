@@ -54,7 +54,7 @@ if __name__ == "__main__":
     num_years = 50
     time_array = 365.25 * np.arange(0.0, num_years+1)
     seal_model_kwargs = {'time_array': time_array} # time is given in days
-    
+
     # Define file type for saving gridded observations
     grid_save_type = 'npz'
 
@@ -122,7 +122,8 @@ if __name__ == "__main__":
         os.mkdir(output_dir)
 
     # Add gridded observations of the reservoir component
-    ltres.add_grid_obs('pressure', constr_type='array', output_dir=output_dir, save_type=grid_save_type)
+    ltres.add_grid_obs('pressure', constr_type='array',
+                       output_dir=output_dir, save_type=grid_save_type)
 
     print('Starting NRAP-Open-IAM simulation.')
     # Run forward simulation

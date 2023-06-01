@@ -24,10 +24,10 @@ if __name__ == "__main__":
 
     # Define output directory
     output_directory = os.sep.join(['..', '..', 'output', 'scripts'])
-    
+
     # Define file type for saving gridded observations
     grid_save_type = 'npz'
-    
+
     # Create output directory if needed
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -77,7 +77,8 @@ if __name__ == "__main__":
     ltres.add_par('index', value=index_value, vary=False)
     ltres_obs = ['pressure', 'CO2saturation']
     for obs_nm in ltres_obs:
-        ltres.add_grid_obs(obs_nm, constr_type='array', output_dir=output_directory, save_type=grid_save_type)
+        ltres.add_grid_obs(obs_nm, constr_type='array',
+                           output_dir=output_directory, save_type=grid_save_type)
         # Add observations of reservoir component model to be linked
         ltres.add_obs_to_be_linked(obs_nm, obs_type='grid', constr_type='array')
 
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     max_thickness = 460.0
     t_sampler.add_par('maxThickness', value=max_thickness, vary=False)
     t_sampler.add_grid_obs('thickness', constr_type='array', index=[0],
-                            output_dir=output_directory, save_type=grid_save_type)
+                           output_dir=output_directory, save_type=grid_save_type)
 
     # Setup permeability sampler
     perm_sampler = sm.add_component_model_object(
@@ -163,8 +164,8 @@ if __name__ == "__main__":
 
     # Add gridded observations
     for obs_nm in shc_grid_obs:
-        shc.add_grid_obs(
-            obs_nm, constr_type='array', output_dir=output_directory, save_type=grid_save_type)
+        shc.add_grid_obs(obs_nm, constr_type='array',
+                         output_dir=output_directory, save_type=grid_save_type)
 
     print('Starting simulation...')
     sm.forward()
@@ -181,10 +182,12 @@ if __name__ == "__main__":
             shc, obs_nm, output_directory, rlzn_number=0, save_type=grid_save_type)
 
     outputs['thickness'] = sm.collect_gridded_observations_as_time_series(
-        t_sampler, 'thickness', output_directory, indices=[0], rlzn_number=0, save_type=grid_save_type)
+        t_sampler, 'thickness', output_directory, indices=[0], rlzn_number=0,
+        save_type=grid_save_type)
 
     outputs['permeability'] = sm.collect_gridded_observations_as_time_series(
-        perm_sampler, 'permeability', output_directory, indices=[0], rlzn_number=0, save_type=grid_save_type)
+        perm_sampler, 'permeability', output_directory, indices=[0], rlzn_number=0,
+        save_type=grid_save_type)
 
     # Collect scalar observations
     for obs_nm in shc_scalar_obs:
