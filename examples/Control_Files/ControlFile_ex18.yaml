@@ -1,39 +1,39 @@
 # OpenIAM Control File Example 18
 #
-# This example demonstrates the use of a FaultFlow component 
-# linked to a LookupTableReservoir component. It also demonstrates 
-# the use of the GriddedMetric plot type. This plot type creates 
-# map-view images of gridded output. Separate figures are made for 
-# different model times. Specific times (in years) can be provided 
-# as a list through the TimeList entry (e.g., 'TimeList: [1, 5, 10, 25, 50]'). 
-# Otherwise, the word 'All' can be provided for TimeList, causing 
-# one figure to be created for each model time. If TimeList is not 
-# provided, the default value is All. If SaveCSVFilesis set to True 
-# (the default setting), a .csv file containing the results used 
-# in the plots will be created for each figure made. Here, SaveCSVFiles 
+# This example demonstrates the use of a FaultFlow component
+# linked to a LookupTableReservoir component. It also demonstrates
+# the use of the GriddedMetric plot type. This plot type creates
+# map-view images of gridded output. Separate figures are made for
+# different model times. Specific times (in years) can be provided
+# as a list through the TimeList entry (e.g., 'TimeList: [1, 5, 10, 25, 50]').
+# Otherwise, the word 'All' can be provided for TimeList, causing
+# one figure to be created for each model time. If TimeList is not
+# provided, the default value is All. If SaveCSVFilesis set to True
+# (the default setting), a .csv file containing the results used
+# in the plots will be created for each figure made. Here, SaveCSVFiles
 # is set to False because of the large number of figures made.
 #
-# The name(s) of the component(s) that produce the gridded output 
-# must be entered under ComponentNameList. Here, the name for the 
-# FaultFlow component is Fault1, so the plot entry includes 
-# 'ComponentNameList: [Fault1].' The name of the gridded output to 
-# plot must be give under the entry 'MetricName.' Here, the output used 
-# is 'mass_CO2_aquifer.' Note that the components in ComponentNameList 
-# must produce the metric used. Both ComponentNameList and MetricName 
+# The name(s) of the component(s) that produce the gridded output
+# must be entered under ComponentNameList. Here, the name for the
+# FaultFlow component is Fault1, so the plot entry includes
+# 'ComponentNameList: [Fault1].' The name of the gridded output to
+# plot must be given under the entry 'MetricName.' Here, the output used
+# is 'mass_CO2_aquifer.' Note that the components in ComponentNameList
+# must produce the metric used. Both ComponentNameList and MetricName
 # are required entries for the GriddedMetric plot type.
 #
-# Note that because this simulation uses Latin Hypercube Sampling (lhs), 
-# there are 10 realizations of the simulation (siz: 10). The GriddedMetric 
-# plot type can only display the results for a single realization. The 
-# realization used can be specified with the 'Realization' entry. This entry 
-# uses the indexing rules in python, so it can range from 0 for the first 
-# realization to N-1 for the last realization (where N is the total number 
-# of realizations - here, 10). If Realization entry is not provided, the 
+# Note that because this simulation uses Latin Hypercube Sampling (lhs),
+# there are 10 realizations of the simulation (siz: 10). The GriddedMetric
+# plot type can only display the results for a single realization. The
+# realization used can be specified with the 'Realization' entry. This entry
+# uses the indexing rules in python, so it can range from 0 for the first
+# realization to N-1 for the last realization (where N is the total number
+# of realizations - here, 10). If Realization entry is not provided, the
 # default setting of 'Realization: 0' will be used.
 #
-# Note that the GriddedMetric plots will show the CO2_aquifer results from 
-# all of the faults used (in one of the ten model realizations). In contrast, 
-# Plot6, Plot7, and Plot8 each show the CO2_aquifer results for one of the 
+# Note that the GriddedMetric plots will show the CO2_aquifer results from
+# all of the faults used (in one of the ten model realizations). In contrast,
+# Plot6, Plot7, and Plot8 each show the CO2_aquifer results for one of the
 # separate segments (with results from all ten model realizations).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
@@ -172,13 +172,13 @@ Plots:
             MetricName: CO2_aquifer
             Realization: 0
             FigureDPI: 300
-            TimeList: All # [1, 5, 10, 25, 50]
+            TimeList:  [1, 5, 10, 25, 50] # All
             SaveCSVFiles: False
             PlotInjectionSites: False
-            # InjectionCoordx: 4.68e+04      # Remove the '#' symbols in front of these 
+            # InjectionCoordx: 4.68e+04      # Remove the '#' symbols in front of these
             # InjectionCoordy: 5.11e+04      # if you set PlotInjectionSites to True
-            SpecifyXandYLims:        
+            SpecifyXandYLims:
                 xLims: [38750, 40500]
                 yLims: [48266, 48400]
-            EqualAxes: False     # If EqualAxes is set to the default of True, the 
+            EqualAxes: False     # If EqualAxes is set to the default of True, the
                                  # limits specified with xLims and yLims will not be used

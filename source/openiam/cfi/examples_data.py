@@ -17,7 +17,7 @@ GUI_EXAMPLES = [
     '10_LHS_MSW_GENAQ.OpenIAM',
     '11_LHS_AR_CWWR.OpenIAM',
     '12_LHS_FL.OpenIAM',
-    '13_13_Forward_TR.OpenIAM',
+    '13_Forward_TR.OpenIAM',
     ]
 
 CFI_EXAMPLES = {
@@ -46,12 +46,12 @@ CFI_EXAMPLES = {
     '15': 'LUT reservoir, Multisegmented wellbore (multiple locations), FutureGen2 AZMI, LHS',
     '16': 'Plume stability analysis, parstudy',
     '17': 'Fault flow, forward, dyn_pars: arrays',
-    '18': 'LUT reservoir, fault flow, LHS',
-    '19': 'LUT reservoir, seal horizon, LHS',
+    '18': 'LUT reservoir, fault flow, GriddedMetric plot, LHS',
+    '19': 'LUT reservoir, seal horizon, GriddedMetric plot, LHS',
     '20': 'Analytical reservoir, LHS',
     '21': 'LUT reservoir, Multisegmented wellbore, Deep alluvium aquifer (ML), forward',
     '22': 'Chemical well sealing, forward',
-    '23': 'LUT reservoir, Seal Horizon, forward',
+    '23': 'LUT reservoir, Seal Horizon, GriddedMetric plot, forward',
     '24': 'LUT reservoir, Multisegmented wellbore, Generic Aquifer, forward',
     '25': 'Multisegmented wellbore, Generic Aquifer, LHS, dyn_pars: arrays',
     '26': ''.join(['LUT reservoir, Multisegmented wellbore (multiple locations), ',

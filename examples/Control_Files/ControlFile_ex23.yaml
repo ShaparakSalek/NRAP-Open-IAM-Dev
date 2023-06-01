@@ -2,8 +2,8 @@
 #
 # This example demonstrates the uses of the SealHorizon
 # component in a deterministic simulation ('Analysis: forward').
-# Results for specific years (0, 1, 10, 20, 30, 40, and 50) 
-# are displayed with the GriddedMetric plot type. This plot type 
+# Results for specific years (0, 1, 10, 20, 30, 40, and 50)
+# are displayed with the GriddedMetric plot type. This plot type
 # is further described in control file examples 18 and 19.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
@@ -15,7 +15,7 @@ ModelParams:
     Analysis: forward
     Components: [LUTReservoir1, SealLayer1]
     OutputDirectory: output/output_ex23_{datetime}
-    Logging: Debug
+    Logging: Info
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

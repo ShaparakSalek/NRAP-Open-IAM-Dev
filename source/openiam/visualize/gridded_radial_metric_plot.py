@@ -274,6 +274,7 @@ def gridded_radial_metric_plot(yaml_data, sm, output_dir,
                     z_data = np.load(ZCOORD_FILE_NAME.format(
                         comp_name=comp_name, sim_index=sim_index, t_index=0))
                     z = z_data['data']
+                    z_data.close()
                 else:
                     # Leaving this as a placeholder for obtaining the z output
                     # from future components that produce gridded radial data.
@@ -349,10 +350,12 @@ def gridded_radial_metric_plot(yaml_data, sm, output_dir,
                         r_data = np.load(RCOORD_FILE_NAME.format(
                             comp_name=comp_name, sim_index=sim_index, t_index=t_index))
                         r = r_data['data']
+                        r_data.close()
 
                         z_data = np.load(ZCOORD_FILE_NAME.format(
                             comp_name=comp_name, sim_index=sim_index, t_index=t_index))
                         z = z_data['data']
+                        z_data.close()
                     else:
                         # Leaving this as a placeholder for obtaining the z and
                         # r output from future components that produce gridded
@@ -408,6 +411,7 @@ def gridded_radial_metric_plot(yaml_data, sm, output_dir,
                             comp_name=comp_name, metric_name=metric_name,
                             sim_index=sim_index, t_index=t_index))
                         radial_metric = radial_metric_data['data']
+                        radial_metric_data.close()
                     else:
                         # Leaving this as a placeholder for obtaining the output for
                         # future components that produce gridded radial data.
@@ -568,10 +572,12 @@ def get_max_vals_over_time_radial(components_to_use, component_xvals,
                     r_data = np.load(RCOORD_FILE_NAME.format(
                         comp_name=comp_name, sim_index=sim_index, t_index=t_index))
                     r = r_data['data']
+                    r_data.close()
 
                     z_data = np.load(ZCOORD_FILE_NAME.format(
                         comp_name=comp_name, sim_index=sim_index, t_index=t_index))
                     z = z_data['data']
+                    r_data.close()
                 else:
                     # Leaving this as a placeholder for obtaining the z and
                     # r output from future components that produce gridded
@@ -605,6 +611,7 @@ def get_max_vals_over_time_radial(components_to_use, component_xvals,
                         comp_name=comp_name, metric_name=metric_name,
                         sim_index=sim_index, t_index=t_index))
                     radial_metric = radial_metric_data['data']
+                    radial_metric_data.close()
                 else:
                     # Leaving this as a placeholder for obtaining the output for
                     # future components that produce gridded radial data.
