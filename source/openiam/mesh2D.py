@@ -13,6 +13,7 @@ from matk.ordereddict import OrderedDict
 from copy import copy
 import warnings
 from math import atan2, degrees
+import pandas as pd
 
 np.set_printoptions(threshold=sys.maxsize)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -625,15 +626,17 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
         d = {}
         with h5py.File(data_file, 'r') as hf:
             all_names = list(hf.keys())
-            for nm in ['x', 'y', 'area']:
+            for nm in ['x', 'y', 'z', 'area']:
                 try:
-                    d[nm] = hf[nm][()]
+                    d[nm] = hf[nm]['values'][:]#[()]
                 except KeyError:
                     pass
             for nm in variable_names:
                 for ind in range(len(time_points)):
                     f_nm = nm+'_'+str(ind+1)
-                    d[f_nm] = hf[f_nm][()]
+                    d[f_nm] = hf[f_nm]['values'][:]#[()]
+            #Rewrite all_names to new order for d
+            all_names = list(d.keys())
     else:
         d = np.genfromtxt(data_file, names=True, delimiter=',')
         all_names = list(d.dtype.names)
@@ -641,7 +644,7 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
     # Collect unique values of x and y
     xu = np.unique(d['x'])
     yu = np.unique(d['y'])
-
+    
     # If areas are provided, collect them
     if 'area' in all_names:
         dAc = d['area']
@@ -668,6 +671,10 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
     for i, y in enumerate(yu):
         yud[str(y)] = i
 
+    # Check to see if data is 3D, and if so, collapse to 2D
+    if 'z' in all_names:
+        d = collapse_3D_data(d, all_names)
+
     # Add data to variable objects
     for vnm in variable_names:
         M.add_variable(vnm)
@@ -684,3 +691,35 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
         M.Am[xud[str(x)], yud[str(y)]] = v
 
     return M
+
+def collapse_3D_data(d, all_names):
+    # Convert to pandas dataframe
+    if isinstance(d,np.ndarray):
+        d_p = pd.DataFrame(d, columns=all_names)
+    elif isinstance(d,dict):
+        d_p = pd.DataFrame.from_dict(d, orient='columns')
+    
+    # Get all xy coordinate pairs
+    coords = [[x,y] for x,y in list(zip(d['x'],d['y']))]
+    
+    # Get unique xy coordinate pairs
+    uniq_coords = np.unique(coords, axis=0)
+    
+    # Get number of unique coordinates
+    coord_num = len(uniq_coords)
+    
+    # Pre-allocate pandas dataframe
+    c = pd.DataFrame(columns=all_names, index=range(coord_num))
+
+    # For each coordinate pair, get max values in z and write to dataframe
+    for i,coord in enumerate(uniq_coords):
+        c_temp = d_p[(d_p['x']==coord[0]) & (d_p['y']==coord[1])].max()
+        c.iloc[i] = c_temp
+    
+    # Remove z-value information
+    c = c.drop('z', axis='columns')
+    
+    # Convert pandas dataframe to dictionary
+    d = c.to_dict('list')
+ 
+    return d

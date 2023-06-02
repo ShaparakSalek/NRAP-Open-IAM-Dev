@@ -85,8 +85,8 @@ if __name__ == '__main__':
     # For example, for list of values [3,7,1,2,9] value of 1 would be used as value
     # for forward simulation.
     sps.add_par('index', discrete_vals=(
-        list(range(1, len(sps.filenames)+1)),
-        [1./len(sps.filenames)]*len(sps.filenames)))
+        list(range(1, len(sps.filenames)-1)),
+        [1./(len(sps.filenames)-2)]*(len(sps.filenames)-2)))
     print('Value of {} will be used for index parameter in forward simulation.'.format(
         sps.pars['index'].value))
 
@@ -165,6 +165,7 @@ if __name__ == '__main__':
             ax[ind].yaxis.set_label_coords(labelx, 0.5)
 
         plt.suptitle('{} metrics'.format(title_part[var_name]), fontsize=font_size+3)
+        plt.show()
 
     # One can run system model with a different value of parameter index using
     #    out = sm.forward(pardict={'sps.index': 7})
@@ -203,6 +204,7 @@ if __name__ == '__main__':
             ax[ind].yaxis.set_label_coords(labelx, 0.5)
 
         plt.suptitle('{} metrics'.format(title_part[var_name]), fontsize=font_size+3)
+        plt.show()
 
     # Remove all handlers from the logger for proper work in the consecutive runs
     while logging.getLogger('').handlers:

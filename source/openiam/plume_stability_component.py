@@ -136,9 +136,11 @@ class PlumeStability(ComponentModel):
         self.parameter_values = []
         self.file_directory = None
         self.parameter_filename = None
-
+        
         self.time_file = None
         self.time_points = None
+        
+
 
         # List of variables available in the provided lookup tables
         self.variable_list = []
@@ -241,7 +243,7 @@ class PlumeStability(ComponentModel):
         """ Read names of variables provided in the lookup tables."""
 
         # Assume that all data files have identical variables
-        # Assume that 'x','y', and 'area' are the only possible non-variable header entries
+        # Assume that 'x','y','z', and 'area' are the only possible non-variable header entries
         # Get file with the first index
         ind1 = list(self.filenames.keys())[0]
 
@@ -440,7 +442,11 @@ class PlumeStability(ComponentModel):
 
         # index is limited to be within the set of indices of linked data sets
         index = int(actual_p['index'])
-
+        
+        # verify file type for data file to be used and
+        # change if necessary
+        self.hdf5_data_format, _ = check_file_format(self.filenames[index], data_type='data')
+        
         # Create Mesh2D object
         M = read_Mesh2D_data(
             os.path.join(self.file_directory, self.filenames[index]),
@@ -548,15 +554,22 @@ if __name__ == "__main__":
                        '1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam \n',
                        '2. https://gitlab.com/NRAP/Kimberlina_data \n'])
         logging.error(msg)
-    option = 1
+    option = 3
     if option == 1:
         num_years = 200
         # Time array different from time points provided in the data set
         time_array = 365.25*np.arange(0.0, num_years+1)
-    else:
+        data_dim = "2D"
+    elif option == 2:
         # Time array is the same as in the data set but converted to days
         time_array = np.genfromtxt(
             os.sep.join([file_directory, 'time_points.csv']), delimiter=',')*365.25
+        data_dim = "2D"
+    elif option == 3:
+        # Time array is the same as in the data set but converted to days
+        time_array = np.genfromtxt(
+            os.sep.join([file_directory, 'time_points.csv']), delimiter=',')*365.25
+        data_dim = "3D"
 
     # Time array argument has to be defined for use of plume stability component.
     # It has to be defined as in the data set or whatever (in the latter case
@@ -582,7 +595,7 @@ if __name__ == "__main__":
     sps.variable_names.remove('pressure')
     print('Variables are updated')
 
-    # Add discrete parameter datafie_index. Each file with data has the same probability
+    # Add discrete parameter datafile_index. For 2D processing, each file with data has the same probability
     # of being used for sampling the observation.
     # When parameter is added as discrete, it has an associated with it value which is used
     # for forward simulations. For range of values from 1 to 54 the value of 28
@@ -590,9 +603,15 @@ if __name__ == "__main__":
     # or right at the center depending whether the number of values is even or odd.
     # For example, for list of values [3, 7, 1, 2, 9] value of 1 would be used as value
     # for forward simulation.
-    sps.add_par('index', discrete_vals=(
-        list(range(1, len(sps.filenames)+1)),
-        [1./len(sps.filenames)]*len(sps.filenames)))
+    # For 3D example, either index 55 (CSV file) or 
+    # 56 (HDF5 file) will be used with equal probability.
+    if data_dim == '2D':
+        sps.add_par('index', discrete_vals=(
+            list(range(1, len(sps.filenames)-1)),
+            [1./(len(sps.filenames)-2)]*(len(sps.filenames)-2)))
+    elif data_dim == '3D':
+        sps.add_par('index', discrete_vals=([55,56],[0.5,0.5]))
+        
 
     # Observations have to be added explicitly
     sps.add_obs('times')
@@ -677,6 +696,10 @@ if __name__ == "__main__":
     # The mobility and spreading angles could be plotted as well,
     # but it may not be that useful to plot an entire ensemble of them.
 
+    if data_dim == "2D":
+        f.savefig(file_directory + '\\plume_stability_graph_2D.jpg', format='jpg')
+    elif data_dim == "3D":
+        f.savefig(file_directory + '\\plume_stability_graph_3D.jpg', format='jpg')
     f.show()
 
     # Remove all handlers from the logger for proper work in the consecutive runs
