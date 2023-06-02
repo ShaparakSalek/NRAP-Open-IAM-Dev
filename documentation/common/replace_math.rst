@@ -12,6 +12,7 @@
 .. |m^4| replace:: :math:`m^4`
 .. |m^2/g| replace:: :math:`m^2/g`
 .. |m^3/s| replace:: :math:`m^3/s`
+.. |m/s^2| replace:: :math:`m/s^2`
 .. |kg| replace:: :math:`kg`
 .. |kg/s| replace:: :math:`kg/s`
 .. |kg/m^3| replace:: :math:`kg/m^3`

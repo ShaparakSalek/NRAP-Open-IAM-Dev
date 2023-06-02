@@ -137,7 +137,7 @@ class NRAPOpenIAM(tk.Tk):
             self.process_parameter_vars(componentVars[choice]['Params'],
                                         d[choice]['Parameters'],
                                         componentVars[choice]['Params'].keys())
-            
+
             if 'Controls' in componentVars[choice]:
                 d[choice]['Controls'] = {}
                 self.process_control_vars(componentVars[choice]['Controls'],
@@ -313,19 +313,19 @@ class NRAPOpenIAM(tk.Tk):
 
                 data_dict_to[key]['discrete_vals'].append(discrete_values)
                 data_dict_to[key]['discrete_vals'].append(discrete_weights)
-    
-    
+
+
     def process_control_vars(self, var_dict_from, data_dict_to, var_keys):
-        """ Read information from componentVars[component_name]['Controls'] kept 
+        """ Read information from componentVars[component_name]['Controls'] kept
             in var_dict_from to copy to data_dict_to[component_name]['Controls'].
 
-        Read information from componentVars corresponding to the controls 
+        Read information from componentVars corresponding to the controls
         of the component.
         """
         for key in var_keys:
             data_dict_to[key] = var_dict_from[key].get()
-    
-            
+
+
     @staticmethod
     def reformat_list_presentation(val_list):
         """ Reformat list representation for tooltip hints."""
@@ -549,7 +549,7 @@ class NRAPOpenIAM(tk.Tk):
                     aquiferName = data[key]['LeakTo']
                 except KeyError:
                     aquiferName = 'none'
-            
+
             try:
                 controls = data[key]['Controls']
             except KeyError:
@@ -786,11 +786,16 @@ class NRAPOpenIAM(tk.Tk):
                         self.nametowidget(self.getvar(par_frame_name)),
                         pars_label_width=label_width)
 
-                # Some parameters of Seal Horizon component require processing
-                # after every other parameters are processed
-                if data[key]['type'] == 'SealHorizon':
-                    # Load cell parameters values
-                    sh_tab.load_additional_parameters(self, data[key], key)
+            # Some parameters of Seal Horizon component require processing
+            # after every other parameters are processed
+            if data[key]['type'] == 'SealHorizon':
+                # Load cell parameters values
+                sh_tab.load_additional_parameters(self, data[key], key)
+
+            # Some parameters of Open Wellbore require processing after initial
+            # preprocessing depending on the controls
+            if data[key]['type'] == 'OpenWellbore':
+                ow_tab.process_crit_pressure_approach_pars(self, data[key], key)
 
         frame = self.frames[OpenIAM_Page]
         frame.tkraise()

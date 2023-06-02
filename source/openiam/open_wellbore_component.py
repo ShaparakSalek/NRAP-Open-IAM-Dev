@@ -21,7 +21,7 @@ except ImportError:
     sys.exit()
 
 # Assumed gravitational acceleration for critical pressure calculation, m/(s^2)
-GRAV_ACCEL = 9.81
+GRAV_ACCEL = 9.8
 
 # Assumed density of water for critical pressure calculation, kg/(m^3).
 WATER_DENSITY = 1000
@@ -36,56 +36,56 @@ class OpenWellbore(ComponentModel):
     phase transition of |CO2| from supercritical to gaseous, with Joule-Thompson
     cooling, and considers exsolution of |CO2| from the brine phase.
 
-    By default, when used within the user interface the Open Wellbore is connected
-    to the upper aquifer (e.g., aquifer 2 if there are 2 aquifers in the system).
-    For user-defined scenarios the ``LeakTo`` keyword can be used
+    By default, when used within the control file interface the Open Wellbore
+    is connected to the upper aquifer (e.g., aquifer 2 if there are 2 aquifers
+    in the system). For user-defined scenarios the ``LeakTo`` keyword can be used
     to specify either the name of the aquifer (e.g., *aquifer1*) |CO2| leaks to
     or *atmosphere* for leakage to the atmosphere. The default value is
     *aquifer#* where # is an index of the uppermost aquifer.
 
     The Open Wellbore component can be used to calculate leakage rates following
     positive change in reservoir pressure or only from changes in reservoir
-    pressure above a critical pressure. To use the latter approach, the 
+    pressure above a critical pressure. To use the latter approach, the
     argument ``crit_pressure_approach`` should be set to *True* for the setup
     of the component. Here is an example of this setup in a script application:
 
         OpenWellbore(name='ow', parent=sm, crit_pressure_approach=True)
 
-    To set ``crit_pressure_approach`` to *True* in the control file interface, 
-    the ``Controls`` section in the .yaml entry for the Open Wellbore should be 
-    included with an additional entry ``critPressureApproach: True`` indented 
+    To set ``crit_pressure_approach`` to *True* in the control file interface,
+    the ``Controls`` section in the .yaml entry for the Open Wellbore should be
+    included with an additional entry ``critPressureApproach: True`` indented
     beneath ``Controls``. For an example setup, see control file example 31a.
-    
-    If ``crit_pressure_approach`` is set to *True*, the default approach is for 
+
+    If ``crit_pressure_approach`` is set to *True*, the default approach is for
     critical pressure to be calculated as:
-        
-        Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)), 
-        
-    where rho_w and rho_br are the densities of water and brine (1000 kg m$^-3$ 
-    and the brineDensity parameter), respectivey, g is gravitational acceleration
-    (9.81 m s$^-2$), d_aq is the depth to the bottom of the aquifer receiving
-    leakage (m) (taken as the wellTop parameter value; if wellTop is 0 m, then the 
-    atmosphere receives leakage), and d_res is the depth to the top of the 
-    reservoir (m). Higher brine densities will generally lead to lower leakage 
-    rates.
-    
-    Instead of calculating critical pressure in this manner, one can enforce a 
-    particular critical pressure (the **critPressure** parameter) by setting the 
-    argument ``enforce_crit_pressure`` to *True* for the setup of the component. 
-    Here is an example in a script application:
-        
-        OpenWellbore(name='ow', parent=sm, crit_pressure_approach=True, 
+
+        Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)),
+
+    where rho_w and rho_br are the densities of water and brine (by default,
+    1000 |kg/m^3|) defined by the brineDensity parameter, respectively,
+    g is gravitational acceleration(9.8 |m/s^2|), d_aq is the depth to the
+    bottom of the aquifer impacted by leakage (m) (defined by the wellTop
+    parameter value; if wellTop is 0 m, then the atmosphere receives leakage),
+    and d_res is the depth to the top of the reservoir (m). Higher brine densities
+    generally produce lower leakage rates.
+
+    Instead of calculating critical pressure in this manner, one can enforce a
+    particular critical pressure (the **critPressure** parameter) by setting the
+    argument ``enforce_crit_pressure`` to *True* for the setup of the component.
+    Here is an example in a script setup:
+
+        OpenWellbore(name='ow', parent=sm, crit_pressure_approach=True,
                      enforce_crit_pressure=True)
 
-    To set ``enforce_crit_pressure`` to *True* in the control file interface, 
-    file interface, the ``Controls`` section in the .yaml entry for the Open 
+    To set ``enforce_crit_pressure`` to *True* in the control file interface,
+    file interface, the ``Controls`` section in the .yaml entry for the Open
     Wellbore should be included with additional entry ``enforceCritPressure: True``
-    indented beneath ``Controls``. If enforce_crit_pressure is not set to *True*, 
+    indented beneath ``Controls``. If enforce_crit_pressure is not set to *True*,
     then the **critPressure** parameter will not be used.
-    
+
     When a critical pressure is used, flow through an Open Wellbore can still
-    occur at pressures beneath the critical pressure if a |CO2| plume is present 
-    in the reservoir at the base of the well (i.e., buoyancy effects from the 
+    occur at pressures beneath the critical pressure if a |CO2| plume is present
+    in the reservoir at the base of the well (i.e., buoyancy effects from the
     |CO2|).
 
     Component model input definitions:
@@ -104,18 +104,17 @@ class OpenWellbore(ComponentModel):
 
     * **wellTop** [|m|] (0 to 500) - depth of well top (default: 500); *linked to
       Stratigraphy*. Note that this parameter represents how far leakage can
-      extend from the reservoir up the open wellbore. For example, the cement
+      extend from the reservoir along the open wellbore. For example, the cement
       used to plug the well may be of poor quality or damaged, but the damage
       may not allow leakage to reach the surface at 0 m. When using control files,
       wellTop can be set to the bottom depth of an aquifer by entering
       'aquifer#Depth,' where # is the aquifer number. If the aquifer is too deep,
       however, the limits for this parameter would still be enforced. In control
       files, if the 'LeakTo' entry is provided as the name of the aquifer
-      receiving leakage from the open wellbore (without a space between aquifer
-      and the number; e.g., 'LeakTo: aquifer2') then the wellTop parameter will 
-      automatically be set to the bottom depth of the corresponding aquifer. 
-      If 'LeakTo' is set to 'atmosphere', wellTop will automatically be set to 
-      0.
+      receiving leakage from the open wellbore (e.g., 'LeakTo: aquifer2')
+      then the wellTop parameter will automatically be set to the bottom depth
+      of the corresponding aquifer. If 'LeakTo' is set to 'atmosphere',
+      wellTop will automatically be set to 0.
 
     * **critPressure** [|Pa|] (1.0e+5 to 9.0e+7) - pressure above which the model
       initiates leakage rates calculations. Default value of this parameter is
@@ -157,6 +156,12 @@ class OpenWellbore(ComponentModel):
             to initiate the leakage versus non-zero pressure change. By default,
             non-zero pressure change is used.
         :type crit_pressure_approach: boolean
+
+        :param enforce_crit_pressure: flag indicating whether user provided
+        value of critical pressure will be used to model a leakage. Value of False
+        means that the value of brineDensity will be used to estimate critical
+        pressure value.
+        :type enforce_crit_pressure: boolean
 
         :returns: OpenWellbore class object
         """
@@ -201,9 +206,9 @@ class OpenWellbore(ComponentModel):
 
         # Save whether critical pressure is to be used
         self.use_crit_pressure = crit_pressure_approach
-        
-        # If use_crit_pressure is True, enforce_crit_pressure sets whether the 
-        # critical pressure is calculated automatically (False, default) or set 
+
+        # If use_crit_pressure is True, enforce_crit_pressure sets whether the
+        # critical pressure is calculated automatically (False, default) or setup
         # by the critPressure parameter (True)
         self.enforce_crit_pressure = enforce_crit_pressure
 
@@ -265,11 +270,22 @@ class OpenWellbore(ComponentModel):
         # Calculate critical pressure delta (EPA method)
         if self.use_crit_pressure:
             if self.enforce_crit_pressure:
-                critP = actual_p['critPressure']
+                try:
+                    critP = actual_p['critPressure']
+                except KeyError:
+                    warn_msg = "".join([
+                        "Parameter 'critPressure' was not setup for Open Wellbore ",
+                        "component {} but arguments 'crit_pressure_approach' ",
+                        "and 'enforce_crit_pressure' were set to True. ",
+                        "critPressure will be calculated based on brineDensity ",
+                        "parameter"]).format(self.name)
+                    logging.warning(warn_msg)
+                    critP = (wellTop * GRAV_ACCEL * WATER_DENSITY) + (
+                        brineDensity * GRAV_ACCEL * (reservoirDepth - wellTop))
             else:
                 critP = (wellTop * GRAV_ACCEL * WATER_DENSITY) + (
                     brineDensity * GRAV_ACCEL * (reservoirDepth - wellTop))
-            
+
             # Calculate pressure change above critical
             deltaP = pressure - critP
 
@@ -282,7 +298,7 @@ class OpenWellbore(ComponentModel):
         # Define array of input parameters
         inputArray = np.array([wellTop, reservoirDepth, logReservoirTransmissivity,
                                logAquiferTransmissivity, deltaP, CO2saturation,
-                               brineSalinity ])
+                               brineSalinity])
 
         # Find solution
         self.sol.find(inputArray)
@@ -324,7 +340,7 @@ class OpenWellbore(ComponentModel):
         if 'Controls' in component_data:
             self.use_crit_pressure = component_data['Controls'].get(
                 'critPressureApproach', False)
-            
+
             self.enforce_crit_pressure = component_data['Controls'].get(
                 'enforceCritPressure', False)
 

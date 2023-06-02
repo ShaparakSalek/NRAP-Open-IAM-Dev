@@ -831,7 +831,7 @@ class OpenIAM_Page(tk.Frame):
             command=lambda: self.controller.add_component(
                 self.controller.connection, aquiferName, tabControl,
                 componentName, self.controller.componentType, connection_menu,
-                componentsSetupFrame, self.controller, self.dyn_data_vars))
+                componentsSetupFrame, self.controller, self.dyn_data_vars, {}))
         addComponentButton.grid(row=1, column=2, pady=2, padx=25, sticky='nw')
         self.toolTip.bind(
             addComponentButton,
