@@ -3196,6 +3196,53 @@ class Tests(unittest.TestCase):
                 'At time t={} years {} is {} but should be {}'.format(
                     time_array[time_index]/365.25, obs, sd, tr))
 
+    def test_plume_stability_cmpnt_h5(self):
+        """Tests work of plume stability component with .h5 files instead of
+        .csv files.
+
+        Tests system model containing only a plume stability component present
+        with system model time array equal to the time points of the linked
+        dataset.
+        """
+        file_directory = os.sep.join(['..', 'source', 'components', 'reservoir',
+                                      'lookuptables', 'Test_2d'])
+        # Time array is the same as in the data set but converted to days
+        time_array = np.genfromtxt(
+            os.sep.join([file_directory, 'time_points_PSA.csv']), delimiter=',')*365.25
+
+        sm_model_kwargs = {'time_array': time_array}   # time is given in days
+        # Create system model
+        sm = SystemModel(model_kwargs=sm_model_kwargs)
+
+        # Add plume stability analysis component for pressure
+        sps = sm.add_component_model_object(
+            PlumeStability(
+                name='sps', parent=sm, file_directory=file_directory,
+                variable_names=['pressure'], thresholds={'pressure': 3.8e7},
+                parameter_filename='parameters_and_filenames_PSA_h5.csv',
+                time_file='time_points_PSA.csv'))
+        sps.add_par('index', value=1, vary=False)
+
+        obs_names = ['pressure_{}'.format(nm) for nm in ['areas', 'areas_dt',
+                                                         'mobility', 'spreading']]
+        for nm in obs_names:
+            sps.add_obs(nm)
+
+        sm.forward()
+
+        # True values: simulation results for the 6th time point (counting from 0):
+        # area, its derivative, mobility, spreading
+        true_results = [69090000., 784000., 6.82994397e-01, -3.32444377e+02]
+
+        time_index = 6
+        sim_data = [sps.obs['{}_{}'.format(nm, time_index)].sim for nm in obs_names]
+
+        for tr, sd, obs in zip(true_results, sim_data, obs_names):
+            self.assertTrue(
+                abs((tr-sd)/tr) < 0.01,
+                'At time t={} years {} is {} but should be {}'.format(
+                    time_array[time_index]/365.25, obs, sd, tr))
+
     def test_rate_to_mass_adapter(self):
         """Tests adapter component.
 
@@ -3757,6 +3804,7 @@ BASE_TESTS = [
     'test_lookup_table_reservoir_3d_h5',
     'test_parstudy',
     'test_plume_stability_cmpnt',
+    'test_plume_stability_cmpnt_h5',
     'test_rate_to_mass_adapter',
     'test_reservoir_data_interpolator',
     'test_seal_horizon',
