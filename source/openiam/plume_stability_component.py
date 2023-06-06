@@ -136,11 +136,9 @@ class PlumeStability(ComponentModel):
         self.parameter_values = []
         self.file_directory = None
         self.parameter_filename = None
-        
+
         self.time_file = None
         self.time_points = None
-        
-
 
         # List of variables available in the provided lookup tables
         self.variable_list = []
@@ -243,12 +241,14 @@ class PlumeStability(ComponentModel):
         """ Read names of variables provided in the lookup tables."""
 
         # Assume that all data files have identical variables
-        # Assume that 'x','y','z', and 'area' are the only possible non-variable header entries
+        # Assume that 'x', 'y', 'z', and 'area' are the only possible
+        # non-variable header entries
         # Get file with the first index
         ind1 = list(self.filenames.keys())[0]
 
         # Check whether file is of appropriate type
-        self.hdf5_data_format, _ = check_file_format(self.filenames[ind1], data_type='data')
+        self.hdf5_data_format, _ = check_file_format(self.filenames[ind1],
+                                                     data_type='data')
 
         # Read headers in the data file
         self.data_headers = read_data_headers(
@@ -264,7 +264,7 @@ class PlumeStability(ComponentModel):
         # Remove # symbol from first name if it exists
         self.data_headers[0] = sub("^#", '', self.data_headers[0]).strip()
         # Remove non-time varying variables assuming that
-        # they will not end in '_[0-9]+' (underscore followed by an interger)
+        # they will not end in '_[0-9]+' (underscore followed by an integer)
         tsnames = []
         for nm in self.data_headers:
             split_res = split("_[0-9]+$", nm)
@@ -442,11 +442,12 @@ class PlumeStability(ComponentModel):
 
         # index is limited to be within the set of indices of linked data sets
         index = int(actual_p['index'])
-        
+
         # verify file type for data file to be used and
         # change if necessary
-        self.hdf5_data_format, _ = check_file_format(self.filenames[index], data_type='data')
-        
+        self.hdf5_data_format, _ = check_file_format(self.filenames[index],
+                                                     data_type='data')
+
         # Create Mesh2D object
         M = read_Mesh2D_data(
             os.path.join(self.file_directory, self.filenames[index]),
@@ -554,22 +555,29 @@ if __name__ == "__main__":
                        '1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam \n',
                        '2. https://gitlab.com/NRAP/Kimberlina_data \n'])
         logging.error(msg)
+
     option = 3
     if option == 1:
         num_years = 200
         # Time array different from time points provided in the data set
         time_array = 365.25*np.arange(0.0, num_years+1)
         data_dim = "2D"
+        parameter_filename = 'parameters_and_filenames.csv'
+        nvals = 10
     elif option == 2:
         # Time array is the same as in the data set but converted to days
         time_array = np.genfromtxt(
             os.sep.join([file_directory, 'time_points.csv']), delimiter=',')*365.25
         data_dim = "2D"
+        parameter_filename = 'parameters_and_filenames.csv'
+        nvals = 10
     elif option == 3:
         # Time array is the same as in the data set but converted to days
         time_array = np.genfromtxt(
             os.sep.join([file_directory, 'time_points.csv']), delimiter=',')*365.25
         data_dim = "3D"
+        parameter_filename = 'parameters_and_filenames_h5.csv'
+        nvals = 2
 
     # Time array argument has to be defined for use of plume stability component.
     # It has to be defined as in the data set or whatever (in the latter case
@@ -582,7 +590,7 @@ if __name__ == "__main__":
                        variable_names=['pressure'],  # can be a list of names
                        thresholds={'pressure': 1.0e6},  # must be a dictionary
                        # containing thresholds for all variables in variable_names
-                       parameter_filename='parameters_and_filenames.csv',
+                       parameter_filename=parameter_filename,
                        time_file='time_points.csv'))
     # Variable(s) can be modified
     # Print available variables
@@ -603,15 +611,16 @@ if __name__ == "__main__":
     # or right at the center depending whether the number of values is even or odd.
     # For example, for list of values [3, 7, 1, 2, 9] value of 1 would be used as value
     # for forward simulation.
-    # For 3D example, either index 55 (CSV file) or 
+    # For 3D example, either index 55 (CSV file) or
     # 56 (HDF5 file) will be used with equal probability.
     if data_dim == '2D':
         sps.add_par('index', discrete_vals=(
-            list(range(1, len(sps.filenames)-1)),
-            [1./(len(sps.filenames)-2)]*(len(sps.filenames)-2)))
+        list(range(1, len(sps.filenames)+1)),
+        [1./len(sps.filenames)]*len(sps.filenames)))
+
     elif data_dim == '3D':
-        sps.add_par('index', discrete_vals=([55,56],[0.5,0.5]))
-        
+        sps.add_par('index', discrete_vals=([1, 2], [0.5, 0.5]))
+
 
     # Observations have to be added explicitly
     sps.add_obs('times')
@@ -658,14 +667,14 @@ if __name__ == "__main__":
               sep='\n')
 
     # One can run system model with a different value of index using
-    #    out = sm.forward(pardict={'sps.index': 7})
+    # out = sm.forward(pardict={'sps.index': 1})
 
     # Create sampleset with 10 evenly spaced realization ids
-    s = sm.parstudy(nvals=10)
+    s = sm.parstudy(nvals=nvals)
     # One can create a sampleset of all realizations in Kimb_54_sims
     #    s = sm.create_sampleset([[v] for v in range(1, 55)])
     # Run sampleset
-    s.run(cpus=4, verbose=False)
+    s.run(cpus=nvals//2+1, verbose=False)
     # Postprocess output into easy to use dictionary
     out = s.collect_observations_as_time_series()
 

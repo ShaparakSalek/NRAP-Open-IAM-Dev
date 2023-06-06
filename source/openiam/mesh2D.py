@@ -628,14 +628,16 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
             all_names = list(hf.keys())
             for nm in ['x', 'y', 'z', 'area']:
                 try:
-                    d[nm] = hf[nm]['values'][:]#[()]
+                    d[nm] = hf[nm][()]
                 except KeyError:
                     pass
+
             for nm in variable_names:
                 for ind in range(len(time_points)):
-                    f_nm = nm+'_'+str(ind+1)
-                    d[f_nm] = hf[f_nm]['values'][:]#[()]
-            #Rewrite all_names to new order for d
+                    f_nm = nm + '_' + str(ind + 1)
+                    d[f_nm] = hf[f_nm][()]
+
+            # Rewrite all_names to new order for d
             all_names = list(d.keys())
     else:
         d = np.genfromtxt(data_file, names=True, delimiter=',')
@@ -644,7 +646,7 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
     # Collect unique values of x and y
     xu = np.unique(d['x'])
     yu = np.unique(d['y'])
-    
+
     # If areas are provided, collect them
     if 'area' in all_names:
         dAc = d['area']
@@ -693,33 +695,36 @@ def read_Mesh2D_data(data_file, variable_names, time_points, is_hdf5_file):
     return M
 
 def collapse_3D_data(d, all_names):
+    """
+    Squash 3d data into 2d along z-axis by selecting maximum values.
+    """
     # Convert to pandas dataframe
-    if isinstance(d,np.ndarray):
+    if isinstance(d, np.ndarray):
         d_p = pd.DataFrame(d, columns=all_names)
-    elif isinstance(d,dict):
+    elif isinstance(d, dict):
         d_p = pd.DataFrame.from_dict(d, orient='columns')
-    
+
     # Get all xy coordinate pairs
-    coords = [[x,y] for x,y in list(zip(d['x'],d['y']))]
-    
+    coords = [[x, y] for x, y in list(zip(d['x'], d['y']))]
+
     # Get unique xy coordinate pairs
     uniq_coords = np.unique(coords, axis=0)
-    
+
     # Get number of unique coordinates
     coord_num = len(uniq_coords)
-    
+
     # Pre-allocate pandas dataframe
     c = pd.DataFrame(columns=all_names, index=range(coord_num))
 
     # For each coordinate pair, get max values in z and write to dataframe
-    for i,coord in enumerate(uniq_coords):
+    for i, coord in enumerate(uniq_coords):
         c_temp = d_p[(d_p['x']==coord[0]) & (d_p['y']==coord[1])].max()
         c.iloc[i] = c_temp
-    
+
     # Remove z-value information
     c = c.drop('z', axis='columns')
-    
+
     # Convert pandas dataframe to dictionary
     d = c.to_dict('list')
- 
+
     return d

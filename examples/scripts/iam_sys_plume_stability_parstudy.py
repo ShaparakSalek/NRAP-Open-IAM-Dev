@@ -34,6 +34,7 @@ if __name__ == '__main__':
                        '2. https://gitlab.com/NRAP/Kimberlina_data  \n',
                        'Check this example description for more information.'])
         logging.error(msg)
+
     option = 1
     if option == 1:
         num_years = 200
@@ -63,7 +64,7 @@ if __name__ == '__main__':
 
     # Variable(s) can be modified
     # Print available variables
-    print('Variables available in data set', sps.variable_list)
+    print('Variables available in data set:', sps.variable_list)
     # Print names of variables for which metrics will be calculated
     print('Metrics to be calculated for', sps.variable_names)
 
@@ -82,13 +83,13 @@ if __name__ == '__main__':
     # for forward simulations. For range of values from 1 to 54 the value of 28
     # is used as the value located at the next position from the center of the list
     # or right at the center depending whether the number of values is even or odd.
-    # For example, for list of values [3,7,1,2,9] value of 1 would be used as value
+    # For example, for list of values [3, 7, 1, 2, 9] value of 1 would be used as value
     # for forward simulation.
     sps.add_par('index', discrete_vals=(
-        list(range(1, len(sps.filenames)-1)),
-        [1./(len(sps.filenames)-2)]*(len(sps.filenames)-2)))
+        list(range(1, len(sps.filenames)+1)),
+        [1./len(sps.filenames)]*len(sps.filenames)))
     print('Value of {} will be used for index parameter in forward simulation.'.format(
-        sps.pars['index'].value))
+        int(sps.pars['index'].value)))
 
     # Observations have to be added explicitly
     sps.add_obs('times')
@@ -168,7 +169,7 @@ if __name__ == '__main__':
         plt.show()
 
     # One can run system model with a different value of parameter index using
-    #    out = sm.forward(pardict={'sps.index': 7})
+    #    out = sm.forward(pardict={'sps.index': 1})
 
     # Create sampleset with 20 evenly spaced realization ids
     s = sm.parstudy(nvals=20)

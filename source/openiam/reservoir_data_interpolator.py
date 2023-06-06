@@ -393,7 +393,7 @@ class ReservoirDataInterpolator(object):
         if 'z' in self.data_headers:
             constant_obs['depth'] = 'z'  # saving key where the data is kept
 
-        coord_keys = ['x', 'y', 'z', 'ijk', 't']
+        coord_keys = ['x', 'y', 'z', 'ij', 'ijk', 't']
         all_names = [nm for nm in self.data_headers if nm not in coord_keys]
 
         # Loop over all observation names in the header except coordinates
