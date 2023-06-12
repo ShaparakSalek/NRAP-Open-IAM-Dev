@@ -537,6 +537,12 @@ def main(yaml_filename):
             if components[-1].needsXY:
                 components[-1].model_kwargs['x'] = component_data['locX']
                 components[-1].model_kwargs['y'] = component_data['locY']
+        
+        # This recalculates the distance value for the GenericReservoir
+        if yaml_data[component_name]['Type'] == 'GenericReservoir':
+            components[-1].assign_coordinates(
+                components[-1].injX, components[-1].injY, 
+                components[-1].locX, components[-1].locY)
 
         # Outputs
         if 'Outputs' in component_data:
