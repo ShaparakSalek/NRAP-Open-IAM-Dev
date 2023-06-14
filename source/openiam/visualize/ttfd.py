@@ -30,6 +30,7 @@ from matplotlib import ticker
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
+import openiam.openiam_cf_commons as iamcommons
 import openiam_cf_strata as strata
 
 TTFD_RESERVOIR_COMPONENTS = ['LookupTableReservoir',
@@ -1787,11 +1788,7 @@ def get_aq_comp_lists_and_xy_grids(sm, yaml_data, name, aq_name_list):
                         aq_component_indices.append(aq_number_from_yaml - 1)
 
                     elif comp.class_type == 'CarbonateAquifer':
-                        try:
-                            ithresh_val = comp.deterministic_pars[
-                                'ithresh'].value
-                        except KeyError:
-                            ithresh_val = comp.default_pars['ithresh'].value
+                        ithresh_val = iamcommons.get_parameter_val(comp, 'ithresh')
 
                         try:
                             carbaq_x_vals = float(comp_data['locX'])

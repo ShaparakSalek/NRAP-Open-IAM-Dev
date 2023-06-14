@@ -34,8 +34,8 @@ import matplotlib.colors as clrs
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
+import openiam.openiam_cf_commons as iamcommons
 import openiam.openiam_cf_strata as iam_strata
-
 
 reservoir_components = ['LookupTableReservoir',
                         'SimpleReservoir',
@@ -703,22 +703,11 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 if comp.class_type == 'OpenWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'Open\nWellbore {}'.format(number)
-
-                    try:
-                        z_min = comp.deterministic_pars['reservoirDepth'].value
-                    except KeyError:
-                        try:
-                            z_min = comp.pars['reservoirDepth'].value
-                        except KeyError:
-                            z_min = comp.default_pars['reservoirDepth'].value
-
-                    try:
-                        z_max = comp.deterministic_pars['wellTop'].value
-                    except KeyError:
-                        try:
-                            z_max = comp.pars['wellTop'].value
-                        except KeyError:
-                            z_max = comp.default_pars['wellTop'].value
+                    
+                    z_min = iamcommons.get_parameter_val(comp, 'reservoirDepth', 
+                                                         sm=sm, yaml_data=yaml_data)
+                    z_max = iamcommons.get_parameter_val(comp, 'wellTop', 
+                                                         sm=sm, yaml_data=yaml_data)
 
                 elif comp.class_type == 'MultisegmentedWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
@@ -741,15 +730,9 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 elif comp.class_type == 'CementedWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'Cemented\nWellbore {}'.format(number)
-
-                    try:
-                        z_min = comp.deterministic_pars['wellDepth'].value
-                    except KeyError:
-                        try:
-                            z_min = comp.pars['wellDepth'].value
-                        except KeyError:
-                            z_min = comp.default_pars['wellDepth'].value
-
+                    
+                    z_min = iamcommons.get_parameter_val(comp, 'wellDepth', 
+                                                         sm=sm, yaml_data=yaml_data)
                     z_max = 0
 
                 # Plot a 'shadow' beneath the point

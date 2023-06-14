@@ -38,6 +38,16 @@
 # and individual output files. In this example, this option is also turned off
 # by using entry SaveCSVFiles: False in the setup of AoR plots.
 #
+# Note that the optional entry 'CriticalPressureMPa' is not used for the pressure AoR
+# figure (see Control File examples 31a and 31d). Only one critical pressure value can be
+# shown in the figure, but this simulation uses spatially variable stratigraphy. The calculated
+# critical pressure therefore varies over space. Each OpenWellbore will use the correct
+# critical pressure value during the simulation (as calculated with brineDensity and the wellTop
+# and reservoirDepth at that location), however. If the pressure AoR plot is given the entry
+# 'CriticalPressureMPa: Calculated', the lowest critical pressure from all of the OpenWellbore
+# components will be shown in the pressure AoR figure. The .csv file saved by the pressure
+# AoR figure can be used to assess the role of spatially variable critical pressures.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32b.yaml
 #
@@ -152,7 +162,7 @@ Plots:
         InjectionCoordx: 2.37e5
         InjectionCoordy: 4.41e6
         FigureDPI: 100
-        SaveCSVFiles: False
+        SaveCSVFiles: True
     AoR_CO2Sat:
         AoR: [CO2saturation]
         PlotInjectionSites: True

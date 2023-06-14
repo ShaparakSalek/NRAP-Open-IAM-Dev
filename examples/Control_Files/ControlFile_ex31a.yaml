@@ -55,6 +55,21 @@
 # (in Pa), the critical pressure will be taken as the critPressure parameter.
 # Otherwise, the default approach is to calculate critical pressure.
 #
+# A critical pressure can be shown in a pressure AoR figure by including
+# 'CriticalPressureMPa: Calculated' or 'CriticalPressureMPa: X' (where X is a
+# value in MPa). If that entry is included, the figure specifies whether the pressures
+# exceeded the critical pressure and highlights the lcoations equal to the critical pressure
+# with a red contour (if that value is within the domain - e.g., there is no contour if all
+# pressures exceed the critical pressure). When using the 'Calculated' option, the code
+# calculates the critical pressure for all OpenWellbore components and uses the lowest value.
+# This approach is used because critical pressures can vary if spatially variable stratigraphy
+# is used, but the AoR plot is only set up to display one critical pressure value. The pressure
+# results saved to .csv files can be used to make figures incorporating a spatially variable
+# critical pressure, however. Additionally, there are additional consideraitons for the
+# use of the 'CriticalPressureMPa: Calculated' option in lhs or parstudy simulations -
+# see Control File example 31d. Specifically, the wellTop and reservoirDepth parameters of the
+# OpenWellbore need to set explicitly (not set only through 'LeakTo: aquifer#').
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31a.yaml
 #
@@ -176,6 +191,7 @@ Plots:
         FigureDPI: 200
         SaveCSVFiles: True
         Title: 'AoR: Pressure'
+        CriticalPressureMPa: Calculated
     Plot2:
         AoR: [CO2saturation]
     Plot3:

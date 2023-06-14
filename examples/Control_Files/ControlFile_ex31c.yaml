@@ -22,6 +22,13 @@
 # those components will also increase the required number of
 # realizations.
 #
+# There are additional consideraitons for the use of the 'CriticalPressureMPa: Calculated'
+# option in a pressure AoR plot in lhs or parstudy simulations. Specifically, the wellTop
+# and reservoirDepth parameters of the OpenWellbore need to set explicitly (not set only
+# through 'LeakTo: aquifer#'). For example, here wellTop is set as 'aquifer2Depth' and
+# reservoirDepth is set as 'shale1Depth' (i.e., the bottom of shale 1, which is the top of
+# the reservoir). For more details, see Control File example 31d.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31c.yaml
 #
@@ -106,12 +113,9 @@ OpenWellbore1:
         brineDensity:
             value: 1050
             vary: False
-        # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
-        # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
-        # and don't need to be set explicitly unless different values
-        # are required. The parameters wellTop, reservoirDepth, and brineDensity
-        # are used to calculate critical pressure (if the parameter criticalPressure
-        # is not provided).
+        # If critPressureApproach is set to True and enforceCritPressure is left at the default of False, the parameters wellTop, reservoirDepth,
+        # and brineDensity are used to calculate critical pressure. If both critPressureApproach and enforceCritPressure are set to True AND the
+        # critPressure parameter is given, then the critPressure value will be used instead.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------
@@ -142,6 +146,7 @@ Plots:
         AoR: [pressure]
         PlotInjectionSites: True
         FigureDPI: 200
+        CriticalPressureMPa: Calculated
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

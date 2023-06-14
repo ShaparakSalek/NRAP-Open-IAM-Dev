@@ -24,6 +24,10 @@
 # for each time include the maximum results across all model realizations at
 # that time.
 #
+# A critical pressure can be shown in a pressure AoR figure by including
+# 'CriticalPressureMPa: Calculated' or 'CriticalPressureMPa: X' (where X is a value in MPa).
+# The figure will specify whether the critical pressure has been exceeded.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31d.yaml
 #
@@ -91,6 +95,7 @@ OpenWellbore1:
             ysize: 5
     Controls:
         critPressureApproach: True
+        enforceCritPressure: False
     Parameters:
         wellRadius:
             value: 0.05
@@ -108,12 +113,9 @@ OpenWellbore1:
         brineDensity:
             value: 1050
             vary: False
-        # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
-        # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
-        # and don't need to be set explicitly unless different values
-        # are required. The parameters wellTop, reservoirDepth, and brineDensity
-        # are used to calculate critical pressure (if the parameter criticalPressure
-        # is not provided).
+        # If critPressureApproach is set to True and enforceCritPressure is left at the default of False, the parameters wellTop, reservoirDepth,
+        # and brineDensity are used to calculate critical pressure. If both critPressureApproach and enforceCritPressure are set to True AND the
+        # critPressure parameter is given, then the value of the critPressure parameter will be used instead.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------
@@ -144,7 +146,8 @@ Plots:
         AoR: [pressure]
         PlotInjectionSites: True
         FigureDPI: 200
-        TimeList: [1, 5, 10]
+        TimeList: All
+        CriticalPressureMPa: Calculated
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True
@@ -154,9 +157,9 @@ Plots:
         AoR: [pH_volume]
         PlotInjectionSites: True
         FigureDPI: 200
-        TimeList: All
+        TimeList: [1, 5, 10]
     Plot4:
         AoR: [TDS_volume]
         PlotInjectionSites: True
         FigureDPI: 200
-        TimeList: All
+        TimeList: [1, 5, 10]

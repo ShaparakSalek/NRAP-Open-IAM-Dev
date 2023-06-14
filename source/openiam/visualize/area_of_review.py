@@ -30,6 +30,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 from matplotlib import cm
+from matplotlib.lines import Line2D
 from matk.sampleset import percentile
 
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +41,7 @@ try:
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
+import openiam.openiam_cf_commons as iamcommons
 
 AOR_RESERVOIR_COMPONENTS = ['LookupTableReservoir', 'SimpleReservoir',
                         'AnalyticalReservoir', 'GenericReservoir']
@@ -57,7 +59,7 @@ DEFAULT_COLORMAP = 'cividis'
 
 RC_FONT = {'family': 'Arial', 'weight': 'normal', 'size': None}
 
-CBAR_LABELS = {'pressure': 'Increase in Pressure (MPa)',
+CBAR_LABELS = {'pressure': 'Pressure (MPa)',
                'CO2saturation': 'CO$_2$ Saturation [-]',
                'pH_volume': 'pH Plume Volume (m$^3$)',
                'TDS_volume': 'TDS Plume Volume (m$^3$)',
@@ -65,64 +67,64 @@ CBAR_LABELS = {'pressure': 'Increase in Pressure (MPa)',
                'Dissolved_salt_volume': 'Salt Plume Volume (m$^3$)'}
 
 TITLE_OPTIONS_LHS = {
-    'pressure': ''.join(['Maximum Increase in Reservoir Pressure{} Over Time ',
-                         'Across {} LHS\nSimulations{}{}(Gray: 0 MPa)']),
+    'pressure': ''.join(['Maximum Reservoir Pressure{} Over Time ',
+                         'Across {} LHS\nSimulations{}{}(Gray: 0 MPa){}']),
     'CO2saturation': ''.join(['Maximum Reservoir CO$_2$ Saturation{} Over Time ',
-                              'Across {} LHS\nSimulations{}{}(Gray: 0)']),
+                              'Across {} LHS\nSimulations{}{}(Gray: 0){}']),
     'pH_volume': ''.join(['Maximum Aquifer {} pH Plume Volume Over Time ',
-                          'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$)']),
+                          'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$){}']),
     'TDS_volume': ''.join(['Maximum Aquifer {} TDS Plume Volume Over Time ',
-                           'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$)']),
+                           'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$){}']),
     'Dissolved_CO2_volume': ''.join(['Maximum Aquifer {} CO$_2$ Plume ',
                                      'Volume Over Time Across {} LHS\n',
-                                     'Simulations{}{}(Gray: 0 m$^3$)']),
+                                     'Simulations{}{}(Gray: 0 m$^3$){}']),
     'Dissolved_salt_volume': ''.join(['Maximum Aquifer {} Salt Plume Volume ',
                                       'Over Time Across {} LHS\nSimulations',
-                                      '{}{}(Gray: 0 m$^3$)'])}
+                                      '{}{}(Gray: 0 m$^3$){}'])}
 
 TITLE_OPTIONS_FORWARD = {
-    'pressure': ''.join(['Maximum Increase in Reservoir Pressure{} Over Time{}\n',
-                         '{}(Gray: 0 MPa)']),
+    'pressure': ''.join(['Maximum Reservoir Pressure{} Over Time{}\n',
+                         '{}(Gray: 0 MPa){}']),
     'CO2saturation': ''.join(['Maximum Reservoir CO$_2$ Saturation{} Over Time{}\n',
-                              '{}(Gray: 0)']),
+                              '{}(Gray: 0){}']),
     'pH_volume': ''.join(['Maximum Aquifer {} pH Plume Volume Over Time{}\n',
-                          '{}(Gray: 0 m$^3$)']),
+                          '{}(Gray: 0 m$^3$){}']),
     'TDS_volume': ''.join(['Maximum Aquifer {} TDS Plume Volume Over Time{}\n',
-                           '{}(Gray: 0 m$^3$)']),
+                           '{}(Gray: 0 m$^3$){}']),
     'Dissolved_CO2_volume': ''.join(['Maximum Aquifer {} CO$_2$ Plume Volume Over ',
-                                     'Time{}\n{}(Gray: 0 m$^3$)']),
+                                     'Time{}\n{}(Gray: 0 m$^3$){}']),
     'Dissolved_salt_volume': ''.join(['Maximum Aquifer {} Salt Plume Volume Over ',
-                                      'Time{}\n{}(Gray: 0 m$^3$)'])}
+                                      'Time{}\n{}(Gray: 0 m$^3$){}'])}
 
 TITLE_OPTIONS_LHS_T_INDEX = {
-    'pressure': ''.join(['Maximum Increase in Reservoir Pressure{} at t = {} years ',
-                         'Across {} LHS\nSimulations{}{}(Gray: 0 MPa)']),
+    'pressure': ''.join(['Maximum Reservoir Pressure{} at t = {} years ',
+                         'Across {} LHS\nSimulations{}{}(Gray: 0 MPa){}']),
     'CO2saturation': ''.join(['Maximum Reservoir CO$_2$ Saturation{} at t = {} years ',
-                              'Across {} LHS\nSimulations{}{}(Gray: 0)']),
+                              'Across {} LHS\nSimulations{}{}(Gray: 0){}']),
     'pH_volume': ''.join(['Maximum Aquifer {} pH Plume Volume at t = {} years ',
-                          'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$)']),
+                          'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$){}']),
     'TDS_volume': ''.join(['Maximum Aquifer {} TDS Plume Volume at t = {} years ',
-                           'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$)']),
+                           'Across {} LHS\nSimulations{}{}(Gray: 0 m$^3$){}']),
     'Dissolved_CO2_volume': ''.join(['Maximum Aquifer {} CO$_2$ Plume Volume at ',
                                      't = {} years Across {} LHS\n',
-                                     'Simulations{}{}(Gray: 0 m$^3$)']),
+                                     'Simulations{}{}(Gray: 0 m$^3$){}']),
     'Dissolved_salt_volume': ''.join(['Maximum Aquifer {} Salt Plume Volume at ',
                                       't = {} years Across {} LHS\n',
-                                      'Simulations{}{}(Gray: 0 m$^3$)'])}
+                                      'Simulations{}{}(Gray: 0 m$^3$){}'])}
 
 TITLE_OPTIONS_FORWARD_T_INDEX = {
-    'pressure': ''.join(['Maximum Increase in Reservoir Pressure{} at ',
-                         't = {} years{}\n{}(Gray: 0 MPa)']),
+    'pressure': ''.join(['Maximum Reservoir Pressure{} at ',
+                         't = {} years{}\n{}(Gray: 0 MPa){}']),
     'CO2saturation': ''.join(['Maximum Reservoir CO$_2$ Saturation{} at ',
-                              't = {} years{}\n{}(Gray: 0)']),
+                              't = {} years{}\n{}(Gray: 0){}']),
     'pH_volume': ''.join(['Maximum Aquifer {} pH Plume Volume at t = {} years{}\n',
-                          '{}(Gray: 0 m$^3$)']),
+                          '{}(Gray: 0 m$^3$){}']),
     'TDS_volume': ''.join(['Maximum Aquifer {} TDS Plume Volume at t = {} years{}\n',
-                           '{}(Gray: 0 m$^3$)']),
+                           '{}(Gray: 0 m$^3$){}']),
     'Dissolved_CO2_volume': ''.join(['Maximum Aquifer {} CO$_2$ Plume Volume ',
-                                     'at t = {} years{}\n{}(Gray: 0 m$^3$)']),
+                                     'at t = {} years{}\n{}(Gray: 0 m$^3$){}']),
     'Dissolved_salt_volume': ''.join(['Maximum Aquifer {} Salt Plume Volume ',
-                                      'at t = {} years{}\n{}(Gray: 0 m$^3$)'])}
+                                      'at t = {} years{}\n{}(Gray: 0 m$^3$){}'])}
 
 TITLE_RANGE = {
     'pressure': 'Range: {} MPa to {} MPa ',
@@ -140,7 +142,7 @@ TITLE_SINGLE_VALUE = {
     'Dissolved_CO2_volume': 'Value: {} m$^3$ ',
     'Dissolved_salt_volume': 'Value: {} m$^3$ ',}
 
-CSV_FILE_COLUMNS = {'pressure': 'Max increase in pressure [MPa]',
+CSV_FILE_COLUMNS = {'pressure': 'Max pressure [MPa]',
                     'CO2saturation': 'Max CO2 saturation [-]',
                     'pH_volume': 'Max pH plume volume [m^3]',
                     'TDS_volume': 'Max TDS plume volume [m^3]',
@@ -153,6 +155,12 @@ CSV_FILE_NAME_TAGS = {'pressure': 'Pressure', 'CO2saturation': 'CO2_Saturation',
                       'Dissolved_salt_volume': 'Dissolved_Salt_Volume'}
 
 MAX_VAL_ADJUST = 1.1
+
+# Assumed gravitational acceleration for critical pressure calculation, m/(s^2)
+GRAV_ACCEL = 9.8
+
+# Assumed density of water for critical pressure calculation, kg/(m^3).
+WATER_DENSITY = 1000
 
 def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                         output_list, locations, name='AoR_Figure1', analysis='forward',
@@ -249,6 +257,8 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
     if yaml_input['dpi_input'] is not None:
         figdpi = yaml_input['dpi_input']
+        
+    critPressureInput = yaml_input['CriticalPressureMPa']
 
     # This option specifies whether to evaluate the max. values over all times
     # (False) or evaluate the max. values for specific times (True).
@@ -317,10 +327,56 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
     x_loc = np.array(locations_ow['coordx'])
     y_loc = np.array(locations_ow['coordy'])
-
+    
+    # This variable is used to check if the current figure uses pressure and if 
+    # a critical pressure was given
+    pressure_critP_check = False
+    
+    if 'pressure' in output_names and not critPressureInput is None:
+        pressure_critP_check = True
+        
+        critP_warning_msg = "".join([
+            'The calculated critical pressure for an OpenWellbore component ', 
+            'was found to be 0 Pa. This result can occur if the simulation uses ', 
+            'the Latin Hypercube Sampling (lhs) or Parameter Study (parstudy) analysis ', 
+            'types and the wellTop and/or reservoirDepth parameters are composite ', 
+            'parameters. These parameters will be composite parameters if they are ', 
+            'set only through the .yaml entry LeakTo: aquifer#, where # is a unit number. ', 
+            'To avoid this problem, explicitly set the wellTop and reservoirDepth ', 
+            'parameters. You can use string inputs, like wellTop: aquifer2Depth and ', 
+            'reservoirDepth: shale1Depth. The critical pressure option will not be ', 
+            'used for the AoR plot.'])
+        
+        # This is used to check if the error was already logged. That way, it 
+        # can logged only once.
+        critP_error_print_check = False
+        
+    elif not 'pressure' in output_names and not critPressureInput is None:
+        # If the metric is not pressure but the .yaml plot entry included a 
+        # critical pressure entry, get rid of that entry.
+        critPressureInput = None
+    
+    # Make the figures
     if not time_option:
-        results = get_AoR_results(x_loc, output_names, sm, s, output_list,
-                                  analysis=analysis, time_option=time_option)
+        # One figure with max values from all model times
+        results, critPressureMin = get_AoR_results(
+            x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis, 
+            time_option=time_option, critPressureInput=critPressureInput)
+        
+        if pressure_critP_check:
+            if critPressureMin == 0 and critPressureInput == 'Calculated':
+                if not critP_error_print_check:
+                    logging.warning(critP_warning_msg)
+                    critP_error_print_check = True
+                
+                critPressureInput = None
+                
+            elif critPressureMin is None and critPressureInput == 'Calculated':
+                critPressureInput = None
+                
+            elif critPressureInput == 'Calculated':
+                # Convert to MPa
+                critPressureInput = critPressureMin / 1.0e+6
 
         plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data,
                          model_data, output_names, sm, name=name, analysis=analysis,
@@ -330,8 +386,10 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                          title_font_size=title_font_size, colormap=colormap,
                          bold_labels=bold_labels, save_results=save_results,
                          InjectionCoordx=InjectionCoordx, InjectionCoordy=InjectionCoordy,
-                         grid_option=grid_option)
+                         grid_option=grid_option, critPressureInput=critPressureInput)
     else:
+        # Get the min and max values over time, so the colorbar can use the 
+        # same limits in each figure.
         min_value = None
         max_value = None
 
@@ -340,9 +398,10 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
             max_value = -9.9e+99
 
             for time_index in time_index_list:
-                results = get_AoR_results(x_loc, output_names, sm, s, output_list,
-                                          analysis=analysis, time_option=time_option,
-                                          time_index=time_index)
+                results, critPressureMin = get_AoR_results(
+                    x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis, 
+                    time_option=time_option, time_index=time_index)
+                
                 if len(results[results > 0].tolist()) > 0:
                     if np.min(results[results > 0]) < min_value:
                         min_value = np.min(results[results > 0])
@@ -357,11 +416,28 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
             if max_value == -9.9e+99:
                 max_value = 1
-
+        
+        # Make a figure for each time
         for time_index in time_index_list:
-            results = get_AoR_results(x_loc, output_names, sm, s, output_list,
-                                      analysis=analysis, time_option=time_option,
-                                      time_index=time_index)
+            results, critPressureMin = get_AoR_results(
+                x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis, 
+                time_option=time_option, time_index=time_index, 
+                critPressureInput=critPressureInput)
+            
+            if pressure_critP_check:
+                if critPressureMin == 0 and critPressureInput == 'Calculated':
+                    if not critP_error_print_check:
+                        logging.warning(critP_warning_msg)
+                        critP_error_print_check = True
+                    
+                    critPressureInput = None
+                    
+                elif critPressureMin is None and critPressureInput == 'Calculated':
+                    critPressureInput = None
+                    
+                elif critPressureInput == 'Calculated':
+                    # Convert to MPa
+                    critPressureInput = critPressureMin / 1.0e+6
 
             plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data,
                              model_data, output_names, sm, name=name,
@@ -374,11 +450,13 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                              time_option=time_option, time_index=time_index,
                              InjectionCoordx=InjectionCoordx, InjectionCoordy=InjectionCoordy,
                              grid_option=grid_option, enforce_levels=enforce_levels,
-                             min_value=min_value, max_value=max_value)
+                             min_value=min_value, max_value=max_value, 
+                             critPressureInput=critPressureInput)
 
 
-def get_AoR_results(x_loc, output_names, sm, s, output_list, analysis='forward',
-                    time_option=False, time_index=None):
+def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data, 
+                    analysis='forward',time_option=False, time_index=None, 
+                    critPressureInput=None):
     """
     Evaluates and returns the maximum values of a metric for all locations.
     These maximum values are then used in a plot that is meant to inform the
@@ -390,11 +468,28 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, analysis='forward',
 
     # This is used to store the maximum value of a metric at each location
     results = np.zeros((len(x_loc), 1))
+    
+    critPressureMin = None
 
     for output_nm in output_names:
         # output_list is all the components with augmented names
         for output_component in list(output_list.keys()):
-
+            
+            # This checks out the calculated critical pressure for each OpenWellbore.
+            # If the metric is pressure and the corresponding option is selected, 
+            # the lowest critical pressure will be used in the plots. Calculated 
+            # critical pressures can vary if spatially variable stratigraphy 
+            # is used, but the plot will only show a contour for one pressure 
+            # value - therefore, the minimum critical pressure is used.
+            if isinstance(output_component, iam.OpenWellbore):
+                critPressureVal = get_crit_pressure(output_component, sm=sm, 
+                                                    yaml_data=yaml_data)
+                
+                if critPressureMin is None:
+                    critPressureMin = critPressureVal
+                elif critPressureVal < critPressureMin:
+                    critPressureMin = critPressureVal
+            
             if output_nm in output_list[output_component]:
                 full_obs_nm = '.'.join([output_component.name, output_nm])
                 aq_comp_check = False
@@ -422,16 +517,14 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, analysis='forward',
 
                         if not time_option:
                             if output_nm == 'pressure':
-                                # Get the maximum increase in pressure in MPa.
-                                results[loc_ref] = max(
-                                    p - values[0] for p in values) / 1e+6
+                                # Get the maximum pressure in MPa.
+                                results[loc_ref] = max(values) / 1e+6
                             else:
                                 results[loc_ref] = max(values)
                         else:
                             if output_nm == 'pressure':
-                                # Get the maximum increase in pressure in MPa
-                                results[loc_ref] = (values[time_index]
-                                                    - values[0]) / 1e+6
+                                # Get the maximum pressure in MPa
+                                results[loc_ref] = values[time_index] / 1e+6
                             else:
                                 results[loc_ref] = values[time_index]
 
@@ -453,22 +546,18 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, analysis='forward',
 
                         if not time_option:
                             if output_nm == 'pressure':
-                                # Get the maximum increase in pressure in MPa
-                                results[loc_ref] = max(
-                                    obs_percentiles[4, :]
-                                    - obs_percentiles_t0[4]) / 1e+6
+                                # Get the maximum pressure in MPa
+                                results[loc_ref] = max(obs_percentiles[4, :]) / 1e+6
                             else:
                                 results[loc_ref] = max(obs_percentiles[4, :])
                         else:
                             if output_nm == 'pressure':
-                                # Get the maximum increase in pressure in MPa
-                                results[loc_ref] = (
-                                    obs_percentiles[4, time_index]
-                                    - obs_percentiles_t0[4]) / 1e+6
+                                # Get the maximum pressure in MPa
+                                results[loc_ref] = obs_percentiles[4, time_index] / 1e+6
                             else:
                                 results[loc_ref] = obs_percentiles[4, time_index]
 
-    return results
+    return results, critPressureMin
 
 
 def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
@@ -479,7 +568,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                      bold_labels=True, save_results=False, time_option=False,
                      time_index=None, InjectionCoordx=None, InjectionCoordy=None,
                      grid_option=True, enforce_levels=False, min_value=None,
-                     max_value=None):
+                     max_value=None, critPressureInput=None):
     """
     Plots maximum results across all x and y values (x_loc and y_loc) for either
     all times (time_option is False) or a specific time (time option is True).
@@ -523,6 +612,14 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
     ncol_number = 1
 
     cmap = plt.cm.get_cmap(colormap)
+    
+    # This is used to specify if the critical pressure was exceeded, IF the metric 
+    # is pressure and a critical pressure was given in the .yaml plot entry.
+    title_pressure = ''
+    
+    # This specifies whether the critical pressure is included in the domain. 
+    # If it is included in the domain, a red line is shown for it.
+    Pcrit_Included = False
 
     if np.max(results[:, 0]) != 0:
         # I use np.max(results[:, 0]) * MAX_VAL_ADJUST in levels  because having
@@ -653,6 +750,33 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                          marker='o', markerfacecolor=rgba[0:3],
                          markeredgecolor='k', markeredgewidth=1.5,
                          markersize=12, linestyle='none')
+        
+        if 'pressure' and not critPressureInput is None:
+            pressure_levels = np.array([critPressureInput])
+            
+            a, b = '{:.2e}'.format(critPressureInput).split('e')
+            b = int(b)
+            critPressure_str = r'${}\times10^{{{}}}$'.format(a, b)
+            
+            if np.max(results_temp[:, 0]) < critPressureInput:
+                title_pressure = ',\nNever Exceeded the P$_{crit}$ of ' + \
+                    '{} MPa'.format(critPressure_str)
+                
+            elif np.min(results_temp[:, 0]) > critPressureInput:
+                title_pressure = ',\nAll Pressures Exceeded the P$_{crit}$ of ' + \
+                    '{} MPa'.format(critPressure_str)
+                
+            elif np.min(results_temp[:, 0]) < critPressureInput and \
+                np.max(results_temp[:, 0]) >= critPressureInput:
+                    title_pressure = ',\nCertain Pressures Exceeded the P$_{crit}$ of ' + \
+                        '{} MPa'.format(critPressure_str)
+                    Pcrit_Included = True
+                    
+                    # The handle and label for this are created manually below
+                    plt.tricontour(
+                        x_loc_temp / 1000.0, y_loc_temp / 1000.0,
+                        results_temp[:, 0], pressure_levels, colors = 'r')
+                    ncol_number += 1
 
     else:
         if enforce_levels and time_option:
@@ -771,11 +895,36 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                   fontweight=selected_labelfontweight)
     ax.set_ylabel('Northing (km)', fontsize=axis_label_font_size,
                   fontweight=selected_labelfontweight)
+    
+    # Create legend
+    handle_list = []
+    label_list = []
+    handles, labels = ax.get_legend_handles_labels()
 
-    ax.legend(fancybox=False, fontsize=gen_font_size - 2, ncol=ncol_number,
-              edgecolor=[0, 0, 0], loc='upper center', bbox_to_anchor=(0.5, -0.1),
-              framealpha=0.67)
-
+    for handle, label in zip(handles, labels):
+        if label not in label_list:
+            handle_list.append(handle)
+            label_list.append(label)
+    
+    # If the metric is pressure and a critical pressure was given, include it in the legend
+    if Pcrit_Included:
+        legend_element_critPressure = Line2D([0], [0], color='r', lw=2, label='P$_{crit}$')
+        
+        handle_list.append(legend_element_critPressure)
+        label_list.append('P$_{crit}$')
+    
+    if ncol_number <= 2:
+        bbox_val = (0.5, -0.1)
+    elif ncol_number == 3:
+        bbox_val = (0.55, -0.1)
+    elif ncol_number >= 4:
+        bbox_val = (0.6, -0.1)
+    
+    ax.legend(handle_list, label_list, fancybox=False, fontsize = gen_font_size - 2, 
+              ncol=ncol_number, edgecolor=[0, 0, 0], loc='upper center', 
+              bbox_to_anchor=bbox_val, framealpha=0.67)
+    
+    # aq_number is used in the figure title
     if output_nm in ['pressure', 'CO2saturation']:
         aq_number = ''
 
@@ -790,8 +939,8 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 comma_str = ' '
 
             fig_title = TITLE_OPTIONS_FORWARD.get(
-                output_nm, '{} at Each Point{}{}(Gray: Zero)'.format(
-                    output_nm, comma_str, range_str))
+                output_nm, '{} at Each Point{}{}(Gray: Zero){}'.format(
+                    output_nm, comma_str, range_str, title_pressure))
 
             # No space afterwards b/c the comma_str goes right before a '\n'
             if range_str != '':
@@ -800,7 +949,8 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 comma_str = ''
 
             if output_nm in TITLE_OPTIONS_FORWARD:
-                fig_title = fig_title.format(aq_number, comma_str, range_str)
+                fig_title = fig_title.format(aq_number, comma_str, range_str, 
+                                             title_pressure)
         else:
             # No space afterwards b/c the comma_str goes right before a '\n'
             if range_str != '':
@@ -809,12 +959,12 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 comma_str = ''
 
             fig_title = TITLE_OPTIONS_FORWARD_T_INDEX.get(
-                output_nm, '{} at Each Point at Time\nt = {} years{}{}(Gray: Zero)'.format(
-                    output_nm, time[time_index], comma_str, range_str))
+                output_nm, '{} at Each Point at Time\nt = {} years{}{}(Gray: Zero){}'.format(
+                    output_nm, time[time_index], comma_str, range_str, title_pressure))
 
             if output_nm in TITLE_OPTIONS_FORWARD_T_INDEX:
                 fig_title = fig_title.format(aq_number, time[time_index],
-                                             comma_str, range_str)
+                                             comma_str, range_str, title_pressure)
 
     elif analysis in ['lhs', 'parstudy']:
         realization_number = yaml_data['ModelParams']['Analysis']['siz']
@@ -828,24 +978,24 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             fig_title = TITLE_OPTIONS_LHS.get(
                 output_nm,
                 ''.join(['Maximum {} at Each Point\nAcross {} ',
-                         'LHS Simulations{}{}(Gray: Zero)']).format(
-                    output_nm, realization_number, comma_str, range_str))
+                         'LHS Simulations{}{}(Gray: Zero){}']).format(
+                    output_nm, realization_number, comma_str, range_str, title_pressure))
 
             if output_nm in TITLE_OPTIONS_LHS:
                 fig_title = fig_title.format(aq_number, realization_number,
-                                             comma_str, range_str)
+                                             comma_str, range_str, title_pressure)
         else:
             fig_title = TITLE_OPTIONS_LHS_T_INDEX.get(
                 output_nm,
                 ''.join(['Maximum {} at Each Point at Time t = {} years\n',
-                         'Across {} LHS Simulations{}{}(Gray: Zero)']).format(
+                         'Across {} LHS Simulations{}{}(Gray: Zero){}']).format(
                     output_nm, time[time_index], realization_number,
-                    comma_str, range_str))
+                    comma_str, range_str, title_pressure))
 
             if output_nm in TITLE_OPTIONS_LHS_T_INDEX:
                 fig_title = fig_title.format(aq_number, time[time_index],
                                              realization_number,
-                                             comma_str, range_str)
+                                             comma_str, range_str, title_pressure)
 
     # Set figure title
     plt.title(fig_title, fontsize=title_font_size,
@@ -862,7 +1012,11 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
         output_dir = model_data['OutputDirectory']
 
         if save_results:
-            results_formatted = np.empty(((len(x_loc) + 1), 3), dtype=list)
+            # Set up data for .csv file
+            if output_nm == 'pressure' and not critPressureInput is None:
+                results_formatted = np.empty(((len(x_loc) + 1), 5), dtype=list)
+            else:
+                results_formatted = np.empty(((len(x_loc) + 1), 3), dtype=list)
 
             results_formatted[0, 0] = 'x (km)'
             results_formatted[0, 1] = 'y (km)'
@@ -875,7 +1029,21 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             # If name does not match known observations use it as a column label
             results_formatted[0, 2] = CSV_FILE_COLUMNS.get(output_nm, output_nm)
 
-            results_formatted[1:None, 2:None] = results
+            results_formatted[1:None, 2] = results[:, 0]
+            
+            if output_nm == 'pressure' and not critPressureInput is None:
+                results_formatted[0, 3] = 'Critical Pressure [MPa]'
+                
+                results_formatted[1:None, 3] = np.ones(len(results)) * critPressureInput
+                
+                results_formatted[0, 4] = 'Critical Pressure Exceeded'
+                critPressureExceeded = np.zeros(len(results))
+                
+                for locRef in range(0, len(results)):
+                    if results[locRef, 0] >= critPressureInput:
+                        critPressureExceeded[locRef] = 1
+                
+                results_formatted[1:None, 4] = critPressureExceeded
 
             if not os.path.exists(os.path.join(output_dir, 'csv_files')):
                 os.mkdir(os.path.join(output_dir, 'csv_files'))
@@ -890,7 +1058,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                                         'AoR_{}_tIndex_{:.0f}.csv'.format(
                                             file_name_addition, time_index))
 
-            # Save the ouput for the simulation
+            # Save the ouput for the simulation to a .csv file
             with open(filename, 'w', newline='') as f:
                 writer = csv.writer(f)
                 for row_ref in range(0, len(x_loc) + 1):
@@ -951,7 +1119,7 @@ def get_AoR_yaml_input(yaml_data, name):
 
     yaml_input_keys = [
         'dpi_input', 'plot_injection_sites', 'InjectionCoordx',
-        'InjectionCoordy', 'SaveCSVFiles', 'TimeList']
+        'InjectionCoordy', 'SaveCSVFiles', 'TimeList', 'CriticalPressureMPa']
 
     InjectionCoord_debug_msg = ''.join([
         'InjectionCoord{} was provided for the AoR plot ', name,
@@ -967,6 +1135,21 @@ def get_AoR_yaml_input(yaml_data, name):
     if AoR_plot_data is not None:
         if 'FigureDPI' in AoR_plot_data:
             yaml_input['dpi_input'] = AoR_plot_data['FigureDPI']
+            
+        if 'CriticalPressureMPa' in AoR_plot_data:
+            if AoR_plot_data['CriticalPressureMPa'] == 'Calculated':
+                yaml_input['CriticalPressureMPa'] = AoR_plot_data['CriticalPressureMPa']
+            else:
+                try:
+                    yaml_input['CriticalPressureMPa'] = float(AoR_plot_data['CriticalPressureMPa'])
+                except:
+                    debug_msg = ''.join([
+                        'The input provided for CriticalPresureMPa under the AoR plot ', 
+                        name, ' was not given as ''Calculated'' and it could not ', 
+                        'be turned into a float numeric value. Check your input. ', 
+                        'The CriticalPresureMPa entry will not be used.'])
+                    logging.debug(debug_msg)
+                    yaml_input['CriticalPressureMPa'] = None
 
         if 'TimeList' in AoR_plot_data:
             yaml_input['TimeList'] = AoR_plot_data['TimeList']
@@ -1059,3 +1242,23 @@ def get_t_indices(time_list, time_array):
         time_index_list.append(int(closest_t_index))
 
     return time_index_list
+
+
+def get_crit_pressure(output_component, sm=None, yaml_data=None):
+    """
+    This function calculates the critical pressure for an OpenWellbore component.
+    """
+    wellTop = iamcommons.get_parameter_val(output_component, 'wellTop', 
+                                           sm=sm, yaml_data=yaml_data)
+    
+    reservoirDepth = iamcommons.get_parameter_val(output_component, 'reservoirDepth', 
+                                                  sm=sm, yaml_data=yaml_data)
+    
+    brineDensity = iamcommons.get_parameter_val(output_component, 'brineDensity', 
+                                                sm=sm, yaml_data=yaml_data)
+    
+    critPressureVal = (wellTop * GRAV_ACCEL * WATER_DENSITY) + (
+        brineDensity * GRAV_ACCEL * (reservoirDepth - wellTop))
+    
+    return critPressureVal
+

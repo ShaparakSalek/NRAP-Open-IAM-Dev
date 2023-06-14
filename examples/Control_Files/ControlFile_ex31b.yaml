@@ -63,7 +63,7 @@ SimpleReservoir1:
     Type: SimpleReservoir
     Parameters:
         injRate:
-            value: 1.0
+            value: 0.75
             vary: False
         logResPerm:
             value: -10.15
@@ -135,7 +135,8 @@ Plots:
         AoR: [pressure]
         PlotInjectionSites: True
         FigureDPI: 200
-        SaveCSVFiles: False
+        SaveCSVFiles: True
+        CriticalPressureMPa: Calculated
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

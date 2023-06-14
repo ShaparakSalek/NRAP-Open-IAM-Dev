@@ -179,6 +179,6 @@ Plots:
             # InjectionCoordy: 5.11e+04      # if you set PlotInjectionSites to True
             SpecifyXandYLims:
                 xLims: [38750, 40500]
-                yLims: [48266, 48400]
+                yLims: [46583, 50083]
             EqualAxes: False     # If EqualAxes is set to the default of True, the
                                  # limits specified with xLims and yLims will not be used

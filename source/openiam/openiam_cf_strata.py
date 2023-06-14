@@ -19,7 +19,6 @@ sys.path.append(SOURCE_DIR)
 
 import openiam as iam
 
-
 # Functions in this file are used to generate the colors, alpha values, and
 # labels for different units.
 # Color used to plot the unit
@@ -1345,17 +1344,15 @@ def get_strata_info_from_component(strata_comp):
 
     # The min, max, and numShaleLayers_vary are not used right now, but they
     # are kept here because they might be used in future versions.
+    numShaleLayers = iam.openiam_cf_commons.get_parameter_val(
+        strata_comp, 'numberOfShaleLayers')
+    
     if 'numberOfShaleLayers' in strata_comp.pars:
-        numShaleLayers = strata_comp.pars['numberOfShaleLayers'].value
         strata_dict['numberOfShaleLayers_min'] = \
             strata_comp.pars['numberOfShaleLayers'].min
         strata_dict['numberOfShaleLayers_max'] = \
             strata_comp.pars['numberOfShaleLayers'].max
         strata_dict['numberOfShaleLayers_vary'] = True
-    elif 'numberOfShaleLayers' in strata_comp.deterministic_pars:
-        numShaleLayers = strata_comp.deterministic_pars['numberOfShaleLayers'].value
-    elif 'numberOfShaleLayers' in strata_comp.default_pars:
-        numShaleLayers = strata_comp.default_pars['numberOfShaleLayers'].value
 
     strata_dict['numberOfShaleLayers'] = numShaleLayers
 
@@ -1374,43 +1371,33 @@ def get_strata_info_from_component(strata_comp):
     # Shale layers
     for shaleRef in range(numShaleLayers):
         shale_par_nm = 'shale{}Thickness'.format(shaleRef + 1)
+        
+        strata_dict['shaleThicknesses'].append(
+            iam.openiam_cf_commons.get_parameter_val(strata_comp, shale_par_nm))
+        
+        # The min and max are not used currently, but they are kept for potential 
+        # updates in the future.
         if shale_par_nm in strata_comp.pars:
-            strata_dict['shaleThicknesses'].append(
-                strata_comp.pars[shale_par_nm].value)
             strata_dict['shaleThicknesses_min'][shaleRef] = \
                 strata_comp.pars[shale_par_nm].min
             strata_dict['shaleThicknesses_max'][shaleRef] = \
                 strata_comp.pars[shale_par_nm].max
             strata_dict['shaleThicknesses_vary'][shaleRef] = True
 
-        elif shale_par_nm in strata_comp.deterministic_pars:
-            strata_dict['shaleThicknesses'].append(
-                strata_comp.deterministic_pars[shale_par_nm].value)
-
-        else:
-            strata_dict['shaleThicknesses'].append(
-                strata_comp.default_pars[shale_par_nm].value)
-
     # Aquifer layers
     for shaleRef in range(numShaleLayers-1):
         aq_par_nm = 'aquifer{}Thickness'.format(shaleRef + 1)
+        
+        strata_dict['aquiferThicknesses'].append(
+            iam.openiam_cf_commons.get_parameter_val(strata_comp, aq_par_nm))
+        
         if aq_par_nm in strata_comp.pars:
-            strata_dict['aquiferThicknesses'].append(
-                strata_comp.pars[aq_par_nm].value)
             strata_dict['aquiferThicknesses_min'][shaleRef] = \
                 strata_comp.pars[aq_par_nm].min
             strata_dict['aquiferThicknesses_max'][shaleRef] = \
                 strata_comp.pars[aq_par_nm].max
             strata_dict['aquiferThicknesses_vary'][shaleRef] = True
-
-        elif aq_par_nm in strata_comp.deterministic_pars:
-            strata_dict['aquiferThicknesses'].append(
-                strata_comp.deterministic_pars[aq_par_nm].value)
-
-        else:
-            strata_dict['aquiferThicknesses'].append(
-                strata_comp.default_pars[aq_par_nm].value)
-
+    
     # ReservoirThickness isn't needed for this analysis, but it is needed in the
     # update_stratigraphy() function that is called.
     # Add additional keys
@@ -1421,18 +1408,18 @@ def get_strata_info_from_component(strata_comp):
             strata_dict[par_name+key] = 0  # e.g. 'reservoirThickness_min'
 
         strata_dict[par_name+'_vary'] = False   # e.g. 'reservoirThickness_vary'
-
+        
+        strata_dict[par_name] = iam.openiam_cf_commons.get_parameter_val(
+            strata_comp, par_name)
+        
+        # The min and max vlaues are not used currently, but they are kept for 
+        # potential updates in the future.
         if par_name in strata_comp.pars:
-            strata_dict[par_name] = strata_comp.pars[par_name].value
             strata_dict[par_name+'_min'] = strata_comp.pars[par_name].min
             strata_dict[par_name+'_max'] = strata_comp.pars[par_name].max
             strata_dict[par_name+'_vary'] = True
-        elif par_name in strata_comp.deterministic_pars:
-            strata_dict[par_name] = strata_comp.deterministic_pars[par_name].value
-        elif par_name in strata_comp.default_pars:
-            strata_dict[par_name] = strata_comp.default_pars[par_name].value
-            if par_name == 'depth':
-                strata_dict['depth_default'] = True
+        elif par_name in strata_comp.default_pars and par_name == 'depth':
+            strata_dict['depth_default'] = True
 
     return strata_dict
 
@@ -1909,13 +1896,9 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
 
     # First, handle the shallowest shale
     shale_par_nm = 'shale{}Thickness'.format(numShaleLayers)
-    try:
-        shaleThickness = stratigraphyComponent.deterministic_pars[shale_par_nm].value
-    except KeyError:
-        try:
-            shaleThickness = stratigraphyComponent.pars[shale_par_nm].value
-        except KeyError:
-            shaleThickness = stratigraphyComponent.default_pars[shale_par_nm].value
+    
+    shaleThickness = iam.openiam_cf_commons.get_parameter_val(
+        stratigraphyComponent, shale_par_nm)
 
     if unitNumber < numShaleLayers:
         unitDepth += shaleThickness  # start with thickness of the top shale
@@ -1927,21 +1910,12 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
         for shaleRef in range(numShaleLayers - 1, unitNumber - 1, -1):
             aq_par_nm = 'aquifer{}Thickness'.format(shaleRef)
             shale_par_nm = 'shale{}Thickness'.format(shaleRef)
-            try:
-                aquiferThickness = stratigraphyComponent.deterministic_pars[aq_par_nm].value
-            except KeyError:
-                try:
-                    aquiferThickness = stratigraphyComponent.pars[aq_par_nm].value
-                except KeyError:
-                    aquiferThickness = stratigraphyComponent.default_pars[aq_par_nm].value
-
-            try:
-                shaleThickness = stratigraphyComponent.deterministic_pars[shale_par_nm].value
-            except KeyError:
-                try:
-                    shaleThickness = stratigraphyComponent.pars[shale_par_nm].value
-                except KeyError:
-                    shaleThickness = stratigraphyComponent.default_pars[shale_par_nm].value
+            
+            aquiferThickness = iam.openiam_cf_commons.get_parameter_val(
+                stratigraphyComponent, aq_par_nm)
+            
+            shaleThickness = iam.openiam_cf_commons.get_parameter_val(
+                stratigraphyComponent, shale_par_nm)
 
             if shaleRef > unitNumber:
                 unitDepth += aquiferThickness + shaleThickness
@@ -1955,13 +1929,9 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
 
     if res_bottom_check:
         par_name = 'reservoirThickness'
-        try:
-            reservoirThickness = stratigraphyComponent.deterministic_pars[par_name].value
-        except KeyError:
-            try:
-                reservoirThickness = stratigraphyComponent.pars[par_name].value
-            except KeyError:
-                reservoirThickness = stratigraphyComponent.default_pars[par_name].value
+        
+        reservoirThickness = iam.openiam_cf_commons.get_parameter_val(
+            stratigraphyComponent, par_name)
 
         unitDepth += reservoirThickness
 

@@ -126,8 +126,9 @@ OpenWellbore1:
             vary: False
         # Parameters wellTop (480.31 m) and reservoirDepth (1131.01 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
-        # and don't need to be set explicitly unless different values are
-        # required.
+        # and don't need to be set explicitly in a forward model unless different values are
+        # required. These parameters should be set explicitly in a simulation that uses the 
+        # lhs or parstudy analysis types.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------
@@ -160,7 +161,8 @@ Plots:
         InjectionCoordx: 2.37e5
         InjectionCoordy: 4.41e6
         FigureDPI: 200
-        SaveCSVFiles: False
+        SaveCSVFiles: True
+        CriticalPressureMPa: Calculated
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

@@ -20,6 +20,7 @@ from matplotlib import ticker
 
 from .label_setup import Y_LABEL_DICT
 from openiam.visualize import time_series
+import openiam.openiam_cf_commons as iamcommons
 
 
 RC_FONT = {'family': 'Arial', 'weight': 'normal', 'size': None}
@@ -159,7 +160,7 @@ def gridded_metric_plot(yaml_data, model_data, sm, s, output_dir,
             component_length, component_strike, component_dip, \
                 res_comp_injX, res_comp_injY, x_range, y_range = \
                 get_comps_and_limits(components_name_list, yaml_data, name, sm)
-
+    
     if plot_injection_sites and InjectionCoordx is None:
         InjectionCoordx = res_comp_injX
         InjectionCoordy = res_comp_injY
@@ -358,10 +359,10 @@ def gridded_metric_plot(yaml_data, model_data, sm, s, output_dir,
                 max_val = None
                 # The parts are cells for AREA_COMPONENTS or segments for FAULT_COMPONENTS
                 for partRef, cellMetric in enumerate(metric):
-
+                    
                     x_center_km = component_xvals[compRef][partRef] / 1000
                     y_center_km = component_yvals[compRef][partRef] / 1000
-
+                    
                     if plot_val_over_area and compType in AREA_COMPONENTS:
                         node_x = [x_center_km - (cell_length_x_km / 2),
                                   x_center_km + (cell_length_x_km / 2),
@@ -576,7 +577,7 @@ def get_comps_and_limits(components_name_list, yaml_data, name, sm):
                     component_types.append(comp.class_type)
 
                     if comp.class_type in AREA_COMPONENTS:
-                        cell_area = get_parameter_val(comp, 'area')
+                        cell_area = iamcommons.get_parameter_val(comp, 'area')
                         component_cell_areas.append(cell_area)
 
                         cell_loc = comp.cell_xy_centers
@@ -631,22 +632,25 @@ def get_comps_and_limits(components_name_list, yaml_data, name, sm):
                     elif comp.class_type in FAULT_COMPONENTS:
                         component_cell_areas.append(None)
 
-                        nSegments = get_parameter_val(comp, 'nSegments')
+                        nSegments = iamcommons.get_parameter_val(comp, 'nSegments')
                         component_num_parts.append(nSegments)
 
                         comp_data = yaml_data[compName]
                         loc_data = comp_data['Segments']['Locations']
+                        
+                        component_xvals.append([])
+                        component_yvals.append([])
+                        for locRef in range(len(loc_data['coordx'])):
+                            component_xvals[-1].append(loc_data['coordx'][locRef])
+                            component_yvals[-1].append(loc_data['coordy'][locRef])
 
-                        component_xvals = [val for val in loc_data['coordx']]
-                        component_yvals = [val for val in loc_data['coordy']]
-
-                        length = get_parameter_val(comp, 'length')
+                        length = iamcommons.get_parameter_val(comp, 'length')
                         component_length.append(length)
 
-                        strike = get_parameter_val(comp, 'strike')
+                        strike = iamcommons.get_parameter_val(comp, 'strike')
                         component_strike.append(strike)
 
-                        dip = get_parameter_val(comp, 'dip')
+                        dip = iamcommons.get_parameter_val(comp, 'dip')
                         component_dip.append(dip)
 
                         # Adjust the min and ax x and y to account for the fault length
@@ -1089,6 +1093,7 @@ def plot_comp_inj_sites(ax, comp_name, comp_type, cell_xvals, cell_yvals,
     """
     Function that plots the wells and injection sites used in the simulation.
     """
+    
     if plot_injection_sites:
         if isinstance(InjectionCoordx, float):
             if include_labels:
@@ -1143,7 +1148,7 @@ def plot_comp_inj_sites(ax, comp_name, comp_type, cell_xvals, cell_yvals,
         plt.plot(np.array(cell_xvals) / 1000, np.array(cell_yvals) / 1000,
                  linestyle='none', marker='o', color='k', markeredgewidth=1.5,
                  markersize=cellCenterMarkerSize, markerfacecolor='none', zorder=1e6)
-
+    
     if comp_type in FAULT_COMPONENTS and plot_faults:
         if component_length is not None and component_strike is not None \
                 and component_dip is not None:
@@ -1206,23 +1211,6 @@ def get_loc_from_strike(strike, input_distance):
         dy = input_distance * np.sin(np.radians(strike - 270))
 
     return dx, dy
-
-
-def get_parameter_val(comp, par_name):
-    """
-    Function that checks if a parameter (par_name) is in the stochastic,
-    deterministic, or default parameters of a component. If so, the parameter
-    value is returned.
-    """
-    par_val = None
-    if par_name in comp.pars:
-        par_val = comp.pars[par_name].value
-    elif par_name in comp.deterministic_pars:
-        par_val = comp.deterministic_pars[par_name].value
-    else:
-        par_val = comp.default_pars[par_name].value
-
-    return par_val
 
 
 def save_results_to_csv(output_dir, comp_name, analysis, sim_index,

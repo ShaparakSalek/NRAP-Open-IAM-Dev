@@ -110,8 +110,8 @@ Plots:
             InjectionCoordx: 2.37e5
             InjectionCoordy: 4.41e6
             View:
-                ViewAngleElevation: [5, 5, 5]
-                ViewAngleAzimuth: [300, 315, 330]
+                ViewAngleElevation: [5, 5, 5, 5, 5]
+                ViewAngleAzimuth: [240, 255, 270, 285, 300]
     AoR_Pressure:
         AoR: [pressure]
         TimeList: [1, 5, 10, 15, 20]
