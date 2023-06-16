@@ -252,7 +252,7 @@ class GenericReservoir(ComponentModel):
             is greater than the boundary size of GenericReservoir component'
             logging.warning(warn_msg)
 
-    def assign_coordinates(self, injX, injY, locX, locY):
+    def assign_coordinates(self, injX=None, injY=None, locX=None, locY=None):
         """
         Save locations of injector and leaking well and calculate distance
         between them.
@@ -271,10 +271,15 @@ class GenericReservoir(ComponentModel):
             to be calculated
         :type locY: float
         """
-        self.injX = injX
-        self.injY = injY
-        self.locX = locX
-        self.locY = locY
+        if injX is not None:
+            self.injX = injX
+        if injY is not None:
+            self.injY = injY
+        if locX is not None:
+            self.locX = locX
+        if locY is not None:
+            self.locY = locY
+
         self.distance = sqrt((self.locX-self.injX)**2+(self.locY-self.injY)**2)
 
     def simulation_model(self, p, time_point=365.25, time_step=365.25,
@@ -305,6 +310,13 @@ class GenericReservoir(ComponentModel):
         # Default value not allowed to be changed by user
         # well radius w/ porosity 1.0
         actual_p['wellRadius'] = 0.05
+
+        # This statement should take care of the setup of locations through
+        # control file interface, updates of distance between locations and injection
+        # wells, as well as cases when locations for observations are
+        # generated randomly for each realization
+        if time_point == 0.0:
+            self.assign_coordinates(injX, injY, locX, locY)
 
         inputArray = np.array([
             actual_p['reservoirDepth'], actual_p['reservoirThickness'],
