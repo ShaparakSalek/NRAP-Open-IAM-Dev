@@ -478,7 +478,7 @@ class SystemModel(matk):
             for k, determ_par in cm.deterministic_pars.items():
                 aeval.symtable[sub('\.', '_', determ_par.name)] = determ_par.value
 
-        # Add pardict (stochastic) parameters into aeval.  Stochastic
+        # Add pardict (stochastic) parameters into aeval. Stochastic
         # parameters should go after default and deterministic parameters
         # since their names coincide.
         for k, v in pardict.items():
@@ -525,7 +525,8 @@ class SystemModel(matk):
                 pars[k] = comp_par.value
 
             # Run component's model at frequency defined by the component's run_frequency attribute
-            if (cm.run_frequency == 2) or ((cm.run_frequency == 1) and (to_reset is True)):
+            if (cm.run_frequency == 2) or ((cm.run_frequency == 1) and (to_reset is True)) or (
+                    (cm.run_frequency == 3) and (sm_kwargs['time_index'] in cm.run_time_indices)):
                 # Determine parameters that obtain their values from observations
                 for k, lobs in cm.obslinked_pars.items():
                     # Split into cm name and obs name
@@ -539,6 +540,13 @@ class SystemModel(matk):
                     if lkwargs_nm in self.component_models[lkwargs_cm].linkobs:
                         cm.model_kwargs[k] = (
                             self.component_models[lkwargs_cm].linkobs[lkwargs_nm].sim)
+
+                # Determine parameters that obtain their values from gridded observations
+                for k, lobs in cm.grid_obs_linked_pars.items():
+                    lobs_cm, lobs_nm = lobs['name'].split('.')
+                    if lobs_nm in self.component_models[lobs_cm].linkobs:
+                        linkobs_data = self.component_models[lobs_cm].linkobs[lobs_nm].sim
+                        pars[k] = linkobs_data[lobs['loc_ind']]
 
                 # Determine keyword parameters that obtain their values from gridded observations
                 for k, lkwargs in cm.grid_obs_linked_kwargs.items():
@@ -580,7 +588,7 @@ class SystemModel(matk):
                 # Set up keyword arguments provided by system model
                 if cm.model_kwargs is not None:
                     for k in list(cm.model_kwargs.keys()):
-                        if k in ['time_point', 'time_step']:
+                        if k in ['time_point', 'time_step', 'time_index']:
                             cm.model_kwargs[k] = sm_kwargs[k]
 
                 if to_reset: # check whether input parameters need to be checked
@@ -610,7 +618,6 @@ class SystemModel(matk):
                     # Process linked observations
                     if k in cm.linkobs:
                         cm.linkobs[k].sim = val
-
 
                     # Process gridded observations
                     if k in cm.grid_obs:
@@ -670,24 +677,80 @@ class SystemModel(matk):
                      'time_step': self.time_array[1] - self.time_array[0],
                      'time_index': 0}   # time_index is needed for dynamic kwargs
 
+        # Initializa system model outputs dictionary
+        total_out = {}
+
+        # For some components the model method may not be run (run_frequency = 0)
+        # but the system model is supposed to return the observations corresponding
+        # to the given component for a given time step which in most cases are zero,
+        # or defined by the sim value of observation when it is initialized
+        # These type of components are different from the ones that are known
+        # to be run only at the specified time points
+        for b_obs_nm in self.obs_base_names:
+            obs_cm, obs_nm = b_obs_nm.split('.')
+            try:
+                # For cases when only observations with selected indices are needed
+                # the first line below may return a KeyError
+                # The line still works for components meant to run at all time points
+                val = self.component_models[obs_cm].obs[obs_nm + '_0'].sim
+                total_out[b_obs_nm] = val if val is not None else 0.0
+            except:
+                pass
+
         # Get observations for the first time point
-        total_out = self.single_step_model(
+        current_out = self.single_step_model(
             pardict, to_reset=True, sm_kwargs=sm_kwargs, job_number=job_number)
+
+        # Copy outputs from the first time point to the system model outputs dictionary
+        for nm in current_out:
+            total_out[nm] = current_out[nm]
+
+        # Loop over all output base names
         for obs_nm in self.obs_base_names:
-            ts_obs_nm = obs_nm+'_0'
+            ts_obs_nm = obs_nm + '_0'
             # Check whether observation is already in the output
+            # This check is needed for components like Plume Stability or
+            # Hydrocarbon Leakage that return all the observations with base names
+            # already augmented by time index
             if ts_obs_nm not in total_out:
                 total_out[ts_obs_nm] = total_out[obs_nm]
 
         # Iterate over the remaining time points
         for n in range(1, num_time_points):
+            # Initialize dictionary of outputs associated with a given time point
+            out = {}
+
             # Define time point and time step used by several component models
             sm_kwargs = {'time_point': self.time_array[n],
                          'time_step': self.time_array[n] - self.time_array[n-1],
                          'time_index': n}   # time_index is needed for dynamic kwargs
 
+            # Initialize the values of all observations at time with index n
+            for b_obs_nm in self.obs_base_names:
+                obs_cm, obs_nm = b_obs_nm.split('.')
+                try:
+                    # Since for cases when only observations with selected indices
+                    # are needed and index n is not specified as needed
+                    # the first line below may return a KeyError we added "try".
+                    # The second line was added for cases when the observation
+                    # with index n is specified as needed but it will not be calculated
+                    # (i.e. it will stay None) since component might be turned
+                    # off by some other component during the current time step,
+                    # so we return 0.0 for val to replace non-calculated observation value
+                    # TODO We might need to add option to handle different default values
+                    # TODO Need to think what to do about gridded observations
+                    val = self.component_models[obs_cm].obs[obs_nm + '_{}'.format(n)].sim
+                    out[b_obs_nm] = val if val is not None else 0.0
+                except:
+                    pass
+
             # Find all observations of the system model
-            out = self.single_step_model(pardict, sm_kwargs=sm_kwargs, job_number=job_number)
+            current_out = self.single_step_model(
+                pardict, sm_kwargs=sm_kwargs, job_number=job_number)
+
+            # Update the dictionary of outputs with just calculated values
+            for nm in current_out:
+                out[nm] = current_out[nm]
 
             # Set observations relevant to the current time step
             # The next 4 lines deal with observations
@@ -699,7 +762,7 @@ class SystemModel(matk):
             # Since the end user may not be necessary interested in all time indices,
             # the corresponding outputs are collected after each time step.
             for obs_nm in self.obs_base_names:
-                ts_obs_nm = obs_nm+'_'+str(n)
+                ts_obs_nm = obs_nm + '_{}'.format(n)
                 # Check whether the observation is needed and whether it is already in the output
                 # TODO if we approve this approach we might need to
                 # take into account the connections between components
@@ -849,6 +912,19 @@ class ComponentModel():
         self.workdir = workdir
         self.class_type = 'ComponentModel'  # name of class needed for CFI and GUI
 
+        # The next attribute serves as a placeholder. It can be used to store
+        # any kind of data about the component that can be used by other components
+        # but was not planned as part of the initial setup by developer.
+        # It can be used for different purposes such as to group components
+        # together, or tag them based on some common property. For example,
+        # it can contain some kind of description, or additional properties
+        # that the script developer wished the component had:
+        # location of well for wellbore component, its age, etc. This attribute
+        # is not meant to be used by the component class itself.
+        # The attribute is assigned a value after the instance of the class
+        # is created.
+        self.details = dict()
+
         # Parameters
         self.default_pars = OrderedDict()
         self.deterministic_pars = OrderedDict()
@@ -861,6 +937,7 @@ class ComponentModel():
         # Keyword arguments
         self.obs_linked_kwargs = OrderedDict()
         self.grid_obs_linked_kwargs = OrderedDict()
+        self.grid_obs_linked_pars = OrderedDict()
         self.dynamic_kwargs = OrderedDict()
         self.collection_linked_kwargs = OrderedDict()
 
@@ -889,8 +966,10 @@ class ComponentModel():
         # Possible values:
         # 0 - do not run but setup parameters, container type of component
         # 1 - run only once for the very first time step
-        # 2 - run for all time steps (most common)
+        # 3 - run for selected time points defined by indices in the attribute self.run_time_indices
+        # Indices are defined as indices of the time_array elements
         self.run_frequency = 2
+        self.run_time_indices = None
 
     def add_par(self, name, value=None, vary=True, min=None, max=None,
                 expr=None, discrete_vals=[], **kwargs):
@@ -1012,7 +1091,7 @@ class ComponentModel():
         """
         self.parlinked_pars[name] = parlink.name
 
-    def add_par_linked_to_obs(self, name, obslink):
+    def add_par_linked_to_obs(self, name, obslink, obs_type='scalar', **kwargs):
         """
         Add parameter linked to observation.
 
@@ -1025,8 +1104,41 @@ class ComponentModel():
 
         :param obslink: ComponentModel observation
         :type obslink: Observation class object
+
+        :param obs_type: type of observation that the parameter will
+            be linked to. Possible values: 'scalar' and 'grid'. By default,
+            the argument value is 'scalar'.
+        :type obs_type: str
+
+        :param kwargs: additional keyword arguments specifying constr_type and
+            loc_ind for obs_type='grid'. kwargs['constr_type'] is string in
+            ['array','matrix']. kwargs['loc_ind'] is scalar (for 'array'
+            constr_type) or tuple (for 'matrix' constr_type). Missing dictionary
+            kwargs will lead to exception raised.
+        :type kwargs: dict
         """
-        self.obslinked_pars[name] = obslink.name
+        if obs_type == 'scalar':
+            self.obs_linked_pars[name] = obslink.name
+        elif obs_type == 'grid':
+            self.grid_obs_linked_pars[name] = {'name': obslink.name}
+            if ('constr_type' in kwargs) and ('loc_ind' in kwargs):
+                # Primitive check for consistency between provided loc_ind and constr_type
+                if (kwargs['constr_type']=='array' and
+                        isinstance(kwargs['loc_ind'], int)) or (
+                            kwargs['constr_type']=='matrix' and
+                                isinstance(kwargs['loc_ind'], tuple)):
+                    self.grid_obs_linked_pars[name]['loc_ind'] = kwargs['loc_ind']
+                else:
+                    err_msg = ''.join(['Incompatible combination of keyword parameters ',
+                                    'constr_type and loc_ind, or wrong types used.'])
+                    raise Exception(err_msg)
+            else:
+                err_msg = ''.join(['The location index and contruction type ',
+                                   'of the gridded observation {} should be ',
+                                   'specified for parameter {} to be properly ',
+                                   'linked to it.']).format(obslink.name,
+                                                            name)
+                raise Exception(err_msg)
 
     def add_gridded_par(self, name, interpolator):
         """
@@ -1282,6 +1394,13 @@ class ComponentModel():
                         'Index and value used as lists/arrays ',
                         'should have the same number of elements.']))
 
+            # Check whether the component should be run for all time steps
+            if self.run_time_indices is not None:
+                # Obtain an intersection of the lists provided in the argument
+                # and defined in the component attribute
+                ind_array = [ind for ind in ind_array if ind in self.run_time_indices]
+                val_list = val_list[ind_array]
+
             # Add observation name to the list of base observations in the system model
             if base_nm not in self._parent.obs_base_names:
                 self._parent.obs_base_names.append(base_nm)
@@ -1364,11 +1483,15 @@ class ComponentModel():
         if name in self.grid_obs:
             self.grid_obs[name] = GriddedObservation(
                 '.'.join([self.name, name]), constr_type=constr_type,
-                coordinates=coordinates, output_dir=output_dir, save_type = save_type, index=ind_array, sim=sim, weight=weight, value=value)
+                coordinates=coordinates, output_dir=output_dir,
+                save_type=save_type, index=ind_array,
+                sim=sim, weight=weight, value=value)
         else:
             self.grid_obs.__setitem__(name, GriddedObservation(
                 '.'.join([self.name, name]), constr_type=constr_type,
-                coordinates=coordinates, output_dir=output_dir, save_type = save_type, index=ind_array, sim=sim, weight=weight, value=value))
+                coordinates=coordinates, output_dir=output_dir,
+                save_type=save_type, index=ind_array,
+                sim=sim, weight=weight, value=value))
 
     def add_local_obs(self, name, grid_obs_name, constr_type, loc_ind, index='all',
                       sim=None, weight=1.0, value=None):
@@ -1510,9 +1633,9 @@ class ComponentModel():
                   "to the model documentation for more information.")
 
     # Attributes used to set up component model in system
-    needs_locXY = False # locX and locY are kwargs
-    system_inputs = [] # inputs from the system model
-    system_params = [] # parameters from the system model
+    needs_locXY = False  # locX and locY are kwargs
+    system_inputs = []   # inputs from the system model
+    system_params = []   # parameters from the system model
     composite_inputs = OrderedDict()
     system_collected_inputs = {}
     adapters = []

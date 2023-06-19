@@ -37,6 +37,14 @@ from .samplers.sh_permeability_sampler import SHPermeabilitySampler
 from .samplers.sh_thickness_sampler import SHThicknessSampler
 from .samplers.sh_fracture_sampler import SHFractureSampler
 from .fault_leakage_component import FaultLeakage
+from .parameter_setup_component import (
+    ParameterSetup1, ParameterSetup2, ParameterSetup3, ParameterSetup4, ParameterSetup5)
+from .configurer_component import (
+    PressureBasedRiskConfigurer, DataBasedRiskConfigurer)
+from .monitoring_tool_component import (
+    MonitoringTool1, MonitoringTool2, MonitoringTool3)
+from .monitoring_scheduler_component import (
+    MonitoringScheduler1, MonitoringScheduler2, MonitoringScheduler3)
 
 
 __version__ = 'alpha_2.7.0-23.02.15'
@@ -80,5 +88,18 @@ __all__ = ['IAM_DIR',
            'SHPermeabilitySampler',
            'SHThicknessSampler',
            'SHFractureSampler',
-           'ChemicalWellSealing'
+           'ChemicalWellSealing',
+           'ParameterSetup1',
+           'ParameterSetup2',
+           'ParameterSetup3',
+           'ParameterSetup4',
+           'ParameterSetup5',
+           'PressureBasedRiskConfigurer',
+           'DataBasedRiskConfigurer',
+           'MonitoringTool1',
+           'MonitoringTool2',
+           'MonitoringTool3',
+           'MonitoringScheduler1',
+           'MonitoringScheduler2',
+           'MonitoringScheduler3'
            ]
