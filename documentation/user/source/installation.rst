@@ -21,8 +21,8 @@ are seeking any feedback and/or issue reports. An online feedback form
 can be found here:
 https://docs.google.com/forms/d/e/1FAIpQLSed5mcX0OBx1dLNmYGbmS4Vfc0mdOLapIzFqw-6vHoho9B19A/viewform?usp=sf_link
 
-Issue reports and feedback can be left at the forum on NETL's  
-Energy  Data eXchange webpage for NRAP-Open-IAM: 
+Issue reports and feedback can be left at the forum on NETL's
+Energy  Data eXchange webpage for NRAP-Open-IAM:
 https://edx.netl.doe.gov/workspace/forum/nrap-tools/topic?t=nrap-tools-nrap-open-iam
 or on GitLab issues page for NRAP-Open-IAM:
 https://gitlab.com/NRAP/OpenIAM/-/issues?sort=created_date&state=opened
@@ -71,7 +71,7 @@ and package dependencies.
 
 For alternative installation of Python the following packages are needed:
 ``NumPy``, ``SciPy``, ``PyYAML``, ``Matplotlib``, ``Pandas``,
-``TensorFlow`` (of version 2.6), ``Keras``, ``scikit-learn``, 
+``TensorFlow`` (of version 2.6), ``Keras``, ``scikit-learn``,
 ``Pmw``, ``pip``, and ``six``. In most cases (mainly dependent
 on the platform and Python distribition) the required libraries can be
 installed using ``pip`` or ``conda`` package managers. Additional libraries
@@ -128,19 +128,23 @@ at the time of active contribution):
 
 * Diana Bacon (Pacific Northwest National Laboratory)
 * Seunghwan Baek (Pacific Northwest National Laboratory)
+* Pramod Bhuvankar (Lawrence Berkeley National Laboratory)
 * Suzanne (Michelle) Bourret (Los Alamos National Laboratory)
 * Julia De Toledo Camargo (Pacific Northwest National Laboratory)
 * Bailian Chen (Los Alamos National Laboratory)
+* Abdullah Cihan (Lawrence Berkeley National Laboratory)
 * Dylan Harp (Los Alamos National Laboratory)
 * Paul Holcomb (National Energy Technology Laboratory)
 * Jaisree Iyer (Lawrence Livermore National Laboratory)
 * Elizabeth Keating (Los Alamos National Laboratory)
 * Seth King (National Energy Technology Laboratory)
-* Greg Lackey(National Energy Technology Laboratory)
+* Greg Lackey (National Energy Technology Laboratory)
 * Ernest Lindner (National Energy Technology Laboratory)
 * Kayyum Mansoor (Lawrence Livermore National Laboratory)
+* Mohamed Mehana (Los Alamos National Laboratory)
 * Saro Meguerdijian (Los Alamos National Laboratory)
 * Nathaniel Mitchell (National Energy Technology Laboratory)
+* Omotayo Omosebi (Lawrence Berkeley National Laboratory)
 * Veronika Vasylkivska (National Energy Technology Laboratory)
 * Ya-Mei Yang (National Energy Technology Laboratory)
 * Yingqi Zhang (Lawrence Berkeley National Laboratory)
