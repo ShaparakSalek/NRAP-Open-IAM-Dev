@@ -1,24 +1,27 @@
 # OpenIAM Control File Example 39b
 #
 # This example is similar to Control File example 39a, but it uses
-# spatially variable stratigraphy (the strikeAndDip option). The TTFD 
+# spatially variable stratigraphy (the strikeAndDip option). The TTFD
 # plot type does not work with LookupTableStratigraphy.
 #
-# Because the units dip to the southwest here, the plume timing figures 
+# Because the units dip to the southwest here, the plume timing figures
 # will show an assymetry. Plumes will spread more easily to the northeast.
-# The depths of monitoring wells were chosen to decrease to the northeast. 
-# For help in choosing monitoring well depths, you can first create a Stratigraphy 
-# plot that exports .csv files (through the entry 'SaveCSVFiles: True') to 
-# see how unit depths vary across the domain. Additionally, you can examine the 
-# .csv files with plume timings and the x, y, and z grids - these files are 
-# created by the TTFD plot entry if 'SaveCSVFiles' is set to True. When using 
-# spatially uniform stratigraphy, separate .csv files are created for the x, y, 
-# and z grid - results are evaluated at all combinations of the grid point values. 
-# When using dipping stratigraphy, the z grid values vary with x and y, so 
-# one file with all grid point combinations is created. Because it contains all 
-# combinations of x, y, and z points, this file can be rather large (here, several MB).
+# The depths of monitoring wells were chosen to decrease to the northeast.
+# To figure out the setup of monitoring well depths, one can first create a Stratigraphy
+# plot that exports .csv files (through the entry 'SaveCSVFiles: True') to
+# see how unit depths vary across the domain. Additionally, one can examine the
+# .csv files with plume timings and the x, y, and z grids - these files are
+# created by the TTFD plot entry if 'SaveCSVFiles' is set to True. When using
+# spatially uniform stratigraphy, separate .csv files are created for the x, y,
+# and z grid - results are evaluated at all combinations of the grid point values.
+# When using dipping stratigraphy, the z grid values vary with x and y, so
+# one file with all grid point combinations is created. Because it contains all
+# combinations of x, y, and z points, this file can be rather large (here, several Mb).
 #
-# Last Modified: January 12th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex39b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50

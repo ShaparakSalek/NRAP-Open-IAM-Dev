@@ -9,7 +9,10 @@
 # values of 0, 1, and 2, so the results for the 1st, 2nd, and 3rd realizations
 # (out of 30) will be displayed.
 #
-# Last Modified: April 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex54d.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10.

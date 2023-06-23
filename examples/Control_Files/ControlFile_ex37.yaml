@@ -1,13 +1,14 @@
 # OpenIAM Control File Example 37
 #
-# This example demonstrates how to display the injection location(s) when using
-# a Lookup Table Reservoir. Control File example 33 shows how to display the injection
-# location when using a simple reservoir - a simple reservoir has a specified
-# injection location, even if it resorts to the default location of x = 0 m and y = 0 m.
-# Lookup Table Reservoirs do not have specified injection locations attached
-# to them, so one has to manually enter an injection location within
-# the Stratigraphy Plot section of the .yaml file (InjectionCoordx and InjectionCoordy
-# for x and y values in meters, respectively). If you want to enter multiple injection
+# This example demonstrates how to display the injection location(s) when
+# using a Lookup Table Reservoir. Control File example 33 shows how
+# to display the injection location when using a simple reservoir - a simple
+# reservoir has a specified injection location, even if it resorts to
+# the default location of x = 0 m and y = 0 m. Lookup Table Reservoirs do not
+# have specified injection locations attached to them, so one has to manually
+# enter an injection location within the Stratigraphy Plot section of
+# the .yaml file (InjectionCoordx and InjectionCoordy for x and y values
+# in meters, respectively). If you want to enter multiple injection
 # locations, provide lists to InjectionCoordx and InjectionCoordy
 # (e.g., InjectionCoordx = [100, 200] and InjectionCoordy = [500, 600],
 # where the sites are located at (x, y) values of (100, 500) and (200, 600)).
@@ -26,7 +27,10 @@
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
 #
-# Last Modified: May, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex37.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -35,6 +39,7 @@ ModelParams:
     Components: [LookupTableReservoir1, MultisegmentedWellbore1]
     OutputDirectory: output/output_ex37_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers: 5
     shale1Thickness: 150.0

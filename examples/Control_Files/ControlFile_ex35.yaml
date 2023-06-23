@@ -22,11 +22,11 @@
 # representing unit depths can be seen more clearly. Additionally,
 # having "PlotInjectionLocations: True" makes the code plot the injection sites
 # used by the reservoir components. Note that injection sites must be explicity
-# given with the InjectionCoordx and InjectionCoordy (x and y values, respectively) 
-# for LookupTableReservoir components. Other types of reservoir components store the 
-# x and y values, so InjectionCoordx and InjectionCoordy do not need to be provided. 
-# For more details check Control File example 37. This example also demonstrates how 
-# you can save the Stratigraphy plot as a certain type of image file (here, .tiff).
+# given with the InjectionCoordx and InjectionCoordy (x and y values, respectively)
+# for LookupTableReservoir components. Other types of reservoir components store the
+# x and y values, so InjectionCoordx and InjectionCoordy do not need to be provided.
+# For more details check Control File example 37. This example also demonstrates how
+# one can save the Stratigraphy plot as a certain type of image file (here, .tiff).
 #
 # There are also three StratigraphyColumn plots demonstrating how unit thicknesses
 # change across the domain. The top units pinch out to the north - because both shale
@@ -36,7 +36,10 @@
 # regarding unit labels. Because the text used to display depths would also overlap,
 # this text is disabled in StratCol2 and StratCol3 with the entry "DepthText: False".
 #
-#  Last Modified: May, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex35.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -45,6 +48,7 @@ ModelParams:
     Components: [SimpleReservoir1, OpenWellbore1]
     OutputDirectory: output/output_ex35_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:
         strikeAndDip:

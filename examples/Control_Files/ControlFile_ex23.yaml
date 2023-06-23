@@ -8,6 +8,8 @@
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex23.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -16,6 +18,7 @@ ModelParams:
     Components: [LUTReservoir1, SealLayer1]
     OutputDirectory: output/output_ex23_{datetime}
     Logging: Info
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

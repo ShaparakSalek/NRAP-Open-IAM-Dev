@@ -22,7 +22,10 @@
 # those components will also increase the required number of
 # realizations.
 #
-# Last Modified: April 25th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31c.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
@@ -35,6 +38,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

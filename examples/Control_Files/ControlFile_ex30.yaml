@@ -1,26 +1,32 @@
 # OpenIAM Control File Example 30
 #
-# This example illustrates six different options of setting Locations for 
+# This example illustrates six different options of setting Locations for
 # MultisegmentedWellbore components:
 #
-# (1) through direct entry (e.g., coordx: [235310.172, 235462.572] and 
-#                                 coordy: [4408964.6136, 4408964.6136] under MultisegmentedWellbore1),
+# (1) through direct entry (e.g., coordx: [235310.172, 235462.572] and
+# coordy: [4408964.6136, 4408964.6136] under MultisegmentedWellbore1),
 #
-# (2) through a .csv file (file: 'examples/Control_Files/input_data/ex30/locations.csv' under MultisegmentedWellbore2),
+# (2) through a .csv file (file: 'examples/Control_Files/input_data/ex30/locations.csv'
+# under MultisegmentedWellbore2),
 #
-# (3) as equally spaced array points with a specified number of points ('linspace:' under MultisegmentedWellbore5),
+# (3) as equally spaced array points with a specified number of points
+# ('linspace:' under MultisegmentedWellbore5),
 #
-# (4) as equally spaced points with a specified interval ('range:' under MultisegmentedWellbore6),
+# (4) as equally spaced points with a specified interval
+# ('range:' under MultisegmentedWellbore6),
 #
-# (5) as a grid with a specified number of nodes in the x and y directions ('grid:' under MultisegmentedWellbore3), 
+# (5) as a grid with a specified number of nodes in the x and y directions
+# ('grid:' under MultisegmentedWellbore3),
 #
-# and (6) as a grid with nodes that are explicity stated ('grid:' under MultisegmentedWellbore4).
+# and (6) as a grid with nodes that are explicity stated
+# ('grid:' under MultisegmentedWellbore4).
 #
-# Note that one LookuptableReservoir component will be made to provide inputs for each 
-# MultisegmentedWellbore component, so the LookuptableReservoir components will also have 
-# the locations specified. If the MultisegmentedWellbore components were connected to aquifer 
-# components, one aquifer component would be created for each MultisegmentedWellbore component 
-# at each location.
+# Note that one LookuptableReservoir component is setup to provide inputs
+# for each MultisegmentedWellbore component, so the LookuptableReservoir
+# components also use the same locations as its input.
+# If the MultisegmentedWellbore components were connected to aquifer
+# components, one aquifer component would be created for each
+# MultisegmentedWellbore component at each location.
 #
 # This example requires additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
@@ -33,7 +39,7 @@
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex30.yaml
 #
 # Created August 23, 2022
-# Last Modified: February 9, 2023
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10.

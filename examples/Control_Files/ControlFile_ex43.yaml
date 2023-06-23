@@ -3,7 +3,10 @@
 # This Control File demonstrates the use of the time to first detection (TTFD)
 # plot with DeepAlluviumAquifer component.
 #
-# Last Modified: January 12th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex43.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 100

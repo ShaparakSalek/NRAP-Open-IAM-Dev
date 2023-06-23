@@ -4,7 +4,10 @@
 # settings for the GriddedRadialMetric plot. These versions are provided
 # to demonstrate the minimum input required to use the GriddedRadialMetric plot type.
 #
-# Last Modified: April 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex54b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10.

@@ -5,6 +5,10 @@
 # iam_sys_theis_benchmark2.py. The TheisReservoir component needs entries
 # for injRates and injTimes.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex45a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     # Time is in years
@@ -16,6 +20,7 @@ ModelParams:
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

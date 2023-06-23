@@ -1,15 +1,15 @@
 # OpenIAM Control File Example 10
 #
-# This example evaluates the leakage through a CementedWellbore 
-# component connected to a LookupTableReservoir component (requires 
-# the Kimberlina data set - see below). Given the pressures and CO2 
-# saturations provided by the LookupTableReservoir, the CementedWellbore 
-# component simulates the CO2 and brine leakage into the intermediate 
-# and shallow aquifers (aquifers 1 and 2, respectively). A 
-# DeepAlluviumAquifer is then used to simulate the pH and TDS plume 
-# volumes in the intermediate aquifer (aquifer 1). These analyses are 
-# conducted with Latin Hypercube Sampling (lhs), which allows parameter 
-# values to vary between minimum and maximum values across 30 different 
+# This example evaluates the leakage through a CementedWellbore
+# component connected to a LookupTableReservoir component (requires
+# the Kimberlina data set - see below). Given the pressures and CO2
+# saturations provided by the LookupTableReservoir, the CementedWellbore
+# component simulates the CO2 and brine leakage into the intermediate
+# and shallow aquifers (aquifers 1 and 2, respectively).
+# A DeepAlluviumAquifer is then used to simulate the pH and TDS plume
+# volumes in the intermediate aquifer (aquifer 1). These analyses are
+# conducted with Latin Hypercube Sampling (lhs), which allows parameter
+# values to vary between minimum and maximum values across 30 different
 # realizations (siz: 30).
 #
 # This example produces four plots:
@@ -30,7 +30,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex10.yaml
 #
-# Last Modified: March 9, 2020
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -41,6 +41,7 @@ ModelParams:
     Components: [ClosedKimberlina, CementedWellbore1, DeepAlluviumAquifer1]
     OutputDirectory: output/output_ex10_{datetime}
     Logging: Info
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

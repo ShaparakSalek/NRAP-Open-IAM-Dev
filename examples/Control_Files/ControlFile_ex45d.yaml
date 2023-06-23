@@ -11,6 +11,10 @@
 # does not matter as long as the required labels 'injRates' and 'injTimes'
 # are present.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex45d.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 0.02737850787132101     # 10 days as a fraction of a year
@@ -21,6 +25,7 @@ ModelParams:
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

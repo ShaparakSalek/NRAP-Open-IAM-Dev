@@ -21,7 +21,10 @@
 # there are two modified versions of the AtmPlumeEnsemble plot made. One has
 # all options specified, while the other has no options specified.
 #
-# Last Modified: February 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex9a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5
@@ -34,6 +37,7 @@ ModelParams:
                  atmRom1]
     OutputDirectory: output/output_ex9a_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

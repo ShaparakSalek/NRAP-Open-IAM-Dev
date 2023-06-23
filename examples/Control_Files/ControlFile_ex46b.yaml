@@ -11,6 +11,10 @@
 # injections wells. Each row corresponds to a different injection well,
 # columns correspond to injection times.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex46b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 0.03011635    # 11 days as a fraction of a year
@@ -22,6 +26,7 @@ ModelParams:
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
     GenerateStatFiles: True
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

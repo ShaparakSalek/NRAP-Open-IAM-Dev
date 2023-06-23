@@ -5,6 +5,8 @@ are loosely coupled together. As the first step during setup of NRAP-Open-IAM si
 we specify a few simulation parameters that affect all components
 and as the second step we build the system model by adding the components we want.
 
+.. _gui_operation:
+
 GUI Operation
 -------------
 
@@ -172,7 +174,7 @@ system model containing a ``SimpleReservoir`` and a ``MultisegmentedWellbore``
 components. Example illustrates Latin hypercube sampling approach applied to the
 parameters of the setup model. The number of realizations run is 30.
 
-The third example file *03_LHS_LUT_MSW.OpenIAM* illustrates use of a 
+The third example file *03_LHS_LUT_MSW.OpenIAM* illustrates use of a
 ``LookupTableReservoir`` and ``MultisegmentedWellbore`` components. The lookup tables data
 set utilized in the example for the ``LookupTableReservoir`` component is based
 on the simulation for Kimberlina oil field (:cite:`DAA2018`).

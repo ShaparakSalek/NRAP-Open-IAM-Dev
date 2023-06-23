@@ -10,7 +10,7 @@
 # 'Interpolation2D' within the LookupTableReservoir should not be set to False.
 # It does not need to be set to True, however, it just needs to be ommitted.
 # One might want to use the points from the tables if the reservoir's dip
-# causes variations in the z-values. It might be difficult to correctly capture 
+# causes variations in the z-values. It might be difficult to correctly capture
 # the variation in z-values with the range option for the locations of OpenWellbores.
 #
 # Note that having 'GenerateOutputFiles: False' and 'GenerateCombOutputFile: False'
@@ -35,7 +35,10 @@
 # are not required for AoR plots when using another type of reservoir component
 # (e.g., SimpleReservoir) because those components have injX and injY values tied to them.
 #
-# Last Modified: April 21st, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20
@@ -46,6 +49,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: True
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         value: 5

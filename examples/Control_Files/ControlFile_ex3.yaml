@@ -1,14 +1,14 @@
 # OpenIAM Control File Example 3
 #
-# This example computes the aquifer impact (CarbonateAquifer component) 
-# from 2 leaky wellbores (MultisegmentedWellbore component) connected 
-# to a SimpleReservoir component. The aquifer impact is quantified with 
-# the pH and TDS plume volumes resulting from CO2 and brine leakage, 
+# This example computes the aquifer impact (CarbonateAquifer component)
+# from 2 leaky wellbores (MultisegmentedWellbore component) connected
+# to a SimpleReservoir component. The aquifer impact is quantified with
+# the pH and TDS plume volumes resulting from CO2 and brine leakage,
 # respectively.
 #
-# This example uses the Latin Hypercube Sampling (lhs) analysis type to randomly 
-# vary certain parameter values (those given with min and max values) across 
-# 30 realizations ('siz: 30'). Any parameters that are not explicitly given for 
+# This example uses the Latin Hypercube Sampling (lhs) analysis type to randomly
+# vary certain parameter values (those given with min and max values) across
+# 30 realizations ('siz: 30'). Any parameters that are not explicitly given for
 # a component will be fixed at the default values.
 #
 # This example produces four plots:
@@ -20,7 +20,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex3.yaml
 #
-# Last Modified: February 15, 2018
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -33,6 +33,7 @@ ModelParams:
                  CarbonateAquifer1]
     OutputDirectory: output/output_ex3_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

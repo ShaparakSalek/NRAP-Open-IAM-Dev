@@ -1,11 +1,11 @@
 # OpenIAM Control File Example 7a
 #
-# This example computes the CO2 and brine leakage from a leaky wellbore 
-# (MultisegmentedWellbore component) to the intermediate aquifer (aquifer1). 
-# Instead of connecting to a reservoir component, the MultisegmentedWellbore 
-# component uses specified pressures and CO2 saturations entered through the 
-# DynamicParameters entry. The example also uses Latin Hypercube Sampling 
-# (lhs) to vary certain parameter values between minimum (min) and maximum 
+# This example computes the CO2 and brine leakage from a leaky wellbore
+# (MultisegmentedWellbore component) to the intermediate aquifer (aquifer1).
+# Instead of connecting to a reservoir component, the MultisegmentedWellbore
+# component uses specified pressures and CO2 saturations entered through the
+# DynamicParameters entry. The example also uses Latin Hypercube Sampling
+# (lhs) to vary certain parameters values between minimum (min) and maximum
 # (max) values.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
@@ -14,7 +14,7 @@
 #   python ../source/openiam/openiam_cf.py --file ControlFile_ex7a.yaml
 # in the folder examples/Control_Files.
 #
-# Last Modified: February 15, 2018
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5
@@ -25,6 +25,7 @@ ModelParams:
         #seed: 721
     Components: [msw1]
     OutputDirectory: output/output_ex7a_{datetime}
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

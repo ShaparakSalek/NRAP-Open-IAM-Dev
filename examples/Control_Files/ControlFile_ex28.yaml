@@ -1,11 +1,11 @@
-# OpenIAM Control File Example 28 
-# 
-# This example demonstrates how a LookupTableReservoir component can be used to 
-# read any type of output from .csv files used for LookupTableReservoir components. 
-# The metric used here is called "genericMetric," but the approach demonstrated 
-# could be used to read salinity data, for example. The metric name must 
-# correspond with certain column titles in the .csv file used (e.g., column title of 
-# genericMetric_1 for genericMetric at time step 1) and the metric name must be 
+# OpenIAM Control File Example 28
+#
+# This example demonstrates how a LookupTableReservoir component can be used to
+# read any type of output from .csv files used for LookupTableReservoir components.
+# The metric used here is called "genericMetric," but the approach demonstrated
+# could be used to read any other data, e.g., salinity. The metric name must
+# correspond to certain column titles in the .csv file used (e.g., column title of
+# genericMetric_1 for genericMetric at time step 1) and the metric name must be
 # included in the Outputs of the LookupTableReservoir component.
 #
 # This example uses a modified version of the file Reservoir_data_sim01.csv from the
@@ -16,11 +16,12 @@
 # The file from the Kimberlina data set was modified to include columns
 # for the fields genericMetric_1 through genericMetric_10 (corresponding
 # to the times in columns 1 through 10 of the time_points.csv file
-# in the same folder). These columns were made to all have a constant value of 999.
+# in the same folder). These columns all have a constant value of 999 (only for
+# illustration purposes).
 # This example also uses a modified version of the parameters_and_filenames.csv file.
 # This edited version (parameters_and_filenames_read_genericMetric.csv)
-# was also placed in the Test_metrics folder and only has one entry
-# corresponding for the file Reservoir_data_sim01_read_genericMetric.csv.
+# was also placed in the Test_metrics folder and has only one entry
+# corresponding to the file Reservoir_data_sim01_read_genericMetric.csv.
 # The parameters are unchanged from the Kimberlina data set,
 # however (logResPerm: -13.3, reservoirPorosity: 0.215, logShalePerm: -18.7).
 #
@@ -28,12 +29,13 @@
 # This example is similar to the example ControlFile_ex27.yaml, but it is intended to
 # demonstrate that LookupTableReservoirs can be used to read any type of data
 # (not just pressure, CO2saturation, and temperature). Although the genericMetric
-# data are constant, this approach would also work on metrics that vary over space and time.
+# data are constant, this approach would also work on metrics that vary over
+# space and time.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex28.yaml
 #
-# Last Modified: August 4th, 2022
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 30
@@ -43,6 +45,7 @@ ModelParams:
                  MultisegmentedWellbore1]
     OutputDirectory: output/output_ex28_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
@@ -77,7 +80,7 @@ LookupTableReservoir1:
     Type: LookupTableReservoir
     FileDirectory: source/components/reservoir/lookuptables/Test_metrics
     TimeFile: time_points.csv
-    # This is one of the modified files mentioned above
+    # This is one of the modified files mentioned in the description above
     ParameterFilename: parameters_and_filenames_read_genericMetric.csv
     Parameters:
         index: 1

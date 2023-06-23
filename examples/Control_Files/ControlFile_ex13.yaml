@@ -1,10 +1,10 @@
 # OpenIAM Control File Example 13
 #
 # This example computes the flow rates of brine and CO2 to aquifers 1 and 2
-# utilizing the generalized flow rate component (heuristic model). The two 
-# generalized flow rate components used have different parameters, like 
+# utilizing the generalized flow rate component (heuristic model). The two
+# generalized flow rate components used have different parameters, like
 # logPeakCO2Rate, timePeakCO2Rate, durationPeakCO2Rate, and mitigationTime.
-# The carbonate aquifer component is then used to calculate the pH and TDS plume 
+# The carbonate aquifer component is then used to calculate the pH and TDS plume
 # volumes in aquifers 1 and 2 resulting from CO2 and brine leakage, respectively.
 #
 # To run this file, use the command (\ for Windows and / for Mac or Linux)
@@ -14,7 +14,7 @@
 #   python openiam_cf.py --file ../../examples/Control_Files/ControlFile_ex13.yaml
 # in the folder source/openiam.
 #
-# Last Modified: July 22, 2019
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -23,6 +23,7 @@ ModelParams:
     Components: [ca1, ca2, gfr1, gfr2]
     OutputDirectory: output/output_ex13_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

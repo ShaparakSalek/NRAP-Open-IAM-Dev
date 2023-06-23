@@ -1,10 +1,13 @@
 # OpenIAM Control File Example 32c
 #
-# This example is similar to Control File example 32b, but this example 
-# also demonstrates the use of the TimeList entry with the AoR plot type. 
+# This example is similar to Control File example 32b, but this example
+# also demonstrates the use of the TimeList entry with the AoR plot type.
 # The TimeList entry is also shown in Control File example 31d.
 #
-# Last Modified: April 25th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32c.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20
@@ -15,6 +18,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:
         LookupTableStratigraphy:

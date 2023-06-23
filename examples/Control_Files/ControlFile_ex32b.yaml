@@ -38,7 +38,10 @@
 # and individual output files. In this example, this option is also turned off
 # by using entry SaveCSVFiles: False in the setup of AoR plots.
 #
-# Last Modified: April 21st, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20
@@ -49,6 +52,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:
         LookupTableStratigraphy:

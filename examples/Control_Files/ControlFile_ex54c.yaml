@@ -5,7 +5,7 @@
 # e.g., Control File example 24), and a MultisegmentedWellbore.
 # For each GriddedRadialMetric entry, one figure is made for each combination
 # of time (TimeList), depth (ZList), and component location. Note that
-# this example is similar to Control File example 24, but the wells are much
+# this example is also similar to Control File example 24, but the wells are much
 # closer to the injection site, the permeabilities are much higher, and
 # the well radius is much higher (all set to the maximum value allowed).
 
@@ -16,21 +16,25 @@
 # Dissolved_CO2_mass_fraction, and Dissolved_salt_mass_fraction) each represent
 # one coordinate.
 #
-# To evaluate spatial variations in the gridded results from GenericAquifer components, 
-# one would need to compile results from many .csv files. The .csv files saved by the 
-# GriddedRadialMetric plot are meant to be more convenient and approachable than that approach. 
-# The output values (Dissolved_CO2_mass_fraction or Dissolved_salt_mass_fraction) are saved 
-# in relation to x and y values across the domain. In other words, the radial grid (defined 
-# by radius  and depth) is automatically translated into positions characterized by easting distance, 
+# To evaluate spatial variations in the gridded results from GenericAquifer
+# components, one would need to compile results from many .csv files. The .csv
+# files saved by the GriddedRadialMetric plot are meant to be more convenient
+# than that approach. The output values (Dissolved_CO2_mass_fraction or
+# Dissolved_salt_mass_fraction) are saved in relation to x and y values across
+# the domain. In other words, the radial grid (defined by radius and depth)
+# is automatically translated into positions characterized by easting distance,
 # northing distance, and depth.
 #
 # Note that the .csv file will only include values above the MinValue
-# provided by user. If one only want to save .csv files with
-# the GriddedRadialMetric plot type, you can prevent the creation
+# provided by user. If one only wants to save .csv files with
+# the GriddedRadialMetric plot type, one can prevent the creation
 # of other output .csv files by setting GenerateOutputFiles and
 # GenerateCombOutputFile to False in the ModelParams section of the .yaml file.
 #
-# Last Modified: April 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex54c.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10.

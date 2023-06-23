@@ -11,7 +11,10 @@
 # realization and you do not have to specify which realization to use. Therefore,
 # the "Realization: 9" entry used in Control File example 9a is not used here.
 #
-# Last Modified: February 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex9b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5
@@ -22,6 +25,7 @@ ModelParams:
                  atmRom1]
     OutputDirectory: output/output_ex9b_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

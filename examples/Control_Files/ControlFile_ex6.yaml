@@ -1,15 +1,16 @@
 # OpenIAM Control File Example 6
 #
-# This example uses a MultisegmentedWellbore component connected to a 
+# This example uses a MultisegmentedWellbore component connected to a
 # LookupTableReservoir component with the Latin Hypercube Sampling (lhs)
-# analysis type. The LookupTableReservoir component is used to read the 
-# pressures and CO2 saturations stored in .csv files and provide appropriate 
-# values (i.e., spatial interpolation of the results in the .csv file) to the 
-# wellbores based on their locations. Based on the pressures and CO2 saturations 
-# provided, the MultisegmentedWellbore components then simulate the leakage 
-# of CO2 and brine into the intermediate aquifer (aquifer1).
+# analysis type. The LookupTableReservoir component is used to read the
+# pressures and CO2 saturations stored in .csv files and provide appropriate
+# values (i.e., spatially interpolated reservoir data of the results
+# in the .csv file) to the wellbores based on their locations. Based
+# on the pressures and CO2 saturations provided, the MultisegmentedWellbore
+# components then simulate the leakage of CO2 and brine into the intermediate
+# aquifer (aquifer1).
 #
-# The use of the LookupTableReservoir in this example requires the additional 
+# The use of the LookupTableReservoir in this example requires the additional
 # Kimberlina data set. THe Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
 # Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following places:
 # 1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
@@ -21,7 +22,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex6.yaml
 #
-# Last Modified: February 15, 2018
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -32,6 +33,7 @@ ModelParams:
     Components: [LUTReservoir1, msw1]
     OutputDirectory: output/output_ex6_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

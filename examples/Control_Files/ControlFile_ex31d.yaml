@@ -24,7 +24,10 @@
 # for each time include the maximum results across all model realizations at
 # that time.
 #
-# Last Modified: April 25th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31d.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
@@ -37,6 +40,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

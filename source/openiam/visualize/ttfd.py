@@ -274,9 +274,9 @@ def ttfd_plot(yaml_data, model_data, sm, s,
         write_dream_grid(x_grid, y_grid, z_grid, output_dir, var_type=var_type)
 
     checkCarbAq = 'CarbonateAquifer' in aq_component_types
-    
+
     if save_results:
-        save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type=var_type, 
+        save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type=var_type,
                          checkCarbAq=checkCarbAq)
 
     if analysis in ['lhs', 'parstudy']:
@@ -2016,7 +2016,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                       name='TTFD_Figure1', analysis='lhs', realization=0, output_dir=None,
                       genfontsize=12, axislabelfontsize=14, titlefontsize=14,
                       labelfontweight='bold', colormap='plasma', figsize=(10, 8),
-                      res_comp_injX=None, res_comp_injY=None, min_num_points=25, 
+                      res_comp_injX=None, res_comp_injY=None, min_num_points=25,
                       var_type='noVariation'):
     """
     Function that creates plots of different plume metrics: earliest plume
@@ -2203,7 +2203,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
         max_metric_for_subplot = None
 
         checkValid = check_metric_validity(plumeMetric, plotType, valType='multiple')
-        
+
         if checkValid:
             if plotType == 'plumeProbabilities':
                 plumeMetricValid = plumeMetric[plumeMetric > MIN_PROBABILITY]
@@ -2256,42 +2256,43 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
         min_z_subplot4 = ((np.min(z_grid) - np.max(z_grid)) * 0.25) + (
             np.max(z_grid))
         max_z_subplot4 = np.max(z_grid)
-        
+
         subplot_min_z_vals = [min_z_subplot1, min_z_subplot2, min_z_subplot3, min_z_subplot4]
         subplot_max_z_vals = [min_z_subplot2, min_z_subplot3, min_z_subplot4, max_z_subplot4]
-        
+
         subplot_use_x_label = [False, False, True, True]
         subplot_use_y_label = [True, False, True, False]
-        
+
         subplot_label_wells = [True, False, False, False]
-        
-        for subplotRef in range(0, len(subplot_min_z_vals)):
-            # This is used to make certain results plot on top of other results 
-            # (lowest plume timings or highest plume proabilities).
+
+        for subplotRef, (subplot_min_z_val, subplot_max_z_val)  in enumerate(
+                zip(subplot_min_z_vals, subplot_max_z_vals)):
+            # This is used to make certain results plot on top of other results
+            # (lowest plume timings or highest plume probabilities).
             zorder_val = 1e6
-            
+
             min_metric_for_subplot = None
             max_metric_for_subplot = None
             mean_metric_for_subplot = None
-            
+
             ax = plt.subplot(2, 2, subplotRef + 1)
-            
+
             sensor_lgnd_check = plot_wells_inj_sites(
-                ax, aq_component_xvals, aq_component_yvals, 
-                subplot_min_z_vals[subplotRef], subplot_max_z_vals[subplotRef], 
-                plot_injection_sites, InjectionCoordx, InjectionCoordy, 
-                monitoringTTFD, monitoringCoordX, monitoringCoordY, 
-                monitoringCoordZ, sensor_lgnd_check, genfontsize, 
+                ax, aq_component_xvals, aq_component_yvals,
+                subplot_min_z_val, subplot_max_z_val,
+                plot_injection_sites, InjectionCoordx, InjectionCoordy,
+                monitoringTTFD, monitoringCoordX, monitoringCoordY,
+                monitoringCoordZ, sensor_lgnd_check, genfontsize,
                 labelWells=subplot_label_wells[subplotRef])
-            
+
             if subplot_use_x_label[subplotRef]:
                 plt.ylabel('Easting (km)', fontsize=axislabelfontsize,
                            fontweight=labelfontweight)
-            
+
             if subplot_use_y_label[subplotRef]:
                 plt.ylabel('Northing (km)', fontsize=axislabelfontsize,
                            fontweight=labelfontweight)
-            
+
             # Makes sure the outer edge of the plot stays on top of other elements
             for _, spine in ax.spines.items():
                 spine.set_zorder(3e6)
@@ -2315,48 +2316,48 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
 
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
             ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
-            
+
             if var_type == 'noVariation':
                 zIndices = np.array(range(len(z_grid)))
-                zMask = np.ma.masked_inside(z_grid[:, 0, 0], subplot_min_z_vals[subplotRef], 
-                                            subplot_max_z_vals[subplotRef])
+                zMask = np.ma.masked_inside(
+                    z_grid[:, 0, 0], subplot_min_z_val, subplot_max_z_val)
                 zIndices = zIndices[zMask.mask]
             elif var_type == 'strikeAndDip':
                 zIndices = range(len(z_grid))
-            
+
             # Loop through the z_grid values and plume metrics
             for zRef in zIndices:
                 z_temp = z_grid[zRef, :, :]
-                
+
                 # Get the plume metric and z values for the current zRef
                 plumeMetric_temp = plumeMetric[zRef, :, :].copy()
-                
-                # Use only the metrics with z values in the current range. Each 
-                # layer of z values (z_grid[zRef, :, :]) is flat-lying / the same 
-                # when spatially uniform stratigraphy is used, but each layer dips 
-                # when dipping stratigraphy is used. This function excludes results 
+
+                # Use only the metrics with z values in the current range. Each
+                # layer of z values (z_grid[zRef, :, :]) is flat-lying / the same
+                # when spatially uniform stratigraphy is used, but each layer dips
+                # when dipping stratigraphy is used. This function excludes results
                 # that fall outside the current depth range.
                 if var_type == 'strikeAndDip':
                     plumeMetric_temp = clip_results_outside_of_z_range(
-                        plumeMetric_temp, z_temp, plotType, 
-                        subplot_min_z_vals[subplotRef], subplot_max_z_vals[subplotRef])
-                
-                # These are used to make the lower plumeTimings or higher 
+                        plumeMetric_temp, z_temp, plotType,
+                        subplot_min_z_val, subplot_max_z_val)
+
+                # These are used to make the lower plumeTimings or higher
                 # plumeProbabilities plot on top of the other results. They are
-                # also used the first time any valid results occur. Using only 
-                # the minimum or maximum values does not consistently put the 
+                # also used the first time any valid results occur. Using only
+                # the minimum or maximum values does not consistently put the
                 # appropriate layer on top, so these are adjusted based on mean values.
                 checkMinPlumeTimings = False
                 checkMaxPlumeProbabilities = False
 
                 checkValid = check_metric_validity(plumeMetric_temp, plotType,
                                                    valType='multiple')
-                
+
                 if checkValid:
                     if plotType == 'plumeTimings':
                         plumeMetricValid = plumeMetric_temp[
                             plumeMetric_temp < THRESHOLD_TIME]
-                        
+
                         if not mean_metric_for_subplot:
                             checkMinPlumeTimings = True
                         elif np.mean(plumeMetricValid) < mean_metric_for_subplot:
@@ -2365,7 +2366,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                     elif plotType == 'plumeProbabilities':
                         plumeMetricValid = plumeMetric_temp[
                             plumeMetric_temp > MIN_PROBABILITY]
-                        
+
                         if not mean_metric_for_subplot:
                             checkMaxPlumeProbabilities = True
                         elif np.mean(plumeMetricValid) > mean_metric_for_subplot:
@@ -2380,12 +2381,12 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                         max_metric_for_subplot = np.max(plumeMetricValid)
                     elif np.max(plumeMetricValid) > max_metric_for_subplot:
                         max_metric_for_subplot = np.max(plumeMetricValid)
-                    
+
                     if not mean_metric_for_subplot:
                         mean_metric_for_subplot = np.mean(plumeMetricValid)
                     elif np.max(plumeMetricValid) > max_metric_for_subplot:
                         mean_metric_for_subplot = np.mean(plumeMetricValid)
-                        
+
                     # Plot the results with contourf
                     if checkMinPlumeTimings or checkMaxPlumeProbabilities:
                         zorder_val += 1
@@ -2407,23 +2408,23 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                         for plumeMetricVal in plumeMetricValid:
                             X_temp = X[plumeMetric[zRef, :, :] == plumeMetricVal]
                             Y_temp = Y[plumeMetric[zRef, :, :] == plumeMetricVal]
-                            
+
                             rgba = cmap(((plumeMetricVal) - np.min(levels))
                                         / (np.max(levels) - np.min(levels)))
-                            
+
                             ax.plot(X_temp / 1000, Y_temp / 1000, color=rgba[0:3],
                                     marker='o', markerfacecolor=rgba[0:3],
                                     linewidth=1, linestyle='none',
                                     markersize=plumeMetricMarkerSize, zorder=1)
-            
-            # End of the z loop - now that the min and max metric values are 
+
+            # End of the z loop - now that the min and max metric values are
             # known, add the subplot title
             axtitle = gen_ax_title_for_subplot(
-                plotType, subplot_min_z_vals[subplotRef], subplot_max_z_vals[subplotRef], 
+                plotType, subplot_min_z_val, subplot_max_z_val,
                 min_metric_for_subplot, max_metric_for_subplot, checkCarbAq=checkCarbAq)
-            
+
             ax.set_title(axtitle, fontweight=labelfontweight, fontsize=genfontsize)
-    
+
     output_title = TITLE_OPTIONS[plotType].get(plume_metric_abbrev, plume_metric_abbrev)
 
     if checkCarbAq:
@@ -2702,22 +2703,22 @@ def check_metric_validity(value, resultsType, valType='single'):
     return checkValid
 
 
-def clip_results_outside_of_z_range(plumeMetric_temp, z_temp, plotType, 
+def clip_results_outside_of_z_range(plumeMetric_temp, z_temp, plotType,
                                     subplot_min_z, subplot_max_z):
     """
     When using a strike and dip, the z grid values depend on x and y. This function
-    examines z_temp (the current z_grid[zRef, :, :] within the z loop) - for 
-    z values outside the current subplot range, it sets the corresponding 
-    plumeMetric_temp to a value that will be excluded from the plot 
+    examines z_temp (the current z_grid[zRef, :, :] within the z loop) - for
+    z values outside the current subplot range, it sets the corresponding
+    plumeMetric_temp to a value that will be excluded from the plot
     (MIN_PROBABILITY or THRESHOLD_TIME).
     """
     mask = np.ma.masked_outside(z_temp, subplot_min_z, subplot_max_z)
-    
+
     if plotType == 'plumeProbabilities':
         plumeMetric_temp[mask.mask] = MIN_PROBABILITY
     elif plotType == 'plumeTimings':
         plumeMetric_temp[mask.mask] = MAX_TIME
-    
+
     return plumeMetric_temp
 
 
@@ -2880,55 +2881,54 @@ def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
                                     writer.writerow(row_temp)
 
 
-def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type='noVariation', 
+def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type='noVariation',
                      checkCarbAq=False):
     """
     Saves the x, y, and z grid points to a .csv file.
     """
     if not os.path.exists(os.path.join(output_dir, 'csv_files')):
         os.mkdir(os.path.join(output_dir, 'csv_files'))
-    
+
     if checkCarbAq:
         coordinates = ['x', 'y']
     else:
         coordinates = ['x', 'y', 'z']
-    
+
     if var_type == 'noVariation' or checkCarbAq:
         for coord in coordinates:
             filename = 'TTFD_{}_grid_points.csv'.format(coord)
             filename = os.path.join(output_dir, 'csv_files', filename)
-            
+
             first_row = ['{}_grid_points_m'.format(coord)]
-            
+
             if coord == 'x':
                 grid = x_grid[:]
             elif coord == 'y':
                 grid = y_grid[:, 0]
             elif coord == 'z':
                 grid = z_grid[:, 0, 0]
-            
+
             with open(filename, 'w', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(first_row)
-                
+
                 for coordRef in range(len(list(grid))):
                     writer.writerow([grid[coordRef]])
-        
+
     elif var_type == 'strikeAndDip':
         filename = 'TTFD_xyz_grid_points.csv'
         filename = os.path.join(output_dir, 'csv_files', filename)
-        
+
         first_row = ['x_grid_points_m', 'y_grid_points_m', 'z_grid_points_m']
-        
+
         with open(filename, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(first_row)
-            
+
             for xRef in range(len(list(x_grid))):
                 for yRef in range(len(list(y_grid[:, 0]))):
                     for zRef in range(len(z_grid)):
                         row_temp = [x_grid[xRef], y_grid[yRef, 0],
                                     z_grid[zRef, yRef, xRef]]
-                    
-                        writer.writerow(row_temp)
 
+                        writer.writerow(row_temp)

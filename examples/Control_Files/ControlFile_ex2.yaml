@@ -1,12 +1,14 @@
 # OpenIAM Control File Example 2
 #
-# This example computes the leakage from a leaky well (MultisegmentedWellbore 
-# component) connected to a SimpleReservoir component. Uncertainty is represented 
-# through parameter variations (between the min and max values) with Latin 
+# This example computes the leakage from a leaky well (MultisegmentedWellbore
+# component) connected to a SimpleReservoir component. Uncertainty is represented
+# through parameter variations (between the min and max values) with Latin
 # Hypercube Sampling (lhs) across 30 realizations (siz: 30).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex2.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
@@ -21,6 +23,7 @@ ModelParams:
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
     GenerateStatFiles: True
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

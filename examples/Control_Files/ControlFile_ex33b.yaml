@@ -1,8 +1,7 @@
 # OpenIAM Control File Example 33b
 #
-# This example is similar to Control File example 33a,
-# but it includes optional entries for the Stratigraphy and
-# StratigraphicColumn plots.
+# This example is similar to Control File example 33a, but it includes optional
+# entries for the Stratigraphy and StratigraphicColumn plots.
 #
 # Plot1 includes entries that specify the colors to be
 # used for the reservoir, shales, and aquifers ('ReservoirColor',
@@ -14,7 +13,7 @@
 # ('ReservoirAlpha', 'ShaleAlpha', and 'AquiferAlpha', respectively). Alpha
 # values control how translucent each three-dimensional surface will be
 # (1 is completely opaque, with values approaching 0 becoming more
-# translucent). The color for the wellbores is given with  the
+# translucent). The color for the wellbores is setup with the
 # 'WellColor' entry.
 #
 # Plot2 is similar, but instead it provides specific colors and alpha values
@@ -24,10 +23,10 @@
 # For example, if you provided 'ShaleColor: teal' and 'Shale2Color: red' then
 # shales 1 and 3 would be shown in teal, while shale 2 would be shown in red.
 # Plot 2 also includes labels for specific units. The label for the reservoir is
-# given with the ReservoirLabel entry. The label for each shale and aquifer is
-# given with 'Shale#Label' and 'Aquifer#Label' entries, respectively,
+# setup with the ReservoirLabel entry. The label for each shale and aquifer is
+# setup with 'Shale#Label' and 'Aquifer#Label' entries, respectively,
 # where # is the corresponding unit number. The label for each wellbore can be
-# enforced with the 'WellLabel' entry. If the 'WellLabel' entry is given with
+# enforced with the 'WellLabel' entry. If the 'WellLabel' entry is setup with
 # brackets ({}), then the location index of each well will be shown where the
 # brackets are located (e.g., 'WellLabel: Well {}' leads to labels like 'Well 0',
 # 'Well 1', 'Well 2', etc.). If no brackets are included, then whatever is given
@@ -42,7 +41,10 @@
 # text in StratigraphicColumn figures - the text for depths can be disabled by
 # setting the optional entry DepthText to False (shown in Plot4).
 #
-#  Last Modified: May, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex33b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -51,6 +53,7 @@ ModelParams:
     Components: [SimpleReservoir1, OpenWellbore1]
     OutputDirectory: output/output_ex33b_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:
         strikeAndDip:

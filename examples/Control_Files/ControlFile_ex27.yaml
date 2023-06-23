@@ -1,4 +1,4 @@
-# OpenIAM Control File Example 27 
+# OpenIAM Control File Example 27
 #
 # This example demonstrates reading temperature data with a LookupTableReservoir.
 #
@@ -9,25 +9,25 @@
 #
 # The file from the Kimberlina data set was modified to include columns
 # for the fields temperature_1 through temperature_10 (corresponding to
-# the times in columns 1 through 10 of the time_points.csv file in the same folder).
-# These temperature columns were made to all have a constant value of 50 (degrees Celcius).
-# This example also uses a modified version of the parameters_and_filenames.csv file.
-# This edited version (parameters_and_filenames_read_temperature.csv) was also placed in the
-# Test_metrics folder. The file and only has one entry corresponding for the file
+# the times in columns 1 through 10 of the time_points.csv file in the same
+# folder). These temperature columns all have a constant value of 50 (degrees
+# Celcius). This example also uses a modified version of
+# the parameters_and_filenames.csv file. This edited version
+# (parameters_and_filenames_read_temperature.csv) was also placed in the
+# Test_metrics folder. The file has only one entry corresponding to the file
 # Reservoir_data_sim01_read_temperature.csv. The parameters are unchanged
-# from the Kimberlina data set, however (logResPerm: -13.3, reservoirPorosity: 0.215,
-# logShalePerm: -18.7).
-#
+# from the Kimberlina data set, however (logResPerm: -13.3,
+# reservoirPorosity: 0.215, logShalePerm: -18.7).
 # If the above files are not present, this example will produce an error.
-# Although the temperature data are constant, this approach would also work 
-# on metrics that vary over space and time. Note that to incorporate the temperature data 
-# from the .csv files into the system model, 'temperature' must be included in 
-# the Outputs of the LookupTableReservoir component.
+# Although the temperature data are constant, this approach would also work
+# on any metrics that vary over space and time. Note that to incorporate
+# the temperature data from the .csv files into the system model, 'temperature'
+# must be included in the Outputs section of the LookupTableReservoir component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex27.yaml
 #
-# Last Modified: August 4th, 2022
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 30
@@ -37,11 +37,11 @@ ModelParams:
                  MultisegmentedWellbore1]
     OutputDirectory: output/output_ex27_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
         value: 4
-    # Thickness is in meters
     shale1Thickness:
         value: 200.0
         vary: False

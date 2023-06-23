@@ -1,33 +1,33 @@
 # OpenIAM Control File Example 25
 #
-# This example connects a MultisegmentedWellbore component to a 
-# GenericAquifer component. Reservoir pressures and CO2 saturations 
-# are provided directly to the MultisegmentedWellbore component through 
-# the DynamicParameters entry. This simulation also uses Latin Hypercube 
-# Sampling (lhs) to vary the logWellPerm parameter of the wellbore 
-# component. Across 10 different realizations (siz: 10), the 
-# MultisegmentedWellbore component produces the CO2 and brine leakage rates 
-# into aquifers 1, 2, 3, and 4. The GenericAquifer is set up to represent 
-# aquifer 1 by the inclusion of 'AquiferName: aquifer1' in the component's 
-# section. The GenericAquifer calculates the dissolved CO2 and dissolved salt 
-# plume volumes in aquifer 1 as the volumes with concentrations exceeding 
-# the dissolved_co2_threshold and dissolved_salt_threshold parameters. 
+# This example connects a MultisegmentedWellbore component to a
+# GenericAquifer component. Reservoir pressures and CO2 saturations
+# are provided directly to the MultisegmentedWellbore component through
+# the DynamicParameters entry. This simulation also uses Latin Hypercube
+# Sampling (lhs) with the logWellPerm parameter of the wellbore component
+# setup as random. Across 10 different realizations (siz: 10), the
+# MultisegmentedWellbore component produces the CO2 and brine leakage rates
+# into aquifers 1, 2, 3, and 4. The GenericAquifer is set up to represent
+# aquifer 1 by the inclusion of 'AquiferName: aquifer1' in the component's
+# section. The GenericAquifer calculates the dissolved CO2 and dissolved salt
+# plume volumes in aquifer 1 as the volumes with concentrations exceeding
+# the dissolved_co2_threshold and dissolved_salt_threshold parameters.
 #
-# The GenericAquifer also produces gridded observations of dissolved CO2 and 
-# salt mass fractions. These gridded observations include all concentrations at 
-# different depths and radii from the component's location - not just the volumes 
-# exceeding a threshold. These gridded observations can be visualized with the 
-# GriddedRadialMetric plot type - see control file examples 54a-54d. Otherwise, 
-# the GenericAquifer's gridded output can be plotted by using indices for 
-# a specific radius and depth. There are always 100 radii and 10 depths. The 
-# radii nonlinearly increase from 1.62 m (first radius) to about 77.5 km 
-# (last radius). The depths extend across the aquifer being represented. 
-# The salt_mass_fraction plot entry includes the output 
-# Dissolved_salt_mass_fraction_coord_1_5, specifying to show the salt mass 
-# fraction at the 1st radius (1.62 m) and 5th depth interval (5 out of 10 - in the 
-# middle of the aquifer). If you include r_coordinate and z_coordinate in the 
-# outputs of the GenericAquifer, the radii and depths will be saved in 
-# .npz files. The values from .npz files can be loaded and printed with 
+# The GenericAquifer also produces gridded observations of dissolved CO2 and
+# salt mass fractions. These gridded observations include all concentrations at
+# different depths and radii from the component's location - not just the volumes
+# exceeding a threshold. These gridded observations can be visualized with the
+# GriddedRadialMetric plot type - see control file examples 54a-54d. Otherwise,
+# the GenericAquifer's gridded output can be plotted by using indices for
+# a specific radius and depth. There are always 100 radii and 10 depths. The
+# radii nonlinearly increase from 1.62 m (first radius) to about 77.5 km
+# (last radius). The depths extend across the aquifer being represented.
+# The salt_mass_fraction plot entry includes the output
+# Dissolved_salt_mass_fraction_coord_1_5, specifying to show the salt mass
+# fraction at the 1st radius (1.62 m) and 5th depth interval (5 out of 10 - in the
+# middle of the aquifer). If you include r_coordinate and z_coordinate in the
+# outputs of the GenericAquifer, the radii and depths will be saved in
+# .npz files. The values from .npz files can be loaded and printed with
 # the following approach in Python:
 #
 # import numpy as np
@@ -36,19 +36,20 @@
 # r = r_data['data']
 # print(r)          # This statement will print out the radii
 #
-# Here, 'GenericAquifer1_000' is the name of the component (GenericAquifer1 
-# at location 0), 'r_coordinate' is the output, 'sim_1' indicates the 
-# realization used (1 out of the 10 lhs realizaitons), and 'time_0' indicates 
-# the first time step. The radius data will be in a 100 by 10 array, where 
-# the 100 rows correspond with changes in radii and the 10 columns correspond 
-# with changes in depth. The same approach can be used for depths with the 
-# z_coordinate output. The gridded data from GenericAquifer components can also 
-# be assessed through the GriddedRadialMetric plot type; see control files 54a-54d.
+# Here, 'GenericAquifer1_000' is the name of the component (GenericAquifer1
+# at location 0), 'r_coordinate' is the output, 'sim_1' indicates the
+# realization used (1 out of the 10 lhs realizaitons), and 'time_0' indicates
+# the first time step. The radius data will be in a 100 by 10 array, where
+# the 100 rows correspond with changes in radii and the 10 columns correspond
+# with changes in depth. The same approach can be used for depths with the
+# z_coordinate output. The gridded data from GenericAquifer components can also
+# be assessed/visualized through the GriddedRadialMetric plot type;
+# see control files 54a-54d.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex25.yaml
 #
-# Last Modified: April 26, 2022
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5.
@@ -118,8 +119,8 @@ GenericAquifer1:
         log_aniso: 0.6
         dissolved_co2_threshold: 0.01    # default is 0.01
         dissolved_salt_threshold: 0.01   # default is 0.02
-    Outputs: [Dissolved_salt_volume, Dissolved_CO2_volume, 
-              r_coordinate, z_coordinate, 
+    Outputs: [Dissolved_salt_volume, Dissolved_CO2_volume,
+              r_coordinate, z_coordinate,
               Dissolved_CO2_mass_fraction, Dissolved_salt_mass_fraction]  # gridded observations
 #-------------------------------------------------
 Plots:

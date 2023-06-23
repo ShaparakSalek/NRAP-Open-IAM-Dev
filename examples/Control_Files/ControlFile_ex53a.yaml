@@ -8,7 +8,10 @@
 # None of Stratigraphy parameters are used as input for the FaultLeakage
 # component.
 #
-# Last Modified: March 31, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex53a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     # Time is in years
@@ -19,6 +22,7 @@ ModelParams:
     OutputDirectory: output/output_ex53a_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

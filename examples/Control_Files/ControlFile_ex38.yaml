@@ -33,7 +33,10 @@
 # (XValue and YValue) must also be within MaxPointDistance of a location in the
 # .csv file containing the data for the LookupTableStratigraphy option.
 #
-#  Last Modified: May, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex38.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5
@@ -44,6 +47,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:
         LookupTableStratigraphy:

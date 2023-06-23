@@ -15,7 +15,10 @@
 # which enables the creation of files for DREAM (Designs for Risk Evaluation
 # and Management).
 #
-# Last Modified: January 12th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex41.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 1

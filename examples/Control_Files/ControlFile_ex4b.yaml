@@ -1,28 +1,28 @@
 # OpenIAM Control File Example 4b
 #
-# This example is similar to control file example 4a, but it is deterministic 
-# (a forward model), it includes another OpenWellbore component that leaks 
+# This example is similar to control file example 4a, but it is deterministic
+# (a forward model), it includes another OpenWellbore component that leaks
 # into aquifer 1, and it does not include a CarbonateAquifer component.
 #
-# An OpenWellbore component produces CO2_aquifer and brine_aquifer outputs, 
-# but the outputs can also be named to correspond with the aquifer receiving 
+# An OpenWellbore component produces CO2_aquifer and brine_aquifer outputs,
+# but the outputs can also be named to correspond to the aquifer receiving
 # leakage (e.g., if LeakTo is aquifer 1, then the output can be CO2_aquifer1).
-# The aquifer name does not have to be included in the output name (CO2_aquifer 
-# or CO2_aquifer1 would work). If the aquifer name is included in the output, 
+# The aquifer name does not have to be included in the output name (CO2_aquifer
+# and CO2_aquifer1 would work). If the aquifer name is included in the output,
 # however, the TimeSeries plots created will explicitly display the aquifer name.
-# Otherwise, the plots would show the component name (OpenWellbore1 or 
-# OpenWellbore2) and the viewer would need to know which component corresponds 
-# with which aquifer.
+# Otherwise, the plots would show the component name (OpenWellbore1 or
+# OpenWellbore2) and the viewer would need to know which component corresponds
+# to which aquifer.
 #
-# The OpenWellbore component also uses a critical pressure in the calculation 
-# of leakage rates. This approach is enforced through the inclusion of 
-# 'critPressureApproach: True' in the 'Controls' entry. For more details 
+# The OpenWellbore component also uses a critical pressure in the calculation
+# of leakage rates. This approach is enforced through the inclusion of
+# 'critPressureApproach: True' in the 'Controls' entry. For more details
 # regarding critical pressures, see control file example 31a.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex4.yaml
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex4b.yaml
 #
-# Last Modified: January 16th, 2023
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 1
@@ -31,6 +31,7 @@ ModelParams:
     Components: [SimpleReservoir1, OpenWellbore1, OpenWellbore2]
     OutputDirectory: output/output_ex4b_{datetime}
     Logging: Error
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
@@ -91,7 +92,7 @@ OpenWellbore2:
         logAquiferTransmissivity: -10.0
         brineSalinity: 0.0
         brineDensity: 1050.0  # used only if critPressureApproach is True and enforceCritPressure is False
-        # critPressure: 13330450.0  # If unsilenced, this value would only be used if both critPressureApproach and enforceCritPressure are set to True. 
+        # critPressure: 13330450.0  # If unsilenced, this value would only be used if both critPressureApproach and enforceCritPressure are set to True.
         # If critPressureApproach is True and enforceCritPressure is False (the default settings), a calculated critical pressure is used.
     Outputs: [CO2_aquifer2, brine_aquifer2]
 #-------------------------------------------------

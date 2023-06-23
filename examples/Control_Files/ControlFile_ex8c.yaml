@@ -3,7 +3,10 @@
 # This example applies the sensitivity analysis in the Analysis section
 # to dissolved salt and CO2 plumes from a FutureGen2Aquifer.
 #
-# Last Modified: March 14th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex8c.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -14,6 +17,7 @@ ModelParams:
     Components: [Reservoir1, Wellbore1, Aquifer1]
     OutputDirectory: output/output_ex8c_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

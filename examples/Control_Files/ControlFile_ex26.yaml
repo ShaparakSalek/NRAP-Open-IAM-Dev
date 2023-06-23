@@ -1,17 +1,18 @@
 # OpenIAM Control File Example 26
 #
 # This example demonstrates the use of 3D interpolation with a LookupTableReservoir.
-# When using 3D interpolation, reservoir conditions like pressure and CO2 saturation 
-# are calculated with x, y, and z values (not just x and y). This approach considers 
-# considers the depth of the wellbore base (coordz under Locations).
+# When using 3D interpolation, reservoir conditions like pressure and CO2 saturation
+# are calculated with x, y, and z values (not just x and y). This approach considers
+# the depth of the wellbore base (coordz under Locations).
 #
 # To have a LookupTableReservoir use 3D interpolation in a Control File interface,
-# it must have 'Interpolation2D: False,' as shown below. The locations at which conditions
-# are interpolated are specified in the wellbore component below (coordx, coordy, and
-# coordz). These locations can be considered the bottom of the MultisegmentedWellbores.
-# Note that an error will occur if the locations used are not within the space covered
-# by the lookup table data. The locations used here were selected by assessing the
-# distribution of z with x and y in the file fg1.csv (from the FutureGen2 data set).
+# it must have 'Interpolation2D: False,' as shown below. The locations at which
+# the conditions are interpolated are specified in the wellbore component below
+# (coordx, coordy, and coordz). These locations can be considered the bottom
+# of the MultisegmentedWellbores. Note that an error will occur if the used
+# locations are not within the space covered by the lookup table data.
+# The locations used here were selected by assessing the distribution of z
+# with x and y in the file fg1.csv (from the FutureGen2 data set).
 #
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
@@ -23,7 +24,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex26.yaml
 #
-# Last Modified: August 4th, 2022
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20.
@@ -167,4 +168,3 @@ Plots:
             Numcols: 2
         FigureSize: [12, 10]     # width, height in inches; default for TimeSeries is [10, 8]
         TimeSeries: [pH_volume, TDS_volume, Pressure_volume]
-

@@ -13,6 +13,10 @@
 # (x = 739 m, y = 423 m). Although in this example each injTimes list
 # is the same, each well still needs its own injTimes list.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex46a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 0.03011635   # 11 days as a fraction of a year
@@ -26,6 +30,7 @@ ModelParams:
     GenerateStatFiles: True
     GenerateSystemPrintFile: True        # mainly for debugging and information purposes
     GenerateComponentsPrintFiles: True   # mainly for debugging and information purposes
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

@@ -85,7 +85,9 @@
 # is below or equal to MinValue, then the entire figures will be gray, with
 # the component's location shown as a black circle.
 #
-# Last Modified: April 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex54a.yaml
+## Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10.

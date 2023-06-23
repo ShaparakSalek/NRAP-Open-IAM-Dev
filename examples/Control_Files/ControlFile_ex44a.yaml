@@ -4,6 +4,10 @@
 # this control file was created to be equivalent to the script example iam_sys_theis.py.
 # The TheisReservoir component needs entries for injRates and injTimes.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex44a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 0.030116358658453114     # 11 days in years
@@ -14,6 +18,7 @@ ModelParams:
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

@@ -5,7 +5,10 @@
 # site when using a LookupTableReservoir, InjectionCoordx and InjectionCoordy
 # must be provided for the plot along with PlotInjectionSites: True.
 #
-# Last Modified: February 9th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex9c.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 5
@@ -18,6 +21,7 @@ ModelParams:
                  atmRom1]
     OutputDirectory: output/output_ex9c_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

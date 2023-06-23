@@ -4,6 +4,10 @@
 # LHS type of simulations. Several parameters of Theis Reservoir Component
 # are set up as stochastic (i.e., varying between minimum and maximum values).
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex44b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 0.030116358658453114     # 11 days in years
@@ -17,6 +21,7 @@ ModelParams:
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
     GenerateStatFiles: True
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

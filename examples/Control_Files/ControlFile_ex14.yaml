@@ -1,11 +1,11 @@
 # OpenIAM Control File Example 14
 #
-# This example demonstrates the connection of a LookupTableReservoir, 
-# a MultisegmentedWellbore, and a FutureGen2Aquifer. The pressures and 
-# CO2 saturations provided by the LookupTableReservoir drive the leakage 
-# of brine and CO2 throught the MultisegmentedWellbore and into the four 
-# aquifers. The resulting pressure, pH, and TDS plume volumes in aquifer 
-# 4 are then modeled by the FutureGen2Aquifer component (specified through 
+# This example demonstrates the connection of a LookupTableReservoir,
+# a MultisegmentedWellbore, and a FutureGen2Aquifer. The pressures and
+# CO2 saturations provided by the LookupTableReservoir drive the leakage
+# of brine and CO2 throught the MultisegmentedWellbore and into the four
+# aquifers. The resulting pressure, pH, and TDS plume volumes in aquifer 4
+# are then modeled by the FutureGen2Aquifer component (specified through
 # the inclusion of 'AquiferName: aquifer4').
 #
 # This example requires the additional FutureGen 2.0 data set.
@@ -18,7 +18,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex14.yaml
 #
-# Last Modified: January 13, 2020
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20.

@@ -1,9 +1,9 @@
 # OpenIAM Control File Example 7b
 #
-# This example is similar to control file example 7a, but the pressures 
+# This example is similar to control file example 7a, but the pressures
 # and CO2 saturations provided directly to the MultisegmentedWellbore component
 # (through the DynamicParameters field) are entered with .csv files.
-# Additionally, this example uses a forward analysis type (deterministic) 
+# Additionally, this example uses a forward analysis type (deterministic)
 # instead of Latin Hypercube Sampling (lhs, stochastic).
 #
 # To run this file, use the command (\ for Windows and / for Mac or Linux)
@@ -13,7 +13,7 @@
 #   python ../source/openiam/openiam_cf.py --file ControlFile_ex7b.yaml
 # in the folder examples/Control_Files.
 #
-# Last Modified: July 17, 2019
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 200
@@ -22,6 +22,7 @@ ModelParams:
         type: forward
     Components: [msw1]
     OutputDirectory: output/output_ex7b_{datetime}
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers: 3
     shale1Thickness: 50.0

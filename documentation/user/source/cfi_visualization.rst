@@ -1,9 +1,11 @@
+.. _cfi_visualization:
+
 Setup of visualization options
 ------------------------------
 
 The plot types available within NRAP-Open-IAM are: ``TimeSeries``, ``TimeSeriesStats``,
-``TimeSeriesAndStats``, ``StratigraphicColumn``, ``Stratigraphy``, ``AoR``, ``TTFD``, 
-``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, and ``AtmPlumeEnsemble``. 
+``TimeSeriesAndStats``, ``StratigraphicColumn``, ``Stratigraphy``, ``AoR``, ``TTFD``,
+``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, and ``AtmPlumeEnsemble``.
 We review the process of creating these plots and then discuss each plot type separately.
 
 To create a figure using a simulation run with a *.yaml* control file, the
@@ -15,7 +17,7 @@ plots. For example, with the ``TTFD`` plot type generates a large number of
 plots, and the final file names will depend on the input used
 (e.g., *TDS_Plume_Timings_Realization10.png*). The plot name provided can have
 extensions appended that specify the file type of the resulting figure file
-(e.g., *.png*, *.tiff*, or *.eps*). Below, we show two examples of ``TimeSeries`` 
+(e.g., *.png*, *.tiff*, or *.eps*). Below, we show two examples of ``TimeSeries``
 plot entries in a *.yaml* control file.
 
 .. code-block:: python
@@ -65,29 +67,32 @@ Each plot type has the optional entries ``FigureDPI`` and ``FigureSize``.
   used (e.g., *.png* or *.tiff*). Recommended ``FigureDPI`` values are between
   100 and 300.
 
-* ``FigureSize`` - the width and height of the figure in inches. The width and height 
-  must be entered as a list of length two (e.g., ``FigureSize: [15, 8]``), with the width 
-  as the first number and the height as the second. The default values for the plot types 
-  are: [13, 8] for ``TimeSeries``, ``TimeSeriesStats``, and ``TimeSeriesAndStats``; [6, 10] for 
-  ``StratigraphicColumn`` plots; [12, 10] for ``Stratigraphy`` plots; [10, 8] for ``AoR``, 
-  ``TTFD``, ``GriddedMetric``, and ``GriddedRadialMetric`` plots; and [15, 10] for 
-  ``AtmPlumeSingle`` and ``AtmPlumeEnsemble`` plots. This entry can also be provided as 
-  ``figsize``.
+* ``FigureSize`` - the width and height of the figure in inches. The width and
+  height must be entered as a list of length two (e.g., ``FigureSize: [15, 8]``),
+  with the width as the first number and the height as the second. The default
+  values for the plot types are: [13, 8] for ``TimeSeries``, ``TimeSeriesStats``,
+  and ``TimeSeriesAndStats``; [6, 10] for ``StratigraphicColumn`` plots;
+  [12, 10] for ``Stratigraphy`` plots; [10, 8] for ``AoR``, ``TTFD``,
+  ``GriddedMetric``, and ``GriddedRadialMetric`` plots; and [15, 10] for
+  ``AtmPlumeSingle`` and ``AtmPlumeEnsemble`` plots. This entry can also be
+  provided as ``figsize`` instead of ``FigureSize``.
 
-The ``TimeSeries``, ``TimeSeriesStats``, ``TimeSeriesAndStats``, ``Aor``, ``StratigraphicColumn``, 
-and ``Stratigraphy`` plot types have the optional entry ``Title``.
+The ``TimeSeries``, ``TimeSeriesStats``, ``TimeSeriesAndStats``, ``Aor``,
+``StratigraphicColumn``, and ``Stratigraphy`` plot types have the optional
+entry ``Title``.
 
-* ``Title`` - the text placed in bold at the top of the figure. If the ``Title`` entry is 
-  given for ``StratigraphicColumn`` or ``Stratigraphy`` plots, it replaces the default titles 
-  ('Stratigraphy for the Study Area' and 'Stratigraphy for the Study Area, Top of Each Unit 
-  Shown' for each plot type, respectively). For the remaining plot types, by default there is no 
-  title for the overall figure, only titles for each individual subplot that are generated 
-  based on the output shown (with ``AoR`` plots having one subplot). Note that if you want to 
-  have |CO2| in a title, you should enter it as 'CO$_2$' (the $$ symobls aid in the proper 
-  formatting).
+* ``Title`` - the text placed in bold at the top of the figure. If the ``Title``
+  entry is given for ``StratigraphicColumn`` or ``Stratigraphy`` plots,
+  it replaces the default titles ('Stratigraphy for the Study Area' and
+  'Stratigraphy for the Study Area, Top of Each Unit Shown' for each plot type,
+  respectively). For the remaining plot types, by default, there is no
+  title for the overall figure, only titles for each individual subplot generated
+  based on the output shown (with ``AoR`` plots having one subplot). Note that
+  if one wants to have |CO2| in a title, one should enter it as 'CO$_2$'
+  (the $$ symbols aid in the proper formatting).
 
-Below , we show examples of ``FigureDPI``, ``FigureSize``, and ``Title`` entries used in 
-a *.yaml* control file.
+Below , we show examples of ``FigureDPI``, ``FigureSize``, and ``Title`` entries
+used in a *.yaml* control file.
 
 .. code-block:: python
    :lineno-start: 1
@@ -140,60 +145,60 @@ a *.yaml* control file.
                 FigureDPI: 300
                 FigureSize: [14, 11]
 
-Notice that the ``FigureDPI`` and ``FigureSize`` entries for the ``StratigraphicColumn``, 
-``Stratigraphy``, ``TTFD``, ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, 
-and ``AtmPlumeEnsemble`` plots are indented under the plot type. In contrast, the ``FigureDPI``, 
- ``FigureSize``, and ``Title`` entries for the ``TimeSeriesStats`` and ``AoR`` plots are not 
-indented beneath the plot type. This discrepancy occurs because the ``TimeSeriesStats`` and 
-``AoR`` entries are followed by a metric (e.g., [**pressure**]), while the other plot type 
+Notice that the ``FigureDPI`` and ``FigureSize`` entries for the ``StratigraphicColumn``,
+``Stratigraphy``, ``TTFD``, ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``,
+and ``AtmPlumeEnsemble`` plots are indented under the plot type. In contrast, the ``FigureDPI``,
+ ``FigureSize``, and ``Title`` entries for the ``TimeSeriesStats`` and ``AoR`` plots are not
+indented beneath the plot type. This discrepancy occurs because the ``TimeSeriesStats`` and
+``AoR`` entries are followed by a metric (e.g., [**pressure**]), while the other plot type
 entries are not.
 
-The ``StratigraphicColumn`` and ``Stratigraphy`` plot types both have the optional entries 
-``ReservoirColor``, ``ShaleColor``, ``AquiferColor``, ``ReservoirAlpha``, ``ShaleAlpha``, 
-``AquiferAlpha``, ``ReservoirLabel``, ``Shale#Label``, and ``Aquifer#Label`` (where ``#`` 
-is a particular unit number). Note that the color and alpha entries containing ``Shale`` 
-and ``Aquifer`` can be used with a number specifying a certain shale or aquifer (e.g., 
-``Shale2Color`` or ``Aquifer1Alpha``). Without a specific number, these entries will apply 
-to all shales or aquifers (excluding units that have their own, separate entry of the same 
-type). Note that the color entries can be a string (e.g., ``ReservoirColor: orange`` or 
-``Aquifer2Color: g``) or a list of length three representing fractions of red, green, 
-and blue (``Aquifer2Color: [0.25, 0.25, 1]``). The entries containing ``Alpha`` set the 
-alpha values used in the plot. Alpha values range from 0 to 1 and control transparency, 
-with 1 being fully opaque and values approaching 0 becoming more transparent. For examples 
-showing the use of these entries, see *ControlFile_ex33b*. To prevent a label from being 
-shown, a label entry can be given as '' (e.g., ``Shale2Label: ''``). One might not want a 
+The ``StratigraphicColumn`` and ``Stratigraphy`` plot types both have the optional entries
+``ReservoirColor``, ``ShaleColor``, ``AquiferColor``, ``ReservoirAlpha``, ``ShaleAlpha``,
+``AquiferAlpha``, ``ReservoirLabel``, ``Shale#Label``, and ``Aquifer#Label`` (where ``#``
+is a particular unit number). Note that the color and alpha entries containing ``Shale``
+and ``Aquifer`` can be used with a number specifying a certain shale or aquifer (e.g.,
+``Shale2Color`` or ``Aquifer1Alpha``). Without a specific number, these entries will apply
+to all shales or aquifers (excluding units that have their own, separate entry of the same
+type). Note that the color entries can be a string (e.g., ``ReservoirColor: orange`` or
+``Aquifer2Color: g``) or a list of length three representing fractions of red, green,
+and blue (``Aquifer2Color: [0.25, 0.25, 1]``). The entries containing ``Alpha`` set the
+alpha values used in the plot. Alpha values range from 0 to 1 and control transparency,
+with 1 being fully opaque and values approaching 0 becoming more transparent. For examples
+showing the use of these entries, see *ControlFile_ex33b*. To prevent a label from being
+shown, a label entry can be given as '' (e.g., ``Shale2Label: ''``). One might not want a
 label if the setup causes overlap between different labels.
 
 * ``ReservoirColor`` - the color used when plotting the reservoir. The default is [0.33, 0.33, 0.33].
 
-* ``ShaleColor`` - the color used when plotting all shales (or a specific shale, if given as 
+* ``ShaleColor`` - the color used when plotting all shales (or a specific shale, if given as
   ``Shale#Color``, where ``#`` is an appropriate unit number). The default is red.
 
-* ``AquiferColor`` - the color used when plotting all shales (or a specific shale, if given as 
+* ``AquiferColor`` - the color used when plotting all shales (or a specific shale, if given as
   ``Aquifer#Color``, where ``#`` is an appropriate unit number). The default is blue.
 
-* ``ReservoirAlpha`` - the alpha value used when plotting the reservoir. The default value is 
+* ``ReservoirAlpha`` - the alpha value used when plotting the reservoir. The default value is
   0.5.
 
-* ``ShaleAlpha`` - the alpha value used when plotting all shales (or a specific shale, if given as 
-  ``Shale#Alpha``, where ``#`` is an appropriate unit number). The default value is 0.25. 
+* ``ShaleAlpha`` - the alpha value used when plotting all shales (or a specific shale, if given as
+  ``Shale#Alpha``, where ``#`` is an appropriate unit number). The default value is 0.25.
 
-* ``AquiferAlpha`` - the alpha value used when plotting all aquifers (or a specific aquifer, if given  
-  as ``Aquifer#Alpha``, where ``#`` is an appropriate unit number). The default value is 0.25. 
+* ``AquiferAlpha`` - the alpha value used when plotting all aquifers (or a specific aquifer, if given
+  as ``Aquifer#Alpha``, where ``#`` is an appropriate unit number). The default value is 0.25.
 
-* ``ReservoirLabel`` - the label displayed for the reservoir. In ``StratigraphicColumn`` plots, the 
-  default label is "Reservoir Thickness: H m," where H is the unit thickness. In ``Stratigraphy`` 
+* ``ReservoirLabel`` - the label displayed for the reservoir. In ``StratigraphicColumn`` plots, the
+  default label is "Reservoir Thickness: H m," where H is the unit thickness. In ``Stratigraphy``
   plots, the default label is "Reservoir."
 
-* ``Shale#Label`` - the label displayed a specific shale, where ``#`` is an appropriate unit number. 
-  In ``StratigraphicColumn`` plots, the default label is "Shale # Thickness: H m," where H is the 
+* ``Shale#Label`` - the label displayed a specific shale, where ``#`` is an appropriate unit number.
+  In ``StratigraphicColumn`` plots, the default label is "Shale # Thickness: H m," where H is the
   unit thickness. In ``Stratigraphy`` plots, the default label is "Shale #."
 
-* ``Aquifer#Label`` - the label displayed a specific aquifer, where ``#`` is an appropriate unit 
-  number. In ``StratigraphicColumn`` plots, the default label is "Aquifer # Thickness: H m," where 
+* ``Aquifer#Label`` - the label displayed a specific aquifer, where ``#`` is an appropriate unit
+  number. In ``StratigraphicColumn`` plots, the default label is "Aquifer # Thickness: H m," where
   H is the unit thickness. In ``Stratigraphy`` plots, the default label is "Aquifer #."
 
-The ``Stratigraphy``, ``TTFD``, ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, 
+The ``Stratigraphy``, ``TTFD``, ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``,
 and ``AtmPlumeEnsemble`` plot types all have the optional entries ``PlotInjectionSites``,
 ``InjectionCoordx``, ``InjectionCoordy``, ``SpecifyXandYLims``, and ``SaveCSVFiles``.
 
@@ -214,14 +219,14 @@ and ``AtmPlumeEnsemble`` plot types all have the optional entries ``PlotInjectio
 
 * ``SaveCSVFiles`` - an option to save results in *.csv* files. The only acceptable
   values are ``True`` or ``False``. The default value for ``AoR``, ``TTFD``,
-  ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, and 
-  ``AtmPlumeEnsemble`` plots is ``True``, while the default value for ``Stratigraphy`` 
-  plots is ``False``. For ``Stratigraphy`` plots, the *.csv* files contain unit 
-  thicknesses and depths across the domain. The *.csv* files are not saved by 
+  ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, and
+  ``AtmPlumeEnsemble`` plots is ``True``, while the default value for ``Stratigraphy``
+  plots is ``False``. For ``Stratigraphy`` plots, the *.csv* files contain unit
+  thicknesses and depths across the domain. The *.csv* files are not saved by
   ``Stratigraphy`` plots when the simulation uses the ``LookupTableStratigraphy`` option.
 
 If set up, ``SpecifyXandYLims`` is a dictionary containing two entries: ``xLims``
-and ``yLims`` (i.e., ``xLims`` and ``yLims`` are indented beneath``SpecifyXandYLims`` 
+and ``yLims`` (i.e., ``xLims`` and ``yLims`` are indented beneath``SpecifyXandYLims``
 in a *.yaml* file).
 
 * ``SpecifyXandYLims`` - a dictionary containing two optional entries related
@@ -246,7 +251,7 @@ The ``Stratigraphy``, ``TTFD``, and ``AtmPlumeEnsemble`` plots also have the opt
 entry ``SpecifyXandYGridLims``, which is a dictionary containing the ``gridXLims`` and
 ``gridYLims`` entries. ``AoR`` plots do not have grid entries because the x and y values
 used are those of the ``OpenWellbore`` components. ``GriddedRadialMetric`` plots use the
-radial grids produced by a component (e.g., a ``GenericAquifer`` component), while 
+radial grids produced by a component (e.g., a ``GenericAquifer`` component), while
 ``GriddedMetric`` plots use only the locations corresponding with the output.
 
 * ``SpecifyXandYGridLims`` - a dictionary containing two optional entries
@@ -290,10 +295,10 @@ entry ``TimeList``:
   figures (e.g., ``TimeList: [1, 5, 10]). Otherwise, one figure can be created for
   each timestep by having ``TimeList: All``. If TimeList is not entered for an ``AoR``
   plot, the figures created will show the maximum values for all locations across all
-  model times. If ``TimeList`` is not entered for a ``GriddedMetric`` or 
+  model times. If ``TimeList`` is not entered for a ``GriddedMetric`` or
   ``GriddedRadialMetric`` plot, the default setting is ``TimeList: All``.
 
-The ``TTFD``, ``GriddedMetric``, and ``GriddedRadialMetric`` plot types all have the 
+The ``TTFD``, ``GriddedMetric``, and ``GriddedRadialMetric`` plot types all have the
 required entry ``ComponentNameList``:
 
 * ``ComponentNameList`` - a list containing the names provided for each of the
@@ -329,18 +334,18 @@ Example of setting the component name (*FutureGen2AZMI2*) in a script applicatio
 
     fga = sm.add_component_model_object(FutureGen2AZMI(name='FutureGen2AZMI2', parent=sm))
 
-The ``GriddedMetric`` and ``GriddedRadialMetric`` plot types both have the required entry 
+The ``GriddedMetric`` and ``GriddedRadialMetric`` plot types both have the required entry
 ``MetricName``:
 
-* ``MetricName`` - the name of the metric to plot. For a ``GriddedMetric`` plot, the 
-  ``SealHorizon`` and ``FaultFlow`` outputs **CO2_aquifer**, **brine_aquifer**, 
-  **mass_CO2_aquifer**, or **mass_brine_aquifer** can be provided for ``MetricName``. For a 
-  ``GriddedRadialMetric`` plot, the ``GenericAquifer`` outputs **Dissolved_CO2_mass_fraction** 
-  or **Dissolved_salt_mass_fraction** can be provided for ``MetricName``. When plotting these 
-  ``GenericAquifer` metrics, the component used must also produce **r_coordinate** and 
-  **z_coordinate** outputs. 
+* ``MetricName`` - the name of the metric to plot. For a ``GriddedMetric`` plot, the
+  ``SealHorizon`` and ``FaultFlow`` outputs **CO2_aquifer**, **brine_aquifer**,
+  **mass_CO2_aquifer**, or **mass_brine_aquifer** can be provided for ``MetricName``. For a
+  ``GriddedRadialMetric`` plot, the ``GenericAquifer`` outputs **Dissolved_CO2_mass_fraction**
+  or **Dissolved_salt_mass_fraction** can be provided for ``MetricName``. When plotting these
+  ``GenericAquifer` metrics, the component used must also produce **r_coordinate** and
+  **z_coordinate** outputs.
 
-The ``GriddedMetric``, ``GriddedRadialMetric``, and ``AtmPlumeSingle`` plot types have the 
+The ``GriddedMetric``, ``GriddedRadialMetric``, and ``AtmPlumeSingle`` plot types have the
 optional entry ``Realization``:
 
 * ``Realization`` - the realization number for which to display results (default is 0).
@@ -349,7 +354,7 @@ optional entry ``Realization``:
   rules in Python, where 0 represents the first realization and (N - 1) represents the last
   (where N is the number of realizations).
 
-The ``GriddedMetric`` and ``GriddedRadialMetric`` plot types both have the optional entry 
+The ``GriddedMetric`` and ``GriddedRadialMetric`` plot types both have the optional entry
 ``EqualAxes``:
 
 * ``EqualAxes`` - the option to force the x and y axes to cover the same distances (for an equal
@@ -374,12 +379,12 @@ of lines created for that particular metric.
 
 ``TimeSeriesStats`` and ``TimeSeriesAndStats`` plots can only be produced for simulations
 using the Latin Hypercube Sampling (LHS, ``lhs`` in a control file setup)
-or Parameter Study (``parstudy`` in a control file setup) analysis types (not the 
-``forward`` analysis type). Simulations using the ``lhs`` and ``parstudy`` analysis 
-types create separate simulations (i.e., different realizations) that explore the 
-parameter space. The parameters varied are those entered with minimum and maximum 
-values, which are meant to model uniform distribution. Consider, for example, a 
-``TimeSeriesStats`` plot set up for an LHS run with 30 realizations. The ``ModelParams`` 
+or Parameter Study (``parstudy`` in a control file setup) analysis types (not the
+``forward`` analysis type). Simulations using the ``lhs`` and ``parstudy`` analysis
+types create separate simulations (i.e., different realizations) that explore the
+parameter space. The parameters varied are those entered with minimum and maximum
+values, which are meant to model uniform distribution. Consider, for example, a
+``TimeSeriesStats`` plot set up for an LHS run with 30 realizations. The ``ModelParams``
 section of the *.yaml* file would be similar to this excerpt from *ControlFile_ex4a.yaml*:
 
 .. code-block:: python
@@ -399,10 +404,10 @@ section of the *.yaml* file would be similar to this excerpt from *ControlFile_e
 
 The entries ``Type: lhs`` and ``siz: 30`` under ``Analysis`` specify the run as an
 LHS simulation with 30 realizations. Each realization will use different values
-for the parameters that are setup to vary. In a ``TimeSeries`` plot, the outputs for 
+for the parameters that are setup to vary. In a ``TimeSeries`` plot, the outputs for
 each realization will be represented by separate lines.
 
-If an LHS or parstudy simulation uses many realizations and many component locations, 
+If an LHS or parstudy simulation uses many realizations and many component locations,
 the ``TimeSeries`` plot could become visually unclear. To avoid a lack of visual
 clarity, ``TimeSeriesStats`` plots show the basic information about the distribution
 of results. The plot produces lines representing mean and median values as well
@@ -413,11 +418,11 @@ as shaded regions showing the four quartiles of the distribution varying over ti
 and ``TimeSeriesStats`` plots. The mean, median, and quartiles are shown along
 with line graphs for each realization.
 
-``TimeSeries``, ``TimeSeriesStats``, and ``TimeSeriesAndStats`` plots can have the following 
-optional entries: ``UseMarkers``, ``VaryLineStyles``, ``UseLines``, ``Subplot``, ``Title``, 
-``FigureDPI``, and ``FigureSize`` (the latter three are described above). Note that 
-``Subplot`` is a dictionary containing the optional entries ``Use`` and ``NumCols`` 
-(i.e., the ``Use`` and ``NumCols`` options are on a line beneath ``Subplots`` and 
+``TimeSeries``, ``TimeSeriesStats``, and ``TimeSeriesAndStats`` plots can have the following
+optional entries: ``UseMarkers``, ``VaryLineStyles``, ``UseLines``, ``Subplot``, ``Title``,
+``FigureDPI``, and ``FigureSize`` (the latter three are described above). Note that
+``Subplot`` is a dictionary containing the optional entries ``Use`` and ``NumCols``
+(i.e., the ``Use`` and ``NumCols`` options are on a line beneath ``Subplots`` and
 preceeded by four more spaces).
 
 * ``UseMarkers`` - an option to show results with values annotated with markers
@@ -438,50 +443,50 @@ preceeded by four more spaces).
   ``VaryLineStyles``  will automatically be set to ``False``, regardless
   of the entry provided in the *.yaml* file.
 
-* ``Subplot`` - a dictionary containing the optional entries ``Use`` and ``NumCols``. This 
+* ``Subplot`` - a dictionary containing the optional entries ``Use`` and ``NumCols``. This
   entry can also be provided as ``subplot``.
 
-* ``Use`` - the option to use multiple subplots (``True``) or not (``False``). The defalt 
-  value is ``True``. The different subplots can show the results for different locations 
-  and/or the results for different metrics (e.g., **pressure** in one subplot, 
-  **CO2saturation** in another). If different types of output (e.g., **pressure** and 
-  **CO2saturation**) are included in a ``TimeSeries`` plot but ``Use`` is set to ``False``, 
-  the y-axis label will only reflect one of the two output types. This entry can also be 
+* ``Use`` - the option to use multiple subplots (``True``) or not (``False``). The defalt
+  value is ``True``. The different subplots can show the results for different locations
+  and/or the results for different metrics (e.g., **pressure** in one subplot,
+  **CO2saturation** in another). If different types of output (e.g., **pressure** and
+  **CO2saturation**) are included in a ``TimeSeries`` plot but ``Use`` is set to ``False``,
+  the y-axis label will only reflect one of the two output types. This entry can also be
   provided as ``use``.
 
-* ``NumCols`` - the number of columns used to set up the subplots, if ``Use`` is set to 
-  ``True``. If the plot includes 3 or fewer metrics (influenced by the output type(s) and 
-  locations used), the default value is 1. If the plot includes 4 or more metrics, the 
-  default value is 2. This entry can also be given as ``ncols``. The number of rows 
-  is taken as the number required to plot the metrics used by the plot (given the number 
-  of columns). The number of metrics is set by the number of output types given (e.g., 
-  two for ``TimeSeries: [pressure, CO2saturation]``) and the number of locations for 
-  those output types. For example, if ``NumCols`` is two, then the number of rows will 
-  be half the number of metrics (rounding up to the next integer). Note that ``TimeSeries``, 
-  ``TimeSeriesStats``, and ``TimeSeriesAndStats`` plots will automatically adjust the font 
-  sizes used to seek to avoid text overlapping with other features. Accomplishing a specific 
-  subplot configuration without the text becoming too small, for example, can be aided by 
+* ``NumCols`` - the number of columns used to set up the subplots, if ``Use`` is set to
+  ``True``. If the plot includes 3 or fewer metrics (influenced by the output type(s) and
+  locations used), the default value is 1. If the plot includes 4 or more metrics, the
+  default value is 2. This entry can also be given as ``ncols``. The number of rows
+  is taken as the number required to plot the metrics used by the plot (given the number
+  of columns). The number of metrics is set by the number of output types given (e.g.,
+  two for ``TimeSeries: [pressure, CO2saturation]``) and the number of locations for
+  those output types. For example, if ``NumCols`` is two, then the number of rows will
+  be half the number of metrics (rounding up to the next integer). Note that ``TimeSeries``,
+  ``TimeSeriesStats``, and ``TimeSeriesAndStats`` plots will automatically adjust the font
+  sizes used to seek to avoid text overlapping with other features. Accomplishing a specific
+  subplot configuration without the text becoming too small, for example, can be aided by
   also changing the ``FigureSize`` entry (see above).
 
 These optional entries are not indented under ``TimeSeries`` or ``TimeSeriesAndStats`` in a
-*.yaml* file, but are instead indented under the figure name. If ``UseMarkers``, 
-``VaryLineStyles``, or ``UseLines`` are provided for a ``TimeSeriesStats`` plot, the 
-entries will have no effect (i.e., they do not influence the mean and median lines or the 
+*.yaml* file, but are instead indented under the figure name. If ``UseMarkers``,
+``VaryLineStyles``, or ``UseLines`` are provided for a ``TimeSeriesStats`` plot, the
+entries will have no effect (i.e., they do not influence the mean and median lines or the
 shaded quartiles).
 
-The titles for individual subplots are generated based on the metric shown in the subplot 
-(i.e., output type and location the output was produced for). You can specify the subplot 
-title that will correspond with a specific output, however, by entering the output name 
-under ``Subplot``. The output name depends on the corresponding component, the output type, 
-and the location index. For example, a ``SimpleReservoir`` component named SimpleReservoir1 
-producing pressure at location 0 will result in an output name of ``SimpleReservoir1_000.pressure``. 
-The component name is followed by an underscore, then the location index (starting at 0 and 
-expressed with three digits), then a period, and finally the output name (e.g., **pressure**). 
-The text used for the title is given after the output name as 
-``ComponentName_000.OutputName: Text Used for Title``. For an example of this approach, see 
+The titles for individual subplots are generated based on the metric shown in the subplot
+(i.e., output type and location the output was produced for). One can specify the subplot
+title that will correspond to a specific output, however, by entering the output name
+under ``Subplot``. The output name depends on the corresponding component, the output type,
+and the location index. For example, a ``SimpleReservoir`` component named SimpleReservoir1
+producing pressure at location 0 will result in an output name of ``SimpleReservoir1_000.pressure``.
+The component name is followed by an underscore, then the location index (starting at 0 and
+expressed with three digits), then a period, and finally the output name (e.g., **pressure**).
+The text used for the title is given after the output name as
+``ComponentName_000.OutputName: Text Used for Title``. For an example of this approach, see
 *ControlFile_ex1a*.
 
-Below, we show examples of ``TimeSeries`` and ``TimeSeriesAndStats`` plots in a *.yaml* 
+Below, we show examples of ``TimeSeries`` and ``TimeSeriesAndStats`` plots in a *.yaml*
 control file.
 
 .. code-block:: python
@@ -515,33 +520,33 @@ file examples 4a, 14, and 40.
 
 StratigraphicColumn
 ~~~~~~~~~~~~~~~~~~~
-``StratigraphicColumn`` plots show unit thicknesses at one location. If the simulation 
-does not use spatially variable stratigraphy, then the unit thicknesses at the one location 
-used are representative of the entire domain. For more details regarding the use of 
+``StratigraphicColumn`` plots show unit thicknesses at one location. If the simulation
+does not use spatially variable stratigraphy, then the unit thicknesses at the one location
+used are representative of the entire domain. For more details regarding the use of
 spatially variable stratigraphy, see the section for the ``Stratigraphy`` plot type below.
-When using spatially variable stratigraphy with the ``LookupTableStratigraphy`` approach, 
+When using spatially variable stratigraphy with the ``LookupTableStratigraphy`` approach,
 the ``StratigraphicColumn`` plot may be more visually clear than the ``Stratigraphy`` plot type.
 
-The ``StratigraphicColumn`` plot type has the following optional entries: ``XValue``, 
-``YValue``, ``DepthText``, ``ReservoirColor``, ``ShaleColor``, ``AquiferColor``, 
-``ReservoirAlpha``, ``ShaleAlpha``, ``AquiferAlpha``, ``ReservoirLabel``, ``ShaleLabel``, 
-``AquiferLabel``, ``FigureDPI``, ``FigureSize``, and ``Title``. All of these entries but 
+The ``StratigraphicColumn`` plot type has the following optional entries: ``XValue``,
+``YValue``, ``DepthText``, ``ReservoirColor``, ``ShaleColor``, ``AquiferColor``,
+``ReservoirAlpha``, ``ShaleAlpha``, ``AquiferAlpha``, ``ReservoirLabel``, ``ShaleLabel``,
+``AquiferLabel``, ``FigureDPI``, ``FigureSize``, and ``Title``. All of these entries but
 ``XValue``, ``YValue``, and ``DepthText`` are described above.
 
-* ``XValue`` - the x-coordinate (m) of the location used for the plot. The default value is 
-  is 0 m.
+* ``XValue`` - the x-coordinate (m) of the location used for the plot.
+  The default value is is 0 m.
 
-* ``YValue`` - the y-coordinate (m) of the location used for the plot. The default value is 
-  is 0 m.
+* ``YValue`` - the y-coordinate (m) of the location used for the plot.
+  The default value is is 0 m.
 
-* ``DepthText`` - option specifying whether to show depths at each unit interface (``True``) 
-  or not (``False``). The default value is ``True``. You may want to disable the depth text 
-  if, for example, certain units are so thin that the text for different units plot on top 
-  of each other.
+* ``DepthText`` - option specifying whether to show depths at each unit interface
+  (``True``) or not (``False``). The default value is ``True``. One may want
+  to disable the depth text if, for example, certain units are so thin that
+  the text for different units plot on top of each other.
 
-Two examples of ``StratigraphicColumn`` plots in a *.yaml* control file are shown below. One 
-plot does not inlcude any optional entries and therefore uses the default options. The other 
-plot includes a variety of optional entries.
+Two examples of ``StratigraphicColumn`` plots in a *.yaml* control file are
+shown below. One plot does not include any optional entries and, therefore, uses
+the default options. The other plot includes a variety of optional entries.
 
 .. code-block:: python
    :lineno-start: 1
@@ -575,12 +580,12 @@ plot includes a variety of optional entries.
                 YValue: 2000
                 DepthText: False
 
-For more examples of ``StratigraphicColumn`` plots, see control file examples 
+For more examples of ``StratigraphicColumn`` plots, see control file examples
 *ControlFile_ex33a*-*ControlFile_ex38*.
 
 Stratigraphy
 ~~~~~~~~~~~~
-``Stratigraphy`` plots are three-dimensional figures showing the specified
+``Stratigraphy`` plots are three-dimensional plots showing the specified
 stratigraphy as well as features like wellbores and injection sites. These plots
 can vary with the approach used for the stratigraphy. For example, a ``strike`` and
 ``dip`` can be assigned in the ``Stratigraphy`` section of a *.yaml* control file.
@@ -722,36 +727,36 @@ as squares along each wellbore.
 ``PlotWellLabels``, ``WellLabel``, ``PlotInjectionSites``, ``PlotInjectionSiteLabels``,
 ``InjectionCoordx``, ``InjectionCoordy``, ``PlotStratComponents``,
 ``StrikeAndDipSymbol``, ``SpecifyXandYLims``, ``SpecifyXandYGridLims``,
-``xGridSpacing``, ``yGridSpacing``, ``View``, ``SaveCSVFiles``, ``ReservoirColor``, 
-``ShaleColor``, ``AquiferColor``, ``ReservoirAlpha``, ShaleAlpha``, AquiferAlpha``, 
-``ReservoirLabel``, ``Shale#Label``, ``Aquifer#Label``, ``FigureDPI``, 
-``FigureSize``, and ``Title``. Four of these entries (``StrikeAndDipSymbol``, 
-``SpecifyXandYLims``, ``SpecifyXandYGridLims``, and ``View``) are dictionaries 
-containing additional entries (i.e., more entries indented beneath them in a 
-*.yaml* file). The entries ``SpecifyXandYLims``, ``SpecifyXandYGridLims``, 
-``xGridSpacing``, ``yGridSpacing``, ``SaveCSVFiles``, ``PlotInjectionSites``, 
-``InjectionCoordx``, ``InjectionCoordy``, ``ReservoirColor``, ``ShaleColor``, 
-``AquiferColor``, ``ReservoirAlpha``, ShaleAlpha``, AquiferAlpha``, ``ReservoirLabel``, 
-``Shale#Label``, ``Aquifer#Label``, ``FigureDPI``, and ``FigureSize`` are 
+``xGridSpacing``, ``yGridSpacing``, ``View``, ``SaveCSVFiles``, ``ReservoirColor``,
+``ShaleColor``, ``AquiferColor``, ``ReservoirAlpha``, ShaleAlpha``, AquiferAlpha``,
+``ReservoirLabel``, ``Shale#Label``, ``Aquifer#Label``, ``FigureDPI``,
+``FigureSize``, and ``Title``. Four of these entries (``StrikeAndDipSymbol``,
+``SpecifyXandYLims``, ``SpecifyXandYGridLims``, and ``View``) are dictionaries
+containing additional entries (i.e., more entries indented beneath them in a
+*.yaml* file). The entries ``SpecifyXandYLims``, ``SpecifyXandYGridLims``,
+``xGridSpacing``, ``yGridSpacing``, ``SaveCSVFiles``, ``PlotInjectionSites``,
+``InjectionCoordx``, ``InjectionCoordy``, ``ReservoirColor``, ``ShaleColor``,
+``AquiferColor``, ``ReservoirAlpha``, ShaleAlpha``, AquiferAlpha``, ``ReservoirLabel``,
+``Shale#Label``, ``Aquifer#Label``, ``FigureDPI``, and ``FigureSize`` are
 described above.
 
 * ``PlotWellbores`` - an option to plot wellbores as vertical lines (default is
   ``True``). The only acceptable values are ``True`` or ``False``.
 
 * ``PlotWellLabels`` - an option to show text labels specifying wellbore types
-  and numbers (default is ``True``). If ``WellLabel`` is not entered, labels will 
-  be set according to the wellbore component type. For example, the labels could be 
+  and numbers (default is ``True``). If ``WellLabel`` is not entered, labels will
+  be set according to the wellbore component type. For example, the labels could be
   "Open Wellbore 1" for an Open Wellbore, "M.S. Wellbore 1" for a MultiSegmented Wellbore,
-  or "Cemented Wellbore 1" for a Cemented Wellbore. If ``WellLabel`` is entered, the text 
+  or "Cemented Wellbore 1" for a Cemented Wellbore. If ``WellLabel`` is entered, the text
   provided will be used. The only acceptable values are ``True`` or ``False``.
 
-* ``WellLabel`` - the label used for wellbores if ``PlotWellLabels``is set to ``True``. 
-  If the text given includes empty brackets (*{}*), then the location index will be inserted 
-  in that position. If this entry was given as ``WellLabel: Legacy Well {}``, for example, 
-  then the labels would range from "Legacy Well 0" to "Legacy Well (N - 1)," where N is the 
-  maximum location index for the wellbore components (location indices use the python indexing). 
-  If ``WellLabel`` is given without brackets, then the same text will be displayed for each 
-  wellbore component (e.g., ``WellLabel: Well``). if ``PlotWellLabels``is set to ``True`` 
+* ``WellLabel`` - the label used for wellbores if ``PlotWellLabels``is set to ``True``.
+  If the text given includes empty brackets (*{}*), then the location index will be inserted
+  in that position. If this entry was given as ``WellLabel: Legacy Well {}``, for example,
+  then the labels would range from "Legacy Well 0" to "Legacy Well (N - 1)," where N is the
+  maximum location index for the wellbore components (location indices use the python indexing).
+  If ``WellLabel`` is given without brackets, then the same text will be displayed for each
+  wellbore component (e.g., ``WellLabel: Well``). if ``PlotWellLabels``is set to ``True``
   but ``WellLabel`` is not entered, labels will be set using the default approach.
 
 * ``PlotInjectionSiteLabels`` - an option to show a text label for the injection
@@ -804,9 +809,9 @@ described above.
   documentation regarding view angles. This list must have the same length as
   the ``ViewAngleElevation`` list.
 
-Two examples of *.yaml* entries for ``Stratigraphy`` plots are shown below. The 
-first entry uses the default settings, while the second entry specifies each 
-option. Since the simulation uses a ``LookupTableReservoir``, the entry has to 
+Two examples of *.yaml* entries for ``Stratigraphy`` plots are shown below. The
+first entry uses the default settings, while the second entry specifies each
+option. Since the simulation uses a ``LookupTableReservoir``, the entry has to
 include ``InjectionCoordx`` and ``InjectionCoordy``. ``InjectionCoordx`` and
 ``InjectionCoordy`` are not required when using another type of reservoir
 component with option ``PlotInjectionSites: True``.
@@ -900,7 +905,7 @@ each ``OpenWellbore`` location, and every component will have its output saved. 
 and these files are much smaller in size.
 
 ``AoR`` plots can have six optional entries: ``PlotInjectionSites``, ``InjectionCoordx``,
-``InjectionCoordy``, ``SaveCSVFiles``, ``FigureDPI``, ``FigureSize``, and ``TimeList``. 
+``InjectionCoordy``, ``SaveCSVFiles``, ``FigureDPI``, ``FigureSize``, and ``TimeList``.
 All of these entries are described above.
 
 If the ``TimeList`` entry is not provided for an ``AoR`` plot, the figure will show the
@@ -938,21 +943,21 @@ For examples of AoR plots, see *ControlFile_ex31a.yaml* to *ControlFile_ex32c.ya
 
 TTFD
 ~~~~
-The time to first detection (``TTFD``) plot type uses contaminant plume output from 
-aquifer components to simulate when a monitoring well would be able to detect the 
-plume in the aquifer(s) considered. If the ``TTFD`` plot type is run without monitoring 
-locations provided, it still produces maps showing the spread of contaminant plumes across 
-the domain. These figures (and the .csv files that can be saved) could then be used to 
+The time to first detection (``TTFD``) plot type uses contaminant plume output from
+aquifer components to simulate when a monitoring well would be able to detect the
+plume in the aquifer(s) considered. If the ``TTFD`` plot type is run without monitoring
+locations provided, it still produces maps showing the spread of contaminant plumes across
+the domain. These figures (and the .csv files that can be saved) could then be used to
 decide where to place monitoring sensors.
 
-The ``TTFD`` plot type can produce three types of figures: maps of earliest plume 
-timings across the domain (i.e., the earliest time at which the plume type occurs in 
-each part of the aquifer(s) considered), maps showing the ``TTFD`` provided by the 
-entered monitoring locations, and maps of the probability of plume occurrence in the 
-aquifer(s) considered. The figures with the ``TTFD`` from monitoring locations are only 
-created if monitoring locations are entered. The maps of plume probabilities are only 
-created if the analysis type is Latin Hypercube Sampling (``lhs``) or Parameter Study 
-(``parstudy``). Note that plume probabilities are calculated as the number of realizations 
+The ``TTFD`` plot type can produce three types of figures: maps of earliest plume
+timings across the domain (i.e., the earliest time at which the plume type occurs in
+each part of the aquifer(s) considered), maps showing the ``TTFD`` provided by the
+entered monitoring locations, and maps of the probability of plume occurrence in the
+aquifer(s) considered. The figures with the ``TTFD`` from monitoring locations are only
+created if monitoring locations are entered. The maps of plume probabilities are only
+created if the analysis type is Latin Hypercube Sampling (``lhs``) or Parameter Study
+(``parstudy``). Note that plume probabilities are calculated as the number of realizations
 in which a plume occurred at each location divided by the total number of realizations.
 
 The ``TTFD`` plot type requires the use of at least one of the following aquifer
@@ -965,7 +970,7 @@ must also produce the plume dimension metrics associated with the plume type
 considered (e.g., **TDS_dx**, **TDS_dy**, and **TDS_dz** for TDS plumes). Note that
 ``CarbonateAquifer`` components do not produce plume dimension outputs for different
 plume types, so the required outputs when using ``CarbonateAquifer`` are **dx** and **dy**
-(which represent the lengths of the impacted aquifer volume in the x- and y-directions, 
+(which represent the lengths of the impacted aquifer volume in the x- and y-directions,
 respectively).
 
 The plume timing and plume probability figures made with the ``TTFD`` plot type show
@@ -986,7 +991,7 @@ While the plume timing plots show the earliest plume timings at each grid locati
 across the domain, the monitoring ``TTFD`` plots only display plume timings that are
 sufficiently close to the sensor location(s) provided. The purpose of such graphs
 is to show when the sensors used could warn site operators that an aquifer has
-been impacted. If the chosen sensor ``x``, ``y``, and ``z`` values do not provide any 
+been impacted. If the chosen sensor ``x``, ``y``, and ``z`` values do not provide any
 warning of plumes in an aquifer, and there are plumes in that aquifer, then the monitoring
 locations should be changed. The distance over which sensors can detect a plume
 are controlled by the ``VerticalWindow`` and ``HorizontalWindow`` entries, which are
@@ -1012,7 +1017,7 @@ above.
 The ``TTFD`` plot type can have the following optional entries: ``MonitoringLocations``,
 ``SaveCSVFiles``, ``WriteDreamOutput``, ``SpecifyXandYLims``, ``NumZPointsWithinAquifers``,
 ``NumZPointsWithinShales``, ``xGridSpacing``, ``yGridSpacing``, ``SpecifyXandYGridLims``,
-``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``, ``FigureDPI``, and 
+``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``, ``FigureDPI``, and
 ``FigureSize``. Three of these entries (``MonitoringLocations``, ``SpecifyXandYLims``, and
 ``SpecifyXandYGridLims``) are dictionaries containing additional entries
 (i.e., entries indented beneath mentioned keywords in a *.yaml* file).
@@ -1111,14 +1116,14 @@ component does not produce a dz plume metric.
   redundant because those points are included for the aquifers below and above
   the shale.
 
-Below, we show two examples of ``TTFD`` plots setup in the ``Plots``section of a 
-*.yaml* file. The first plot (*pH_Minimum_Input*) has only the entries required to 
-set up the ``TTFD`` plot type: ``PlumeType`` and ``ComponentNameList``. The second 
-plot (*TDS_All_Options_Specified.tiff*) includes all optional entries for the TTFD 
-plot type. Although there are only two plot entries included, each entry can result 
-in the creation of multiple figures (e.g., earliest plume timings, TTFD from 
-monitoring locations, and plume probabilities for each model realization). Note that 
-all entries for the ``TTFD`` plot type are indented under ``TTFD`` which is indented 
+Below, we show two examples of ``TTFD`` plots setup in the ``Plots``section of a
+*.yaml* file. The first plot (*pH_Minimum_Input*) has only the entries required to
+set up the ``TTFD`` plot type: ``PlumeType`` and ``ComponentNameList``. The second
+plot (*TDS_All_Options_Specified.tiff*) includes all optional entries for the TTFD
+plot type. Although there are only two plot entries included, each entry can result
+in the creation of multiple figures (e.g., earliest plume timings, TTFD from
+monitoring locations, and plume probabilities for each model realization). Note that
+all entries for the ``TTFD`` plot type are indented under ``TTFD`` which is indented
 under the figure name.
 
 .. code-block:: python
@@ -1160,23 +1165,23 @@ For examples of TTFD plots, see *ControlFile_ex39.yaml* to *ControlFile_ex43.yam
 
 GriddedMetric
 ~~~~~~~~~~~~~
-The ``GriddedMetric`` plot type produces map view images of a gridded metric. While 
-the radial metrics shown by the ``GriddedRadialMetric`` plot type are defined in 
-relation to radius and depth values, the metrics shown by the ``GriddedMetric`` plot 
-type are defined relative to x-coordinates and y-coordinates. For example, the 
-``GriddedMetric`` plot type can display the gridded output produced by ``SealHorizon`` 
+The ``GriddedMetric`` plot type produces map view images of a gridded metric. While
+the radial metrics shown by the ``GriddedRadialMetric`` plot type are defined in
+relation to radius and depth values, the metrics shown by the ``GriddedMetric`` plot
+type are defined relative to x-coordinates and y-coordinates. For example, the
+``GriddedMetric`` plot type can display the gridded output produced by ``SealHorizon``
 and ``FaultFlow`` components.
 
-The ``GriddedMetric`` plot type has two required entries: ``ComponentNameList`` and 
+The ``GriddedMetric`` plot type has two required entries: ``ComponentNameList`` and
  and ``MetricName``. Both are described above.
 
-The ``GriddedMetric`` plot type has the following optional entries: ``Realization``, 
-``TimeList``, ``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``, 
+The ``GriddedMetric`` plot type has the following optional entries: ``Realization``,
+``TimeList``, ``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``,
 ``SpecifyXandYLims``, ``SaveCSVFiles``, ``EqualAxes``, ``FigureDPI``, and ``FigureSize``.
 All of these entries are discussed above.
 
-Below, we show two examples of setting up ``GriddedMetric`` plots in a *.yaml* control 
-file. The first plot (*Plot_Default_Settings*) includes only the required entries, 
+Below, we show two examples of setting up ``GriddedMetric`` plots in a *.yaml* control
+file. The first plot (*Plot_Default_Settings*) includes only the required entries,
 while the second (*Plot_With_Options*) includes all optional entries.
 
 .. code-block:: python
@@ -1198,12 +1203,12 @@ while the second (*Plot_With_Options*) includes all optional entries.
                 PlotInjectionSites: False
                 InjectionCoordx: 4.68e+04
                 InjectionCoordy: 5.11e+04
-                SpecifyXandYLims:        
+                SpecifyXandYLims:
                     xLims: [38750, 40500]
                     yLims: [48266, 48400]
                 EqualAxes: False
 
-For examples of ``GriddedMetric`` plots, see *ControlFile_ex18.yaml*, *ControlFile_ex19.yaml*, 
+For examples of ``GriddedMetric`` plots, see *ControlFile_ex18.yaml*, *ControlFile_ex19.yaml*,
 and *ControlFile_ex23.yaml*.
 
 GriddedRadialMetric
@@ -1234,8 +1239,8 @@ The ``GriddedRadialMetric`` plot type has three required entries: ``ComponentNam
 
 The ``GriddedRadialMetric`` plot type has 11 optional entries: ``MinValue``,
 ``DegreeInterval``, ``Realization``, ``TimeList``, ``PlotInjectionSites``, ``InjectionCoordx``,
-``InjectionCoordy``, ``SpecifyXandYLims``, ``SaveCSVFiles``, ``EqualAxes``, ``FigureDPI``, 
-and ``FigureSize``. All of these entries except for ``MinValue`` and ``DegreeInterval`` 
+``InjectionCoordy``, ``SpecifyXandYLims``, ``SaveCSVFiles``, ``EqualAxes``, ``FigureDPI``,
+and ``FigureSize``. All of these entries except for ``MinValue`` and ``DegreeInterval``
 are discussed above.
 
 * ``MinValue`` - the minimum value used for the colorbar on the figures. Any values beneath
@@ -1363,7 +1368,7 @@ are provided and the *.yaml* input for the ``AtmPlumeSingle`` includes the entry
 
 The ``AtmPlumeSingle`` plot type can have the following optional entries ``Realization``,
 ``PlotReceptors``, ``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``,
-``SpecifyXandYLims``, ``FigureDPI``, and ``FigureSize``. All of these entries except 
+``SpecifyXandYLims``, ``FigureDPI``, and ``FigureSize``. All of these entries except
 for ``PlotReceptors`` are described above.
 
 * ``PlotReceptors`` - option to plot receptor locations (default is ``False``). The
@@ -1411,7 +1416,7 @@ plot type is available only when example setup includes an ``AtmosphericROM`` co
 
 The ``AtmPlumeEnsemble`` plot type has the optional entries ``PlotReceptors``,
 ``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``, ``SpecifyXandYGridLims``,
-``xGridSpacing``, ``yGridSpacing``, ``SpecifyXandYLims``, ``FigureDPI``, and ``FigureSize``. 
+``xGridSpacing``, ``yGridSpacing``, ``SpecifyXandYLims``, ``FigureDPI``, and ``FigureSize``.
 All of these entries are described above.
 
 Below is an example of a ``AtmPlumeEnsemble`` plot entry in a *.yaml* file:

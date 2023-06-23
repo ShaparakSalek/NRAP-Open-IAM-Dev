@@ -2,9 +2,9 @@
 #
 # This example demonstrates the use of the time to first detection (TTFD) plot
 # type for a simulation with a simple reservoir, multisegmented wellbores,
-# and aquifer components. If monitoring locations are given (see below), the TTFD 
-# plot type specifically represents the use of a monitoring well to detect a 
-# contaminant plume in (an) aquifer(s). If no monitoring locations are given, then 
+# and aquifer components. If monitoring locations are provided (see below), the TTFD
+# plot type specifically represents the use of a monitoring well to detect a
+# contaminant plume in (an) aquifer(s). If no monitoring locations are given, then
 # this plot type shows the spread of contaminant plumes in (an) aquifer(s).
 #
 # Using this plot type requires aquifer component(s) producing the plume dimension
@@ -46,7 +46,10 @@
 # of realizations in which a plume occured at that location divided by the total
 # number of realizations (i.e., the LHS samples set by 'siz' under analysis).
 #
-# Last Modified: January 12th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex39a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50

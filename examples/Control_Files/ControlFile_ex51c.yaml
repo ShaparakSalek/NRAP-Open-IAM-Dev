@@ -1,17 +1,21 @@
 # OpenIAM Control File Example 51c
 #
-# This example illustrates a system model with an analytical reservoir component
-# component providing pressure and CO2 saturation inputs for cemented wellbore (wr) components.
-# In the setup the stratigraphy has 4 shale layers and 3 aquifer layers. To distinguish
-# between the aquifers two options are available for user in the setup
-# of the cemented wellbore components. The option 'LeakTo' allows to specify
-# which of the aquifers is considered a shallow aquifer. The option 'ThiefZone'
-# allows to specify which of the aquifers is considered a thief zone. Here, the 
-# cemented wellbore components both have 'LeakTo: aquifer3.' One of the component entries 
-# has 'ThiefZone: aquifer1' while the other has 'ThiefZone: aquifer2,' however.
+# This example illustrates a system model with an analytical reservoir
+# component providing pressure and CO2 saturation inputs for cemented
+# wellbore (wr) components. In the setup the stratigraphy has 4 shale layers
+# and 3 aquifer layers. To distinguish between the aquifers two options
+# are available for user in the setup of the cemented wellbore components.
+# The option 'LeakTo' allows to specify which of the aquifers is considered
+# a shallow aquifer. The option 'ThiefZone' allows to specify which
+# of the aquifers is considered a thief zone. Here, the cemented wellbore
+# components both have 'LeakTo: aquifer3.' One of the component entries
+# has 'ThiefZone: aquifer1' while the other has 'ThiefZone: aquifer2,'
+# however.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex51c.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 25
@@ -20,6 +24,7 @@ ModelParams:
     Components: [Reservoir, Wellbore1, Wellbore2]
     OutputDirectory: output/output_ex51c_{datetime}
     Logging: Error
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

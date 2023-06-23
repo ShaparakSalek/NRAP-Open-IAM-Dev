@@ -23,7 +23,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex40.yaml
 #
-# Last Modified: January 12th, 2023
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 15.
@@ -145,7 +145,7 @@ Plots:
             MonitoringLocations:
                 # coordx: 236377.0
                 # coordy: 4409269.5
-                # coordz: -1040
+                # coordz: -1015
                 coordx: [236377.0, 236758.0, 236377.0, 236758.0]
                 coordy: [4409269.5, 4410107.6, 4409269.5, 4410107.6]
                 coordz: [-1015, -715, -1015, -715] # Near the tops of aquifers 1 and 3

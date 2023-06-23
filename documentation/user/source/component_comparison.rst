@@ -1,6 +1,8 @@
 .. toctree::
     :maxdepth: 2
 
+.. _components_comparison:
+
 Component Comparison
 ====================
 

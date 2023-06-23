@@ -1,32 +1,32 @@
 # OpenIAM Control File Example 1a
 #
 # This example links a SimpleReservoir component to a CementedWellbore component.
-# Based on the pressures and CO2 saturations provided by the SimpleReservoir, the 
-# CementedWellbore component calculates the leakage rates from 4 leaky wellbores. 
+# Based on the pressures and CO2 saturations provided by the SimpleReservoir,
+# the CementedWellbore component calculates the leakage rates from 4 leaky wellbores.
 # The leakage enters aquifers 1 and 2 as well as the atmosphere.
 #
 # This example produces three plots. The first two plots show the CO2 leakage
-# into the intermediate aquifer (aquifer1) and the shallow aquifer (aquifer2). 
-# The third plot shows the reservoir pressures at the wellbore locations. Each 
-# plot has different outputs in separate subplots through the inclusion of 
-# 'Use: True' under the 'Subplot' entry. The 'NumCols: 2' entry in each plot 
-# specifies that each plot will have two columns of subplots. The subplot rows 
-# are determined as the number required to show the number of outputs included 
-# (here, two rows, so there are four subplots for four locations). 
+# into the intermediate aquifer (aquifer1) and the shallow aquifer (aquifer2).
+# The third plot shows the reservoir pressures at the wellbore locations. Each
+# plot has different outputs in separate subplots through the inclusion of
+# 'Use: True' under the 'Subplot' entry. The 'NumCols: 2' entry in each plot
+# specifies that each plot will have two columns of subplots. The subplot rows
+# are determined as the number required to show the number of outputs included
+# (here, two rows, so there are four subplots for four locations).
 #
-# In the plot Pressure_plot, the subplot titles are specified through the inclusion 
-# of 'COMPONENTNAME.OUTPUTNAME: SUBPLOT TITLE' under the 'Subplot' entry. In the 
-# control file interface, the component name is a combination of what the user 
-# provides ('SimpleReservoir1') and a location index preceeded by an underscore 
-# and containing three digits ('_000'). For example, the formatting of 
-# 'COMPONENTNAME.OUTPUTNAME' here leads to 'SimpleReservoir1_000.pressure' for the 
-# pressure at location 0 (the indexing starts at 0). If subplot titles are not 
+# In the plot Pressure_plot, the subplot titles are specified through the inclusion
+# of 'COMPONENTNAME.OUTPUTNAME: SUBPLOT TITLE' under the 'Subplot' entry. In the
+# control file interface, the component name is a combination of what the user
+# provides ('SimpleReservoir1') and a location index preceeded by an underscore
+# and containing three digits ('_000'). For example, the formatting of
+# 'COMPONENTNAME.OUTPUTNAME' here leads to 'SimpleReservoir1_000.pressure' for the
+# pressure at location 0 (the indexing starts at 0). If subplot titles are not
 # specified, they are generated based on the data shown.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex1a.yaml
 #
-# Last Modified: May 21, 2020
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     # Time is in years
@@ -40,18 +40,17 @@ ModelParams:
     OutputDirectory: output/output_ex1a_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
         value: 3
     # Thickness is in meters
     shale1Thickness:
-        min: 500.0
-        max: 550.0
+        vary: False
         value: 525.0
     shale2Thickness:
-        min: 450.0
-        max: 500.0
+        vary: False
         value: 475.0
     shale3Thickness:
         vary: False
@@ -99,8 +98,7 @@ CementedWellbore1:
         ymax: 300
     Parameters:
         logWellPerm:
-            min: -14.0
-            max: -12.0
+            vary: False
             value: -13.0
     Outputs: [CO2_aquifer1,
               CO2_aquifer2,
@@ -138,7 +136,7 @@ Plots:
         Subplot:
             NumCols: 2
             Use: True
-            SimpleReservoir1_000.pressure: 'Pressure at well #1'   # the '' are required because the number 
+            SimpleReservoir1_000.pressure: 'Pressure at well #1'   # the '' are required because the number
             SimpleReservoir1_001.pressure: 'Pressure at well #2'   # would be silenced by the # and excluded
             SimpleReservoir1_002.pressure: 'Pressure at well #3'
             SimpleReservoir1_003.pressure: 'Pressure at well #4'

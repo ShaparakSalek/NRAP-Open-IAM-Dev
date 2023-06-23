@@ -1,26 +1,28 @@
 # OpenIAM Control File Example 17
 #
-# This example demonstrate the use of the FaultFlow component. Here, the 
-# component is directly given reservoir pressures and CO2 saturations 
-# though the DynamicParameters entry (in the Fault1 section). Note that 
-# the timing of these values corresponds with the times entered with the 
-# TimePoints entry in the ModelParams section. Based on these inputs and 
-# the parameters used (e.g., fault location, fault strike and dip, and 
-# fault aperture), the FaultFlow component produces the CO2 and brine 
+# This example demonstrates the use of the FaultFlow component. Here, the
+# component is explicitly provided with the reservoir pressures and CO2 saturations
+# though the DynamicParameters entry (in the Fault1 section). Note that
+# the timing of these values corresponds to the times entered with the
+# TimePoints entry in the ModelParams section. Based on these inputs and
+# the parameters used (e.g., fault location, fault strike and dip, and
+# fault aperture), the FaultFlow component produces the CO2 and brine
 # leakage rates into an overlying aquifer.
 #
-# Note that the FaultFlow component does not connect with the Stratigraphy 
-# component, so it will ignore the information entered under Stratigraphy. 
-# The characteristics of the aquifer receiving leakage are entered through 
+# Note that the FaultFlow component does not connect with the Stratigraphy
+# component, so it will ignore the information entered under Stratigraphy.
+# The characteristics of the aquifer receiving leakage are entered through
 # FaultFlow parameters like aquiferDepth, aquiferTemperature, and aquiferPressure.
-# Additionally, some details regarding the injection operation are controlled 
-# through the pressure and CO2saturations provided as well as parameters like 
-# injectX, injectY, injectDepth, injectPressure, and finalPressure. A FaultFlow 
-# component can still be provided pressures and CO2 saturations from a 
-# reservoir component, however - see control file example 18.
+# Additionally, some details regarding the injection operation are controlled
+# through the pressure and CO2saturations provided as well as parameters like
+# injectX, injectY, injectDepth, injectPressure, and finalPressure. A FaultFlow
+# component can still use pressures and CO2 saturations provided from a
+# reservoir component, however: see control file example 18.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex17.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     TimePoints: [0.00E+00, 8.49E-02, 1.64E-01, 2.49E-01, 3.31E-01, 4.16E-01,

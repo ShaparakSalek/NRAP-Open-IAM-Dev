@@ -20,7 +20,10 @@
 # the OpenWellbore is hypothetical and the AoR plot code is set up to exclude
 # such a result.
 #
-# Last Modified: April 25th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
@@ -32,6 +35,7 @@ ModelParams:
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
@@ -101,8 +105,8 @@ OpenWellbore1:
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
         # and don't need to be set explicitly unless different values
-        # are required. The parameters wellTop, reservoirDepth, and brineDensity 
-        # are used to calculate critical pressure (if the parameter criticalPressure 
+        # are required. The parameters wellTop, reservoirDepth, and brineDensity
+        # are used to calculate critical pressure (if the parameter criticalPressure
         # is not provided).
     Outputs: [CO2_aquifer,
               brine_aquifer]

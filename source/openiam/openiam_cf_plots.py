@@ -166,7 +166,7 @@ def get_title(plot_yaml_input):
     """
     The position of the Title entry depends on the plot type. TimeSeries,
     TimeSeriesStats, TimeSeriesAndStats, and AoR figures have the Title indented
-    under the plot name. The other ploit types that accept the Title entry
+    under the plot name. The other plot types that accept the Title entry
     (not TTFD, GriddedMetric, GriddedRadialMetric, AtmPlumeSIngle, or
     AtmPlumeEnsemble) have it indented under the plot type (which is in turn
     indented under the plot name).

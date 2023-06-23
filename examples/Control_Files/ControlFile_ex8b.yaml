@@ -15,7 +15,10 @@
 # that logResPerm is the logarithm of reservoir permeability). Note that
 # UseFormattedLabels cannot be provided to CorrelationCoeff.
 #
-# Last Modified: March 14th, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex8b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -26,6 +29,7 @@ ModelParams:
     Components: [Reservoir1, Wellbore1]
     OutputDirectory: output/output_ex8b_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False

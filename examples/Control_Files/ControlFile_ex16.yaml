@@ -1,25 +1,26 @@
 # OpenIAM Control File Example 16
 #
 # This example demonstrates the use of the PlumeStability component.
-# The PlumeStability component uses the same type of .csv files as 
-# those used by the LookupTableReservoir component. By analyzing changes 
-# in pressure and CO2 saturation over time in these files, the PlumeStability 
-# component can produce a variety of metrics describing the changes in 
-# pressure and CO2 saturation plumes over time (e.g., plume areas, velocity of 
-# the plume centroid, direction at which a plume is moving, and the direction at 
-# which the dispersion of the plume occurs). The plumes are defined by areas 
-# exceeding the values presented in the 'Thresholds' entry (here, a pressure of 
+# The PlumeStability component uses the same type of .csv files as
+# those used by the LookupTableReservoir component. By analyzing changes
+# in pressure and CO2 saturation over time in these files, the PlumeStability
+# component can produce a variety of metrics describing the changes in
+# pressure and CO2 saturation plumes over time (e.g., plume areas, velocity of
+# the plume centroid, direction in which a plume is moving, and the direction in
+# which the dispersion of the plume occurs). The plumes are defined by areas
+# exceeding the values presented in the 'Thresholds' entry (here, a pressure of
 # 1 MPa and a CO2saturation of 0.01).
 #
-# Note that LookupTableReservoir and PlumeStability components can both accept 
-# outputs other than pressure and CO2saturation (e.g., temperature). The outputs 
-# of the PlumeStability component can be named to track whatever metric is stored 
-# in the .csv files used (e.g., including 'temperature: 20' in the Thresholds 
-# entry and producing outputs of temperature_areas and temperature_mobility). 
-# Control file examples 27 and 28 demonstrate how to include other metrics in 
+# Note that LookupTableReservoir and PlumeStability components can both accept
+# additional outputs other than pressure and CO2saturation (e.g., temperature).
+# The outputs of the PlumeStability component can be named to track whatever
+# metric is stored in the .csv files used (e.g., including 'temperature: 20'
+# in the Thresholds entry and producing outputs of temperature_areas and
+# temperature_mobility).
+# Control file examples 27 and 28 demonstrate how to include other metrics in
 # the .csv files used for LookupTableReservoir and PlumeStability components.
 #
-# Note that the PlumeStability component does not connect with the Stratigraphy 
+# Note that the PlumeStability component does not connect with the Stratigraphy
 # component, so it will ignore the information entered under Stratigraphy.
 #
 # This example requires the additional Kimberlina data set.
@@ -34,7 +35,7 @@
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex16.yaml
 #
-# Last Modified: February 10, 2020
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 200.
@@ -59,9 +60,9 @@ PlumeStabilityCmpnt:
         index:
             Values: [1, 2, 4, 5, 7, 10, 12, 15, 21, 36]
             Weights: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    Outputs: [pressure_areas, pressure_areas_dt, 
+    Outputs: [pressure_areas, pressure_areas_dt,
               CO2saturation_areas, CO2saturation_areas_dt,
-              pressure_mobility, pressure_spreading, 
+              pressure_mobility, pressure_spreading,
               CO2saturation_mobility, CO2saturation_spreading]
 #-------------------------------------------------
 Plots:

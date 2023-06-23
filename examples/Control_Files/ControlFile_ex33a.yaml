@@ -30,7 +30,10 @@
 # take x and y values in meters. If XValue and YValue are not given, the default
 # values of x = 0 m and y = 0 m will be used.
 #
-#  Last Modified: May, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex33a.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 50
@@ -39,6 +42,7 @@ ModelParams:
     Components: [SimpleReservoir1, OpenWellbore1]
     OutputDirectory: output/output_ex33a_{datetime}
     Logging: Debug
+#-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:
         strikeAndDip:

@@ -1,15 +1,17 @@
 # OpenIAM Control File Example 51b
 #
-# This example illustrates the setup of an LHS run (Latin Hypercube Sampling) 
-# for a system model with analytical reservoir component providing pressure and 
+# This example illustrates the setup of an LHS run (Latin Hypercube Sampling)
+# for a system model with analytical reservoir component providing pressure and
 # CO2 saturation inputs for cemented wellbore (wr) components.
-# The setup is standard in a sense that aquifer 1 (deeper one) is a thief zone;
+# The setup is standard in a sense that aquifer 1 (deeper one) is a thief zone
 # while aquifer 2 (under shale 3) is a shallow aquifer.
-# The example also illustrates the set up for a random placement of wells within
+# The example also illustrates the setup for a random placement of wells within
 # a specified domain (inputs under the 'RandomLocDomain' entry').
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex51b.yaml
+#
+# Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 25
@@ -21,6 +23,7 @@ ModelParams:
     Components: [Reservoir, Wellbore]
     OutputDirectory: output/output_ex51b_{datetime}
     Logging: Error
+#-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
