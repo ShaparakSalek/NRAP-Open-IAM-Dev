@@ -19,14 +19,35 @@ please perform the following actions:
   - do not forget to commit the changes.
 
 
-## [a2.7.1]
+## [a2.7.1 - 2023-06-30]
 ### Added
   - Hydrocarbon Leakage component: class and CFI
   - Cemented Wellbore (WR) component: GUI and an example illustrating setup
   - Fault Leakage component: CFI and GUI; CFI and GUI examples illustrating setup
+  - CFI: Stratigraphy column type of plot; examples illlustrating setup
+  - CFI: Gridded radial metric type of plot for Generic Aquifer component;
+  examples illustrating setup
+  - CFI: Gridded metric type of plot for Seal Horizon and Fault Flow components;
+  examples illustrating setup
+  - Lookup Table Reservoir component: option for the use of lookup tables
+  in *.h5 format; related tests to the test suite
+  - Plume Stability component: option for the component metrics to be
+  calculated for 3d data; option for the use of lookup tables in *.h5
+  format; related tests to the test suite
+  - Functionality to save gridded observations in formats different from *.npy
+  - Documentation:
+   - NRAP-Open-IAM workflows illustration figures
+   - Section on conceptual model overview
 ### Updated
+  - CFI and GUI for Open Wellbore component: option to consider critical
+  pressure for leakage estimates
   - Plotting functionality related to sensitivity analysis in CFI and GUI;
   new CFI examples illustrating setup
+  - Stratigraphy, time series, Total time to the first detection (TTFD), Area of Review
+  workflows plots
+  -
+  - Documentation:
+   - Description of existing and added visualization capabilities
 
 ## [a2.7.0 - 2023-02-15]
 ### Added

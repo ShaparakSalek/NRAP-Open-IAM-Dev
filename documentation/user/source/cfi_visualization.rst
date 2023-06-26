@@ -502,10 +502,10 @@ control file.
             Subplot:
                 Use: True
                 NumCols: 2
-                SimpleReservoir1_000.pressure: Pressure at Well 0
-                SimpleReservoir1_001.pressure: Pressure at Well 1
-                SimpleReservoir1_000.CO2saturation: CO$_2$ Saturation at Well 0
-                SimpleReservoir1_001.CO2saturation: CO$_2$ Saturation at Well 1
+                SimpleReservoir1_000.pressure: 'Pressure at Well 0'
+                SimpleReservoir1_001.pressure: 'Pressure at Well 1'
+                SimpleReservoir1_000.CO2saturation: 'CO$_2$ Saturation at Well 0'
+                SimpleReservoir1_001.CO2saturation: 'CO$_2$ Saturation at Well 1'
         Pressure_Stats:
             TimeSeriesAndStats: [pressure]
             UseMarkers: True

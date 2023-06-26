@@ -11,7 +11,7 @@ Examples illustrating applications of ttfd_plot method:
     ControlFile_ex42.yaml
     ControlFile_ex43.yaml
 
-Last Modified: January 17th, 2023
+Last Modified: June, 2023
 
 @author: Nate Mitchell (Nathaniel.Mitchell@NETL.DOE.GOV)
 @contributor: Veronika Vasylkivska (Veronika.Vasylkivska@NETL.DOE.GOV)

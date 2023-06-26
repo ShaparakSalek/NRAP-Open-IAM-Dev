@@ -35,14 +35,18 @@ Downloading NRAP-Open-IAM
 -------------------------
 
 NRAP-Open-IAM tool and examples can be downloaded from a public GitLab
-repository located at https://gitlab.com/NRAP/OpenIAM. In addition to that,
-the copy of the tool can be obtained through NETL's Energy Data eXchange
-website: https://edx.netl.doe.gov/dataset/nrap-open-source-iam
-by requesting an access through e-mail addressed to NRAP@netl.doe.gov.
-The NRAP-Open-IAM is distributed as a zip file that can be extracted in the location
-specified by user. If the NRAP-Open-IAM was downloaded from the GitLab repository,
-the folder name may have the repository's current hash appended to it. Feel
-free to rename the folder something simple like *NRAPOpenIAM* to simplify the navigation.
+repository located at https://gitlab.com/NRAP/OpenIAM. If the NRAP-Open-IAM
+was downloaded from the GitLab repository, the folder name may have
+the repository's current hash appended to it. Feel free to rename the folder
+something simple like *NRAPOpenIAM* to simplify the navigation.
+
+..
+    In addition to that,
+    the copy of the tool can be obtained through NETL's Energy Data eXchange
+    website: https://edx.netl.doe.gov/dataset/nrap-open-source-iam
+    by requesting an access through e-mail addressed to NRAP@netl.doe.gov.
+    The NRAP-Open-IAM is distributed as a zip file that can be extracted in the location
+    specified by user.
 
 Installing NRAP-Open-IAM
 ------------------------

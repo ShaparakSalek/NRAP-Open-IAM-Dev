@@ -2,6 +2,8 @@
 """
 Code to create different time-series visualizations for NRAP-Open-IAM.
 
+Last Modified: June, 2023
+
 @author: Seth King
 @author: Nate Mitchell (Nathaniel.Mitchell@NETL.DOE.GOV)
 @author: Veronika Vasylkivska (Veronika.Vasylkivska@NETL.DOE.GOV)

@@ -1,6 +1,7 @@
-.. _control_file:
 .. highlight:: python
    :linenothreshold: 3
+
+.. _control_file:
 
 Control Files
 -------------
@@ -15,7 +16,7 @@ the consecutive lines tabbed in. For example, consider this partial file
 
 .. code-block:: python
    :lineno-start: 1
-   
+
     #-------------------------------------------------
     # NRAP-Open-IAM Control File example
     #-------------------------------------------------

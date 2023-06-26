@@ -28,7 +28,7 @@ of pH and TDS plumes within the aquifer. An aquifer component is a receptor type
 component which can also be represented by an atmosphere component.
 For example, a wellbore component can provide leakage rates to the atmosphere,
 and an atmosphere component can then be used to model the evolution of
-atmospheric contaminant plumes. :numref:`_workflow_figure1` is a conceptual
+atmospheric contaminant plumes. :numref:`workflow_figure1` is a conceptual
 model demonstrating the connection of reservoir components,
 wellbore components, and a receptor (aquifer or atmosphere components).
 Almost all NRAP-Open-IAM system models include a stratigraphy component.
@@ -42,12 +42,12 @@ to the stratigraphy without additional user efforts.
 
 .. figure:: ../../images/SystemModel_Figures/User_Guide_Fig1p1.png
    :align: center
-   :width: 400
+   :width: 500
    :alt: Standard System Model Design
 
    Standard System Model Design
 
-The setup demonstrated in :numref:`_workflow_figure1` is the most common
+The setup demonstrated in :numref:`workflow_figure1` is the most common
 design of an NRAP-Open-IAM system model. Other designs not fitting
 the illustrated scheme are possible as well. For example, some of the components
 producing leakage rates are not designed to be linked to an aquifer component
@@ -56,15 +56,15 @@ can use pressures and |CO2| saturations from a reservoir component
 to model brine and |CO2| leakage rates through a fractured caprock overlying
 the storage reservoir, but the predicted leakage rates occur over an area
 of the caprock/reservoir interface. The aquifer components shown in
-:numref:`_workflow_figure1` are designed to receive leakage rates from a point
+:numref:`workflow_figure1` are designed to receive leakage rates from a point
 source, like a wellbore, and, therefore, are not appropriate to use with
 rates that apply over an area or a linear element (e.g., faults in the
 ``FaultFlow`` component). Such components can still be used to evaluate
-leakage risks, however, and :numref:`_workflow_figure2` shows a conceptual model
+leakage risks, however, and :numref:`workflow_figure2` shows a conceptual model
 demonstrating the connection of a reservoir component with a non-local leakage
 pathway component (i.e., not a point source leakage pathway). Aquifer
 components accepting leakage rates that apply over areas or linear elements may be
-developed in the future. The system model shown in :numref:`_workflow_figure2`
+developed in the future. The system model shown in :numref:`workflow_figure2`
 represents how these non-local leakage pathway components can be used
 with the currently available aquifer components.
 
@@ -72,7 +72,7 @@ with the currently available aquifer components.
 
 .. figure:: ../../images/SystemModel_Figures/User_Guide_Fig1p2.png
    :align: center
-   :width: 400
+   :width: 500
    :alt: Non-local Leakage System Model Design
 
    Non-local Leakage System Model Design
@@ -86,7 +86,7 @@ plume centroid, and the direction in which the dispersion of the plume occurs).
 The ``ChemicalWellSealing`` component, which evaluates if and when a fracture
 will seal due to calcite precipitation, also does not connect with
 other components. This type of system model design is demonstrated
-in :numref:`_workflow_figure3`.
+in :numref:`workflow_figure3`.
 
 NRAP-Open-IAM is designed to accept a variety of component designs,
 so it can be used to create many different system model designs. Note that
@@ -99,25 +99,25 @@ from high-fidelity reservoir simulations).
 
 .. figure:: ../../images/SystemModel_Figures/User_Guide_Fig1p3.png
    :align: center
-   :width: 400
+   :width: 500
    :alt: Standalone Component System Model Design
 
    Standalone Component System Model Design
 
 The support of one GCS site may require the use of multiple system models.
-For example, the ``ChemicalWellSealing`` component (:numref:`_workflow_figure3`)
+For example, the ``ChemicalWellSealing`` component (:numref:`workflow_figure3`)
 can help inform which wells are likely to self-seal and, therefore, might be
 excluded from being considered as a possible leakage pathway
-in a larger GCS system model (:numref:`_workflow_figure1`).
+in a larger GCS system model (:numref:`workflow_figure1`).
 The ``ChemicalWellSealing`` component has a parameter related to reservoir
 pressure, so one should first constrain this parameter by running
 a reservoir simulation (either through a separate program or through
 an NRAP-Open-IAM simulation where the reservoir component is the final
 component in the chain). In this case, one might use three GCS system
 models (1) to constrain reservoir pressures, (2) to determine whether particular
-wells will self-seal (:numref:`_workflow_figure3`), and (3) to model the behavior
+wells will self-seal (:numref:`workflow_figure3`), and (3) to model the behavior
 of the whole GCS site (excluding wells that will self-seal;
-:numref:`_workflow_figure1`).
+:numref:`workflow_figure1`).
 
 Component parameters and applications
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,7 +150,7 @@ Analysis types
 
 NRAP-Open-IAM simulations can use one of three analysis types: ``Forward``,
 Latin Hypercube Sampling (``LHS``), or parameter study (``Parstudy``)
-(:numref:`_workflow_figure1`-:numref:`_workflow_figure3`). A ``Forward``
+(:numref:`workflow_figure1` - :numref:`workflow_figure3`). A ``Forward``
 analysis (``forward`` in the control file interface) is deterministic. Each
 parameter is fixed at a certain value, so the simulation has the same results each
 time it is run.

@@ -1,9 +1,4 @@
-Conceptual model
-----------------
-Within the NRAP-Open-IAM the system model is divided up into components that
-are loosely coupled together. As the first step during setup of NRAP-Open-IAM simulation,
-we specify a few simulation parameters that affect all components
-and as the second step we build the system model by adding the components we want.
+.. include:: conceptual_model_overview.rst
 
 .. _gui_operation:
 
@@ -154,8 +149,8 @@ In the folder *examples*, there is a subfolder *GUI_Files* with example simulati
 files that can be loaded into the GUI and run by the NRAP-Open-IAM. To run one
 of the provided examples select **Load Simulation** on the main dashboard of the GUI.
 In the file browser that appears, navigate to the *GUI_Files* subfolder of the
-*examples* folder and select the first example file *01_Forward_SR_CW.OpenIAM*.
-This example runs a simple forward model with a ``SimpleReservoir`` component
+*examples* folder and select the first example file *01_Forward_AR_CW.OpenIAM*.
+This example runs a simple forward model with a ``AnalyticalReservoir`` component
 providing an input to a ``CementedWellbore`` component.
 When the file is loaded into the GUI, the parameters of the simulation
 can be investigated. After the simulation is complete the user can proceed to the
@@ -169,8 +164,8 @@ containing useful (debug, info, warning or error) messages produced during the s
 File names of the GUI setup examples distributed with the tool contain shortcuts
 that would help the user to figure out the featured components and type of analysis.
 
-The second example file *02_LHS_SR_MSW.OpenIAM* is a stochastic simulation of
-system model containing a ``SimpleReservoir`` and a ``MultisegmentedWellbore``
+The second example file *02_LHS_AR_MSW.OpenIAM* is a stochastic simulation of
+system model containing a ``AnalyticalReservoir`` and a ``MultisegmentedWellbore``
 components. Example illustrates Latin hypercube sampling approach applied to the
 parameters of the setup model. The number of realizations run is 30.
 
@@ -185,7 +180,7 @@ and |CO2| saturation required as inputs of the component are provided in the
 form of arrays. This form of input arguments is called dynamic parameters,
 i.e. parameters that change in time.
 
-The system model setup in the fifth example file *05_LHS_SR_OW_CA.OpenIAM*
-illustrates application of three component models: ``SimpleReservoir``, ``OpenWellbore``
+The system model setup in the fifth example file *05_LHS_AR_OW_CA.OpenIAM*
+illustrates application of three component models: ``AnalyticalReservoir``, ``OpenWellbore``
 and ``CarbonateAquifer``. It estimates the impact the leakage of fluids through
 the wellbore has on the aquifer overlying the storage reservoir.

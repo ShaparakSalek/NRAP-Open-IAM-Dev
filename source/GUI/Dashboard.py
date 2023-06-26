@@ -222,7 +222,7 @@ class Dashboard_Page(tk.Frame):
         label_frame.grid(row=1, column=0)
 
         version_label = ttk.Label(
-            label_frame, text=('Version: 2023-02-a2.7.0'))
+            label_frame, text=('Version: 2023-06-a2.7.1'))
         version_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         toolTip.bind(version_label, 'Software version')
 
