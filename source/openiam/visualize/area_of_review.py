@@ -257,7 +257,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
     if yaml_input['dpi_input'] is not None:
         figdpi = yaml_input['dpi_input']
-        
+
     critPressureInput = yaml_input['CriticalPressureMPa']
 
     # This option specifies whether to evaluate the max. values over all times
@@ -327,53 +327,53 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
     x_loc = np.array(locations_ow['coordx'])
     y_loc = np.array(locations_ow['coordy'])
-    
-    # This variable is used to check if the current figure uses pressure and if 
+
+    # This variable is used to check if the current figure uses pressure and if
     # a critical pressure was given
     pressure_critP_check = False
-    
-    if 'pressure' in output_names and not critPressureInput is None:
+
+    if 'pressure' in output_names and critPressureInput is not None:
         pressure_critP_check = True
-        
+
         critP_warning_msg = "".join([
-            'The calculated critical pressure for an OpenWellbore component ', 
-            'was found to be 0 Pa. This result can occur if the simulation uses ', 
-            'the Latin Hypercube Sampling (lhs) or Parameter Study (parstudy) analysis ', 
-            'types and the wellTop and/or reservoirDepth parameters are composite ', 
-            'parameters. These parameters will be composite parameters if they are ', 
-            'set only through the .yaml entry LeakTo: aquifer#, where # is a unit number. ', 
-            'To avoid this problem, explicitly set the wellTop and reservoirDepth ', 
-            'parameters. You can use string inputs, like wellTop: aquifer2Depth and ', 
-            'reservoirDepth: shale1Depth. The critical pressure option will not be ', 
+            'The calculated critical pressure for an OpenWellbore component ',
+            'was found to be 0 Pa. This result can occur if the simulation uses ',
+            'the Latin Hypercube Sampling (lhs) or Parameter Study (parstudy) analysis ',
+            'types and the wellTop and/or reservoirDepth parameters are composite ',
+            'parameters. These parameters will be composite parameters if they are ',
+            'set only through the .yaml entry LeakTo: aquifer#, where # is a unit number. ',
+            'To avoid this problem, explicitly set the wellTop and reservoirDepth ',
+            'parameters. You can use string inputs, like wellTop: aquifer2Depth and ',
+            'reservoirDepth: shale1Depth. The critical pressure option will not be ',
             'used for the AoR plot.'])
-        
-        # This is used to check if the error was already logged. That way, it 
+
+        # This is used to check if the error was already logged. That way, it
         # can logged only once.
         critP_error_print_check = False
-        
-    elif not 'pressure' in output_names and not critPressureInput is None:
-        # If the metric is not pressure but the .yaml plot entry included a 
+
+    elif not 'pressure' in output_names and critPressureInput is not None:
+        # If the metric is not pressure but the .yaml plot entry included a
         # critical pressure entry, get rid of that entry.
         critPressureInput = None
-    
+
     # Make the figures
     if not time_option:
         # One figure with max values from all model times
         results, critPressureMin = get_AoR_results(
-            x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis, 
+            x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
             time_option=time_option, critPressureInput=critPressureInput)
-        
+
         if pressure_critP_check:
             if critPressureMin == 0 and critPressureInput == 'Calculated':
                 if not critP_error_print_check:
                     logging.warning(critP_warning_msg)
                     critP_error_print_check = True
-                
+
                 critPressureInput = None
-                
+
             elif critPressureMin is None and critPressureInput == 'Calculated':
                 critPressureInput = None
-                
+
             elif critPressureInput == 'Calculated':
                 # Convert to MPa
                 critPressureInput = critPressureMin / 1.0e+6
@@ -388,7 +388,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                          InjectionCoordx=InjectionCoordx, InjectionCoordy=InjectionCoordy,
                          grid_option=grid_option, critPressureInput=critPressureInput)
     else:
-        # Get the min and max values over time, so the colorbar can use the 
+        # Get the min and max values over time, so the colorbar can use the
         # same limits in each figure.
         min_value = None
         max_value = None
@@ -399,9 +399,9 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
             for time_index in time_index_list:
                 results, critPressureMin = get_AoR_results(
-                    x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis, 
+                    x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
                     time_option=time_option, time_index=time_index)
-                
+
                 if len(results[results > 0].tolist()) > 0:
                     if np.min(results[results > 0]) < min_value:
                         min_value = np.min(results[results > 0])
@@ -416,28 +416,29 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
             if max_value == -9.9e+99:
                 max_value = 1
-        
+
         # Make a figure for each time
         for time_index in time_index_list:
             results, critPressureMin = get_AoR_results(
-                x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis, 
-                time_option=time_option, time_index=time_index, 
+                x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
+                time_option=time_option, time_index=time_index,
                 critPressureInput=critPressureInput)
-            
+
             if pressure_critP_check:
-                if critPressureMin == 0 and critPressureInput == 'Calculated':
-                    if not critP_error_print_check:
-                        logging.warning(critP_warning_msg)
-                        critP_error_print_check = True
-                    
-                    critPressureInput = None
-                    
-                elif critPressureMin is None and critPressureInput == 'Calculated':
-                    critPressureInput = None
-                    
-                elif critPressureInput == 'Calculated':
-                    # Convert to MPa
-                    critPressureInput = critPressureMin / 1.0e+6
+                if critPressureInput == 'Calculated':
+                    if critPressureMin == 0:
+                        if not critP_error_print_check:
+                            logging.warning(critP_warning_msg)
+                            critP_error_print_check = True
+
+                        critPressureInput = None
+
+                    elif critPressureMin is None:
+                        critPressureInput = None
+
+                    else:
+                        # Convert to MPa
+                        critPressureInput = critPressureMin / 1.0e+6
 
             plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data,
                              model_data, output_names, sm, name=name,
@@ -450,12 +451,12 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                              time_option=time_option, time_index=time_index,
                              InjectionCoordx=InjectionCoordx, InjectionCoordy=InjectionCoordy,
                              grid_option=grid_option, enforce_levels=enforce_levels,
-                             min_value=min_value, max_value=max_value, 
+                             min_value=min_value, max_value=max_value,
                              critPressureInput=critPressureInput)
 
 
-def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data, 
-                    analysis='forward',time_option=False, time_index=None, 
+def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
+                    analysis='forward',time_option=False, time_index=None,
                     critPressureInput=None):
     """
     Evaluates and returns the maximum values of a metric for all locations.
@@ -468,28 +469,28 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
     # This is used to store the maximum value of a metric at each location
     results = np.zeros((len(x_loc), 1))
-    
+
     critPressureMin = None
 
     for output_nm in output_names:
         # output_list is all the components with augmented names
         for output_component in list(output_list.keys()):
-            
+
             # This checks out the calculated critical pressure for each OpenWellbore.
-            # If the metric is pressure and the corresponding option is selected, 
-            # the lowest critical pressure will be used in the plots. Calculated 
-            # critical pressures can vary if spatially variable stratigraphy 
-            # is used, but the plot will only show a contour for one pressure 
+            # If the metric is pressure and the corresponding option is selected,
+            # the lowest critical pressure will be used in the plots. Calculated
+            # critical pressures can vary if spatially variable stratigraphy
+            # is used, but the plot will only show a contour for one pressure
             # value - therefore, the minimum critical pressure is used.
             if isinstance(output_component, iam.OpenWellbore):
-                critPressureVal = get_crit_pressure(output_component, sm=sm, 
+                critPressureVal = get_crit_pressure(output_component, sm=sm,
                                                     yaml_data=yaml_data)
-                
+
                 if critPressureMin is None:
                     critPressureMin = critPressureVal
                 elif critPressureVal < critPressureMin:
                     critPressureMin = critPressureVal
-            
+
             if output_nm in output_list[output_component]:
                 full_obs_nm = '.'.join([output_component.name, output_nm])
                 aq_comp_check = False
@@ -538,7 +539,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
                     obs_t0 = [full_obs_nm + '_0']
                     obs_percentiles_t0 = percentile(s.recarray[obs_t0],
-                                                 [0, 25, 50, 75, 100])
+                                                    [0, 25, 50, 75, 100])
 
                     if aq_comp_check or res_comp_check:
                         # Find the location index
@@ -562,7 +563,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
 def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                      output_names, sm, name='AoR_Figure1',
-                     analysis='forward',savefig=None, title=None, figsize=(10, 8),
+                     analysis='forward', savefig=None, title=None, figsize=(10, 8),
                      figdpi=100, gen_font_size=12,
                      axis_label_font_size=14, title_font_size=14, colormap=None,
                      bold_labels=True, save_results=False, time_option=False,
@@ -612,12 +613,12 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
     ncol_number = 1
 
     cmap = plt.cm.get_cmap(colormap)
-    
-    # This is used to specify if the critical pressure was exceeded, IF the metric 
+
+    # This is used to specify if the critical pressure was exceeded, If the metric
     # is pressure and a critical pressure was given in the .yaml plot entry.
     title_pressure = ''
-    
-    # This specifies whether the critical pressure is included in the domain. 
+
+    # This specifies whether the critical pressure is included in the domain.
     # If it is included in the domain, a red line is shown for it.
     Pcrit_Included = False
 
@@ -750,33 +751,34 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                          marker='o', markerfacecolor=rgba[0:3],
                          markeredgecolor='k', markeredgewidth=1.5,
                          markersize=12, linestyle='none')
-        
-        if 'pressure' and not critPressureInput is None:
+
+        # TODO Not sure why 'pressure' is in condition?
+        if 'pressure' and critPressureInput is not None:
             pressure_levels = np.array([critPressureInput])
-            
+
             a, b = '{:.2e}'.format(critPressureInput).split('e')
             b = int(b)
             critPressure_str = r'${}\times10^{{{}}}$'.format(a, b)
-            
+
             if np.max(results_temp[:, 0]) < critPressureInput:
                 title_pressure = ',\nNever Exceeded the P$_{crit}$ of ' + \
                     '{} MPa'.format(critPressure_str)
-                
+
             elif np.min(results_temp[:, 0]) > critPressureInput:
                 title_pressure = ',\nAll Pressures Exceeded the P$_{crit}$ of ' + \
                     '{} MPa'.format(critPressure_str)
-                
+
             elif np.min(results_temp[:, 0]) < critPressureInput and \
-                np.max(results_temp[:, 0]) >= critPressureInput:
-                    title_pressure = ',\nCertain Pressures Exceeded the P$_{crit}$ of ' + \
-                        '{} MPa'.format(critPressure_str)
-                    Pcrit_Included = True
-                    
-                    # The handle and label for this are created manually below
-                    plt.tricontour(
-                        x_loc_temp / 1000.0, y_loc_temp / 1000.0,
-                        results_temp[:, 0], pressure_levels, colors = 'r')
-                    ncol_number += 1
+                    np.max(results_temp[:, 0]) >= critPressureInput:
+                title_pressure = ',\nCertain Pressures Exceeded the P$_{crit}$ of ' + \
+                    '{} MPa'.format(critPressure_str)
+                Pcrit_Included = True
+
+                # The handle and label for this are created manually below
+                plt.tricontour(
+                    x_loc_temp / 1000.0, y_loc_temp / 1000.0,
+                    results_temp[:, 0], pressure_levels, colors = 'r')
+                ncol_number += 1
 
     else:
         if enforce_levels and time_option:
@@ -895,7 +897,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                   fontweight=selected_labelfontweight)
     ax.set_ylabel('Northing (km)', fontsize=axis_label_font_size,
                   fontweight=selected_labelfontweight)
-    
+
     # Create legend
     handle_list = []
     label_list = []
@@ -905,25 +907,26 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
         if label not in label_list:
             handle_list.append(handle)
             label_list.append(label)
-    
+
     # If the metric is pressure and a critical pressure was given, include it in the legend
     if Pcrit_Included:
-        legend_element_critPressure = Line2D([0], [0], color='r', lw=2, label='P$_{crit}$')
-        
+        legend_element_critPressure = Line2D([0], [0], color='r',
+                                             lw=2, label='P$_{crit}$')
+
         handle_list.append(legend_element_critPressure)
         label_list.append('P$_{crit}$')
-    
+
     if ncol_number <= 2:
         bbox_val = (0.5, -0.1)
     elif ncol_number == 3:
         bbox_val = (0.55, -0.1)
     elif ncol_number >= 4:
         bbox_val = (0.6, -0.1)
-    
-    ax.legend(handle_list, label_list, fancybox=False, fontsize = gen_font_size - 2, 
-              ncol=ncol_number, edgecolor=[0, 0, 0], loc='upper center', 
+
+    ax.legend(handle_list, label_list, fancybox=False, fontsize=gen_font_size - 2,
+              ncol=ncol_number, edgecolor=[0, 0, 0], loc='upper center',
               bbox_to_anchor=bbox_val, framealpha=0.67)
-    
+
     # aq_number is used in the figure title
     if output_nm in ['pressure', 'CO2saturation']:
         aq_number = ''
@@ -949,7 +952,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 comma_str = ''
 
             if output_nm in TITLE_OPTIONS_FORWARD:
-                fig_title = fig_title.format(aq_number, comma_str, range_str, 
+                fig_title = fig_title.format(aq_number, comma_str, range_str,
                                              title_pressure)
         else:
             # No space afterwards b/c the comma_str goes right before a '\n'
@@ -1030,19 +1033,19 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             results_formatted[0, 2] = CSV_FILE_COLUMNS.get(output_nm, output_nm)
 
             results_formatted[1:None, 2] = results[:, 0]
-            
-            if output_nm == 'pressure' and not critPressureInput is None:
+
+            if output_nm == 'pressure' and critPressureInput is not None:
                 results_formatted[0, 3] = 'Critical Pressure [MPa]'
-                
+
                 results_formatted[1:None, 3] = np.ones(len(results)) * critPressureInput
-                
+
                 results_formatted[0, 4] = 'Critical Pressure Exceeded'
                 critPressureExceeded = np.zeros(len(results))
-                
+
                 for locRef in range(0, len(results)):
                     if results[locRef, 0] >= critPressureInput:
                         critPressureExceeded[locRef] = 1
-                
+
                 results_formatted[1:None, 4] = critPressureExceeded
 
             if not os.path.exists(os.path.join(output_dir, 'csv_files')):
@@ -1135,7 +1138,7 @@ def get_AoR_yaml_input(yaml_data, name):
     if AoR_plot_data is not None:
         if 'FigureDPI' in AoR_plot_data:
             yaml_input['dpi_input'] = AoR_plot_data['FigureDPI']
-            
+
         if 'CriticalPressureMPa' in AoR_plot_data:
             if AoR_plot_data['CriticalPressureMPa'] == 'Calculated':
                 yaml_input['CriticalPressureMPa'] = AoR_plot_data['CriticalPressureMPa']
@@ -1144,10 +1147,10 @@ def get_AoR_yaml_input(yaml_data, name):
                     yaml_input['CriticalPressureMPa'] = float(AoR_plot_data['CriticalPressureMPa'])
                 except:
                     debug_msg = ''.join([
-                        'The input provided for CriticalPresureMPa under the AoR plot ', 
-                        name, ' was not given as ''Calculated'' and it could not ', 
-                        'be turned into a float numeric value. Check your input. ', 
-                        'The CriticalPresureMPa entry will not be used.'])
+                        'The input provided for CriticalPressureMPa under the AoR plot ',
+                        name, ' was not given as "Calculated" and it could not ',
+                        'be turned into a float numeric value. Check your input. ',
+                        'The CriticalPressureMPa entry will not be used.'])
                     logging.debug(debug_msg)
                     yaml_input['CriticalPressureMPa'] = None
 
@@ -1248,17 +1251,16 @@ def get_crit_pressure(output_component, sm=None, yaml_data=None):
     """
     This function calculates the critical pressure for an OpenWellbore component.
     """
-    wellTop = iamcommons.get_parameter_val(output_component, 'wellTop', 
+    wellTop = iamcommons.get_parameter_val(output_component, 'wellTop',
                                            sm=sm, yaml_data=yaml_data)
-    
-    reservoirDepth = iamcommons.get_parameter_val(output_component, 'reservoirDepth', 
+
+    reservoirDepth = iamcommons.get_parameter_val(output_component, 'reservoirDepth',
                                                   sm=sm, yaml_data=yaml_data)
-    
-    brineDensity = iamcommons.get_parameter_val(output_component, 'brineDensity', 
+
+    brineDensity = iamcommons.get_parameter_val(output_component, 'brineDensity',
                                                 sm=sm, yaml_data=yaml_data)
-    
+
     critPressureVal = (wellTop * GRAV_ACCEL * WATER_DENSITY) + (
         brineDensity * GRAV_ACCEL * (reservoirDepth - wellTop))
-    
-    return critPressureVal
 
+    return critPressureVal

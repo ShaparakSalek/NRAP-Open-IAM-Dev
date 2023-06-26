@@ -1,33 +1,26 @@
 # OpenIAM Control File Example 31c
 #
-# This example is similar to Control File Example 31a,
-# but it demonstrates the use of the AoR plot type with
-# Latin Hypercube Sampling (lhs). The AoR figures created
-# specify the number of lhs samples used.
+# This example is similar to Control File Example 31a, but it demonstrates
+# the use of the AoR plot type with Latin Hypercube Sampling (lhs). The AoR
+# figures created specify the number of lhs samples used.
 #
-# Note that when using a large number of OpenWellbore
-# components, as shown here with the grid placement option,
-# simulations using lhs can require a large number of samples
-# (the "siz" entry) in order to run correctly. If the simulation
-# does not include enough realizations, python will raise a numpy
-# LinAlgError error saying "Matrix is not positive definite."
-# This behavior occurs because Latin Hypercube Sampling requires
-# a minimum number of realizations in order to evenly sample
-# the parameter space. If a parameter of the OpenWellbore
-# component is set up to vary (e.g., between minimum and maximum
-# values), then each OpenWellbore component included increases
-# the minimum number of realizations required. Additionally, one
-# reservoir component and one aquifer component will be made
-# for each wellbore location, so any parameter variations for
-# those components will also increase the required number of
+# Note that when using a large number of OpenWellbore components, as shown here
+# with the grid placement option, simulations using lhs can require a large
+# number of samples (the "siz" entry) in order to run correctly. If the simulation
+# does not include enough realizations, python will raise a numpy LinAlgError
+# error saying "Matrix is not positive definite." This behavior occurs because
+# Latin Hypercube Sampling requires a minimum number of realizations in order
+# to evenly sample the parameter space. If a parameter of the OpenWellbore
+# component is set up to vary (e.g., between minimum and maximum values), then
+# each OpenWellbore component included increases the minimum number
+# of realizations required. Additionally, one reservoir component and one
+# aquifer component will be made for each wellbore location, so any parameter
+# variations for those components will also increase the required number of
 # realizations.
 #
-# There are additional consideraitons for the use of the 'CriticalPressureMPa: Calculated'
-# option in a pressure AoR plot in lhs or parstudy simulations. Specifically, the wellTop
-# and reservoirDepth parameters of the OpenWellbore need to set explicitly (not set only
-# through 'LeakTo: aquifer#'). For example, here wellTop is set as 'aquifer2Depth' and
-# reservoirDepth is set as 'shale1Depth' (i.e., the bottom of shale 1, which is the top of
-# the reservoir). For more details, see Control File example 31d.
+# There are additional considerations for the use of the
+# 'CriticalPressureMPa: Calculated' option in a pressure AoR plot in lhs
+# or parstudy simulations. For more details, see Control File example 31d.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31c.yaml
@@ -113,9 +106,12 @@ OpenWellbore1:
         brineDensity:
             value: 1050
             vary: False
-        # If critPressureApproach is set to True and enforceCritPressure is left at the default of False, the parameters wellTop, reservoirDepth,
-        # and brineDensity are used to calculate critical pressure. If both critPressureApproach and enforceCritPressure are set to True AND the
-        # critPressure parameter is given, then the critPressure value will be used instead.
+        # If critPressureApproach is set to True and enforceCritPressure
+        # is left at the default of False, the parameters wellTop, reservoirDepth,
+        # and brineDensity are used to calculate critical pressure.
+        # If both critPressureApproach and enforceCritPressure are set to True
+        # and the critPressure parameter is given, then the critPressure value
+        # will be used instead.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------

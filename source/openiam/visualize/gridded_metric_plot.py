@@ -160,7 +160,7 @@ def gridded_metric_plot(yaml_data, model_data, sm, s, output_dir,
             component_length, component_strike, component_dip, \
                 res_comp_injX, res_comp_injY, x_range, y_range = \
                 get_comps_and_limits(components_name_list, yaml_data, name, sm)
-    
+
     if plot_injection_sites and InjectionCoordx is None:
         InjectionCoordx = res_comp_injX
         InjectionCoordy = res_comp_injY
@@ -359,10 +359,10 @@ def gridded_metric_plot(yaml_data, model_data, sm, s, output_dir,
                 max_val = None
                 # The parts are cells for AREA_COMPONENTS or segments for FAULT_COMPONENTS
                 for partRef, cellMetric in enumerate(metric):
-                    
+
                     x_center_km = component_xvals[compRef][partRef] / 1000
                     y_center_km = component_yvals[compRef][partRef] / 1000
-                    
+
                     if plot_val_over_area and compType in AREA_COMPONENTS:
                         node_x = [x_center_km - (cell_length_x_km / 2),
                                   x_center_km + (cell_length_x_km / 2),
@@ -637,7 +637,7 @@ def get_comps_and_limits(components_name_list, yaml_data, name, sm):
 
                         comp_data = yaml_data[compName]
                         loc_data = comp_data['Segments']['Locations']
-                        
+
                         component_xvals.append([])
                         component_yvals.append([])
                         for locRef in range(len(loc_data['coordx'])):
@@ -1093,7 +1093,7 @@ def plot_comp_inj_sites(ax, comp_name, comp_type, cell_xvals, cell_yvals,
     """
     Function that plots the wells and injection sites used in the simulation.
     """
-    
+
     if plot_injection_sites:
         if isinstance(InjectionCoordx, float):
             if include_labels:
@@ -1148,7 +1148,7 @@ def plot_comp_inj_sites(ax, comp_name, comp_type, cell_xvals, cell_yvals,
         plt.plot(np.array(cell_xvals) / 1000, np.array(cell_yvals) / 1000,
                  linestyle='none', marker='o', color='k', markeredgewidth=1.5,
                  markersize=cellCenterMarkerSize, markerfacecolor='none', zorder=1e6)
-    
+
     if comp_type in FAULT_COMPONENTS and plot_faults:
         if component_length is not None and component_strike is not None \
                 and component_dip is not None:

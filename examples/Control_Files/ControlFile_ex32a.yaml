@@ -29,11 +29,12 @@
 # the FutureGen2Aquifer component) should reflect the depth to the
 # bottom of the aquifer being examined for the AoR (here, aquifer 2).
 #
-# Note that when a LookupTableReservoir component is used and an AoR plot is set up
-# with PlotInjectionSites: True, both InjectionCoordx and InjectionCoordy must be
-# included for the injection site to be plotted. InjectionCoordx and InjectionCoordy
-# are not required for AoR plots when using another type of reservoir component
-# (e.g., SimpleReservoir) because those components have injX and injY values tied to them.
+# Note that when a LookupTableReservoir component is used and an AoR plot is
+# set up with PlotInjectionSites: True, both InjectionCoordx and InjectionCoordy
+# must be included for the injection site to be plotted. InjectionCoordx
+# and InjectionCoordy are not required for AoR plots when using another type
+# of reservoir component (e.g., SimpleReservoir) because those components
+# have injX and injY values tied to them.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32a.yaml
@@ -126,9 +127,8 @@ OpenWellbore1:
             vary: False
         # Parameters wellTop (480.31 m) and reservoirDepth (1131.01 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
-        # and don't need to be set explicitly in a forward model unless different values are
-        # required. These parameters should be set explicitly in a simulation that uses the 
-        # lhs or parstudy analysis types.
+        # and don't need to be set explicitly in a forward model unless different
+        # values are required.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------

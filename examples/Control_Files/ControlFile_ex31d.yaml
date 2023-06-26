@@ -25,8 +25,9 @@
 # that time.
 #
 # A critical pressure can be shown in a pressure AoR figure by including
-# 'CriticalPressureMPa: Calculated' or 'CriticalPressureMPa: X' (where X is a value in MPa).
-# The figure will specify whether the critical pressure has been exceeded.
+# 'CriticalPressureMPa: Calculated' or 'CriticalPressureMPa: X'
+# (where X is a value in MPa). The figure will specify whether the critical
+# pressure has been exceeded.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31d.yaml
@@ -113,9 +114,12 @@ OpenWellbore1:
         brineDensity:
             value: 1050
             vary: False
-        # If critPressureApproach is set to True and enforceCritPressure is left at the default of False, the parameters wellTop, reservoirDepth,
-        # and brineDensity are used to calculate critical pressure. If both critPressureApproach and enforceCritPressure are set to True AND the
-        # critPressure parameter is given, then the value of the critPressure parameter will be used instead.
+        # If critPressureApproach is set to True and enforceCritPressure
+        # is left at the default of False, the parameters wellTop, reservoirDepth,
+        # and brineDensity are used to calculate critical pressure.
+        # If both critPressureApproach and enforceCritPressure are set to True
+        # and the critPressure parameter is given, then the value
+        # of the critPressure parameter will be used instead.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------
