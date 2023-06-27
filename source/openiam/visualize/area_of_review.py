@@ -752,8 +752,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                          markeredgecolor='k', markeredgewidth=1.5,
                          markersize=12, linestyle='none')
 
-        # TODO Not sure why 'pressure' is in condition?
-        if 'pressure' and critPressureInput is not None:
+        if output_nm == 'pressure' and critPressureInput is not None:
             pressure_levels = np.array([critPressureInput])
 
             a, b = '{:.2e}'.format(critPressureInput).split('e')
