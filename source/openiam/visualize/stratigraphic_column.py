@@ -253,42 +253,42 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
     y_buffer_text = np.min(aquiferThicknessList + shaleThicknessList) * 0.075
 
     fig = plt.figure(figsize=figsize, dpi=figdpi)
-    ax = plt.gca()
+    ax = fig.add_subplot()
 
-    plt.plot(x_range_reservoir, [reservoirBottomDepth, reservoirBottomDepth],
-             color=reservoirColor, alpha=reservoirAlpha, zorder=10)
+    ax.plot(x_range_reservoir, [reservoirBottomDepth, reservoirBottomDepth],
+            color=reservoirColor, alpha=reservoirAlpha, zorder=10)
 
-    plt.plot(x_range_reservoir, [reservoirTopDepth, reservoirTopDepth],
-             color=reservoirColor, alpha=reservoirAlpha, zorder=10)
+    ax.plot(x_range_reservoir, [reservoirTopDepth, reservoirTopDepth],
+            color=reservoirColor, alpha=reservoirAlpha, zorder=10)
 
-    plt.fill_between(x_range_reservoir, [reservoirTopDepth, reservoirTopDepth],
-                     [reservoirBottomDepth, reservoirBottomDepth],
-                     color=reservoirColor, alpha=reservoirAlphaFill)
+    ax.fill_between(x_range_reservoir, [reservoirTopDepth, reservoirTopDepth],
+                    [reservoirBottomDepth, reservoirBottomDepth],
+                    color=reservoirColor, alpha=reservoirAlphaFill)
 
     # Text for unit label
     y_text = reservoirBottomDepth + y_buffer_text
 
-    plt.text(x_text_reservoir, y_text, reservoirLabel, color=reservoirColor,
-             alpha=reservoirAlpha, fontsize=genfontsize - 2,
-             fontweight=selected_labelfontweight, zorder=10)
+    ax.text(x_text_reservoir, y_text, reservoirLabel, color=reservoirColor,
+            alpha=reservoirAlpha, fontsize=genfontsize - 2,
+            fontweight=selected_labelfontweight, zorder=10)
 
     # Text for unit depth
     if plot_depth_text:
         depth_text = DEPTH_LABEL.format(-reservoirBottomDepth)
 
-        plt.text(x_text_depth_reservoir, y_text, DEPTH_LABEL.format(-reservoirTopDepth),
-                 color=reservoirColor, alpha=reservoirAlpha, fontsize=genfontsize - 2,
-                 fontweight=selected_labelfontweight, zorder=10)
+        ax.text(x_text_depth_reservoir, y_text, DEPTH_LABEL.format(-reservoirTopDepth),
+                color=reservoirColor, alpha=reservoirAlpha, fontsize=genfontsize - 2,
+                fontweight=selected_labelfontweight, zorder=10)
 
     for shaleRef, shaleTDValue in enumerate(shaleTopDepthList):
-        plt.plot(x_range_shales, [reservoirTopDepth, reservoirTopDepth],
-                 color=shaleColor[shaleRef], alpha=shaleAlpha[shaleRef], zorder=11)
+        ax.plot(x_range_shales, [reservoirTopDepth, reservoirTopDepth],
+                color=shaleColor[shaleRef], alpha=shaleAlpha[shaleRef], zorder=11)
 
-        plt.plot(x_range_shales, [shaleTDValue, shaleTDValue],
-                 color=shaleColor[shaleRef], alpha=shaleAlpha[shaleRef], zorder=11)
+        ax.plot(x_range_shales, [shaleTDValue, shaleTDValue],
+                color=shaleColor[shaleRef], alpha=shaleAlpha[shaleRef], zorder=11)
 
         if shaleRef == 0:
-            plt.fill_between(
+            ax.fill_between(
                 x_range_shales, [shaleTDValue, shaleTDValue],
                 [reservoirTopDepth, reservoirTopDepth],
                 color=shaleColor[shaleRef], alpha=shaleAlphaFill[shaleRef])
@@ -296,7 +296,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
             y_text = reservoirTopDepth + y_buffer_text
             depth_text = DEPTH_LABEL.format(-reservoirTopDepth)
         else:
-            plt.fill_between(
+            ax.fill_between(
                 x_range_shales, [shaleTDValue, shaleTDValue],
                 [aquiferTopDepthList[shaleRef - 1],
                  aquiferTopDepthList[shaleRef - 1]],
@@ -306,30 +306,29 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
             depth_text = DEPTH_LABEL.format(-aquiferTopDepthList[shaleRef - 1])
 
         # Text for unit label
-        plt.text(x_text_shales, y_text, shaleLabel[shaleRef],
-                 color=shaleColor[shaleRef],
-                 alpha=shaleAlpha[shaleRef], fontsize=genfontsize - 2,
-                 fontweight=selected_labelfontweight, zorder=11)
+        ax.text(x_text_shales, y_text, shaleLabel[shaleRef],
+                color=shaleColor[shaleRef],
+                alpha=shaleAlpha[shaleRef], fontsize=genfontsize - 2,
+                fontweight=selected_labelfontweight, zorder=11)
 
         # Text for unit depth
         if plot_depth_text:
-            plt.text(x_text_depth_shales, y_text, depth_text,
-                     color=shaleColor[shaleRef],
-                     alpha=shaleAlpha[shaleRef], fontsize=genfontsize - 2,
-                     fontweight=selected_labelfontweight, zorder=10)
+            ax.text(x_text_depth_shales, y_text, depth_text,
+                    color=shaleColor[shaleRef],
+                    alpha=shaleAlpha[shaleRef], fontsize=genfontsize - 2,
+                    fontweight=selected_labelfontweight, zorder=10)
 
         if shaleRef != (len(shaleTopDepthList) - 1):
-            plt.plot(x_range_aquifers, [shaleTDValue, shaleTDValue],
-                     color=aquiferColor[shaleRef],
-                     alpha=aquiferAlpha[shaleRef], zorder=10)
+            ax.plot(x_range_aquifers, [shaleTDValue, shaleTDValue],
+                    color=aquiferColor[shaleRef],
+                    alpha=aquiferAlpha[shaleRef], zorder=10)
 
-            plt.plot(x_range_aquifers,
-                     [aquiferTopDepthList[shaleRef],
-                      aquiferTopDepthList[shaleRef]],
-                     color=aquiferColor[shaleRef],
-                     alpha=aquiferAlpha[shaleRef], zorder=10)
+            ax.plot(x_range_aquifers,
+                    [aquiferTopDepthList[shaleRef], aquiferTopDepthList[shaleRef]],
+                    color=aquiferColor[shaleRef], alpha=aquiferAlpha[shaleRef],
+                    zorder=10)
 
-            plt.fill_between(
+            ax.fill_between(
                 x_range_aquifers,
                 [aquiferTopDepthList[shaleRef], aquiferTopDepthList[shaleRef]],
                 [shaleTDValue, shaleTDValue],
@@ -338,26 +337,26 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
             # Text for unit label
             y_text = shaleTopDepthList[shaleRef] + y_buffer_text
 
-            plt.text(x_text_aquifers, y_text, aquiferLabel[shaleRef],
-                     color=aquiferColor[shaleRef], alpha=aquiferAlpha[shaleRef],
-                     fontsize=genfontsize - 2, fontweight=selected_labelfontweight,
-                     zorder=10)
+            ax.text(x_text_aquifers, y_text, aquiferLabel[shaleRef],
+                    color=aquiferColor[shaleRef], alpha=aquiferAlpha[shaleRef],
+                    fontsize=genfontsize - 2, fontweight=selected_labelfontweight,
+                    zorder=10)
 
             # Text for unit depth
             if plot_depth_text:
                 depth_text = DEPTH_LABEL.format(-shaleTDValue)
 
-                plt.text(x_text_depth_aquifers, y_text, depth_text,
-                         color=aquiferColor[shaleRef], alpha=aquiferAlpha[shaleRef],
-                         fontsize=genfontsize - 2, fontweight=selected_labelfontweight,
-                         zorder=10)
+                ax.text(x_text_depth_aquifers, y_text, depth_text,
+                        color=aquiferColor[shaleRef], alpha=aquiferAlpha[shaleRef],
+                        fontsize=genfontsize - 2, fontweight=selected_labelfontweight,
+                        zorder=10)
 
     if plot_depth_text:
-        plt.text(x_text_depth_shales, 0, '0 m', color=shaleColor[shaleRef],
-                 alpha=shaleAlpha[shaleRef], fontsize=genfontsize - 2,
-                 fontweight=selected_labelfontweight, zorder=10)
+        ax.text(x_text_depth_shales, 0, '0 m', color=shaleColor[shaleRef],
+                alpha=shaleAlpha[shaleRef], fontsize=genfontsize - 2,
+                fontweight=selected_labelfontweight, zorder=10)
 
-    plt.xlim(x_lims_strat_col)
+    ax.set_xlim(x_lims_strat_col)
     ax.set_xticks([])
 
     if var_type == 'noVariation':
@@ -366,27 +365,27 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
         x_label = 'Stratigraphic Column at\nx = {} km, y = {} km'.format(
             x_value / 1000, y_value / 1000)
 
-    plt.xlabel(x_label, fontsize=axislabelfontsize, fontweight=selected_labelfontweight)
+    ax.set_xlabel(x_label, fontsize=axislabelfontsize, fontweight=selected_labelfontweight)
 
-    plt.ylabel('Depth (m)', fontsize=axislabelfontsize, fontweight='bold')
+    ax.set_ylabel('Depth (m)', fontsize=axislabelfontsize, fontweight='bold')
 
     ax.set_title('Stratigraphy for the Study Area',
                  fontsize=titlefontsize, fontweight=selected_labelfontweight)
 
     if title:
-        plt.suptitle(title, fontweight=selected_labelfontweight,
+        fig.suptitle(title, fontweight=selected_labelfontweight,
                      fontsize=titlefontsize)
 
-    plt.tight_layout()
+    fig.tight_layout()
 
     if savefig:
         try:
-            plt.savefig(savefig, bbox_inches='tight', dpi=figdpi)
+            fig.savefig(savefig, bbox_inches='tight', dpi=figdpi)
         except ValueError:
             # User has specified plot with a '.' in name but no extension.
             # Add .png as output format.
             savefig += '.png'
-            plt.savefig(savefig, bbox_inches='tight', dpi=figdpi)
+            fig.savefig(savefig, bbox_inches='tight', dpi=figdpi)
     else:
         plt.show()
 

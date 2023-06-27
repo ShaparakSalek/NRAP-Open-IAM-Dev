@@ -736,10 +736,10 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                     rgba = cmap(0)
                     # This does not have any color, it's just used for the legend
                     plt.plot(x_loc[loc_ref] / 1000, y_loc[loc_ref] / 1000,
-                              marker='o', markerfacecolor=rgba[0:3],
-                              markeredgecolor='k', markeredgewidth=1.5,
-                              markersize=12, linestyle='none',
-                              label='Wellbore with Nonzero Result')
+                             marker='o', markerfacecolor=rgba[0:3],
+                             markeredgecolor='k', markeredgewidth=1.5,
+                             markersize=12, linestyle='none',
+                             label='Wellbore with Nonzero Result')
                     lgnd_check = True
                     ncol_number += 1
 

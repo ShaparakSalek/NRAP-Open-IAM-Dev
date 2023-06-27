@@ -474,8 +474,8 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     plt.rc('font', **font)
 
     # 3D Stratigraphy Figure
-    plt3d = plt.figure(figsize=figsize, dpi=figdpi).gca(projection='3d')
-    ax = plt.gca()
+    plt3d = plt.figure(figsize=figsize, dpi=figdpi)
+    plt3d_ax = plt3d.add_subplot(projection='3d')
 
     if var_type == 'LookupTable':
         plot_SandD_symbol = False
@@ -498,12 +498,12 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                     maxDepth = maxDepth_temp
 
         z0_plane = np.zeros((x_loc.shape[0], x_loc.shape[1]))
-        plt3d.plot_surface(x_loc / 1000, y_loc / 1000, z0_plane,
-                           color=shaleColor[-1], alpha=shaleAlphaFill[-1], shade=False)
+        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, z0_plane,
+                              color=shaleColor[-1], alpha=shaleAlphaFill[-1], shade=False)
 
-        ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, z0_plane[0, 0],
-                'Shale ' + str(numShaleLayers), zdir='y', color=shaleColor[-1],
-                alpha=shaleAlpha[-1], fontsize=genfontsize - 2, fontweight='bold')
+        plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, z0_plane[0, 0],
+                      'Shale ' + str(numShaleLayers), zdir='y', color=shaleColor[-1],
+                      alpha=shaleAlpha[-1], fontsize=genfontsize - 2, fontweight='bold')
 
     else:
         shaleThicknessesReferencePoint = strata_dict['shaleThicknesses']
@@ -513,54 +513,60 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         reservoirThicknessReferencePoint = strata_dict['reservoirThickness']
 
         # Dictionary containing the arrays used for the 3D graph
-        stratigraphy_by_loc = create_strata_planes_dict(x_loc, y_loc, numShaleLayers,
-                                      shaleThicknessesReferencePoint,
-                                      aquiferThicknessesReferencePoint,
-                                      reservoirThicknessReferencePoint,
-                                      var_type, strataReferencePoint,
-                                      coordxReferencePoint=coordxReferencePoint,
-                                      coordyReferencePoint=coordyReferencePoint,
-                                      strike=strike, dip=dip,
-                                      dipDirection=dipDirection)
+        stratigraphy_by_loc = create_strata_planes_dict(
+            x_loc, y_loc, numShaleLayers,
+            shaleThicknessesReferencePoint,
+            aquiferThicknessesReferencePoint,
+            reservoirThicknessReferencePoint,
+            var_type, strataReferencePoint,
+            coordxReferencePoint=coordxReferencePoint,
+            coordyReferencePoint=coordyReferencePoint,
+            strike=strike, dip=dip,
+            dipDirection=dipDirection)
 
         # Plot the top of each unit as a 3D surface
         surface = -stratigraphy_by_loc['resBottomDepth'][:, :]
-        plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                           color=reservoirColor, alpha=reservoirAlphaFill, shade=False)
+        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                              color=reservoirColor, alpha=reservoirAlphaFill,
+                              shade=False)
 
         surface = -stratigraphy_by_loc['resTopDepth'][:, :]
-        plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                           color=reservoirColor, alpha=(reservoirAlphaFill / 2), shade=False)
-        ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                reservoirLabel, zdir='y', color=reservoirColor, alpha=reservoirAlpha,
-                fontsize=genfontsize - 2, fontweight='bold')
+        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                              color=reservoirColor, alpha=(reservoirAlphaFill / 2),
+                              shade=False)
+        plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
+                      reservoirLabel, zdir='y', color=reservoirColor,
+                      alpha=reservoirAlpha, fontsize=genfontsize - 2,
+                      fontweight='bold')
 
         for shaleRef in range(1, numShaleLayers + 1):
             surface = -stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef)][:, :]
-            plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                               color=shaleColor[shaleRef - 1],
-                               alpha=shaleAlphaFill[shaleRef - 1], shade=False)
+            plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                                  color=shaleColor[shaleRef - 1],
+                                  alpha=shaleAlphaFill[shaleRef - 1], shade=False)
 
-            ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                    shaleLabel[shaleRef - 1], zdir='y', color=shaleColor[shaleRef - 1],
-                    alpha=shaleAlpha[shaleRef - 1],
-                    fontsize=genfontsize - 2, fontweight='bold')
+            plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
+                          shaleLabel[shaleRef - 1], zdir='y', color=shaleColor[shaleRef - 1],
+                          alpha=shaleAlpha[shaleRef - 1],
+                          fontsize=genfontsize - 2, fontweight='bold')
 
             if shaleRef < numShaleLayers:
                 surface = -stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef)][:, :]
-                plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                                   color=aquiferColor[shaleRef - 1],
-                                   alpha=aquiferAlphaFill[shaleRef - 1], shade=False)
+                plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                                      color=aquiferColor[shaleRef - 1],
+                                      alpha=aquiferAlphaFill[shaleRef - 1],
+                                      shade=False)
 
-                ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                        aquiferLabel[shaleRef - 1], zdir='y',
-                        color=aquiferColor[shaleRef - 1], alpha=aquiferAlpha[shaleRef - 1],
-                        fontsize=genfontsize - 2, fontweight='bold')
+                plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
+                              aquiferLabel[shaleRef - 1], zdir='y',
+                              color=aquiferColor[shaleRef - 1],
+                              alpha=aquiferAlpha[shaleRef - 1],
+                              fontsize=genfontsize - 2, fontweight='bold')
 
     if var_type == 'LookupTable':
         zlim = [-maxDepth, LUTS_max_z]
     else:
-        zlim = ax.get_zlim()
+        zlim = plt3d_ax.get_zlim()
 
     if plot_injection_sites:
         for comp in components:
@@ -609,33 +615,33 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                             pass
 
                         # Plot a 'shadow' beneath the point
-                        plt.plot(x_res_val / 1000,
-                                 y_vals_res[x_res_ref] / 1000,
-                                 zlim[0], marker='s', markersize=3,
-                                 color=[0.67, 0.67, 0.67], linewidth=1)
+                        plt3d_ax.plot(x_res_val / 1000,
+                                      y_vals_res[x_res_ref] / 1000,
+                                      zlim[0], marker='s', markersize=3,
+                                      color=[0.67, 0.67, 0.67], linewidth=1)
 
                         if var_type != 'LookupTable':
-                            plt.plot([x_res_val / 1000,
-                                      x_res_val / 1000],
-                                      [y_vals_res[x_res_ref] / 1000,
-                                       y_vals_res[x_res_ref] / 1000],
-                                      [-resTopDepth_temp, 0], marker='s',
-                                      markersize=3,
-                                      color=[0.25, 0.25, 0.25], linewidth=1)
+                            plt3d_ax.plot([x_res_val / 1000,
+                                           x_res_val / 1000],
+                                          [y_vals_res[x_res_ref] / 1000,
+                                           y_vals_res[x_res_ref] / 1000],
+                                          [-resTopDepth_temp, 0], marker='s',
+                                          markersize=3,
+                                          color=[0.25, 0.25, 0.25], linewidth=1)
 
-                        plt.plot(x_res_val / 1000,
-                                 y_vals_res[x_res_ref] / 1000,
-                                 0, marker='s', markersize=3,
-                                 color=[0.25, 0.25, 0.25], linewidth=1,
-                                 zorder=98)
+                        plt3d_ax.plot(x_res_val / 1000,
+                                      y_vals_res[x_res_ref] / 1000,
+                                      0, marker='s', markersize=3,
+                                      color=[0.25, 0.25, 0.25], linewidth=1,
+                                      zorder=98)
 
                         if plot_injection_site_labels and \
                                 x_res_ref == (len(x_vals_res) - 1):
-                            ax.text(x_res_val / 1000,
-                                    y_vals_res[x_res_ref] / 1000, 0,
-                                    'Injection\nSites', zdir='x', color='k',
-                                    fontsize=genfontsize - 4, fontweight='bold',
-                                    zorder=99)
+                            plt3d_ax.text(x_res_val / 1000,
+                                          y_vals_res[x_res_ref] / 1000, 0,
+                                          'Injection\nSites', zdir='x', color='k',
+                                          fontsize=genfontsize - 4, fontweight='bold',
+                                          zorder=99)
 
                 else:
                     if var_type == 'strikeAndDip':
@@ -665,27 +671,27 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                         pass
 
                     # Plot a 'shadow' beneath the point
-                    plt.plot(x_vals_res / 1000, y_vals_res / 1000,
-                             zlim[0], marker='s', markersize=3,
-                             color=[0.67, 0.67, 0.67], linewidth=1)
+                    plt3d_ax.plot(x_vals_res / 1000, y_vals_res / 1000,
+                                  zlim[0], marker='s', markersize=3,
+                                  color=[0.67, 0.67, 0.67], linewidth=1)
 
                     if var_type != 'LookupTable':
-                        plt.plot([x_vals_res / 1000, x_vals_res / 1000],
-                                  [y_vals_res / 1000, y_vals_res / 1000],
-                                  [-resTopDepth_temp, 0], marker='s',
-                                  markersize=3, color=[0.25, 0.25, 0.25],
-                                  linewidth=1)
+                        plt3d_ax.plot([x_vals_res / 1000, x_vals_res / 1000],
+                                      [y_vals_res / 1000, y_vals_res / 1000],
+                                      [-resTopDepth_temp, 0], marker='s',
+                                      markersize=3, color=[0.25, 0.25, 0.25],
+                                      linewidth=1)
 
-                    plt.plot(x_vals_res / 1000, y_vals_res / 1000,
-                             0, marker='s', markersize=3,
-                             color=[0.25, 0.25, 0.25], linewidth=1,
-                             zorder=98)
+                    plt3d_ax.plot(x_vals_res / 1000, y_vals_res / 1000,
+                                  0, marker='s', markersize=3,
+                                  color=[0.25, 0.25, 0.25], linewidth=1,
+                                  zorder=98)
 
                     if plot_injection_site_labels:
-                        ax.text(x_vals_res / 1000, y_vals_res / 1000, 0,
-                                'Injection\nSite', zdir='x', color='k',
-                                fontsize=genfontsize - 4, fontweight='bold',
-                                zorder=99)
+                        plt3d_ax.text(x_vals_res / 1000, y_vals_res / 1000, 0,
+                                      'Injection\nSite', zdir='x', color='k',
+                                      fontsize=genfontsize - 4, fontweight='bold',
+                                      zorder=99)
 
     if plot_wellbore_locations:
         for comp in components:
@@ -703,10 +709,10 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 if comp.class_type == 'OpenWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'Open\nWellbore {}'.format(number)
-                    
-                    z_min = iamcommons.get_parameter_val(comp, 'reservoirDepth', 
+
+                    z_min = iamcommons.get_parameter_val(comp, 'reservoirDepth',
                                                          sm=sm, yaml_data=yaml_data)
-                    z_max = iamcommons.get_parameter_val(comp, 'wellTop', 
+                    z_max = iamcommons.get_parameter_val(comp, 'wellTop',
                                                          sm=sm, yaml_data=yaml_data)
 
                 elif comp.class_type == 'MultisegmentedWellbore':
@@ -730,20 +736,20 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 elif comp.class_type == 'CementedWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'Cemented\nWellbore {}'.format(number)
-                    
-                    z_min = iamcommons.get_parameter_val(comp, 'wellDepth', 
+
+                    z_min = iamcommons.get_parameter_val(comp, 'wellDepth',
                                                          sm=sm, yaml_data=yaml_data)
                     z_max = 0
 
                 # Plot a 'shadow' beneath the point
-                plt.plot(x_vals_well / 1000, y_vals_well / 1000,
-                          zlim[0], marker='o', markersize=3,
-                          color=[0.67, 0.67, 0.67], linewidth=1)
+                plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
+                              zlim[0], marker='o', markersize=3,
+                              color=[0.67, 0.67, 0.67], linewidth=1)
 
-                plt.plot([x_vals_well / 1000, x_vals_well / 1000],
-                          [y_vals_well / 1000, y_vals_well / 1000],
-                          [-z_min, -z_max], marker='o', markersize=3,
-                          color=wellColor, alpha=wellAlphaFill, linewidth=1)
+                plt3d_ax.plot([x_vals_well / 1000, x_vals_well / 1000],
+                              [y_vals_well / 1000, y_vals_well / 1000],
+                              [-z_min, -z_max], marker='o', markersize=3,
+                              color=wellColor, alpha=wellAlphaFill, linewidth=1)
 
                 if plot_well_labels:
                     # Have the label slightly darker, so it doesn't blend in
@@ -756,40 +762,42 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                     if not wellLabel is None:
                         if '{}' in wellLabel:
-                            ax.text(
+                            plt3d_ax.text(
                                 x_vals_well / 1000, y_vals_well / 1000, -z_min,
                                 str(wellLabel.format(number)), zdir='x', color=rgbWell,
                                 alpha=wellAlpha, fontsize=genfontsize - 4,
                                 fontweight='bold')
                         else:
-                            ax.text(
+                            plt3d_ax.text(
                                 x_vals_well / 1000, y_vals_well / 1000, -z_min,
                                 wellLabel, zdir='x', color=rgbWell,
                                 alpha=wellAlpha, fontsize=genfontsize - 4,
                                 fontweight='bold')
                     else:
-                        ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_min,
+                        plt3d_ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_min,
                                 compName, zdir='x', color=rgbWell, alpha=wellAlpha,
                                 fontsize=genfontsize - 4, fontweight='bold')
 
                 if comp.class_type == 'OpenWellbore':
                     if z_max != 0:
-                        plt.plot([x_vals_well / 1000, x_vals_well / 1000],
-                                  [y_vals_well / 1000, y_vals_well / 1000],
-                                  [-z_max, 0], marker='o', markersize=3,
-                                  color=wellColor, alpha=0.5, linewidth=1)
+                        plt3d_ax.plot([x_vals_well / 1000, x_vals_well / 1000],
+                                      [y_vals_well / 1000, y_vals_well / 1000],
+                                      [-z_max, 0], marker='o', markersize=3,
+                                      color=wellColor, alpha=0.5, linewidth=1)
 
                     if plot_well_labels:
                         if z_max != 0:
-                            ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_max,
-                                    'Well\nTop', zdir='x', color=rgbWell,
-                                    alpha=wellAlpha, fontsize=genfontsize - 4,
-                                    fontweight='bold')
+                            plt3d_ax.text(
+                                x_vals_well / 1000, y_vals_well / 1000, -z_max,
+                                'Well\nTop', zdir='x', color=rgbWell,
+                                alpha=wellAlpha, fontsize=genfontsize - 4,
+                                fontweight='bold')
                         else:
-                            ax.text(x_vals_well / 1000, y_vals_well / 1000, -z_max,
-                                    'Well\nTop', zdir='x', color=rgbWell,
-                                    alpha=wellAlpha, fontsize=genfontsize - 4,
-                                    fontweight='bold', zorder=200)
+                            plt3d_ax.text(
+                                x_vals_well / 1000, y_vals_well / 1000, -z_max,
+                                'Well\nTop', zdir='x', color=rgbWell,
+                                alpha=wellAlpha, fontsize=genfontsize - 4,
+                                fontweight='bold', zorder=200)
 
     if plot_indiv_strat_comps:
         for comp in components:
@@ -807,73 +815,73 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                     numShaleLayers, strata_temp, unitType='reservoir',
                     top_or_bottom='bottom')
 
-                plt.plot(x_vals_well / 1000, y_vals_well / 1000,
-                         -z_temp, marker='s', markersize=2,
-                         color=reservoirColor, linewidth=1)
+                plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
+                              -z_temp, marker='s', markersize=2,
+                              color=reservoirColor, linewidth=1)
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='reservoir',
                     top_or_bottom='top')
 
-                plt.plot(x_vals_well / 1000, y_vals_well / 1000,
-                         -z_temp, marker='s', markersize=2,
-                         color=reservoirColor, linewidth=1)
+                plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
+                              -z_temp, marker='s', markersize=2,
+                              color=reservoirColor, linewidth=1)
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='shale',
                     unitNumber=numShaleLayers, top_or_bottom='top')
 
-                plt.plot(x_vals_well / 1000, y_vals_well / 1000,
-                         -z_temp, marker='s', markersize=2,
-                         color=shaleColor[-1], linewidth=1)
+                plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
+                              -z_temp, marker='s', markersize=2,
+                              color=shaleColor[-1], linewidth=1)
 
                 for shaleRef in range(numShaleLayers - 1):
                     z_temp = iam_strata.get_unit_depth_from_component(
                         numShaleLayers, strata_temp, unitType='shale',
                         unitNumber=(shaleRef + 1), top_or_bottom='top')
 
-                    plt.plot(x_vals_well / 1000, y_vals_well / 1000,
-                             -z_temp, marker='s', markersize=2,
-                             color=shaleColor[shaleRef], linewidth=1)
+                    plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
+                                  -z_temp, marker='s', markersize=2,
+                                  color=shaleColor[shaleRef], linewidth=1)
 
                     if (shaleRef + 1) < numShaleLayers:
                         z_temp = iam_strata.get_unit_depth_from_component(
                             numShaleLayers, strata_temp, unitType='aquifer',
                             unitNumber=(shaleRef + 1), top_or_bottom='top')
 
-                        plt.plot(x_vals_well / 1000, y_vals_well / 1000,
-                                 -z_temp, marker='s', markersize=2,
-                                 color=aquiferColor[shaleRef], linewidth=1)
+                        plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
+                                      -z_temp, marker='s', markersize=2,
+                                      color=aquiferColor[shaleRef], linewidth=1)
 
     # I think 3D graphs are more clear if you add shadows beneath the features
     # (i.e., at the same x and y, but at the minimum z value). The shadows help
     # you judge each feature's position in the space. I also add vertical lines
     # at the edges of the surfaces.
-    plt.plot([x_loc[0, 0] / 1000, x_loc[0, 0] / 1000],
-             [y_loc[0, 0] / 1000, y_loc[0, 0] / 1000],
-             [zlim[0], 0], color='k', linewidth=1)
+    plt3d_ax.plot([x_loc[0, 0] / 1000, x_loc[0, 0] / 1000],
+                 [y_loc[0, 0] / 1000, y_loc[0, 0] / 1000],
+                 [zlim[0], 0], color='k', linewidth=1)
 
-    plt.plot([x_loc[-1, -1] / 1000, x_loc[-1, -1] / 1000],
-             [y_loc[0, 0] / 1000, y_loc[0, 0] / 1000],
-             [zlim[0], 0], color='k', linewidth=1)
+    plt3d_ax.plot([x_loc[-1, -1] / 1000, x_loc[-1, -1] / 1000],
+                 [y_loc[0, 0] / 1000, y_loc[0, 0] / 1000],
+                 [zlim[0], 0], color='k', linewidth=1)
 
-    plt.plot([x_loc[-1, -1] / 1000, x_loc[-1, -1] / 1000],
-             [y_loc[-1, -1] / 1000, y_loc[-1, -1] / 1000],
-             [zlim[0], 0], color='k', linewidth=1)
+    plt3d_ax.plot([x_loc[-1, -1] / 1000, x_loc[-1, -1] / 1000],
+                 [y_loc[-1, -1] / 1000, y_loc[-1, -1] / 1000],
+                 [zlim[0], 0], color='k', linewidth=1)
 
-    plt.plot([x_loc[0, 0] / 1000, x_loc[0, 0] / 1000],
-             [y_loc[-1, -1] / 1000, y_loc[-1, -1] / 1000],
-             [zlim[0], 0], color='k', linewidth=1)
+    plt3d_ax.plot([x_loc[0, 0] / 1000, x_loc[0, 0] / 1000],
+                 [y_loc[-1, -1] / 1000, y_loc[-1, -1] / 1000],
+                 [zlim[0], 0], color='k', linewidth=1)
 
     # Plot a 'shadow' beneath the planes
     if var_type == 'LookupTable':
         zmin_plane = np.ones((x_loc.shape[0], x_loc.shape[1])) * zlim[0]
-        plt3d.plot_surface(x_loc / 1000, y_loc / 1000, zmin_plane,
-                           color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
+        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, zmin_plane,
+                              color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
     else:
         surface[:, :] = zlim[0]
-        plt3d.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                           color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
+        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                              color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
 
     if zlim[0] >= -500:
         z_interval = 100
@@ -893,45 +901,47 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     zticks = np.unique(ticks_pt2)
 
     zticks = zticks.tolist()
-    ax.set_zticks(zticks)
+    plt3d_ax.set_zticks(zticks)
 
     if EnforceXandYLims:
         xticks = np.linspace(xLims[0] / 1000, xLims[1] / 1000, numberXTicks,
                              endpoint=True)
         xticks = xticks.tolist()
-        ax.set_xticks(xticks)
+        plt3d_ax.set_xticks(xticks)
 
         yticks = np.linspace(yLims[0] / 1000, yLims[1] / 1000, numberYTicks,
                              endpoint=True)
         yticks = yticks.tolist()
-        ax.set_yticks(yticks)
+        plt3d_ax.set_yticks(yticks)
 
     axislabel_pad = 10
     plt.xlabel('Easting (km)', fontsize=axislabelfontsize,
                fontweight='bold', labelpad=axislabel_pad)
     plt.ylabel('Northing (km)', fontsize=axislabelfontsize,
                fontweight='bold', labelpad=axislabel_pad)
-    ax.set_zlabel('Depth (m)', fontsize=axislabelfontsize,
-               fontweight='bold', labelpad=axislabel_pad)
-    
+    plt3d_ax.set_zlabel('Depth (m)', fontsize=axislabelfontsize,
+                        fontweight='bold', labelpad=axislabel_pad)
+
     if not title:
         if var_type == 'LookupTable':
-            ax.set_title('Stratigraphy for the Study Area,\nRed Squares: '
-                         + 'Top of Shales, Blue Squares: Top of Aquifers,\nGray '
-                         + 'Squares: Top and Bottom of the Reservoir',
-                         fontsize=titlefontsize, fontweight=selected_labelfontweight,
-                         pad=0)
+            plt3d_ax.set_title(
+                'Stratigraphy for the Study Area,\nRed Squares: '
+                + 'Top of Shales, Blue Squares: Top of Aquifers,\nGray '
+                + 'Squares: Top and Bottom of the Reservoir',
+                fontsize=titlefontsize, fontweight=selected_labelfontweight,
+                pad=0)
         else:
-            ax.set_title('Stratigraphy for the Study Area,\nTop of Each Unit Shown',
-                         fontsize=titlefontsize, fontweight=selected_labelfontweight,
-                         pad=0)
+            plt3d_ax.set_title(
+                'Stratigraphy for the Study Area,\nTop of Each Unit Shown',
+                fontsize=titlefontsize, fontweight=selected_labelfontweight,
+                pad=0)
     else:
-        ax.set_title(title, fontweight=selected_labelfontweight, 
-                     fontsize=titlefontsize, pad=0)
+        plt3d_ax.set_title(title, fontweight=selected_labelfontweight,
+                           fontsize=titlefontsize, pad=0)
 
     # Make the x and y axes have equal aspects
-    xlim = ax.get_xlim()
-    ylim = ax.get_ylim()
+    xlim = plt3d_ax.get_xlim()
+    ylim = plt3d_ax.get_ylim()
 
     x_range = xlim[1] - xlim[0]
     y_range = ylim[1] - ylim[0]
@@ -940,13 +950,13 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         y_center = (ylim[1] + ylim[0]) / 2
         new_min_y = y_center - (x_range / 2)
         new_max_y = y_center + (x_range / 2)
-        ax.set_ylim(new_min_y, new_max_y)
+        plt3d_ax.set_ylim(new_min_y, new_max_y)
 
     elif y_range > x_range:
         x_center = (xlim[1] + xlim[0]) / 2
         new_min_x = x_center - (y_range / 2)
         new_max_x = x_center + (y_range / 2)
-        ax.set_xlim(new_min_x, new_max_x)
+        plt3d_ax.set_xlim(new_min_x, new_max_x)
 
     if plot_SandD_symbol:
         # Make the strike and dip symbol by using 5 known points. The point
@@ -980,19 +990,20 @@ def stratigraphy_plot(yaml_data, model_data, sm,
             z_p2 = z_points[2]
             z_p3 = z_points[3]
 
-            plt.plot([x_p2 / 1000, x_p3 / 1000],
-                     [y_p2 / 1000, y_p3 / 1000],
-                     [z_p2, z_p3],
-                     color='k', linewidth=2, zorder=100)
+            plt3d_ax.plot([x_p2 / 1000, x_p3 / 1000],
+                          [y_p2 / 1000, y_p3 / 1000],
+                          [z_p2, z_p3],
+                          color='k', linewidth=2, zorder=100)
 
-            plt.plot([x_p0 / 1000, x_p1 / 1000],
-                     [y_p0 / 1000, y_p1 / 1000],
-                     [z_p0, z_p0],
-                     color='k', linewidth=2, zorder=101)
+            plt3d_ax.plot([x_p0 / 1000, x_p1 / 1000],
+                          [y_p0 / 1000, y_p1 / 1000],
+                          [z_p0, z_p0],
+                          color='k', linewidth=2, zorder=101)
 
-            ax.text(x_p4 / 1000, y_p4 / 1000, z_p0,
-                    str(dip), zdir='x', color='w',
-                    fontsize=genfontsize - 2, fontweight='bold', zorder=102)
+            plt3d_ax.text(x_p4 / 1000, y_p4 / 1000, z_p0,
+                          str(dip), zdir='x', color='w',
+                          fontsize=genfontsize - 2, fontweight='bold',
+                          zorder=102)
 
         elif var_type == 'noVariation':
             degrees_for_circle = np.arange(0, 360, 1)
@@ -1004,19 +1015,19 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 circleX[ind] = SandD_location[0] + np.cos(np.radians(d_val)) * L
                 circleY[ind] = SandD_location[1] + np.sin(np.radians(d_val)) * L
 
-            plt.plot(circleX / 1000, circleY / 1000, 0, marker=None,
-                     color='k', linewidth=1, zorder=100)
+            plt3d_ax.plot(circleX / 1000, circleY / 1000, 0, marker=None,
+                          color='k', linewidth=1, zorder=100)
 
-            plt.plot([circleX[0] / 1000, circleX[179] / 1000],
-                     [circleY[0] / 1000, circleY[179] / 1000],
-                     [0, 0], marker=None, color='k', linewidth=1, zorder=101)
+            plt3d_ax.plot([circleX[0] / 1000, circleX[179] / 1000],
+                          [circleY[0] / 1000, circleY[179] / 1000],
+                          [0, 0], marker=None, color='k', linewidth=1, zorder=101)
 
-            plt.plot([circleX[89] / 1000, circleX[269] / 1000],
-                     [circleY[89] / 1000, circleY[269] / 1000],
-                     [0, 0], marker=None, color='k', linewidth=1, zorder=102)
+            plt3d_ax.plot([circleX[89] / 1000, circleX[269] / 1000],
+                          [circleY[89] / 1000, circleY[269] / 1000],
+                          [0, 0], marker=None, color='k', linewidth=1, zorder=102)
 
-    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
-    ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+    plt3d_ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+    plt3d_ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
     plt.tight_layout()
 
@@ -1027,7 +1038,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
     if savefig:
         for saveRef, elev_val in enumerate(view_elev):
-            ax.view_init(elev_val, view_azimuth[saveRef])
+            plt3d_ax.view_init(elev_val, view_azimuth[saveRef])
 
             if '.' in name:
                 name_pt1 = name[0:name.index('.')]
@@ -1040,12 +1051,12 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                                                 name + '_View' + str(saveRef + 1))
 
             try:
-                plt.savefig(fig_dir_and_name, bbox_inches='tight', dpi=figdpi)
+                plt3d.savefig(fig_dir_and_name, bbox_inches='tight', dpi=figdpi)
             except ValueError:
                 # User has specified plot with a '.' in name but no extension.
                 # Add .png as output format.
                 fig_dir_and_name += '.png'
-                plt.savefig(fig_dir_and_name, bbox_inches='tight', dpi=figdpi)
+                plt3d.savefig(fig_dir_and_name, bbox_inches='tight', dpi=figdpi)
     else:
         plt.show()
 
