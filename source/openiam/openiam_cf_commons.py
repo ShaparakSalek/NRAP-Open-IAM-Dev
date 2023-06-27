@@ -330,6 +330,14 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
         run_again = True
 
     else:
+        if 'Thickness' in par_name and ('shale' in par_name or 'aquifer' in par_name):
+            # Parameters like 'shale1Thickness' will not be in the default parameters, 
+            # but 'shaleThickness' will be.
+            if 'shale' in par_name:
+                par_name = 'shaleThickness'
+            elif 'aquifer' in par_name:
+                par_name = 'aquiferThickness'
+        
         par_val = comp.default_pars[par_name].value
 
     return par_val, run_again, run_again_info

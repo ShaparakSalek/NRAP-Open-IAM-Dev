@@ -114,7 +114,7 @@ SimpleReservoir1:
     Type: SimpleReservoir
     Parameters:
         injRate:
-            value: 1.0
+            value: 0.33
             vary: False
         logResPerm:
             value: -10.15

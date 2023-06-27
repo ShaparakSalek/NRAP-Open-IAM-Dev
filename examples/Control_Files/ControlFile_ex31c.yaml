@@ -18,10 +18,6 @@
 # variations for those components will also increase the required number of
 # realizations.
 #
-# There are additional considerations for the use of the
-# 'CriticalPressureMPa: Calculated' option in a pressure AoR plot in lhs
-# or parstudy simulations. For more details, see Control File example 31d.
-#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31c.yaml
 #
@@ -66,7 +62,7 @@ SimpleReservoir1:
     Type: SimpleReservoir
     Parameters:
         injRate:
-            value: 1.0
+            value: 0.33
             vary: False
         logResPerm:
             value: -11.0

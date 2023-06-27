@@ -1,10 +1,10 @@
 # OpenIAM Control File Example 32b
 #
-# This example is similar to Control File example 32a, but this example
-# also demonstrates the use of the LookupTableStratigraphy option.
-# The name and location of the table containing unit thicknesses and
-# other Stratigraphy component parameters(e.g., datumPressure) must be
-# defined in FileName and FileDirectory, respectively. The parameters
+# This example is similar to Control File example 32a, but this example 
+# demonstrates the use of the LookupTableStratigraphy option (also see 
+# control file example 38). The name and location of the table containing 
+# unit thicknesses and other Stratigraphy component parameters (e.g., datumPressure) 
+# must be defined in FileName and FileDirectory, respectively. The parameters
 # entered can be the values (e.g., reservoirThickness) as well as minimum
 # and maximum values (e.g., aquifer2Thickness_min or reservoirThickness_max).
 # The table is expected to have columns with x and y values representing
@@ -36,19 +36,14 @@
 # Additionally, the AoR plot type can create a csv file with the data used
 # for the plot, and this csv file is much smaller than the combined
 # and individual output files. In this example, this option is also turned off
-# by using entry SaveCSVFiles: False in the setup of AoR plots.
+# by using entry SaveCSVFiles: False in the setup of three of the four AoR plots.
 #
-# Note that the optional entry 'CriticalPressureMPa' is not used for the pressure
-# AoR figure (see Control File examples 31a and 31d). Only one critical pressure
-# value can be shown in the figure, but this simulation uses spatially variable
-# stratigraphy. The calculated critical pressure varies over space. Each
-# OpenWellbore will use the correct critical pressure value during the simulation
-# (as calculated with brineDensity and the wellTop and reservoirDepth at that
-# location), however. If the pressure AoR plot is given the entry
-# 'CriticalPressureMPa: Calculated', the lowest critical pressure from
-# all of the OpenWellbore components will be shown in the pressure AoR figure.
-# The .csv file saved by the pressure AoR figure can be used to assess
-# the role of spatially variable critical pressures.
+# Note that the optional entry 'CriticalPressureMPa: Calculated' is given for the 
+# pressure AoR figure (see Control File examples 31a and 31d). Because spatially 
+# variable stratigraphy is used, the calculated critical pressures will vary over 
+# space. If any of these critical pressures are exceeded, the pressure AoR figure 
+# will use a red contour to highlight areas that exceeded the local critical pressure.
+# All of the critical pressure values are saved in the AoR pressure .csv file.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32b.yaml
@@ -165,6 +160,7 @@ Plots:
         InjectionCoordy: 4.41e6
         FigureDPI: 100
         SaveCSVFiles: True
+        CriticalPressureMPa: Calculated
     AoR_CO2Sat:
         AoR: [CO2saturation]
         PlotInjectionSites: True
