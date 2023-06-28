@@ -190,19 +190,35 @@ def main(yaml_filename):
 
     log_level = log_dict[model_data['Logging']]
 
-    logging.basicConfig(
-        level=log_level,
-        format='from %(module)s %(funcName)s - %(levelname)s %(message)s',
-        datefmt='%m-%d %H:%M', filename=logging_file_name, filemode='w')
+    logger = logging.getLogger('')
+    # Remove default existing handlers
+    logger.handlers.clear()
+    logger.setLevel(log_level)
+    # logging formatter for log files with more details
+    log_formatter1 = logging.Formatter(
+        fmt='%(levelname)s %(module)s.%(funcName)s: %(message)s',
+        datefmt='%m-%d %H:%M')
+    # logging formatter for console output
+    log_formatter2 = logging.Formatter(
+        fmt='%(levelname)-8s %(message)s',
+        datefmt='%m-%d %H:%M')
+
+    # Setup logging to log file
+    file_handler = logging.FileHandler(filename=logging_file_name, mode='w')
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(log_formatter1)
+    logger.addHandler(file_handler)
+
+    # Setup logging to console
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(levelname)-8s %(message)s')
-    # Tell the handler to use this format
-    console.setFormatter(formatter)
-    # Add the handler to the root logger
-    logging.getLogger('').addHandler(console)
+    console.setFormatter(log_formatter2)
+    logger.addHandler(console)
 
     info_msg = output_header.format(iam_version=iam.__version__, now=now)
+    logging.info(info_msg)
+
+    info_msg = '\nRunning file {}\n'.format(yaml_filename)
     logging.info(info_msg)
 
     # Check whether user input time points through input file or list
@@ -744,9 +760,7 @@ def main(yaml_filename):
     logging.info(info_msg)
 
     # Remove all handlers from the logger for proper work in the consecutive runs
-    while logging.getLogger('').handlers:
-        logging.getLogger('').handlers.pop()
-    return True
+    logger.handlers.clear()
 
 
 def process_print_system_options(model_data, sm, out_dir, analysis):
