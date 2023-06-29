@@ -80,7 +80,7 @@ parser.add_argument('--binary', type=bool, dest='binary_file',
                     default=False, help='Set to true for binary control file')
 args = parser.parse_args()
 
-output_header = "".join(["\nNRAPOpenIAM version: {iam_version}",
+output_header = "".join(["NRAP-Open-IAM version: {iam_version}",
                          "\nRuntime: {now} \n"])
 
 pathway_components = ['LookupTableReservoir',
@@ -215,8 +215,8 @@ def main(yaml_filename):
     console.setFormatter(log_formatter2)
     logger.addHandler(console)
 
-    info_msg = output_header.format(iam_version=iam.__version__, now=now)
-    logging.info(info_msg)
+    iam_version_msg = output_header.format(iam_version=iam.__version__, now=now)
+    logging.info('\n'+iam_version_msg)
 
     info_msg = '\nRunning file {}\n'.format(yaml_filename)
     logging.info(info_msg)
@@ -729,6 +729,8 @@ def main(yaml_filename):
     logging.debug(debug_msg)
 
     if 'OutputDirectory' in model_data:
+        with open (os.path.join(out_dir, 'openiam_version_info.txt'), 'w') as f:
+            f.write(iam_version_msg)
         process_print_system_options(model_data, sm, out_dir, analysis)
         clean_components(yaml_data)
         process_output(yaml_data, model_data, output_list, out_dir, sm, s,
@@ -761,6 +763,9 @@ def main(yaml_filename):
 
     # Remove all handlers from the logger for proper work in the consecutive runs
     logger.handlers.clear()
+
+    # Needed for control file test in a test suite
+    return True
 
 
 def process_print_system_options(model_data, sm, out_dir, analysis):
