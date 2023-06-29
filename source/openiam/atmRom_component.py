@@ -18,8 +18,12 @@ from openiam.openiam_cf_commons import process_parameters, process_dynamic_input
 try:
     import components.atmosphere as atmModel
 except ImportError:
-    print('\nERROR: Unable to load ROM for Atmosperic ROM component\n')
+    print('\nERROR: Unable to load ROM for Atmospheric ROM component\n')
     sys.exit()
+
+
+EDX_WINDOWS_ATMROM_LIB_HTTP = 'https://edx.netl.doe.gov/resource/fc330991-7a17-46b6-8995-17feefdf414c'
+GITLAB_WINDOWS_ATMROM_LIB_HTTP = 'https://gitlab.com/NRAP/OpenIAM/-/blob/master/source/components/atmosphere/atmdisrom.dll'
 
 
 class AtmosphericROM(ComponentModel):
@@ -125,6 +129,30 @@ class AtmosphericROM(ComponentModel):
             header_file_dir = atmModel.__path__[0]
 
         self.library = os.sep.join([header_file_dir, library_name])
+        library_folder = header_file_dir
+
+        if not self.model_data_check():
+            if platform == "win32":
+                error_msg = ''.join([
+                    'Atmospheric ROM component "{}" cannot be created as the ',
+                    'required library file "{}" is missing in the folder\n {}.\n',
+                    'For Windows OS the required library file "{}" can be downloaded ',
+                    'from a corresponding folder on EDX here:\n{}\n or directly ',
+                    'from GitLab here:\n{}.\nThe downloaded file should be ',
+                    'placed into the folder\n{}.']).format(
+                        name, library_name, library_folder, library_name,
+                        EDX_WINDOWS_ATMROM_LIB_HTTP, GITLAB_WINDOWS_ATMROM_LIB_HTTP,
+                        library_folder)
+            else:
+                error_msg = ''.join([
+                    'Atmospheric ROM component "{}" cannot be created as the ',
+                    'required library file "{}" is missing in the folder\n {}.\n',
+                    'For non-Windows OS the required library file "{}" should ',
+                    'be compiled using the files provided in the folder\n{}\nand ',
+                    'placed into the same folder.']).format(
+                        name, library_name, library_folder, library_name, library_folder)
+            logging.error(error_msg)
+            sys.exit()
 
         # Placeholder for keyword arguments of the 'model' method:
         # to let the system model know that this component needs the specified keyword arguments
@@ -419,6 +447,35 @@ class AtmosphericROM(ComponentModel):
                     component_data['Outputs'].remove(source)
                     for ip in range(len(component_data['locX'])):
                         component_data['Outputs'].append(source + '_s{0:03}'.format(ip))
+
+
+    @staticmethod
+    def model_data_check():
+        """
+        Check whether required library file for Atmospheric ROM component was
+        downloaded/compiled and placed to the right folder.
+        """
+
+        check_flag = 0
+
+        # Specify name of and path to dynamic library
+        if platform in ("linux", "linux2"):
+            # linux
+            library_name = "atmdisrom.so"
+        elif platform == "darwin":
+            # OS X
+            library_name = "atmdisrom.dylib"
+        elif platform == "win32":
+            # Windows...
+            library_name = "atmdisrom.dll"
+
+        library = os.sep.join([
+            IAM_DIR, 'source', 'components', 'atmosphere', library_name])
+
+        if not os.path.isfile(library):
+            check_flag = check_flag + 1
+
+        return (check_flag == 0)
 
 
 if __name__ == "__main__":

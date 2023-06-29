@@ -281,6 +281,8 @@ class Tests(unittest.TestCase):
                             'Pressure at time t={} days is {} Pa but should be {} Pa'
                             .format(str(t), str(q), str(tx)))
 
+    @unittest.skipIf(AtmosphericROM.model_data_check() == False,
+                     "Atmospheric ROM component library file is not present.")
     def test_atm(self):
         """Tests atmospheric ROM component.
 
@@ -357,6 +359,8 @@ class Tests(unittest.TestCase):
                             'Atmospheric ROM out_flag at time {} is {} but should be {}'
                             .format(str(time), str(sv), str(tv)))
 
+    @unittest.skipIf(CarbonateAquifer.model_data_check() == False,
+                     "Carbonate Aquifer component library file is not present.")
     def test_carb_aquifer(self):
         """Tests the carbonate aquifer component.
 
@@ -1155,6 +1159,8 @@ class Tests(unittest.TestCase):
                             'Flow rate {} is {} but should be {}'
                             .format(l, str(results[l][num_years-1]), str(tf)))
 
+    @unittest.skipIf(CarbonateAquifer.model_data_check() == False,
+                     "Carbonate Aquifer component library file is not present.")
     def test_coupled_reservoir_open_carbonate_forward(self):
         """Tests coupling of reservoir, wellbore and aquifer components.
 
@@ -2905,7 +2911,10 @@ class Tests(unittest.TestCase):
                                 'CO2 saturation at t={} days is {} but should be {}'
                                 .format(t, s, ts))
 
-
+    @unittest.skipIf(CarbonateAquifer.model_data_check() == False,
+                     "Carbonate Aquifer component library file is not present.")
+    @unittest.skipIf(AtmosphericROM.model_data_check() == False,
+                     "Atmospheric ROM component library file is not present.")
     def test_openiam_cf(self):
         """Tests Control File functionality of the NRAP-Open-IAM.
 

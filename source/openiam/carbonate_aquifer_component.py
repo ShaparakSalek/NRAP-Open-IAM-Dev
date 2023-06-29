@@ -10,7 +10,7 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    from openiam import IAM_DIR, SystemModel, ComponentModel
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
@@ -21,6 +21,10 @@ try:
 except ImportError:
     print('\nERROR: Unable to load ROM for Carbonate Aquifer component\n')
     sys.exit()
+
+
+EDX_WINDOWS_CAAQ_LIB_HTTP = 'https://edx.netl.doe.gov/resource/fc330991-7a17-46b6-8995-17feefdf414c'
+GITLAB_WINDOWS_CAAQ_LIB_HTTP = 'https://gitlab.com/NRAP/OpenIAM/-/blob/master/source/components/aquifer/carbonate/carbonate.dll'
 
 
 class CarbonateAquifer(ComponentModel):
@@ -188,6 +192,31 @@ class CarbonateAquifer(ComponentModel):
             library_name = "carbonate.dll"
 
         self.library = os.sep.join([self.header_file_dir, 'carbonate', library_name])
+        library_folder = os.sep.join([self.header_file_dir, 'carbonate'])
+
+        if not self.model_data_check():
+            if platform == "win32":
+                error_msg = ''.join([
+                    'Carbonate Aquifer component "{}" cannot be created as ',
+                    'the required library file "{}" is missing in the folder\n {}.\n\n',
+                    'For Windows OS the required library file "{}" can be downloaded ',
+                    'from a corresponding folder on EDX here:\n{}\n or directly ',
+                    'from GitLab here:\n{}.\nThe downloaded file should be placed into ',
+                    'the folder\n{}.']).format(name, library_name, library_folder,
+                                               library_name, EDX_WINDOWS_CAAQ_LIB_HTTP,
+                                               GITLAB_WINDOWS_CAAQ_LIB_HTTP,
+                                               library_folder)
+            else:
+                error_msg = ''.join([
+                    'Carbonate Aquifer component "{}" cannot be created as ',
+                    'the required library file "{}" is missing in the folder\n {}.\n\n',
+                    'For non-Windows OS the required library file "{}" should ',
+                    'be compiled using the files provided in the folder\n{}\nand ',
+                    'placed into the same folder.']).format(name, library_name,
+                                                          library_folder,
+                                                          library_name, library_folder)
+            logging.error(error_msg)
+            sys.exit()
 
         # Set default parameters of the component model
         self.add_default_par('ithresh', value=2)
@@ -568,6 +597,35 @@ class CarbonateAquifer(ComponentModel):
                 print('Unable to find parameter ' + sparam)
 
         self.add_par_linked_to_par('aqu_thick', connect[sparam])
+
+
+    @staticmethod
+    def model_data_check():
+        """
+        Check whether required library file for Carbonate Aquifer component was
+        downloaded/compiled and placed to the right folder.
+        """
+
+        check_flag = 0
+
+        # Specify name of and path to dynamic library
+        if platform in ("linux", "linux2"):
+            # linux
+            library_name = "carbonate.so"
+        elif platform == "darwin":
+            # OS X
+            library_name = "carbonate.dylib"
+        elif platform == "win32":
+            # Windows
+            library_name = "carbonate.dll"
+
+        library = os.sep.join([
+            IAM_DIR, 'source', 'components', 'aquifer', 'carbonate', library_name])
+
+        if not os.path.isfile(library):
+            check_flag = check_flag + 1
+
+        return (check_flag == 0)
 
 
 if __name__ == "__main__":
