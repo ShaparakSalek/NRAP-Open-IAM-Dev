@@ -45,6 +45,7 @@ from .monitoring_tool_component import (
     MonitoringTool1, MonitoringTool2, MonitoringTool3)
 from .monitoring_scheduler_component import (
     MonitoringScheduler1, MonitoringScheduler2, MonitoringScheduler3)
+from .area_estimate_component import AreaEstimate
 
 
 __version__ = 'alpha_2.7.2-23.08.25'
@@ -102,5 +103,6 @@ __all__ = ['IAM_DIR',
            'MonitoringTool3',
            'MonitoringScheduler1',
            'MonitoringScheduler2',
-           'MonitoringScheduler3'
+           'MonitoringScheduler3',
+           'AreaEstimate'
            ]

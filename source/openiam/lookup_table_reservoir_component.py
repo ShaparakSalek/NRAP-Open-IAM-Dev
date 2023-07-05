@@ -979,8 +979,11 @@ class LookupTableReservoir(ComponentModel):
 
         if self.grid_obs_requested:
             interpr_out = interpr(time_point)
+            if time_point == init_time_point:
+                self.initial_pressure = interpr_out['pressure']
             for nm in interpr_out:
                 out[nm] = interpr_out[nm]
+            out['initial_pressure'] = self.initial_pressure
         else:
             if self.num_points == 1:
                 interpr_out = interpr(

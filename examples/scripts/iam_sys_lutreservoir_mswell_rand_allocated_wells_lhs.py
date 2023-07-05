@@ -9,7 +9,7 @@ into each subdomain.
 This example requires the additional Kimberlina data set.
 Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
 Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following places:
-1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
+1. https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded data set should be placed here:
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):
         msg = ''.join(['\nKimberlina data set can be downloaded ',
                        'from one of the following places:\n',
-                       '1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam \n',
+                       '1. https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam \n',
                        '2. https://gitlab.com/NRAP/Kimberlina_data  \n',
                        'Check this example description for more information.'])
         logging.error(msg)

@@ -11,7 +11,7 @@ $ python iam_sys_lutreservoir_4locs_3d_h5.py
 import sys
 import os
 import logging
-# import h5py
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
@@ -95,11 +95,12 @@ if __name__ == '__main__':
 
     # Setup locations
     well_xyzs = np.array([
-        [100001.0, 347440.0, -2248.0],
-        [103967.0, 348875.0, -2297.0],
-        [101880.0, 358115.0, -2269.0],
-        [100921.0, 358494.0, -2283.0],
-        [100000.21436359595, 347431.0728592322, -2248.862731934832]])
+        [104578.81084533, 356236.57766141, -1936.36545293],
+        [104451.79184157, 356474.16271928, -1946.32763555],
+        [104217.36595839, 356672.65479487, -1877.48687007],
+        [104357.41590664, 356399.26734464, -1914.74868867],
+        [104116.54025884, 356392.68616478, -1900.37271035],
+        [104637.38453673, 356298.44194274, -1940.90245972]])
 
     # xmin = 95152.64220897049     # np.min(x)
     # xmax = 113873.17170033549    # np.max(x)
@@ -152,7 +153,7 @@ if __name__ == '__main__':
         print('CO2 saturation at location {}:'.format(i+1), saturation, sep='\n')
         print('-----------------------------------')
         ax[0].plot(time_array/365.25, pressure/1.0e+6, linespec[i],
-                    label='wellbore '+str(i+1))
+                   label='wellbore '+str(i+1))
         ax[0].set_xlabel('Time, [years]')
         ax[0].set_ylabel('Pressure, [MPa]')
         ax[1].plot(time_array/365.25, saturation, linespec[i],

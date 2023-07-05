@@ -12,7 +12,7 @@ based on the probability of whether there is an impact to groundwater at each gr
 
 This example requires the additional FutureGen 2.0 data set.
 FutureGen 2.0 data set can be downloaded from the following source:
-https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam
 
 The downloaded data set should be placed here:
     source/components/reservoir/lookuptables/FutureGen2/1008_sims
