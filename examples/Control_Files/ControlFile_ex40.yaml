@@ -7,7 +7,7 @@
 # Dissolved_CO2_dx, Dissolved_CO2_dy, and Dissolved_CO2_dz. Note that aquifers
 # to be used for TTDS plots must be included in the ComponentNameList.
 # For an explanation of the MonitoringLocations section of the TTFD plot,
-# see ControlFile_ex39.yaml.
+# see ControlFile_ex39a.yaml.
 #
 # For the injection site(s) to be plotted, the TTFD plot must
 # include PlotInjectionSites: True. When using a LookupTableReservoir,

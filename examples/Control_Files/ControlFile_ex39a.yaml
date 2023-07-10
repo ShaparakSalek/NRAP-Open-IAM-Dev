@@ -99,12 +99,6 @@ MultisegmentedWellbore1:
         logAqu2Perm:
             vary: False
             value: -13.05
-        logAqu3Perm:
-            vary: False
-            value: -14.48
-        logAqu4Perm:
-            vary: False
-            value: -13.92
         logWellPerm:
             min: -14.0
             max: -11.0

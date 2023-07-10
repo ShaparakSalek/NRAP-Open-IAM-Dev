@@ -4,14 +4,17 @@ Code to create map-view figures showing the evolution of contaminant plumes and
 the estimated time to first detection (TTFD) for a given monitoring network.
 
 Examples illustrating applications of ttfd_plot method:
-    iam_sys_reservoir_mswell_fgen_ttfd_lhs.py
-    ControlFile_ex39.yaml
+    iam_sys_reservoir_mswell_futuregen_ttfdplot_dipping_strata.py
+    iam_sys_reservoir_mswell_futuregen_ttfdplot_no_dip.py
+    iam_sys_reservoir_mswell_futuregen_ttfdplot_no_dip_lhs.py
+    ControlFile_ex39a.yaml
+    ControlFile_ex39b.yaml
     ControlFile_ex40.yaml
     ControlFile_ex41.yaml
     ControlFile_ex42.yaml
     ControlFile_ex43.yaml
 
-Last Modified: June, 2023
+Last Modified: July, 2023
 
 @author: Nate Mitchell (Nathaniel.Mitchell@NETL.DOE.GOV)
 @contributor: Veronika Vasylkivska (Veronika.Vasylkivska@NETL.DOE.GOV)
@@ -184,6 +187,9 @@ def ttfd_plot(yaml_data, model_data, sm, s,
     """
     plume_metric_abbrev = yaml_data['Plots'][name]['TTFD']['PlumeType']
     aq_name_list = yaml_data['Plots'][name]['TTFD']['ComponentNameList']
+
+    if not isinstance(aq_name_list, list):
+        aq_name_list = [aq_name_list]
 
     TTFD_yaml_input_dict = get_ttfd_plot_yaml_input(yaml_data, name)
 
@@ -2213,8 +2219,11 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                 for plumeMetricVal in plumeMetricValid:
                     X_temp = X[plumeMetric[:, :] == plumeMetricVal]
                     Y_temp = Y[plumeMetric[:, :] == plumeMetricVal]
-                    rgba = cmap(((plumeMetricVal) - np.min(levels))
-                                / (np.max(levels) - np.min(levels)))
+
+                    rgba = cmap(((plumeMetricVal / contourf_norm_factor
+                                  ) - np.min(levels)) / (
+                                      np.max(levels) - np.min(levels)))
+
                     plt.plot(X_temp / 1000, Y_temp / 1000, color=rgba[0:3],
                              marker='o', markerfacecolor=rgba[0:3],
                              linewidth=1, linestyle='none',
@@ -2403,11 +2412,12 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                     if len(plumeMetricValid) < min_num_points:
                         cmap = plt.cm.get_cmap(colormap)
                         for plumeMetricVal in plumeMetricValid:
-                            X_temp = X[plumeMetric[zRef, :, :] == plumeMetricVal]
-                            Y_temp = Y[plumeMetric[zRef, :, :] == plumeMetricVal]
+                            X_temp = X[plumeMetric_temp == plumeMetricVal]
+                            Y_temp = Y[plumeMetric_temp == plumeMetricVal]
 
-                            rgba = cmap(((plumeMetricVal) - np.min(levels))
-                                        / (np.max(levels) - np.min(levels)))
+                            rgba = cmap(((plumeMetricVal / contourf_norm_factor
+                                          ) - np.min(levels)) / (
+                                              np.max(levels) - np.min(levels)))
 
                             ax.plot(X_temp / 1000, Y_temp / 1000, color=rgba[0:3],
                                     marker='o', markerfacecolor=rgba[0:3],
