@@ -424,7 +424,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model
-    isUQAnalysisOn = 1 # 0: one forward run, 1: stochastic runs
+    isUQAnalysisOn = 0 # 0: one forward run, 1: stochastic runs
     isPlottingOn = 1
     to_save_png = False
 
@@ -540,7 +540,7 @@ if __name__ == "__main__":
 
     if isUQAnalysisOn == 0:
         # Run system model using current values of its parameters
-        sm.forward()  # system model is run deterministically
+        sm.forward(save_output=True)  # system model is run deterministically
 
         print('------------------------------------------------------------------')
         print('                  Forward method illustration ')

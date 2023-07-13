@@ -12,6 +12,10 @@ import collections
 import matk
 import re
 
+import warnings
+# Suppress FutureWarning on empty string check
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 # Set keys to filter out of system model parameters
 SYSTEM_PAR_IGNORE = ['user_value', 'init_value', 'deps', 'stderr', 'correl',
                      'mean', 'std', '_nominal']
@@ -61,7 +65,7 @@ def system_model_to_text(sm, out_dir, analysis):
                  'collectors']
 
     # Get values for each key in temp_keys
-    temp_values = [sm.__dict__[v] for v in temp_keys]
+    temp_values = [sm.__dict__[v] for v in temp_keys if v in sm.__dict__.keys()]
 
     # Set empty string to filter parameter names
     last_parname = ''

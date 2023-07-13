@@ -415,7 +415,11 @@ def process_output(yaml_data, model_data, output_list, out_dir, sm, s, analysis,
         np.savetxt(timefile, time_array / 365.25, fmt='%.12e',
                    delimiter=',', header='Time (years)')
 
-    if to_generate_comb_output:
-        outfile = os.path.join(out_dir, 'combined_output.pkl')
-        with open(outfile, 'wb') as output_dump:
-            pickle.dump(yaml_data, output_dump)
+    try:
+        # No need to save pickled output for script runs
+        not_yaml = yaml_data['not_yaml']
+    except KeyError:
+        if to_generate_comb_output:
+            outfile = os.path.join(out_dir, 'combined_output.pkl')
+            with open(outfile, 'wb') as output_dump:
+                pickle.dump(yaml_data, output_dump)

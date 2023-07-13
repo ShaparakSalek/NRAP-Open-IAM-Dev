@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 from re import sub
+from datetime import datetime
 
 import numpy as np
 
@@ -21,12 +22,15 @@ from matk.parameter import Parameter
 from matk.observation import Observation
 from matk.ordereddict import OrderedDict
 from openiam.iam_sampleset import SampleSet
+from openiam.openiam_cf_text import system_model_to_text, component_models_to_text
+from openiam.openiam_cf_output import process_output
 
 try:
     from openiam.iam_gridded_observation import GriddedObservation
 except ImportError:
     from .iam_gridded_observation import GriddedObservation
 
+import openiam as iam
 IAM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))))
 
@@ -107,6 +111,73 @@ class SystemModel(matk):
         # This flag indicates whether simulated values are associated with current parameters
         self._current = False
         self.model = self.system_model
+
+    def forward(self, pardict=None, workdir=None, reuse_dirs=False,
+                job_number=None, hostname=None, processor=None,
+                save_output=False, output_dir=None, output_sys_model=True,
+                output_component_models=True, data_flip=True,
+                gen_combined_output=True, gen_stats_file=True):
+        """
+        Run model with current values of parameters with options to save produced
+        outputs and information about system model itself and its components.
+        """
+
+        # Run forward model using matk.forward
+        results = super().forward(
+            pardict=pardict, workdir=workdir, reuse_dirs=reuse_dirs,
+            job_number=job_number, hostname=hostname, processor=processor)
+
+        # Check to see if user wants to save output
+        if save_output:
+            # Get current time
+            start_time = datetime.now()
+            now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
+
+            # Set output directory
+            if output_dir != None:
+                out_dir = os.path.join(IAM_DIR, output_dir)
+                out_dir = out_dir.format(datetime=now)
+                if not os.path.exists(os.path.dirname(out_dir)):
+                    os.mkdir(os.path.dirname(out_dir))
+            else:
+                out_dir = os.path.join(IAM_DIR, 'output')
+
+            if not os.path.exists(out_dir):
+                os.mkdir(out_dir)
+
+            # Set results output directory
+            csv_files_dir = os.path.join(out_dir, 'csv_files')
+
+            # Output IAM Version
+            output_header = "".join(["NRAP-Open-IAM version: {iam_version}",
+                         "\nRuntime: {now} \n"])
+            iam_version_msg = output_header.format(
+                iam_version=iam.__version__, now=now)
+            with open (os.path.join(out_dir, 'openiam_version_info.txt'), 'w') as f:
+                f.write(iam_version_msg)
+
+            # Output system model details
+            if output_sys_model:
+                system_model_to_text(self, out_dir, 'forward')
+
+            # Output component model details
+            if output_component_models:
+                component_models_to_text(
+                    self.__dict__['component_models'], out_dir, 'forward')
+
+            # Output results
+            result_data = {'Results': results, 'not_yaml': True}
+            output_choices = {'OutputType': data_flip,
+                              'GenerateOutputFiles': True,
+                              'GenerateCombOutputFile': gen_combined_output,
+                              'GenerateStatFiles': gen_stats_file}
+
+            component_model_objs = list(self.component_models.values())
+            output_list = {comp: comp.obs_base_names for comp in component_model_objs}
+
+            process_output(result_data, output_choices, output_list, out_dir,
+                           self, None, 'forward', self.time_array, csv_files_dir)
+        return results
 
     def add_component_model_object(self, cm_object):
         """
@@ -416,7 +487,7 @@ class SystemModel(matk):
         order = list(self.component_models.keys())
 
         # Find indices for components
-        comp1_idx, comp2_idx = order.index(comp1), order.index(comp2)
+        comp1_idx = order.index(comp1)
 
         # Remove comp2 from list of ordered component models
         order.remove(comp2)
