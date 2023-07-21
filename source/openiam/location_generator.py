@@ -17,7 +17,8 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 
-def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None):
+def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None, 
+                       z_min=None, z_max=None):
     """ Generate x- and y-coordinates uniformly within the defined domain.
 
     :param x_min: lower boundary of the domain along x-axis
@@ -31,6 +32,12 @@ def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None):
 
     :param y_max: upper boundary of the domain along y-axis
     :type y_max: float
+    
+    :param z_min: lower boundary of the domain along z-axis. None is not used.
+    :type z_min: float
+
+    :param z_max: upper boundary of the domain along z-axis. None is not used.
+    :type z_max: float
 
     :param num_locations: number of locations to be generated
     :type num_locations: int
@@ -49,16 +56,21 @@ def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None):
         prng = RandomState(ceil(seed))  # using ceil since seed has to be an integer
 
     # Generate uniform random variables and transform according to the defined setup
-    x_coords = x_min+(x_max-x_min)*prng.rand(num_locations)
-    y_coords = y_min+(y_max-y_min)*prng.rand(num_locations)
+    x_coords = x_min + (x_max - x_min) * prng.rand(num_locations)
+    y_coords = y_min + (y_max - y_min) * prng.rand(num_locations)
+    
+    if z_min is not None and z_max is not None:
+        z_coords = z_min + (z_max - z_min) * prng.rand(num_locations)
+    else:
+        z_coords = None
 
-    return x_coords, y_coords
+    return x_coords, y_coords, z_coords
 
 
 class LocationGenerator(ComponentModel):
     """ NRAP-Open-IAM LocationGenerator component class. """
     def __init__(self, name, parent, x_min=0, x_max=0, y_min=1000, y_max=1000,
-                 num_locations=1, reproducible=True):
+                 num_locations=1, reproducible=True, z_min=None, z_max=None):
         """
         Constructor method of LocationGenerator class
 
@@ -106,6 +118,27 @@ class LocationGenerator(ComponentModel):
         self.y_min = y_min
         self.y_max = y_max
         self.num_locations = num_locations
+        
+        # The z coordinates produced will be None if z_min and/or z_max are None.
+        # The z values are taken as being negative for depths beneath the surface. 
+        # If the input used positive values, the min and max need to be swapped.
+        if z_min is not None and z_max is not None:
+            if z_min > 0:
+                z_min = -z_min
+            
+            if z_max > 0:
+                z_max = -z_max
+            
+            if z_max < z_min:
+                z_min_copy = z_min
+                
+                z_min = z_max
+                z_max = z_min_copy
+                
+                del z_min_copy
+        
+        self.z_min = z_min
+        self.z_max = z_max
 
         # Set a flag indicating whether for each new simulation
         # the distribution will be reproducible.
@@ -122,7 +155,7 @@ class LocationGenerator(ComponentModel):
         self.run_frequency = 1
 
     def simulation_model(self, p):
-        """ Return x- and y-coordinates of well locations."""
+        """ Return x-, y-, and z-coordinates of well locations."""
         # Obtain the default values of the parameters from dictionary of default parameters
         actual_p = {k: v.value for k, v in self.default_pars.items()}
         # Update default values of parameters with the provided ones
@@ -131,16 +164,16 @@ class LocationGenerator(ComponentModel):
         # The generated 'random' (well) locations will be the same
         # for the runs with the same seed and on the same machine
         if self.reproducible:    # if reproducible results are needed
-            x_coords, y_coords = generate_locations(self.x_min, self.x_max,
-                                                    self.y_min, self.y_max,
-                                                    self.num_locations,
-                                                    seed=actual_p['seed'])
+            x_coords, y_coords, z_coords = generate_locations(
+                self.x_min, self.x_max, self.y_min, self.y_max, 
+                self.num_locations, seed=actual_p['seed'], 
+                z_min=self.z_min, z_max=self.z_max)
         else:
-            x_coords, y_coords = generate_locations(self.x_min, self.x_max,
-                                                    self.y_min, self.y_max,
-                                                    self.num_locations)
-
-        out = {'locX': x_coords, 'locY': y_coords}
+            x_coords, y_coords, z_coords = generate_locations(
+                self.x_min, self.x_max, self.y_min, self.y_max, 
+                self.num_locations, z_min=self.z_min, z_max=self.z_max)
+        
+        out = {'locX': x_coords, 'locY': y_coords, 'locZ': z_coords}
 
         return out
 

@@ -40,7 +40,7 @@ from .fault_leakage_component import FaultLeakage
 from .parameter_setup_component import (
     ParameterSetup1, ParameterSetup2, ParameterSetup3, ParameterSetup4, ParameterSetup5)
 from .configurer_component import (
-    PressureBasedRiskConfigurer, DataBasedRiskConfigurer)
+    PressureBasedRiskConfigurer, DataBasedRiskConfigurer, WellDepthRiskConfigurer)
 from .monitoring_tool_component import (
     MonitoringTool1, MonitoringTool2, MonitoringTool3)
 from .monitoring_scheduler_component import (
@@ -96,6 +96,7 @@ __all__ = ['IAM_DIR',
            'ParameterSetup5',
            'PressureBasedRiskConfigurer',
            'DataBasedRiskConfigurer',
+           'WellDepthRiskConfigurer',
            'MonitoringTool1',
            'MonitoringTool2',
            'MonitoringTool3',
