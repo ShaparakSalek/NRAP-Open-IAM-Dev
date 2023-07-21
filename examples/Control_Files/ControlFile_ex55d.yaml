@@ -1,11 +1,12 @@
 # OpenIAM Control File Example 55d
 #
-# This example is similar to control file example 55b, but it uses the TimeList 
-# option (under 'Workflow: Options:') for the area of review (AoR) Workflow. Here, 
-# TimeList is given as 'All', specifying the use of all model times. TimeList 
-# could be given as a list of specific years, however (e.g., 'TimeList: [0, 1, 5, 10, 15 20]'). 
-# The TimeList provided will be used by each of the four AoR plots made as well as the 
-# overall AoR Workflow plot (i.e., the plot that reflects all metrics).
+# This example is similar to control file example 55b, but it uses the TimeList
+# option (under 'Workflow: Options:') for the area of review (AoR) Workflow.
+# Here, TimeList is given as 'All', specifying the use of all model times.
+# TimeList could be given as a list of specific years, however
+# (e.g., 'TimeList: [0, 1, 5, 10, 15 20]'). The TimeList provided will be used
+# by each of the four AoR plots made as well as the overall AoR Workflow plot
+# (i.e., the plot that reflects all metrics).
 #
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
@@ -13,6 +14,11 @@
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55d.yaml
+#
+# Last Modified: July, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20

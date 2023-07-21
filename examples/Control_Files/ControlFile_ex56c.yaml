@@ -1,15 +1,20 @@
 # OpenIAM Control File Example 56c
 #
-# This example is similar to examples 31a and 56b, but it specifies a critical pressure 
-# value (22.07 MPa). This critical pressure is lower than the critical pressure calculated 
-# for examples 31a and 55e (22.78 MPa), given the brineDensity value used in those examples 
-# (1050 kg/(m^3)). The lower critical pressure will allow for higher CO2 and brine leakage 
-# rates, potentially making the area of review (AoR) larger. The chosen critical pressure 
-# is given to the wellbore component through the entries under 'WellboreOptions' 
-# (by giving the critPressure parameter and having both critPressureApproach and 
-# enforceCritPressure set to True). It is also given under the 'Options' section under 
-# 'Workflow'.
+# This example is similar to examples 31a and 56b, but it specifies a critical
+# pressure value (22.07 MPa). This critical pressure is lower than the critical
+# pressure calculated for example 31a (22.78 MPa), given the brineDensity value
+# used in the example (1050 kg/(m^3)). The lower critical pressure will allow
+# for higher CO2 and brine leakage rates, potentially making the area of
+# review (AoR) larger. The chosen critical pressure is given to the wellbore
+# component through the entries under 'WellboreOptions' (by giving
+# the critPressure parameter and having both critPressureApproach and
+# enforceCritPressure set to True). It is also given under the 'Options' section
+# under 'Workflow'.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56c.yaml
+#
+# Last Modified: July, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10

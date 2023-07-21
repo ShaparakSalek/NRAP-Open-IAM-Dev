@@ -1,76 +1,88 @@
 # OpenIAM Control File Example 55a
 #
-# This example demonstrates the use of the Workflow section in a control file. 
-# The Workflow section can be used to run specific analyses. For example, 
-# while the AoR plot type shows results for one metric at a time (e.g., pressure, 
-# CO2saturation, pH_volume, or TDS_volume), the AoR Workflow can automatically 
-# run each of these AoR plots and then compile the results into a single AoR 
-# figure that reflects each of the metrics. The name of this figure is set by 
-# the entry 'AoRFigureName' under 'Options'. 
+# This example demonstrates the use of the Workflow section in a control file.
+# The Workflow section can be used to run several specific analyses. For example,
+# while the AoR plot type shows results for one metric at a time (e.g., pressure,
+# CO2saturation, pH_volume, or TDS_volume), the AoR Workflow can automatically
+# run each of these AoR plots and then compile the results into a single AoR
+# figure that reflects each of the metrics. The name of this figure is set by
+# the entry 'AoRFigureName' under 'Options'.
 #
-# A Workflow is intended to allow complex analyses with minimal input from the user. 
-# For example, you could choose to only provide inputs for the LookupTableReservoir 
-# component (i.e., data from reservoir simulations for your GCS site) and then let all
-# other options resort to defaults (including the parameter values for each component). 
-# The 'Stratigraphy' and 'ModelParams' sections are still required, however. The 
-# Workflow will save a .yaml file that includes all of the component and plot entries 
-# that were setup automatically. This .yaml file will have the same name as the 
-# .yaml file used but with "_WorkflowSetup" included at the end. The Workflow section 
-# will also be removed from this new .yaml file, so that a simulation run with 
-# the file would not add all of the components again, making redundant copies.
+# A Workflow is intended to allow complex analyses with minimal input from
+# a user. For example, a user could choose to only provide inputs for
+# the LookupTableReservoir component (i.e., data from reservoir simulations
+# for the GCS site) and then let all other options resort to defaults (including
+# the parameter values for each component). The 'Stratigraphy' and
+# 'ModelParams' sections are still required, however. The Workflow will
+# save a .yaml file that includes all of the component and plot entries
+# that were setup automatically. This .yaml file will have the same name
+# as the .yaml file used but with "_WorkflowSetup" included at the end.
+# The Workflow section will also be removed from this new .yaml file, so that
+# a simulation run with the file would not add all of the components again,
+# making redundant copies.
 #
-# Control files with Workflow entries are different from other control files 
-# because the Workflow can automatically set up the component and plot entries - 
-# you do not have to set up the components and plots yourself. You can
-# set up those sections manually if you set certain options to False 
-# (AutomateResCompSetup for the reservoir component, AutomateWellCompSetup 
-# for thewellbore component, AutomateAqCompSetup for the aquifer component, 
-# and AutomatePlotsSetup for the Plots section). The default setting for these 
-# entries are True, so by default the Workflow section will assume you have 
-# not set up those sections. For pressures to be used in the delineation of 
-# an overall AoR, a critical pressure must be used. A specific critical pressure 
-# can be given through the 'CriticalPressureMPa' entry (in MPa), but the default 
-# setting is 'CriticalPressureMPa: Calculated'. A calculated critical pressure 
-# is obtained with the normal approach used by the OpenWellbore component 
+# Control files with Workflow entries are different from other control files
+# because the Workflow can automatically set up the component and plot entries -
+# user does not have to set up the components and plots themself. Users can
+# set up those sections manually if they set certain options to False
+# (AutomateResCompSetup for the reservoir component, AutomateWellCompSetup
+# for thewellbore component, AutomateAqCompSetup for the aquifer component,
+# and AutomatePlotsSetup for the Plots section). The default setting for these
+# entries are True, so by default the Workflow section will assume users has
+# not set up those sections. For pressures to be used in the delineation of
+# an overall AoR, a critical pressure must be used. A specific critical pressure
+# can be given through the 'CriticalPressureMPa' entry (in MPa), but the default
+# setting is 'CriticalPressureMPa: Calculated'. A calculated critical pressure
+# is obtained with the normal approach used by the OpenWellbore component
 # (see the documentation for the OpenWellbore component).
 #
-# If you do not provide any input under the 'Options' entry in the Workflow 
-# section, default options will be used. For example, the default approach 
-# is to have a LookupTableReservoir component using the FutureGen2 .csv files. 
-# If you have not downloaded those files and put them in the correct location 
-# (see below), this example will produce an error. The options that are normally 
-# entered in the section for a LookupTableReservoir component can be entered under 
-# ReservoirOptions (e.g., FileDirectory and ParameterFilename). The default wellbore 
-# type is OpenWellbore - that is currently the only wellbore type allowed for AoR 
-# analyses, but that could change in future updates. The default aquifer component 
-# type is GenericAquifer. The wellbore locations are set with the Locations entry 
-# under 'WellboreOptions' (with same format as the normal Locations entry for 
-# wellbore components). If no wellbore locations are provided, the LookupTableReservoir 
-# .csv files are used to set the locations (with default settings of thin_point_density: True, 
-# min_x_spacing: 20000, and min_y_spacing: 20000 - see Control File example 32a). The 
-# wellbores will leak to the aquifer specified with the 'AquiferName' entry under 'Options'. 
-# The aquifer component will also be set up to represent that aquifer. If AquiferName is not 
-# given, the default setting is 'aquifer2'. Parameter values for the reservoir, wellbore, 
-# and aquifer components can be entered under the 'Parameters' sections under the 
-# 'ReservoirOptions', 'WellboreOptions', and 'AquiferOptions' entries, respectively. These 
-# parameter inputs can be given with min and max values for simulations using the lhs or 
-# parstudy analysis types. This simulation uses the forward analysis type, however.
-# The 'Controls' entries under 'WellboreOptions' can be used to set how the wellbore handles
-# critical pressures (e.g., see control file example 31a). If these entries are not provided, 
-# the default settings are 'critPressureApproach: True' and 'enforceCritPressure: False'.
+# If user does not provide any input under the 'Options' entry in the Workflow
+# section, default options will be used. For example, the default approach
+# is to have a LookupTableReservoir component using the FutureGen2 .csv files.
+# If user has not downloaded those files and put them in the correct location
+# (see below), this example will produce an error. The options that are
+# normally entered in the section for a LookupTableReservoir component can be
+# entered under ReservoirOptions (e.g., FileDirectory and ParameterFilename).
+# The default wellbore type is OpenWellbore - that is currently the only
+# wellbore type allowed for AoR analyses, but that could change in future
+# updates. The default aquifer component type is GenericAquifer. The wellbore
+# locations are set with the Locations entry under 'WellboreOptions' (with same
+# format as the normal Locations entry for wellbore components). If no wellbore
+# locations are provided, the LookupTableReservoir .csv files are used to set
+# the locations (with default settings of thin_point_density: True,
+# min_x_spacing: 20000, and min_y_spacing: 20000 - see Control File example 32a).
+# The wellbores will leak to the aquifer specified with the 'AquiferName'
+# entry under 'Options'. The aquifer component will also be set up to represent
+# that aquifer. If AquiferName is not given, the default setting is 'aquifer2'.
+# Parameter values for the reservoir, wellbore, and aquifer components
+# can be entered under the 'Parameters' sections under the 'ReservoirOptions',
+# 'WellboreOptions', and 'AquiferOptions' entries, respectively. These
+# parameter inputs can be given with min and max values for simulations
+# using the lhs or parstudy analysis types. This simulation uses the forward
+# analysis type, however.
+# The 'Controls' entries under 'WellboreOptions' can be used to set how
+# the wellbore handles critical pressures (e.g., see Control File example 31a).
+# If these entries are not provided, the default settings are
+# 'critPressureApproach: True' and 'enforceCritPressure: False'.
 #
-# Note that with the setup used here, the results are identical to those of control file 
-# example 32a. That example does not produce an overall area of review, however. Additionally, 
-# a control file using a Workflow section can allow for more convenient changes (e.g., you do 
-# not need to change a component's name in multiple locations, like the Components list, the 
-# component entry itself, or any Connection entries).
+# Note that with the setup used here, the results are identical to those
+# of control file example 32a. That example does not produce an overall
+# area of review, however. Additionally, a control file using a Workflow
+# section can allow for more convenient changes (e.g., user does
+# not need to change a component's name in multiple locations, like the
+# Components list, the component entry itself, or any Connection entries).
 #
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
 # https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
 #
 # The downloaded data set should be placed here:
-#    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#     source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55a.yaml
+#
+# Last Modified: July, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20

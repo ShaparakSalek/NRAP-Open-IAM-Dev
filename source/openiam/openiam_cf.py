@@ -249,7 +249,7 @@ def main(yaml_filename):
         time_array = 365.25 * np.arange(0.0, num_years + time_step, time_step)
 
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
-    
+
     # Create system model
     sm = iam.SystemModel(model_kwargs=sm_model_kwargs)
 
@@ -263,35 +263,38 @@ def main(yaml_filename):
             strata[-1].connect_with_system()
     else:
         strata.connect_with_system()
-    
+
     if 'Workflow' in yaml_data:
         if isinstance(yaml_data['Workflow'], dict):
             if spatially_variable_strata:
                 strata_comp = strata[-1]
             else:
                 strata_comp = strata
-            
+
             yaml_data = workflow.iam_workflow_setup(yaml_data, strata_comp)
-            
-            yaml_filename_workflow = yaml_filename[
-                0:yaml_filename.index('.')] + '_WorkflowSetup' + yaml_filename[
-                    yaml_filename.index('.'):]
-            
-            # Write updated input YAML file, with the Workflow entry deleted so 
+
+            # Separate path to the file from the file name itself
+            filename_head, filename_tail = os.path.split(yaml_filename)
+
+            yaml_filename_workflow = filename_tail[
+                0:filename_tail.rindex('.')] + '_WorkflowSetup' + \
+                    filename_tail[filename_tail.rindex('.'):]
+
+            # Write updated input YAML file, with the Workflow entry deleted so
             # it won't be redone if this .yaml is given to openiam_cf.py.
             yaml_data_copy = yaml_data.copy()
-            
+
             del yaml_data_copy['Workflow']
-            
+
             # add back the full analysis dictionary
             if analysis in ['lhs', 'parstudy']:
                 yaml_data_copy['ModelParams']['Analysis'] = analysis_dict.copy()
                 yaml_data_copy['ModelParams']['Analysis']['type'] = analysis
-            
+
             with open(os.path.join(out_dir, yaml_filename_workflow), 'w') as f:
                 yaml.dump(yaml_data_copy, f)
-            f.close()
-            
+            # f.close()
+
             del yaml_data_copy
 
     # Initialize component data that would keep the information
@@ -791,7 +794,7 @@ def main(yaml_filename):
             '\nSimulation results and plots can be found ',
             'in the output folder: \n{}']).format(model_data['OutputDirectory'])
     logging.info(info_msg)
-    
+
     if 'Workflow' in yaml_data:
         workflow.workflow_analysis(yaml_data, sm, analysis)
 

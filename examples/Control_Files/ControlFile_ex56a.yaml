@@ -1,15 +1,19 @@
 # OpenIAM Control File Example 56a
 #
 # This example is similar to example 55c in that it mostly
-# uses the default settings for the AoR Workflow. This example 
-# uses a SimpleReservoir component, however ('ReservoirComponentType: 
-# SimpleReservoir' under 'Workflow: Options'). When the reservoir 
-# component is not a LookupTableReservoir and no specific wellbore 
-# locations are given (under 'Options: WellboreOptions: Locations'), 
-# the default setting is to use the 'grid' placement option (see 
-# control file example 31a) with xmin and ymin values of -50 km, 
+# uses the default settings for the AoR Workflow. This example
+# uses a SimpleReservoir component, however ('ReservoirComponentType:
+# SimpleReservoir' under 'Workflow: Options'). When the reservoir
+# component is not a LookupTableReservoir and no specific wellbore
+# locations are given (under 'Options: WellboreOptions: Locations'),
+# the default setting is to use the 'grid' placement option (see
+# control file example 31a) with xmin and ymin values of -50 km,
 # xmax and ymax values of 50 km, and xsize and ysize values of 6.
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56a.yaml
+#
+# Last Modified: July, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10

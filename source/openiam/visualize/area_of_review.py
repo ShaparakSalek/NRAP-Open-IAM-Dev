@@ -185,9 +185,6 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
     :param output_names: List of observation names to match with component models and plot.
     :type output_names: list
 
-    :param locations: dictionary of locations assigned to each applicable component
-    :type locations: dict
-
     :param sm: OpenIAM System model for which plots are created
     :type sm: openiam.SystemModel object
 
@@ -197,6 +194,9 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
     :param output_list: Dictionary mapping component models to observations
     :type output_list: dict
+
+    :param locations: dictionary of locations assigned to each applicable component
+    :type locations: dict
 
     :param name: Figure Name to be used/created.
     :type name: str
@@ -241,6 +241,10 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
         as a .csv file
     :type save_results: bool
 
+    :param enforce_levels: option to enforce minimum and maximum levels for colorbars
+        on plots
+    :type enforce_levels: bool
+
     :return: None
     """
     # When a hypothetical wellbore is placed on the injection site itself, the
@@ -261,7 +265,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
     critPressureInput = yaml_input['CriticalPressureMPa']
 
-    # Get the stratigrapy information from the .yaml file
+    # Get the stratigraphy information from the .yaml file
     strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
     var_type = strata_var_info['var_type']
 
@@ -274,7 +278,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
         time_list = yaml_input['TimeList']
 
         if time_list == 'All':
-            time_index_list = range(0, len(time))
+            time_index_list = range(len(time))
         else:
             time_index_list = get_t_indices(time_list, time)
 
@@ -353,7 +357,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
             'used for the AoR plot.'])
 
         # This is used to check if the error was already logged. That way, it
-        # can logged only once.
+        # can be logged only once.
         critP_error_print_check = False
 
     elif not 'pressure' in output_names and critPressureInput is not None:
@@ -384,14 +388,16 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 # Convert to MPa
                 critPressureInput = critPressure / 1.0e+6
 
-        plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data,
-                         model_data, output_names, sm, name=name, analysis=analysis,
-                         savefig=savefig, title=title, figsize=figsize, figdpi=figdpi,
+        plot_AoR_results(aq_number, x_loc, y_loc, results,
+                         yaml_data, model_data, output_names, sm, name=name,
+                         analysis=analysis, savefig=savefig, title=title,
+                         figsize=figsize, figdpi=figdpi,
                          gen_font_size=gen_font_size,
                          axis_label_font_size=axis_label_font_size,
                          title_font_size=title_font_size, colormap=colormap,
                          bold_labels=bold_labels, save_results=save_results,
-                         InjectionCoordx=InjectionCoordx, InjectionCoordy=InjectionCoordy,
+                         InjectionCoordx=InjectionCoordx,
+                         InjectionCoordy=InjectionCoordy,
                          grid_option=grid_option, critPressureInput=critPressureInput,
                          var_type=var_type)
     else:
@@ -406,8 +412,9 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
             for time_index in time_index_list:
                 results, critPressure = get_AoR_results(
-                    x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
-                    time_option=time_option, time_index=time_index, var_type=var_type)
+                    x_loc, output_names, sm, s, output_list, yaml_data,
+                    analysis=analysis, time_option=time_option,
+                    time_index=time_index, var_type=var_type)
 
                 if len(results[results > 0].tolist()) > 0:
                     if np.min(results[results > 0]) < min_value:
@@ -479,7 +486,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
     if var_type == 'noVariation':
         critPressure = None
-    elif var_type == 'strikeAndDip' or var_type == 'LookupTable':
+    elif var_type in ['strikeAndDip', 'LookupTable']:
         critPressure = np.zeros((len(x_loc), 1))
 
     for output_nm in output_names:
@@ -489,22 +496,22 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
             # It it's an OpenWellbore and critPressureInput is 'Calculated',
             # get the critical pressure
             if isinstance(output_component, iam.OpenWellbore) and \
-                critPressureInput == 'Calculated':
-                    if var_type == 'noVariation' and critPressure is None:
-                        # If using uniform stratigraphy, only do this once
-                        critPressureVal = get_crit_pressure(
-                            output_component, sm=sm, yaml_data=yaml_data)
+                    critPressureInput == 'Calculated':
+                if var_type == 'noVariation' and critPressure is None:
+                    # If using uniform stratigraphy, only do this once
+                    critPressureVal = get_crit_pressure(
+                        output_component, sm=sm, yaml_data=yaml_data)
 
-                        critPressure = critPressureVal
+                    critPressure = critPressureVal
 
-                    elif var_type == 'strikeAndDip' or var_type == 'LookupTable':
-                        critPressureVal = get_crit_pressure(
-                            output_component, sm=sm, yaml_data=yaml_data)
+                elif var_type in ['strikeAndDip', 'LookupTable']:
+                    critPressureVal = get_crit_pressure(
+                        output_component, sm=sm, yaml_data=yaml_data)
 
-                        # Find the location index
-                        loc_ref = int(output_component.name.split('_')[-1])
+                    # Find the location index
+                    loc_ref = int(output_component.name.split('_')[-1])
 
-                        critPressure[loc_ref] = critPressureVal
+                    critPressure[loc_ref] = critPressureVal
 
             if output_nm in output_list[output_component]:
                 full_obs_nm = '.'.join([output_component.name, output_nm])
@@ -630,7 +637,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
 
     cmap = plt.cm.get_cmap(colormap)
 
-    # This is used to specify if the critical pressure was exceeded, If the metric
+    # This is used to specify if the critical pressure was exceeded, if the metric
     # is pressure and a critical pressure was given in the .yaml plot entry.
     title_pressure = ''
 
@@ -639,7 +646,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
     Pcrit_Included = False
 
     if np.max(results[:, 0]) != 0:
-        # I use np.max(results[:, 0]) * MAX_VAL_ADJUST in levels  because having
+        # I use np.max(results[:, 0]) * MAX_VAL_ADJUST in levels because having
         # the maximum level equal to the maximum value can cause the area with
         # the highest values to be left out (i.e., there would be an uncolored
         # area there).
@@ -746,7 +753,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
 
         # Plot colors for individual points so there is less ambiguity
         lgnd_check = False
-        for loc_ref in range(0, len(results[:, 0])):
+        for loc_ref in range(len(results[:, 0])):
             if results[loc_ref, 0] > 0 and results[loc_ref, 0] < np.Inf:
                 if not lgnd_check:
                     rgba = cmap(0)
@@ -796,7 +803,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                         results_temp[:, 0], pressure_levels, colors = 'r')
                     ncol_number += 1
 
-            elif var_type == 'strikeAndDip' or var_type == 'LookupTable':
+            elif var_type in ['strikeAndDip', 'LookupTable']:
                 # Gets rid of any nan values (from a wellbore being on the injection site)
                 x_loc_temp = x_loc[results[:, 0] > 0]
                 y_loc_temp = y_loc[results[:, 0] > 0]
@@ -822,16 +829,16 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                     title_pressure = ',\nAll Pressures Exceeded the Local P$_{crit}$ Values'
 
                 elif np.min(critPressureDiff[:, 0]) < 0 and \
-                    np.max(critPressureDiff[:, 0]) >= 0:
-                        title_pressure = ',\nCertain Pressures Exceeded the Local P$_{crit}$ Values'
+                        np.max(critPressureDiff[:, 0]) >= 0:
+                    title_pressure = ',\nCertain Pressures Exceeded the Local P$_{crit}$ Values'
 
-                        Pcrit_Included = True
+                    Pcrit_Included = True
 
-                        # The handle and label for this are created manually below
-                        plt.tricontour(
-                            x_loc_temp / 1000.0, y_loc_temp / 1000.0,
-                            critPressureDiff[:, 0], critPressureDiff_levels, colors = 'r')
-                        ncol_number += 1
+                    # The handle and label for this are created manually below
+                    plt.tricontour(
+                        x_loc_temp / 1000.0, y_loc_temp / 1000.0,
+                        critPressureDiff[:, 0], critPressureDiff_levels, colors = 'r')
+                    ncol_number += 1
 
     else:
         if enforce_levels and time_option:
@@ -965,7 +972,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
     if Pcrit_Included:
         if var_type == 'noVariation':
             critPressureLabel = 'P$_{crit}$'
-        elif var_type == 'strikeAndDip' or var_type == 'LookupTable':
+        elif var_type in ['strikeAndDip', 'LookupTable']:
             critPressureLabel = 'P > Local P$_{crit}$'
         legend_element_critPressure = Line2D([0], [0], color='r',
                                              lw=2, label=critPressureLabel)
@@ -1097,18 +1104,18 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 if var_type == 'noVariation':
                     results_formatted[1:None, 3] = np.ones(len(results)) * critPressureInput
 
-                elif var_type == 'strikeAndDip' or var_type == 'LookupTable':
+                elif var_type in ['strikeAndDip', 'LookupTable']:
                     results_formatted[1:None, 3] = critPressureInput[:, 0]
 
                 results_formatted[0, 4] = 'Critical Pressure Exceeded'
                 critPressureExceeded = np.zeros(len(results))
 
-                for locRef in range(0, len(results)):
+                for locRef in range(len(results)):
                     if var_type == 'noVariation':
                         if results[locRef, 0] >= critPressureInput:
                             critPressureExceeded[locRef] = 1
 
-                    elif var_type == 'stirkeAndDip' or var_type == 'LookupTable':
+                    elif var_type in ['stirkeAndDip', 'LookupTable']:
                         if results[locRef, 0] >= critPressureInput[locRef, 0]:
                             critPressureExceeded[locRef] = 1
 
@@ -1130,7 +1137,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             # Save the ouput for the simulation to a .csv file
             with open(filename, 'w', newline='') as f:
                 writer = csv.writer(f)
-                for row_ref in range(0, len(x_loc) + 1):
+                for row_ref in range(len(x_loc) + 1):
                     writer.writerow(results_formatted[row_ref, :])
 
             f.close()
@@ -1284,7 +1291,7 @@ def get_AoR_yaml_input(yaml_data, name, workflow_figure=False):
 
 def get_t_indices(time_list, time_array):
     """
-    Returns the time index corresponding with the time_array value closest to
+    Returns the time index corresponding to the time_array value closest to
     the times in time_list. Both time_list and time_array have units of years.
     """
     time_index_list = []
@@ -1367,14 +1374,16 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
         name_addition = ''
     else:
         time = sm.time_array / 365.25
-        fig_title = 'Area of Review Based on {}{},' + ' t = {} years'.format(time[time_index])
+        fig_title = 'Area of Review Based on {}{},' + ' t = {} years'.format(
+            time[time_index])
         name_addition = '_tIndex{}'.format(time_index)
 
     analysis = yaml_data['ModelParams']['Analysis']
 
-    if 'siz' in analysis:
-        realizations = analysis['siz']
-    else:
+    if yaml_data['s'] is not None: # lhs or parstudy was run
+        # Find number of run realizations
+        realizations = yaml_data['s'].samples.values.shape[0]
+    else: # for forward simulations
         realizations = 1
 
     if 'type' in analysis:
@@ -1423,7 +1432,7 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
     ncol_number = 0
 
     # AoR Figure
-    fig = plt.figure(figsize=figsize, dpi=figdpi)
+    _ = plt.figure(figsize=figsize, dpi=figdpi)
 
     ax = plt.gca()
     ax.set_facecolor(BACKGROUND_COLOR)

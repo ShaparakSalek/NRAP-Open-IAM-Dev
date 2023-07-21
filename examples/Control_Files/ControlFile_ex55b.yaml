@@ -1,8 +1,8 @@
 # OpenIAM Control File Example 55b
 #
-# This example is similar to control file example 55a, but it uses the 
-# LookupTableStratigraphy option (see control file examples 32b and 38). 
-# Because unit depths will vary over space, the critical pressure calculated 
+# This example is similar to control file example 55a, but it uses the
+# LookupTableStratigraphy option (see control file examples 32b and 38).
+# Because unit depths will vary over space, the critical pressure calculated
 # for each component will also vary over space.
 #
 # This example requires the additional FutureGen 2.0 data set.
@@ -11,6 +11,11 @@
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55b.yaml
+#
+# Last Modified: July, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20

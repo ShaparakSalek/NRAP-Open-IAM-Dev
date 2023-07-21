@@ -1,13 +1,17 @@
 # OpenIAM Control File Example 56d
 #
-# This example is similar to examples 31a and 56c, but it uses 
-# Latin Hypercube Sampling (lhs). Over 50 different realizations, 
-# the logResPerm value is varied between -9.9 and -10.4. The overall 
-# area of review (AoR) created will reflect the maximum areas of 
-# reservoir and aquifer impact across the 50 realizations. Additionally, 
+# This example is similar to examples 31a and 56c, but it uses
+# Latin Hypercube Sampling (lhs). Over 50 different realizations,
+# the logResPerm value is varied between -9.9 and -10.4. The overall
+# area of review (AoR) created will reflect the maximum areas of
+# reservoir and aquifer impact across the 50 realizations. Additionally,
 # this example includes the 'TimeList' entry under 'Workflow: Options:'.
 # An AoR plot will be made for all model times (years 0 to 10).
 #
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56d.yaml
+#
+# Last Modified: July, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10
