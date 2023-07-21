@@ -1,6 +1,6 @@
 """
 Code to create figures showing the stratigraphy created with
-openiam_cf_strata.py.
+strata.py.
 
 Examples illustrating applications or setup of stratigraphy_plot method:
     ControlFile_ex32b.yaml
@@ -34,8 +34,8 @@ import matplotlib.colors as clrs
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
-import openiam.openiam_cf_commons as iamcommons
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.commons as iamcommons
+import openiam.cfi.strata as iam_strata
 
 reservoir_components = ['LookupTableReservoir',
                         'SimpleReservoir',
@@ -151,7 +151,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     :param plot_indiv_strat_comps: option to plot the stratigraphy component
         created for each location within the control file interface. This
         option is provided to help verify that the functions within
-        openiam_cf_strata.py are behaving as expected. The tops of each unit
+        strata.py are behaving as expected. The tops of each unit
         are plotted as circles. Judging the match between the 3d planes and the
         points can be made easier by adjusting the view_elev and view_azimuth
         values (e.g., view_elev = 0 and view_azimuth is oriented along strike).

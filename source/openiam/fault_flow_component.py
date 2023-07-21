@@ -14,7 +14,7 @@ sys.path.append(os.path.join(source_folder, 'components', 'fault', 'fault_flow')
 
 try:
     from openiam import SystemModel, ComponentModel
-    from openiam.openiam_cf_commons import process_dynamic_inputs
+    from openiam.cfi.commons import process_dynamic_inputs
 except ImportError as err:
     print('Unable to load IAM class module: '+ str(err))
 

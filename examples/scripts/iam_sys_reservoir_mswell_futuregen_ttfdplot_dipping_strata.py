@@ -31,7 +31,7 @@ from openiam import (SystemModel, Stratigraphy, SimpleReservoir,
                      MultisegmentedWellbore, RateToMassAdapter, FutureGen2AZMI)
 
 import openiam as iam
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.strata as iam_strata
 import openiam.visualize as iam_vis
 
 

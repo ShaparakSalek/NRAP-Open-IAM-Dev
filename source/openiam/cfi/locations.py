@@ -3,15 +3,14 @@ Last modified: September 6th, 2022
 
 Authors: Veronika Vasylkivska, Nate Mitchell
 """
-
-
 import os
 import sys
 import logging
 import math
 import random
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 try:
     from openiam import IAM_DIR

@@ -18,7 +18,7 @@ except ImportError as err:
     print('Unable to load IAM class module: '+ str(err))
 import components.seal.seal_model as smod
 
-from openiam.openiam_cf_commons import process_dynamic_inputs
+from openiam.cfi.commons import process_dynamic_inputs
 
 try:
     import components.seal.seal_config as sconf

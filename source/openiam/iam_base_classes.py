@@ -22,8 +22,8 @@ from matk.parameter import Parameter
 from matk.observation import Observation
 from matk.ordereddict import OrderedDict
 from openiam.iam_sampleset import SampleSet
-from openiam.openiam_cf_text import system_model_to_text, component_models_to_text
-from openiam.openiam_cf_output import process_output
+from openiam.cfi.text import system_model_to_text, component_models_to_text
+from openiam.cfi.output import process_output
 
 try:
     from openiam.iam_gridded_observation import GriddedObservation

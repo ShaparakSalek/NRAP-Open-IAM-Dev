@@ -4,7 +4,7 @@ import re
 import logging
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 try:
     from openiam import IAM_DIR
@@ -12,7 +12,7 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 import openiam as iam
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.strata as iam_strata
 
 
 def process_parameters(component, component_data, name2obj_dict=None):
@@ -331,13 +331,13 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
 
     else:
         if 'Thickness' in par_name and ('shale' in par_name or 'aquifer' in par_name):
-            # Parameters like 'shale1Thickness' will not be in the default parameters, 
+            # Parameters like 'shale1Thickness' will not be in the default parameters,
             # but 'shaleThickness' will be.
             if 'shale' in par_name:
                 par_name = 'shaleThickness'
             elif 'aquifer' in par_name:
                 par_name = 'aquiferThickness'
-        
+
         par_val = comp.default_pars[par_name].value
 
     return par_val, run_again, run_again_info

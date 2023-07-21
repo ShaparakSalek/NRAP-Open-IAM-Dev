@@ -1,6 +1,6 @@
 """
 Code to create figures showing the stratigraphy created with
-openiam_cf_strata.py.
+strata.py in the folder cfi.
 
 Examples illustrating applications or setup of stratigraphy_plot method:
     ControlFile_ex32b.yaml
@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.strata as iam_strata
 
 
 DEPTH_LABEL = '{:.2f} m'

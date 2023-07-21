@@ -15,7 +15,7 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 import components.aquifer.generic.generic_aquifer_ROM as genrom
-from openiam.openiam_cf_commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.commons import process_parameters, process_dynamic_inputs
 
 GA_SCALAR_OBSERVATIONS = [
     'Dissolved_salt_volume', 'Dissolved_salt_dr', 'Dissolved_salt_dz',

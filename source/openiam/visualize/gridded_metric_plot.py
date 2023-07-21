@@ -20,7 +20,7 @@ from matplotlib import ticker
 
 from .label_setup import Y_LABEL_DICT
 from openiam.visualize import time_series
-import openiam.openiam_cf_commons as iamcommons
+import openiam.cfi.commons as iamcommons
 
 
 RC_FONT = {'family': 'Arial', 'weight': 'normal', 'size': None}

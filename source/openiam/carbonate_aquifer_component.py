@@ -14,7 +14,7 @@ try:
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
-from openiam.openiam_cf_commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.commons import process_parameters, process_dynamic_inputs
 
 try:
     import components.aquifer as aqmodel

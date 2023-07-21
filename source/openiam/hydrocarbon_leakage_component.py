@@ -18,8 +18,8 @@ except ImportError as err:
     print('Unable to import ComponentModel class:', err)
 
 import components.wellbore.hydrocarbon_leakage.hydrocarbon_leakage_ROM as hydrcarbrom
-from openiam.openiam_cf_commons import process_parameters
-import openiam.openiam_cf_strata as iam_strata
+from openiam.cfi.commons import process_parameters
+import openiam.cfi.strata as iam_strata
 
 class HydrocarbonLeakage(ComponentModel):
     """

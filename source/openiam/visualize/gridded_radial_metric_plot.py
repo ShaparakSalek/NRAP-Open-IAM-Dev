@@ -8,7 +8,7 @@ from matplotlib import cm
 from matplotlib import ticker
 
 from openiam.visualize import time_series
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.strata as iam_strata
 from .label_setup import Y_LABEL_DICT
 
 

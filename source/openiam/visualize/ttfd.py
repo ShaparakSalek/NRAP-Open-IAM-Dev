@@ -33,8 +33,8 @@ from matplotlib import ticker
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
-import openiam.openiam_cf_commons as iamcommons
-import openiam_cf_strata as strata
+import openiam.cfi.commons as iamcommons
+import openiam.cfi.strata as strata
 
 TTFD_RESERVOIR_COMPONENTS = ['LookupTableReservoir',
                              'SimpleReservoir',

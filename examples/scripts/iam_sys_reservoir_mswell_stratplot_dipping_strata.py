@@ -1,6 +1,6 @@
 '''
 This example demonstrates the creation of dipping stratigraphy through the
-use of the functions in openiam_cf_strata.py and stratigraphy_plot.py. The
+use of the functions in cfi/strata.py and stratigraphy_plot.py. The
 stratigraphy_plot function requires the input dictionaries yaml_data and
 model_data. These dictionaries can be made with .yaml Control Files, but they
 can also be made manually as demonstrated here. Note that the function requires
@@ -25,7 +25,7 @@ from openiam import (SystemModel, Stratigraphy, SimpleReservoir,
                      MultisegmentedWellbore)
 
 import openiam as iam
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.strata as iam_strata
 import openiam.visualize as iam_vis
 
 

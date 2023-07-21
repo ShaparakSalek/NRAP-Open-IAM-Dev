@@ -41,8 +41,8 @@ try:
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
-import openiam.openiam_cf_commons as iamcommons
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.commons as iamcommons
+import openiam.cfi.strata as iam_strata
 
 AOR_RESERVOIR_COMPONENTS = ['LookupTableReservoir', 'SimpleReservoir',
                         'AnalyticalReservoir', 'GenericReservoir']

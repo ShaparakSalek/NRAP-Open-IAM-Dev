@@ -29,21 +29,21 @@ sys.path.append(SOURCE_DIR)
 import openiam as iam
 from openiam import IAM_DIR
 
-from openiam.openiam_cf_commons import process_parameters, process_dynamic_inputs
-from openiam.openiam_cf_locations import (process_cell_centers,
+from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.locations import (process_cell_centers,
                                           process_fault_segment_centers,
                                           process_reservoir_locations,
                                           process_wellbore_locations)
-from openiam.openiam_cf_analysis import process_analysis
-from openiam.openiam_cf_plots import process_plots
-from openiam.openiam_cf_output import process_output
-from openiam.openiam_cf_text import system_model_to_text, component_models_to_text
-from openiam.openiam_cf_strata import (initialize_strata,
+from openiam.cfi.analysis import process_analysis
+from openiam.cfi.plots import process_plots
+from openiam.cfi.output import process_output
+from openiam.cfi.text import system_model_to_text, component_models_to_text
+from openiam.cfi.strata import (initialize_strata,
                                        process_spatially_variable_strata)
 
 from openiam.cfi.examples_data import GUI_EXAMPLES, CFI_EXAMPLES
 
-import openiam.openiam_cf_workflow as workflow
+import openiam.cfi.workflow as workflow
 
 # The following line creates a parser to parse arguments from the command line to the code.
 parser = argparse.ArgumentParser(description='YAML control file IAM reader')
@@ -74,7 +74,7 @@ parser.add_argument('--file', type=str, dest='yaml_cf_name',
                     # default='test_CFI',  # to test all control files examples
                     # default='test_GUI',  # to test all GUI examples
                     # default='../../test/test_control_file.yaml',
-                    default='../../examples/Control_Files/ControlFile_ex1a.yaml',
+                    default='../../examples/Control_Files/ControlFile_ex55a.yaml',
                     # default='../../examples/GUI_Files/01_Forward_SR_CW.OpenIAM',
                     help='NRAP-Open-IAM Control File Name')
 parser.add_argument('--binary', type=bool, dest='binary_file',

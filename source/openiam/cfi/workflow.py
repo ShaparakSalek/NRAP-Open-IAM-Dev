@@ -6,7 +6,7 @@ import csv
 import numpy as np
 import pandas as pd
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(SOURCE_DIR)
 
 try:
@@ -15,7 +15,7 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 import openiam as iam
-import openiam.openiam_cf_strata as iam_strata
+import openiam.cfi.strata as iam_strata
 from openiam.visualize.area_of_review import CSV_FILE_NAME_TAGS as AOR_CSV_FILE_NAME_TAGS
 from openiam.visualize.area_of_review import CSV_FILE_COLUMNS as AOR_CSV_FILE_COLUMNS
 import openiam.visualize.area_of_review as AoR

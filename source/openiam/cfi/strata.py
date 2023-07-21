@@ -14,7 +14,7 @@ from matplotlib.colors import is_color_like
 import pandas as pd
 
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(SOURCE_DIR)
 
 import openiam as iam
@@ -708,7 +708,7 @@ def depth_increases_from_strike_dip(strike, dip, dipDirection,
         depth changes for a 1-dimensional list of x and y coordinates, the grid
         option produces a 2-dimensional array of depth changes for 2-D grid of
         x and y points. The x and y grid can be made with the 'grid' option in
-        get_known_locations() within openiam_cf_locations.py.
+        get_known_locations() within file locations.py in the folder cfi.
     :type output_type: str
 
     :param coordxRefPoint: x value for the reference point. The reference point
@@ -729,21 +729,21 @@ def depth_increases_from_strike_dip(strike, dip, dipDirection,
         if len(x_locations) != len(y_locations):
             err_msg = ''.join([
                 'The x_locations and y_locations lists provided to the ',
-                'function depth_increases_from_strike_dip() in openiam_cf_strata.py ',
+                'function depth_increases_from_strike_dip() in strata.py ',
                 'do not have equal lengths.'])
             raise ValueError(err_msg)
 
     if isinstance(x_locations, list) and not isinstance(y_locations, list):
         err_msg = ''.join([
             'The x_locations provided to the function depth_increases_from_strike_dip() ',
-            'in openiam_cf_strata.py were a list, but the y_locations were not a list.',
+            'in strata.py were a list, but the y_locations were not a list.',
             'Check your input.'])
         raise TypeError(err_msg)
 
     if not isinstance(x_locations, list) and isinstance(y_locations, list):
         err_msg = ''.join([
             'The y_locations provided to the function depth_increases_from_strike_dip() ',
-            'in openiam_cf_strata.py were a list, but the x_locations were not a list.',
+            'in strata.py were a list, but the x_locations were not a list.',
             'Check your input.'])
         raise TypeError(err_msg)
 
@@ -1344,7 +1344,7 @@ def get_strata_info_from_component(strata_comp):
 
     # The min, max, and numShaleLayers_vary are not used right now, but they
     # are kept here because they might be used in future versions.
-    numShaleLayers = iam.openiam_cf_commons.get_parameter_val(
+    numShaleLayers = iam.cfi.commons.get_parameter_val(
         strata_comp, 'numberOfShaleLayers')
 
     if 'numberOfShaleLayers' in strata_comp.pars:
@@ -1373,7 +1373,7 @@ def get_strata_info_from_component(strata_comp):
         shale_par_nm = 'shale{}Thickness'.format(shaleRef + 1)
 
         strata_dict['shaleThicknesses'].append(
-            iam.openiam_cf_commons.get_parameter_val(strata_comp, shale_par_nm))
+            iam.cfi.commons.get_parameter_val(strata_comp, shale_par_nm))
 
         # The min and max are not used currently, but they are kept for potential
         # updates in the future.
@@ -1389,7 +1389,7 @@ def get_strata_info_from_component(strata_comp):
         aq_par_nm = 'aquifer{}Thickness'.format(shaleRef + 1)
 
         strata_dict['aquiferThicknesses'].append(
-            iam.openiam_cf_commons.get_parameter_val(strata_comp, aq_par_nm))
+            iam.cfi.commons.get_parameter_val(strata_comp, aq_par_nm))
 
         if aq_par_nm in strata_comp.pars:
             strata_dict['aquiferThicknesses_min'][shaleRef] = \
@@ -1409,7 +1409,7 @@ def get_strata_info_from_component(strata_comp):
 
         strata_dict[par_name+'_vary'] = False   # e.g. 'reservoirThickness_vary'
 
-        strata_dict[par_name] = iam.openiam_cf_commons.get_parameter_val(
+        strata_dict[par_name] = iam.cfi.commons.get_parameter_val(
             strata_comp, par_name)
 
         # The min and max vlaues are not used currently, but they are kept for
@@ -1897,7 +1897,7 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
     # First, handle the shallowest shale
     shale_par_nm = 'shale{}Thickness'.format(numShaleLayers)
 
-    shaleThickness = iam.openiam_cf_commons.get_parameter_val(
+    shaleThickness = iam.cfi.commons.get_parameter_val(
         stratigraphyComponent, shale_par_nm)
 
     if unitNumber < numShaleLayers:
@@ -1911,10 +1911,10 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
             aq_par_nm = 'aquifer{}Thickness'.format(shaleRef)
             shale_par_nm = 'shale{}Thickness'.format(shaleRef)
 
-            aquiferThickness = iam.openiam_cf_commons.get_parameter_val(
+            aquiferThickness = iam.cfi.commons.get_parameter_val(
                 stratigraphyComponent, aq_par_nm)
 
-            shaleThickness = iam.openiam_cf_commons.get_parameter_val(
+            shaleThickness = iam.cfi.commons.get_parameter_val(
                 stratigraphyComponent, shale_par_nm)
 
             if shaleRef > unitNumber:
@@ -1930,7 +1930,7 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
     if res_bottom_check:
         par_name = 'reservoirThickness'
 
-        reservoirThickness = iam.openiam_cf_commons.get_parameter_val(
+        reservoirThickness = iam.cfi.commons.get_parameter_val(
             stratigraphyComponent, par_name)
 
         unitDepth += reservoirThickness

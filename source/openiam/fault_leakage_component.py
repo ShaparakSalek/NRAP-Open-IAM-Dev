@@ -17,7 +17,7 @@ try:
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
-from openiam.openiam_cf_commons import process_parameters
+from openiam.cfi.commons import process_parameters
 
 # try:
 #     import components.fault.fault_leakage.fault_leakage_model as flmod
