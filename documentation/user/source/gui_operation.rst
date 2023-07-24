@@ -3,7 +3,7 @@
 .. _gui_operation:
 
 GUI Operation
--------------
+=============
 
 When the GUI is first opened a disclaimer screen will be shown followed
 by the main interface.
@@ -83,7 +83,8 @@ See the :ref:`stratigraphy_component` section of this
 document for a list of all available parameters and their definitions.
 
 Adding Component Models
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
+
 The NRAP-Open-IAM is designed in a way so that only the components of interest
 need to be modeled in the system. Generally, a simulation will be built
 from the deepest component upward (reservoir, wellbore, aquifer, etc.).
@@ -144,7 +145,8 @@ return to the dashboard. The system model can then be run using
 the **RUN SIMULATION** button on the main dashboard.
 
 GUI Setup Examples
-~~~~~~~~~~~~~~~~~~
+------------------
+
 In the folder *examples*, there is a subfolder *GUI_Files* with example simulation
 files that can be loaded into the GUI and run by the NRAP-Open-IAM. To run one
 of the provided examples select **Load Simulation** on the main dashboard of the GUI.

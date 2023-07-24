@@ -14,14 +14,14 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../../test'))
-sys.path.insert(0, os.path.abspath('../../../source'))
+sys.path.insert(0, os.path.abspath(os.sep.join(['..', '..', '..', 'test'])))
+sys.path.insert(0, os.path.abspath(os.sep.join(['..', '..', '..', 'source'])))
 
 
 # -- Project information -----------------------------------------------------
 
-project = ''
-copyright = '2023, Dylan R. Harp, Veronika Vasylkivska, Diana Bacon'
+project = 'NRAP-Open-IAM'
+copyright = '2023, Dylan Harp, Veronika Vasylkivska, Diana Bacon'
 author = 'D. Harp, V. Vasylkivska, D. Bacon'
 
 # The short X.Y version.
@@ -80,9 +80,9 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'bizstyle'
+html_theme = 'bizstyle'
 #html_theme = 'alabaster'
-html_theme = 'classic'
+# html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

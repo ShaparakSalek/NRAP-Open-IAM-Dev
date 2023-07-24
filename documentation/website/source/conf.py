@@ -19,14 +19,14 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'NRAPOpenIAM'
-copyright = '2022, Dylan R. Harp, Veronika Vasylkivska, Diana Bacon'
+project = 'NRAP-Open-IAM'
+copyright = '2023, Dylan R. Harp, Veronika Vasylkivska, Diana Bacon'
 author = 'Dylan R. Harp, Veronika Vasylkivska, Diana Bacon'
 
-# The short X.Y version
-version = ''
-# The full version, including alpha/beta/rc tags
-release = 'dev'
+# The short X.Y version.
+version = 'a2.7'
+# The full version, including alpha/beta/rc tags.
+release = 'alpha 2.7.1-23.06.30'
 
 
 # -- General configuration ---------------------------------------------------
@@ -76,15 +76,16 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'bizstyle'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
-    'nosidebar': True,
-}
+# html_theme_options = {
+#     'nosidebar': True,
+# }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

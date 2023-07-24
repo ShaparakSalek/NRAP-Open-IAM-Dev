@@ -4,15 +4,15 @@
 .. _control_file:
 
 Control Files
--------------
+=============
 
 Control files are a method of getting user input into the NRAP-Open-IAM for setting
-up a simulation scenario. Control files use a YAML format (extension *.yaml*). Any line in the
-control file starting with a pound sign (#) is a comment and is ignored by
-the program. The basic format of the control file is a parameter name followed
-by a colon, space, and a value. For objects with several parameters the
-object name is followed by a colon and the underlying parameters are listed on
-the consecutive lines tabbed in. For example, consider this partial file
+up a simulation scenario. Control files use a YAML format (extension *.yaml*).
+Any line in the control file starting with a pound sign (#) is a comment and
+is ignored by the program. The basic format of the control file is a parameter
+name followed by a colon, space, and a value. For objects with several parameters
+the object name is followed by a colon and the underlying parameters are listed
+on the consecutive lines tabbed in. For example, consider this partial file
 
 .. code-block:: python
    :lineno-start: 1

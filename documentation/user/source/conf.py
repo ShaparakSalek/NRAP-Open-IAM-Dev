@@ -36,7 +36,9 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinxcontrib.bibtex',
-              'sphinx_numfig.numfig']
+              'sphinx_numfig.numfig',
+              'nbsphinx']
+nbsphinx_execute = 'never'
 bibtex_bibfiles = ['../../bibliography/project.bib']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,13 +54,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'openiam'
-project = 'OpenIAM'
-copyright = ''.join([
-    '2023, Veronika Vasylkivska, Seth King, Diana Bacon, Dylan Harp, '+
-    'Ernest Lindner, Seunghwan Baek, Bailian Chen, Yingqi Zhang, '+
-    'Kayyum Mansoor, Greg Lackey, Elizabeth Keating, Ya-Mei Yang, '+
-    'Nathaniel Mitchell, '])
+project = 'NRAP-Open-IAM'
+copyright = '2023, DOE National Risk Assessment Partnership (NRAP)'
 author = 'NRAP-Open-IAM Development Team'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -80,7 +77,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -94,9 +91,8 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'bizstyle'
-# html_theme = 'pyramid'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'bizstyle'
+# html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -164,8 +160,11 @@ texinfo_documents = [
      'Miscellaneous')]
 
 numfig = True
-numfig_number_figures = True
-numfig_figure_caption_prefix = "Figure"
+numfig_number_figures = False
+numfig_format = {'figure': 'Fig. %s',
+                 'table': 'Table %s',
+                 'code-block': 'Listing %s',
+                 'section': 'Section %s'}
 
 
 # Example configuration for intersphinx: refer to the Python standard library.

@@ -1,7 +1,8 @@
-Getting Started
-===============
-
 .. toctree::
+
+***************
+Getting Started
+***************
 
 The NRAP-Open-IAM has several ways for a user to build and
 run simulations, including graphical user interface (GUI), text based control files
@@ -22,7 +23,7 @@ directory and type::
 .. include:: control_file.rst
 
 Output
-------
+======
 
 Output is written to the folder specified in the model definition with the
 ``Output directory``. If the path to the output directory is not absolute
@@ -44,7 +45,7 @@ page is first opened it asks for a folder specification. This folder is the outp
 of the results you want to analyze. Navigate to that output folder using the **Browse** button.
 
 Plotting
-~~~~~~~~
+--------
 User can access post-processing capabilities of GUI by clicking on the
 **Post Processing** button on the main page. The **Post Processor** window will
 appear. After a folder containing the results of the simulation is selected
@@ -66,7 +67,7 @@ map-view plots of the plume for a single realization or probabilistic ensemble
 can be generated.
 
 Sensitivity Analysis
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 If the simulation results are from a LHS simulation the ``Processing`` menu
 will have options for several types of sensitivity analysis. Note that while
 a sensitivity analysis can be run on simulations with a small number of
@@ -99,7 +100,7 @@ The capture point determines the time at which the sensitivity coefficients
 are compared and then ordered based on the comparison.
 
 Analysis Options in Control File
---------------------------------
+================================
 
 The NRAP-Open-IAM uses the Model Analysis ToolKit (MATK) :cite:`MATK` for
 the basis of its probabilistic framework. More information about MATK can be found here:

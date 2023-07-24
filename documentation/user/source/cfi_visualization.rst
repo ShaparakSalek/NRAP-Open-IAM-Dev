@@ -1,7 +1,7 @@
 .. _cfi_visualization:
 
 Setup of visualization options
-------------------------------
+==============================
 
 The plot types available within NRAP-Open-IAM are: ``TimeSeries``, ``TimeSeriesStats``,
 ``TimeSeriesAndStats``, ``StratigraphicColumn``, ``Stratigraphy``, ``AoR``, ``TTFD``,
@@ -148,7 +148,7 @@ used in a *.yaml* control file.
 Notice that the ``FigureDPI`` and ``FigureSize`` entries for the ``StratigraphicColumn``,
 ``Stratigraphy``, ``TTFD``, ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``,
 and ``AtmPlumeEnsemble`` plots are indented under the plot type. In contrast, the ``FigureDPI``,
- ``FigureSize``, and ``Title`` entries for the ``TimeSeriesStats`` and ``AoR`` plots are not
+``FigureSize``, and ``Title`` entries for the ``TimeSeriesStats`` and ``AoR`` plots are not
 indented beneath the plot type. This discrepancy occurs because the ``TimeSeriesStats`` and
 ``AoR`` entries are followed by a metric (e.g., [**pressure**]), while the other plot type
 entries are not.
@@ -342,7 +342,7 @@ The ``GriddedMetric`` and ``GriddedRadialMetric`` plot types both have the requi
   **mass_CO2_aquifer**, or **mass_brine_aquifer** can be provided for ``MetricName``. For a
   ``GriddedRadialMetric`` plot, the ``GenericAquifer`` outputs **Dissolved_CO2_mass_fraction**
   or **Dissolved_salt_mass_fraction** can be provided for ``MetricName``. When plotting these
-  ``GenericAquifer` metrics, the component used must also produce **r_coordinate** and
+  ``GenericAquifer`` metrics, the component used must also produce **r_coordinate** and
   **z_coordinate** outputs.
 
 The ``GriddedMetric``, ``GriddedRadialMetric``, and ``AtmPlumeSingle`` plot types have the
@@ -364,7 +364,8 @@ The ``GriddedMetric`` and ``GriddedRadialMetric`` plot types both have the optio
 Examples of setting up each plot type in a *.yaml* file are shown in the sections below.
 
 TimeSeries, TimeSeriesStats, and TimeSeriesAndStats
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------------------
+
 The ``TimeSeries``, ``TimeSeriesStats``, and ``TimeSeriesAndStats`` plot types
 are used to display results varying over time. Although this section
 covers three plot types, these plot types are different variations of
@@ -519,7 +520,8 @@ For examples of ``TimeSeries`` plots, see control file examples 1a, 1b, 2, 3, 7a
 file examples 4a, 14, and 40.
 
 StratigraphicColumn
-~~~~~~~~~~~~~~~~~~~
+-------------------
+
 ``StratigraphicColumn`` plots show unit thicknesses at one location. If the simulation
 does not use spatially variable stratigraphy, then the unit thicknesses at the one location
 used are representative of the entire domain. For more details regarding the use of
@@ -584,7 +586,7 @@ For more examples of ``StratigraphicColumn`` plots, see control file examples
 *ControlFile_ex33a*-*ControlFile_ex38*.
 
 Stratigraphy
-~~~~~~~~~~~~
+------------
 ``Stratigraphy`` plots are three-dimensional plots showing the specified
 stratigraphy as well as features like wellbores and injection sites. These plots
 can vary with the approach used for the stratigraphy. For example, a ``strike`` and
@@ -769,7 +771,8 @@ described above.
 
 * ``StrikeAndDipSymbol`` - a dictionary containing four optional entries related
   to the strike and dip symbol shown in the figure (default is None). Within
-  this dictionary are the entries ``PlotSymbol``, ``coordx, coordy, and length.
+  this dictionary are the entries ``PlotSymbol``, ``coordx``, ``coordy``,
+  and ``length``.
 
 * ``PlotSymbol`` - an entry under ``StrikeAndDipSymbol`` that specifies whether to
   show the strike and dip symbol (default is ``True``). The only acceptable values
@@ -855,7 +858,8 @@ For examples of using ``Stratigraphy`` plots in a script application, see files
 *iam_sys_reservoir_mswell_stratplot_no_dip.py*.
 
 AoR
-~~~
+---
+
 Area of Review (``AoR``) plots are developed to estimate the AoR needed for a geologic
 carbon storage project based on the spatial extent of reservoir impacts (pressure
 and |CO2| saturation) and potential aquifer impacts (dissolved salt and dissolved
@@ -942,7 +946,8 @@ for other reservoir component types.
 For examples of AoR plots, see *ControlFile_ex31a.yaml* to *ControlFile_ex32c.yaml*.
 
 TTFD
-~~~~
+----
+
 The time to first detection (``TTFD``) plot type uses contaminant plume output from
 aquifer components to simulate when a monitoring well would be able to detect the
 plume in the aquifer(s) considered. If the ``TTFD`` plot type is run without monitoring
@@ -1164,7 +1169,8 @@ under the figure name.
 For examples of TTFD plots, see *ControlFile_ex39.yaml* to *ControlFile_ex43.yaml*.
 
 GriddedMetric
-~~~~~~~~~~~~~
+-------------
+
 The ``GriddedMetric`` plot type produces map view images of a gridded metric. While
 the radial metrics shown by the ``GriddedRadialMetric`` plot type are defined in
 relation to radius and depth values, the metrics shown by the ``GriddedMetric`` plot
@@ -1212,7 +1218,8 @@ For examples of ``GriddedMetric`` plots, see *ControlFile_ex18.yaml*, *ControlFi
 and *ControlFile_ex23.yaml*.
 
 GriddedRadialMetric
-~~~~~~~~~~~~~~~~~~~
+-------------------
+
 The ``GriddedRadialMetric`` plot type produces map view images of a gridded
 radial metric. The ``GenericAquifer`` produces four kinds of gridded
 radial metrics: **r_coordinate**, **z_coordinate**, **Dissolved_CO2_mass_fraction**,
@@ -1312,7 +1319,8 @@ For examples of ``GriddedRadialMetric`` plots, see *ControlFile_ex53a.yaml* to
 *ControlFile_ex53d.yaml*
 
 AtmPlumeSingle
-~~~~~~~~~~~~~~
+--------------
+
 The ``AtmPlumeSingle`` plot type produces map view images depicting how |CO2| leakage
 at the surface creates atmospheric |CO2| plumes. These images are created for each
 time step during one realization of a simulation. Note that simulations using the
@@ -1401,7 +1409,8 @@ For examples of ``AmtPlumeSingle`` plots, see *ControlFile_ex9a.yaml* to
 *ControlFile_ex9c.yaml*.
 
 AtmPlumeEnsemble
-~~~~~~~~~~~~~~~~
+----------------
+
 The ``AtmPlumeEnsemble`` plot type can only be used in simulations with Latin
 Hypercube Sampling (``lhs``) or Parameter Study (``parstudy``) analysis types. This
 plot type involves concepts similar to those as those of the ``AtmPlumeSingle``

@@ -1,10 +1,11 @@
+*******************
 Introduction to git
-===================
+*******************
 
 .. toctree::
 
 What is Git?
-------------
+============
 
 Git is one of the most often used version control systems in the world.
 The main benefits and features provided for developers employing the version
@@ -82,7 +83,7 @@ GitLab and Git in general.
 
 
 Most frequently used Git commands
----------------------------------
+=================================
 
 As the name of the current section suggests we provide a list of the most
 frequently used commands in Table 1.

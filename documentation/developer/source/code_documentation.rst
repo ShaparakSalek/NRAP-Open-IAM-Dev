@@ -1,10 +1,11 @@
+******************
 Code Documentation
-==================
+******************
 
 .. toctree::
 
 Docstrings
-----------
+==========
 
 Since the integration of the component based on simulation model into the
 NRAP-Open-IAM framework will not necessarily be performed by the developers

@@ -1,10 +1,11 @@
+****************
 Coding Logistics
-================
+****************
 
 .. toctree::
 
 Component model
----------------
+===============
 
 The NRAP-Open-IAM is built on the open-source concept to promote transparency and
 to give advanced users the capability to contribute to the code. The main
@@ -139,7 +140,7 @@ to show the possible implementation of the ``__init__`` method.
 
 
 Method ``__init__``
--------------------
+===================
 
 In this section we consider an example of a typical ``__init__`` method in a component. ::
 
@@ -316,7 +317,7 @@ to represent the intended purpose of the attribute.
 
 
 Method ``simulation_model``
-----------------
+===========================
 
 The ``simulation_model`` method is an instance method of the component class that either
 calls the simulation model (typical if the simulation model is an external
@@ -428,7 +429,7 @@ distribution and described in the next section.
 
 
 Method ``simulation_model`` as a wrapper
------------------------------
+========================================
 
 In some situations the developer of the component might have a code written
 in language different from Python (e.g., Fortran), and rewriting the code in Python
@@ -621,7 +622,7 @@ and coefficients *a*, *b*, *c*. ::
 
 
 Method ``check_input_parameters``
----------------------------------
+=================================
 
 The purpose of the ``check_input_parameters`` method is to ensure that the parameters supplied
 to the ``simulation_model`` method satisfy the model assumptions and/or limitations. Below
@@ -797,7 +798,7 @@ for the varying number of possible (and similar) model parameters. ::
 
 
 Method ``reset``
-----------------
+================
 
 The method ``reset`` is called once before each simulation. Its purpose is
 to reset all the needed attributes, parameters, accumulators and observations
@@ -846,7 +847,7 @@ only the ``accumulator2`` has to be reinitialized within the method. ::
 
 
 Connecting components
----------------------
+=====================
 
 There are many defaults methods of the ``ComponentModel`` class that are not meant
 to be reimplemented within the derived component class. The main purpose of these
@@ -900,7 +901,7 @@ used to define the connections between the components that
 
 
 Parameters
-++++++++++
+----------
 
 We start with the description of the methods that allow the addition of parameters
 and observations to the component models.
@@ -979,7 +980,7 @@ For example, ::
     print(cm.default_pars[par_name])
 
 Observations
-++++++++++++
+------------
 
 The following methods allows adding observations that will be tracked
 by the system model and will be available for different kinds of analysis.
@@ -1085,7 +1086,7 @@ units used by the NRAP-Open-IAM.
 - Viscosities are assumed to be in units of Pascal seconds (Pa s).
 
 Linked parameters and observations
-++++++++++++++++++++++++++++++++++
+----------------------------------
 
 The following methods allow adding component model parameters that depend
 on other parameters and/or observations of the same or different component model.
@@ -1208,7 +1209,7 @@ to the corresponding component and the type of parameters involved in the
 expression for the composite parameter.
 
 Keyword arguments
-+++++++++++++++++
+-----------------
 
 We discussed previously that inputs to the component model can be
 of two main types: constant in time, scalar numerical parameters and

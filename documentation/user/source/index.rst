@@ -1,8 +1,9 @@
 .. index:
 .. include:: ../../common/replace_math.rst
 
+##########################
 NRAP-Open-IAM User's Guide
-++++++++++++++++++++++++++
+##########################
 
 .. toctree::
    :maxdepth: 2

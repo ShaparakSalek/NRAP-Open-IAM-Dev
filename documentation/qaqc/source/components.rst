@@ -1,7 +1,10 @@
+.. toctree::
+
 .. _components:
 
+***********************
 System model components
-=======================
+***********************
 The following links document the QA for each NRAP-Open-IAM component containing
 class documentation, relevant unittests included in the NRAP-Open-IAM test suite,
 and any additional QA documentation.

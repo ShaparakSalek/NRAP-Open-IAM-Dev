@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'NRAPOpenIAMDeveloperGuide'
+project = 'NRAP-Open-IAM'
 copyright = '2023, Veronika Vasylkivska, Seth King, Dylan Harp, Diana Bacon'
 author = 'V. Vasylkivska, S. King, D. Harp, D. Bacon'
 # Comment out for now. Authors will be added following the contribution
@@ -92,7 +92,8 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 #html_theme = 'alabaster'
-html_theme = 'pyramid'
+# html_theme = 'pyramid'
+html_theme = 'bizstyle'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

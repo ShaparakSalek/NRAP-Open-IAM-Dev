@@ -1,5 +1,7 @@
+.. include:: ../../common/replace_math.rst
+
 Conceptual model and overview
------------------------------
+=============================
 
 NRAP-Open-IAM is designed for modeling and simulating the behaviour of geologic
 carbon storage (GCS) system models. These system models can include
@@ -17,7 +19,7 @@ the control file interface (section :ref:`control_file`), or a script-based
 approach in Python.
 
 System model design
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Within NRAP-Open-IAM, the system model contains components that are connected
 to each other. For example, a reservoir component can provide pressures and |CO2|
@@ -120,7 +122,7 @@ of the whole GCS site (excluding wells that will self-seal;
 :numref:`workflow_figure1`).
 
 Component parameters and applications
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 Each component model has a variety of parameters, and these parameters have
 different limits or ranges. When setting up a simulation, any component parameter
@@ -146,7 +148,7 @@ Descriptions of NRAP-Open-IAM components and their parameters are
 provided in chapter :ref:`components_description` below.
 
 Analysis types
-~~~~~~~~~~~~~~
+--------------
 
 NRAP-Open-IAM simulations can use one of three analysis types: ``Forward``,
 Latin Hypercube Sampling (``LHS``), or parameter study (``Parstudy``)
@@ -202,7 +204,7 @@ in their study area. Control file interface can help to automate sensitivity
 analysis within ``LHS`` simulations; see *ControlFile_ex8a*-*ControlFile_ex8c*.
 
 Visualization options
----------------------------
+=====================
 
 NRAP-Open-IAM includes a variety of visualization options. For example, there are
 multiple options for plotting a model domain's stratigraphy with

@@ -74,8 +74,8 @@ parser.add_argument('--file', type=str, dest='yaml_cf_name',
                     # default='test_CFI',  # to test all control files examples
                     # default='test_GUI',  # to test all GUI examples
                     # default='../../test/test_control_file.yaml',
-                    default='../../examples/Control_Files/ControlFile_ex55a.yaml',
-                    # default='../../examples/GUI_Files/01_Forward_SR_CW.OpenIAM',
+                    default='../../examples/Control_Files/ControlFile_ex1a.yaml',
+                    # default='../../examples/GUI_Files/01_Forward_AR_CW.OpenIAM',
                     help='NRAP-Open-IAM Control File Name')
 parser.add_argument('--binary', type=bool, dest='binary_file',
                     default=False, help='Set to true for binary control file')
@@ -130,7 +130,7 @@ alluvium_aquifer_components = ['AlluviumAquifer', 'DeepAlluviumAquifer',
                                'AlluviumAquiferLF', 'DeepAlluviumAquiferML']
 
 
-def main(yaml_filename):
+def main(yaml_filename, binary_file=False):
     """
     Reads in yaml data control file to create OpenIAM model and run it.
 
@@ -142,7 +142,7 @@ def main(yaml_filename):
     start_time = datetime.now()
     now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
     # Load yaml file data
-    if args.binary_file:
+    if binary_file:
         with open(yaml_filename, 'rb') as cf:
             yaml_data = pickle.load(cf)
     else:
@@ -783,7 +783,7 @@ def main(yaml_filename):
         datetime.now().strftime('%Y-%m-%d_%H.%M.%S'), total_time)
     logging.info(info_msg)
 
-    if args.binary_file:
+    if binary_file:
         # For GUI produced binary control files
         info_msg = ''.join([
             '\nSimulation results can be found in the output folder: \n{}.',
@@ -1200,4 +1200,7 @@ if __name__ == "__main__":
         print('Test of all GUI examples is done.')
 
     else:
-        main(args.yaml_cf_name)
+        if args.yaml_cf_name[-5:].lower() == '.yaml':
+            main(args.yaml_cf_name, False)
+        elif args.yaml_cf_name[-8:].lower() == '.openiam':
+            main(args.yaml_cf_name, True)

@@ -1,12 +1,16 @@
+.. toctree::
+
+
 .. _testsuite:
 
+**********
 Test Suite
-==========
+**********
 
 .. toctree::
 
 Execution
----------
+=========
 
 The NRAP-Open-IAM package comes with an automated test suite located
 in the *test* directory.
@@ -24,13 +28,10 @@ The test suite is also run automatically when developer's push changesets
 (refer to :ref:`qaqc_dev` for details).
 
 Test Documentation
-----------------------
+==================
 
 The following provides a description of each test in the test suite.
 
 .. autoclass:: iam_test.Tests
    :members:
    :exclude-members: setUp, shortDescription
-
-
-

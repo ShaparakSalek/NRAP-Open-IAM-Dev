@@ -1,8 +1,9 @@
+******************
 Tests and examples
-==================
+******************
 
 Tests
------
+=====
 Tests and examples can originate from the same process in development but
 they fulfill very different roles. Tests are the integral part of the
 code development and QA process. In general, tests are not for the
@@ -139,7 +140,7 @@ should be written and made available as part of the NRAP-Open-IAM test suite.
 
 
 Examples
---------
+========
 Integration of any component to the NRAP-Open-IAM framework involves not only
 the development of the tests but also the creation of examples illustrating
 the utility and capabilities of the new component. Examples are written to show users how

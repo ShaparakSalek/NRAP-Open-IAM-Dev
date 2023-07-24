@@ -37,4 +37,5 @@
 .. |microg/L| replace:: :math:`{\mu}g/L`
 .. |millig/L| replace:: :math:`mg/L`
 .. |times| unicode:: U+000D7
+.. |y = ax^2 + bx + c| replace:: *y* = *ax* \ :sup:`2`\ + *bx* + *c*
 .. |years| replace:: :math:`years`

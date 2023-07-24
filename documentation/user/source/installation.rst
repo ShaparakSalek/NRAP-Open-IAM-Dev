@@ -1,5 +1,6 @@
+***********************
 Obtaining NRAP-Open-IAM
-=======================
+***********************
 
 .. toctree::
 
@@ -9,12 +10,12 @@ Obtaining NRAP-Open-IAM
    :alt: Nrap Logo
 
 Introduction
-------------
-NRAP-Open-IAM is an open-source Integrated Assessment Model (IAM) for Phases II and III of
-the National Risk Assessment Partnership (NRAP). The goal of this software is
-to go beyond risk assessment into risk management and containment assurance.
-NRAP-Open-IAM is currently in active development and is available for testing
-and feedback only.
+============
+NRAP-Open-IAM is an open-source Integrated Assessment Model (IAM) for
+Phases II and III of the National Risk Assessment Partnership (NRAP). The goal
+of this software is to go beyond risk assessment into risk management and
+containment assurance. NRAP-Open-IAM is currently in active development and
+is available for testing and feedback only.
 
 As this is a prototype of software being actively developed, we
 are seeking any feedback and/or issue reports. An online feedback form
@@ -22,7 +23,7 @@ can be found here:
 https://docs.google.com/forms/d/e/1FAIpQLSed5mcX0OBx1dLNmYGbmS4Vfc0mdOLapIzFqw-6vHoho9B19A/viewform?usp=sf_link
 
 Issue reports and feedback can be left at the forum on NETL's
-Energy  Data eXchange webpage for NRAP-Open-IAM:
+Energy Data eXchange webpage for NRAP-Open-IAM:
 https://edx.netl.doe.gov/workspace/forum/nrap-tools/topic?t=nrap-tools-nrap-open-iam
 or on GitLab issues page for NRAP-Open-IAM:
 https://gitlab.com/NRAP/OpenIAM/-/issues?sort=created_date&state=opened
@@ -32,7 +33,7 @@ notified when updates are available for testing, please contact the development 
 to be added to our email list.
 
 Downloading NRAP-Open-IAM
--------------------------
+=========================
 
 NRAP-Open-IAM tool and examples can be downloaded from a public GitLab
 repository located at https://gitlab.com/NRAP/OpenIAM. If the NRAP-Open-IAM
@@ -49,7 +50,7 @@ something simple like *NRAPOpenIAM* to simplify the navigation.
     specified by user.
 
 Installing NRAP-Open-IAM
-------------------------
+========================
 
 The NRAP-Open-IAM requires Python version 3.9 or greater to operate.
 If you need to install Python, we describe all steps of the installation
@@ -113,7 +114,7 @@ When contacting the developers to resolve problems please include all output
 from the setup script or test suite runs.
 
 Testing installation
---------------------
+====================
 
 After setup the test suite can be run again by entering the NRAP-Open-IAM *test*
 directory in a terminal and typing::
@@ -125,7 +126,8 @@ the installation process uses the same test suite after testing whether the nece
 Python libraries are installed, and compiling the NRAP-Open-IAM libraries.
 
 Contributors
-------------
+============
+
 During the Phase II and/or Phase III of the NRAP the following researchers contributed
 to the development of NRAP-Open-IAM (listed in alphabetical order with affiliation
 at the time of active contribution):
