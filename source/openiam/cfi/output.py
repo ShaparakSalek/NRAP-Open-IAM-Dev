@@ -47,7 +47,11 @@ def extract_data(s, output_list, results, time_array, data_flip):
         ["Realization {}".format(ind) for ind in range(1, num_reals + 1)]
 
     # Number of time points
-    num_time_points = len(time_array)
+    if time_array is not None:
+        num_time_points = len(time_array)
+    else:
+        time_array = [0]
+        num_time_points = 1
 
     # Get names of parameters
     par_names = s.parnames
@@ -81,7 +85,10 @@ def extract_data(s, output_list, results, time_array, data_flip):
     all_obs_names = s.obsnames
     results_array = results
 
-    time_array = np.tile(time_array, num_obs)
+    if num_obs == 0:
+        time_array = np.tile(time_array, len(all_obs_names))
+    else:
+        time_array = np.tile(time_array, num_obs)
     # results_array is of size (num_reals+1, len(all_obs_names))
     results_array = np.insert(results_array, 0, time_array, 0)
 
@@ -411,8 +418,9 @@ def process_output(yaml_data, model_data, output_list, out_dir, sm, s, analysis,
         else:
             pass
 
-        timefile = os.path.join(out_dir, 'csv_files', 'time_series.csv')
-        np.savetxt(timefile, time_array / 365.25, fmt='%.12e',
+        if time_array is not None:
+            timefile = os.path.join(out_dir, 'csv_files', 'time_series.csv')
+            np.savetxt(timefile, time_array / 365.25, fmt='%.12e',
                    delimiter=',', header='Time (years)')
 
     try:

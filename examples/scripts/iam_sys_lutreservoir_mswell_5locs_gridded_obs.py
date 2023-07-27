@@ -5,6 +5,10 @@ locations are random; remaining wellbore is placed at the predetermined location
 Example also illustrates an option of using a gridded observation of
 lookup table reservoir component.
 
+This example also illustrates how to save all the outputs produced by the simulation.
+Changing variable 'save_output' at the beginning of simulation (line 43)
+from True to False allows to cancel saving of the outputs.
+
 This example requires the additional Kimberlina data set.
 Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
 Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following places:
@@ -32,6 +36,11 @@ from matk import pyDOE
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
+
+    # Change the variable value to False if saving the outputs is not needed.
+    # By default, the results will be saved in the folder 'output/csv_files' within root
+    # folder of NRAP-Open-IAM
+    save_output = True
 
     file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
@@ -176,7 +185,7 @@ if __name__ == '__main__':
                                             obs_type='grid', constr_type='array',
                                             loc_ind=[loc_ind])
 
-    sm.forward()
+    sm.forward(save_output=save_output)
 
     print('------------------------------------------------------------------')
     print('                  Forward method illustration ')

@@ -179,6 +179,138 @@ class SystemModel(matk):
                            self, None, 'forward', self.time_array, csv_files_dir)
         return results
 
+    def lhs(self, name=None, siz=None, noCorrRestr=False, corrmat=None, seed=None,
+            index_start=1, cpus=1, verbose=False, save_output=False,
+            output_dir=None, output_sys_model=True, output_component_models=True,
+            data_flip=True, gen_combined_output=True, gen_stats_file=True):
+        """
+        Run model with current values of parameters with options to save produced
+        outputs and information about system model itself and its components.
+        """
+        # Run lhs model using matk.lhs
+        s = super().lhs(name=name, siz=siz, noCorrRestr=noCorrRestr,
+                        corrmat=corrmat, seed=seed, index_start=index_start)
+
+        results = s.run(cpus=cpus, verbose=verbose)
+
+        # Check to see if user wants to save output
+        if save_output:
+            # Get current time
+            start_time = datetime.now()
+            now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
+
+            # Set output directory
+            if output_dir != None:
+                out_dir = os.path.join(IAM_DIR, output_dir)
+                out_dir = out_dir.format(datetime=now)
+                if not os.path.exists(os.path.dirname(out_dir)):
+                    os.mkdir(os.path.dirname(out_dir))
+            else:
+                out_dir = os.path.join(IAM_DIR, 'output')
+
+            if not os.path.exists(out_dir):
+                os.mkdir(out_dir)
+
+            # Set results output directory
+            csv_files_dir = os.path.join(out_dir, 'csv_files')
+
+            # Output IAM Version
+            output_header = "".join(["NRAP-Open-IAM version: {iam_version}",
+                                     "\nRuntime: {now} \n"])
+            iam_version_msg = output_header.format(
+                iam_version=iam.__version__, now=now)
+            with open (os.path.join(out_dir, 'openiam_version_info.txt'), 'w') as f:
+                f.write(iam_version_msg)
+
+            # Output system model details
+            if output_sys_model:
+                system_model_to_text(self, out_dir, 'lhs')
+
+            # Output component model details
+            if output_component_models:
+                component_models_to_text(
+                    self.__dict__['component_models'], out_dir, 'lhs')
+
+            # Output results
+            result_data = {'Results': results,
+                           'not_yaml': True}
+            output_choices = {'OutputType': data_flip,
+                              'GenerateOutputFiles': True,
+                              'GenerateCombOutputFile': gen_combined_output,
+                              'GenerateStatFiles': gen_stats_file}
+
+            component_model_objs = list(self.component_models.values())
+            output_list = {comp: comp.obs_base_names for comp in component_model_objs}
+
+            process_output(result_data, output_choices, output_list, out_dir,
+                           self, s, 'lhs', self.time_array, csv_files_dir)
+        return s
+
+    def parstudy(self, nvals=2, name=None, cpus=1, verbose=False, save_output=False,
+                 output_dir=None, output_sys_model=True, output_component_models=True,
+                 data_flip=True, gen_combined_output=True, gen_stats_file=True):
+        """
+        Run parameter study for system model with current values of parameters
+        with options to save produced outputs and information about system model
+        itself and its components.
+        """
+        # Run parstudy model using matk.parstudy
+        s = super().parstudy(nvals=nvals, name=name)
+
+        results = s.run(cpus=cpus, verbose=verbose)
+
+        # Check to see if user wants to save output
+        if save_output:
+            # Get current time
+            start_time = datetime.now()
+            now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
+
+            # Set output directory
+            if output_dir != None:
+                out_dir = os.path.join(IAM_DIR, output_dir)
+                out_dir = out_dir.format(datetime=now)
+                if not os.path.exists(os.path.dirname(out_dir)):
+                    os.mkdir(os.path.dirname(out_dir))
+            else:
+                out_dir = os.path.join(IAM_DIR, 'output')
+
+            if not os.path.exists(out_dir):
+                os.mkdir(out_dir)
+
+            # Set results output directory
+            csv_files_dir = os.path.join(out_dir, 'csv_files')
+
+            # Output IAM Version
+            output_header = "".join(["NRAP-Open-IAM version: {iam_version}",
+                         "\nRuntime: {now} \n"])
+            iam_version_msg = output_header.format(
+                iam_version=iam.__version__, now=now)
+            with open (os.path.join(out_dir, 'openiam_version_info.txt'), 'w') as f:
+                f.write(iam_version_msg)
+
+            # Output system model details
+            if output_sys_model:
+                system_model_to_text(self, out_dir, 'parstudy')
+
+            # Output component model details
+            if output_component_models:
+                component_models_to_text(
+                    self.__dict__['component_models'], out_dir, 'parstudy')
+
+            # Output results
+            result_data = {'Results': results, 'not_yaml': True}
+            output_choices = {'OutputType': data_flip,
+                              'GenerateOutputFiles': True,
+                              'GenerateCombOutputFile': gen_combined_output,
+                              'GenerateStatFiles': gen_stats_file}
+
+            component_model_objs = list(self.component_models.values())
+            output_list = {comp: comp.obs_base_names for comp in component_model_objs}
+
+            process_output(result_data, output_choices, output_list, out_dir,
+                           self, s, 'parstudy', self.time_array, csv_files_dir)
+        return s
+
     def add_component_model_object(self, cm_object):
         """
         Add component model object to system model.

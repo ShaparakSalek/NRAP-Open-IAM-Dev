@@ -10,6 +10,10 @@ lhs      - number of samples for Latin Hypercube Sampling mode
 parstudy - number of parameter partitions
 ncpus    - number of processors to run concurrent simulations
 
+This example also illustrates how to save all the outputs produced by the simulation.
+Changing variable 'save_output' at the beginning of simulation (line 64)
+from True to False allows to cancel saving of the outputs.
+
 Examples of run:
 $ python iam_sys_reservoir_mswell_lhs_parstudy.py --lhs 10 --ncpus 2
 $ python iam_sys_reservoir_mswell_lhs_parstudy.py --parstudy 10 --ncpus 2
@@ -53,6 +57,11 @@ args = parser.parse_args()
 if __name__=='__main__':
     # For multiprocessing in Spyder
     __spec__ = None
+
+    # Change the variable value to False if saving the outputs is not needed.
+    # By default, the results will be saved in the folder 'output/csv_files' within root
+    # folder of NRAP-Open-IAM
+    save_output = True
 
     # Simple example for single time point which is 0.0 by default
     # System model created without arguments assumes single time point 0
@@ -98,10 +107,10 @@ if __name__=='__main__':
 
     if args.lhs_sample_size is not None:
         # Draw Latin hypercube samples of parameter values
-        s = sm.lhs(siz=args.lhs_sample_size, seed=1000)   # create sample set
+        s = sm.lhs(siz=args.lhs_sample_size, seed=1000, save_output=save_output) # create sample set
     elif args.parstudy_divisions is not None :
         # Generate parameter study samples
-        s = sm.parstudy(nvals=args.parstudy_divisions)  # create sample set
+        s = sm.parstudy(nvals=args.parstudy_divisions, save_output=save_output)  # create sample set
 
     # Run model using values in samples for parameter values
     s.run(cpus=args.ncpus, verbose=False)

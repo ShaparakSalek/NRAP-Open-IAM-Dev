@@ -205,21 +205,32 @@ def system_model_to_text(sm, out_dir, analysis):
                                             for s in r:
                                                 # Get the observation name
                                                 # before the first underscore
-                                                obs_name = s[:s.rfind('_')]
+                                                if '_' in s:
+                                                    obs_name = s[:s.rfind('_')]
+                                                    # Get the observation time index after the underscore
+                                                    try:
+                                                        obs_number = int(s[s.rfind('_') + 1:])
+                                                    except:
+                                                        obs_name = s
+                                                        obs_number = ''
+                                                else:
+                                                    obs_name = s
+                                                    obs_number = ''
                                                 # If this is the first time through,
                                                 # set the current name
                                                 # to the last_obs_name variable
                                                 if len(last_obs_name) == 0:
                                                     last_obs_name = obs_name
-                                                # Get the observation number after the underscore
-                                                obs_number = int(s[s.rfind('_') + 1:])
 
                                                 # if this is the first time seeing this observation name
                                                 if last_obs_name != obs_name:
                                                     # Create a string for the name of the observation,
                                                     # with a list from 0 to the last observation number
-                                                    obs_string = "{},[0-{}]".format(
-                                                        last_obs_name, last_obs_number)
+                                                    if obs_number != '':
+                                                        obs_string = "{},[0-{}]".format(
+                                                            last_obs_name, last_obs_number)
+                                                    else:
+                                                        obs_string = obs_name
                                                     # Set the current observation name
                                                     # as the last observation name
                                                     last_obs_name = obs_name
@@ -236,17 +247,18 @@ def system_model_to_text(sm, out_dir, analysis):
 
             # If the current key is a time array ('time_array')
             elif k == 'time_array':
-                time_start, time_end, time_diff, timestep_check = check_time_steps(v)
+                if v is not None:
+                    time_start, time_end, time_diff, timestep_check = check_time_steps(v)
 
-                if timestep_check:  # if the time step is regular
-                    # Print the 'time_array:' header and the beginning and ending time step
-                    print("{}: [{}-{}]".format(k, time_start, time_end))
-                    # Print the time step
-                    print("time_step: {}".format(time_diff[0]))
+                    if timestep_check:  # if the time step is regular
+                        # Print the 'time_array:' header and the beginning and ending time step
+                        print("{}: [{}-{}]".format(k, time_start, time_end))
+                        # Print the time step
+                        print("time_step: {}".format(time_diff[0]))
 
-                else:  # if the time step is non-uniform
-                    # Print the time array list
-                    print("{}: {}".format(k, v))
+                    else:  # if the time step is non-uniform
+                        # Print the time array list
+                        print("{}: {}".format(k, v))
 
             # If the current key is the connections of observation
             # to components ('observation2components')
@@ -260,12 +272,13 @@ def system_model_to_text(sm, out_dir, analysis):
 
             # If the current key is observation base names ('obs_base_names')
             elif k == 'obs_base_names':
-                # Print the 'obs_base_names:' header
-                print("{}:".format(k))
-                # For each value in the 'obs_base_names' list
-                for n in v:
-                    # Print the value
-                    print("\t{}".format(n))
+                if len(v) != 0:
+                    # Print the 'obs_base_names:' header
+                    print("{}:".format(k))
+                    # For each value in the 'obs_base_names' list
+                    for n in v:
+                        # Print the value
+                        print("\t{}".format(n))
 
             elif k == 'interpolators':  # if the current key is 'interpolators'
                 if len(v) == 0:  # if there are no interpolators to report

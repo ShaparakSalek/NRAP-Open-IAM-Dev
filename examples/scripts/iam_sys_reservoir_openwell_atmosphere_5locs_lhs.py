@@ -4,6 +4,10 @@ atmosphere models. The saturation/pressure output produced by several simple
 reservoir components is used to drive leakage from open wellbores.
 |CO2| leakage rates are passed to the atmosphere model.
 
+This example also illustrates how to save all the outputs produced by the simulation.
+Changing variable 'save_output' at the beginning of simulation (line 32)
+from True to False allows to cancel saving of the outputs.
+
 Example of run:
 $ python iam_sys_reservoir_openwell_atmosphere_5locs_lhs.py
 '''
@@ -21,6 +25,11 @@ from matk import pyDOE
 if __name__ == '__main__':
     # For multiprocessing in Spyder
     __spec__ = None
+
+    # Change the variable value to False if saving the outputs is not needed.
+    # By default, the results will be saved in the folder 'output/csv_files' within root
+    # folder of NRAP-Open-IAM
+    save_output = True
 
     # Define keyword arguments of the system model
     num_years = 50
@@ -85,7 +94,7 @@ if __name__ == '__main__':
             OpenWellbore(name='ow'+str(i), parent=sm)))
 
         # Add parameters of open wellbore component
-        ow[-1].add_par('wellRadius', min=0.01, max=0.02, value=0.015)
+        ow[-1].add_par('wellRadius', min=0.025, max=0.035, value=0.03)
         ow[-1].add_par('logReservoirTransmissivity', min=-11.0, max=-9.0, value=-10.0)
         ow[-1].add_par('logAquiferTransmissivity', min=-11.0, max=-9.0, value=-10.0)
         ow[-1].add_par('brineSalinity', value=0.1, vary=False)
@@ -146,7 +155,7 @@ if __name__ == '__main__':
     num_samples = 50
     ncpus = 4
     # Draw Latin hypercube samples of parameter values
-    s = sm.lhs(siz=num_samples, seed=random.randint(500, 1100))
+    s = sm.lhs(siz=num_samples, seed=random.randint(500, 1100), save_output=save_output)
 
     # Run model using values in samples for parameter values
     results = s.run(cpus=ncpus, verbose=False)
