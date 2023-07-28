@@ -90,8 +90,9 @@ pages:
   artifacts:
     paths:
       - public
-        #only:
-        #- master
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == 'test_branch'
 
 stages:
   - test
