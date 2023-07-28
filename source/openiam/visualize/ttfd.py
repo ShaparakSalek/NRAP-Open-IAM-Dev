@@ -2292,7 +2292,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                 labelWells=subplot_label_wells[subplotRef])
 
             if subplot_use_x_label[subplotRef]:
-                plt.ylabel('Easting (km)', fontsize=axislabelfontsize,
+                plt.xlabel('Easting (km)', fontsize=axislabelfontsize,
                            fontweight=labelfontweight)
 
             if subplot_use_y_label[subplotRef]:
