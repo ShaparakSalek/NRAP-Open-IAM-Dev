@@ -1376,7 +1376,7 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
         time = sm.time_array / 365.25
         fig_title = 'Area of Review Based on {}{},' + ' t = {} years'.format(
             time[time_index])
-        name_addition = '_tIndex{}'.format(time_index)
+        name_addition = '_tIndex_{}'.format(time_index)
 
     analysis = yaml_data['ModelParams']['Analysis']
 

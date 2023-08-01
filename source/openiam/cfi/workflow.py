@@ -56,7 +56,7 @@ DEFAULT_LUTR_ENTRIES = {
     'FileDirectory': DEFAULT_LUTR_FILE_DIRECTORY,
     'TimeFile': 'time_points.csv',
     'ParameterFilename': 'parameters_and_filenames_trunc.csv',
-    'Interpolation2D': False, 'Parameters': {'index': 1}}
+    'Interpolation2D': True, 'Parameters': {'index': 1}}
 
 YAML_INPUT_WARNING_MSG = ''.join([
     'The input provided for {} under the Workflow section of the .yaml file ',
