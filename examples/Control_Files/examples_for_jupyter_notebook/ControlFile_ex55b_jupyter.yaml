@@ -30,7 +30,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex55b_jupyter'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
-    # Logging: Debug
+    Logging: Error
 #-------------------------------------------------
 Stratigraphy:
     spatiallyVariable:

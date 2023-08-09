@@ -16,7 +16,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex56d_jupyter'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
-    Logging: Debug
+    Logging: Error
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
