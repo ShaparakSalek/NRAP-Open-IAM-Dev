@@ -5,6 +5,7 @@ Created on Fri Sep 20 12:54:26 2019
 from math import ceil
 import sys
 import os
+import logging
 import numpy as np
 from numpy.random import RandomState
 import matplotlib.pyplot as plt
@@ -12,12 +13,12 @@ import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    from openiam import SystemModel, SamplerModel
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 
-def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None, 
+def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None,
                        z_min=None, z_max=None):
     """ Generate x- and y-coordinates uniformly within the defined domain.
 
@@ -32,11 +33,11 @@ def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None,
 
     :param y_max: upper boundary of the domain along y-axis
     :type y_max: float
-    
-    :param z_min: lower boundary of the domain along z-axis. None is not used.
+
+    :param z_min: lower boundary of the domain along z-axis. None if not used.
     :type z_min: float
 
-    :param z_max: upper boundary of the domain along z-axis. None is not used.
+    :param z_max: upper boundary of the domain along z-axis. None if not used.
     :type z_max: float
 
     :param num_locations: number of locations to be generated
@@ -58,7 +59,7 @@ def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None,
     # Generate uniform random variables and transform according to the defined setup
     x_coords = x_min + (x_max - x_min) * prng.rand(num_locations)
     y_coords = y_min + (y_max - y_min) * prng.rand(num_locations)
-    
+
     if z_min is not None and z_max is not None:
         z_coords = z_min + (z_max - z_min) * prng.rand(num_locations)
     else:
@@ -67,9 +68,9 @@ def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None,
     return x_coords, y_coords, z_coords
 
 
-class LocationGenerator(ComponentModel):
+class LocationGenerator(SamplerModel):
     """ NRAP-Open-IAM LocationGenerator component class. """
-    def __init__(self, name, parent, x_min=0, x_max=0, y_min=1000, y_max=1000,
+    def __init__(self, name, parent, x_min=0, x_max=1000, y_min=0, y_max=1000,
                  num_locations=1, reproducible=True, z_min=None, z_max=None):
         """
         Constructor method of LocationGenerator class
@@ -107,56 +108,57 @@ class LocationGenerator(ComponentModel):
 
         :returns: LocationGenerator class object
         """
-        super().__init__(name, parent, model=self.simulation_model)
+        super().__init__(name, parent, reproducible=reproducible,
+                         default_seed_value=3)
 
         # Add type attribute
         self.class_type = 'LocationGenerator'
 
         # Save setup attributes of the component
-        self.x_min = x_min
-        self.x_max = x_max
-        self.y_min = y_min
-        self.y_max = y_max
+        self.check_ranges(num_locations, x_min, x_max, y_min, y_max,
+                          z_min=z_min, z_max=z_max)
+
+        msg = 'LocationGenerator created with name {}'.format(self.name)
+        logging.debug(msg)
+
+    def invalid_ranges_msg(self, var, min_val, max_val):
+        msg = ''.join([
+            'Provided minimum value ({}) for {}-coordinates is greater than ',
+            'the provided maximum value ({}) for LocationGenerator {}. ',
+            'Please check your setup.']).format(min_val, var, max_val, self.name)
+        logging.error(msg)
+        raise ValueError(msg)
+
+    def check_ranges(self, num_locations, x_min, x_max, y_min, y_max, z_min, z_max):
+
+        if x_min <= x_max:
+            self.x_min = x_min
+            self.x_max = x_max
+        else:
+            self.invalid_ranges_msg('x', x_min, x_max)
+        if y_min <= y_max:
+            self.y_min = y_min
+            self.y_max = y_max
+        else:
+            self.invalid_ranges_msg('y', y_min, y_max)
+
         self.num_locations = num_locations
-        
+
         # The z coordinates produced will be None if z_min and/or z_max are None.
-        # The z values are taken as being negative for depths beneath the surface. 
-        # If the input used positive values, the min and max need to be swapped.
         if z_min is not None and z_max is not None:
-            if z_min > 0:
-                z_min = -z_min
-            
-            if z_max > 0:
-                z_max = -z_max
-            
-            if z_max < z_min:
-                z_min_copy = z_min
-                
-                z_min = z_max
-                z_max = z_min_copy
-                
-                del z_min_copy
-        
-        self.z_min = z_min
-        self.z_max = z_max
+            if z_min <= z_max:
+                self.z_min = z_min
+                self.z_max = z_max
+            else:
+                self.invalid_ranges_msg('z', z_min, z_max)
+        else:
+            self.z_min = None
+            self.z_max = None
 
-        # Set a flag indicating whether for each new simulation
-        # the distribution will be reproducible.
-        # reproducible=True means that the model method will use
-        # either the default or provided seed parameter value for random number generator
-        # (so the results can be reproduced if the same seed is used).
-        self.reproducible = reproducible
-
-        # Set default parameters of the component model
-        self.add_default_par('seed', value=3)
-
-        # Set the attribute indicating that the component is supposed to run
-        # only once per realization
-        self.run_frequency = 1
-
-    def simulation_model(self, p):
+    def sample(self, p):
         """ Return x-, y-, and z-coordinates of well locations."""
-        # Obtain the default values of the parameters from dictionary of default parameters
+        # Obtain the default values of the parameters from dictionary
+        # of default parameters
         actual_p = {k: v.value for k, v in self.default_pars.items()}
         # Update default values of parameters with the provided ones
         actual_p.update(p)
@@ -165,25 +167,30 @@ class LocationGenerator(ComponentModel):
         # for the runs with the same seed and on the same machine
         if self.reproducible:    # if reproducible results are needed
             x_coords, y_coords, z_coords = generate_locations(
-                self.x_min, self.x_max, self.y_min, self.y_max, 
-                self.num_locations, seed=actual_p['seed'], 
+                self.x_min, self.x_max, self.y_min, self.y_max,
+                self.num_locations, seed=actual_p['seed'],
                 z_min=self.z_min, z_max=self.z_max)
         else:
             x_coords, y_coords, z_coords = generate_locations(
-                self.x_min, self.x_max, self.y_min, self.y_max, 
+                self.x_min, self.x_max, self.y_min, self.y_max,
                 self.num_locations, z_min=self.z_min, z_max=self.z_max)
-        
-        out = {'locX': x_coords, 'locY': y_coords, 'locZ': z_coords}
+
+        if z_coords is None:
+            out = {'locX': x_coords, 'locY': y_coords}
+        else:
+            out = {'locX': x_coords, 'locY': y_coords, 'locZ': z_coords}
 
         return out
 
 
-if __name__ == "__main__":
+def test_case1():
+    # For multiprocessing in Spyder
     __spec__ = None
+
     from openiam import SimpleReservoir
+
     # Define keyword arguments of the system model
     num_years = 50
-    num_obs = num_years+1
     time_array = 365.25*np.arange(0.0, num_years+1)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
@@ -303,3 +310,7 @@ if __name__ == "__main__":
     plt.xlim([0, 50])
     plt.ylim([0.0, 1.0])
     ax.get_yaxis().set_label_coords(-0.10, 0.5)
+
+if __name__ == "__main__":
+
+    test_case1()

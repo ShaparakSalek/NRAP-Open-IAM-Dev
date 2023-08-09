@@ -630,7 +630,8 @@ class SystemModel(matk):
         # Pass reordered list to reorder_component_models method
         self.reorder_component_models(self, order)
 
-    def single_step_model(self, pardict=None, to_reset=False, sm_kwargs=None, job_number=None):
+    def single_step_model(self, pardict=None, to_reset=False, sm_kwargs=None,
+                          job_number=None):
         """
         Return system model output for a single time step.
 
@@ -659,6 +660,9 @@ class SystemModel(matk):
         # can be changed in reset method of component model.
         if to_reset:
             for cm in self.component_models.values():
+                # Reset observation values to zeros
+                for key in self.obs.keys():
+                    self.obs[key].sim = None
                 # Reset using 'accumulators' dictionary attribute
                 for k_ac in list(cm.accumulators.keys()):
                     cm.accumulators[k_ac].sim = 0.0
@@ -666,6 +670,8 @@ class SystemModel(matk):
                 # Use of reset method follows the resetting of the accumulators
                 # in order to correct zero setting of accumulators if needed.
                 cm.reset()
+                # Reset to the default run frequency of the component
+                cm.run_frequency_reset()
 
         # Set up parameter dictionary for composite parameter evaluation
         aeval = Interpreter()
@@ -896,7 +902,10 @@ class SystemModel(matk):
                 # the first line below may return a KeyError
                 # The line still works for components meant to run at all time points
                 val = self.component_models[obs_cm].obs[obs_nm + '_0'].sim
-                total_out[b_obs_nm] = val if val is not None else 0.0
+                if val is None:
+                    # Check if obs is in the default observations of the component
+                    val = self.component_models[obs_cm].default_obs.get(obs_nm, 0.0)
+                total_out[b_obs_nm] = val
             except:
                 pass
 
@@ -1147,6 +1156,7 @@ class ComponentModel():
         # Observations
         self.linkobs = OrderedDict()
         self.accumulators = OrderedDict()
+        self.default_obs = OrderedDict() # dict to keep default values of observations
         self.obs = OrderedDict()
         self.grid_obs = OrderedDict()
         self.local_obs = OrderedDict()
@@ -1171,6 +1181,7 @@ class ComponentModel():
         # 1 - run only once for the very first time step
         # 3 - run for selected time points defined by indices in the attribute self.run_time_indices
         # Indices are defined as indices of the time_array elements
+        self.default_run_frequency = 2
         self.run_frequency = 2
         self.run_time_indices = None
 
@@ -1805,6 +1816,12 @@ class ComponentModel():
                 'of its model parameters.']).format(name=self.name)
             logging.debug(debug_msg)
 
+    def run_frequency_reset(self):
+        """
+        Reset run frequency of the component to the default value.
+        """
+        self.run_frequency = self.default_run_frequency
+
     def reset(self):
         """
         Reset parameters, observations and accumulators.
@@ -1863,6 +1880,7 @@ class SamplerModel(ComponentModel):
         self.add_default_par('seed', value=default_seed_value)
 
         # Run only once for the very first time step
+        self.default_run_frequency = 1
         self.run_frequency = 1
 
     def check_seed_parameter(self, seed):

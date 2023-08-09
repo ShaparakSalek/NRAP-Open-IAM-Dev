@@ -138,6 +138,9 @@ class CementedWellbore(ComponentModel):
                               'brine_aquifer1', 'brine_aquifer2', 'brine_atm',
                               'mass_CO2_aquifer1', 'mass_CO2_aquifer2']
 
+        # Setup default observations of the component
+        self.default_obs = {obs_nm: 0.0 for obs_nm in self.output_labels}
+
         # Set default parameters of the component model
         self.add_default_par('wellDepth', value=1500.0)
         self.add_default_par('depthRatio', value=0.5)

@@ -171,6 +171,12 @@ class AnalyticalReservoir(ComponentModel):
         self.locX = locX
         self.locY = locY
 
+        # Setup default observations of the component
+        self.default_obs = {'pressure': 101325.0,
+                            'pressureAve': 101325.0,
+                            'CO2saturation': 0.0,
+                            'mass_CO2_reservoir': 0.0}
+
         # Add accumulator observation mass_CO2_reservoir used within the component
         self.add_accumulator('mass_CO2_reservoir', sim=0.0)
         self.add_accumulator('volume_CO2_reservoir', sim=0.0)

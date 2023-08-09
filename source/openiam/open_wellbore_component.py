@@ -177,6 +177,9 @@ class OpenWellbore(ComponentModel):
         # Define output dictionary labels
         self.output_labels = ['CO2_atm', 'CO2_aquifer', 'brine_atm', 'brine_aquifer']
 
+        # Setup default observations of the component
+        self.default_obs = {obs_nm: 0.0 for obs_nm in self.output_labels}
+
         # Set default parameters of the component model
         self.initPressure = 0.
         self.add_default_par('wellRadius', value=0.05)

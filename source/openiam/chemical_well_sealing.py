@@ -93,6 +93,7 @@ class ChemicalWellSealing(ComponentModel):
         self.pars_bounds['maxOverpressure'] = [1.0e+6, 1.5e+7]
 
         # Indicate how often the component should be run
+        self.default_run_frequency = 1
         self.run_frequency = 1 # run only once
 
     def check_input_parameters(self, p):

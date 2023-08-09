@@ -305,6 +305,10 @@ class LookupTableReservoir(ComponentModel):
         # -2 means that we didn't assign the value yet
         self.add_default_par('index', value=-2)
 
+        # Setup default observations of the component
+        self.default_obs = {'pressure': 101325.0,
+                            'CO2saturation': 0.0}
+
         # If interpolator family argument is provided, connect to it,
         # otherwise create an 'empty' reservoir component
         if intr_family:

@@ -91,6 +91,7 @@ class Stratigraphy(ComponentModel):
         self.pars_bounds['depth'] = [5.0, 30000.0]
 
         # Indicate that the component should not be run
+        self.default_run_frequency = 0
         self.run_frequency = 0
 
         debug_msg = 'Stratigraphy component created with name {}'.format(name)

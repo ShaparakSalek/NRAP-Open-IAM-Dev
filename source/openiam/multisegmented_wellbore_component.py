@@ -172,6 +172,14 @@ class MultisegmentedWellbore(ComponentModel):
             self.add_accumulator('CO2_saturation_aquifer'+str(i+1), sim=0.0)
         self.num_accumulators = 2
 
+        # Define output dictionary labels
+        self.output_labels = ['CO2_aquifer1', 'CO2_aquifer2', 'CO2_atm',
+                              'brine_aquifer1', 'brine_aquifer2', 'brine_atm',
+                              'mass_CO2_aquifer1', 'mass_CO2_aquifer2']
+
+        # Setup default observations of the component
+        self.default_obs = {obs_nm: 0.0 for obs_nm in self.output_labels}
+
         debug_msg = 'MultisegmentedWellbore component created with name {}'.format(name)
         logging.debug(debug_msg)
 

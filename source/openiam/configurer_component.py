@@ -81,7 +81,7 @@ class PressureBasedRiskConfigurer(ComponentModel):
         logging.debug(msg)
 
     @property
-    def num_wells_on(self):
+    def num_cmpnts_on(self):
         if len(self.cmpnts_to_configure) > 0:
             return sum([1 for nm in self.cmpnts_to_configure
                         if self._parent.component_models[nm].run_frequency == 2])
@@ -182,7 +182,7 @@ class PressureBasedRiskConfigurer(ComponentModel):
 
         out['status'] = self.details['status']
 
-        out['num_wells_on'] = self.num_wells_on
+        out['num_cmpnts_on'] = self.num_cmpnts_on
         return out
 
 
@@ -272,7 +272,7 @@ class DataBasedRiskConfigurer(ComponentModel):
         logging.debug(msg)
 
     @property
-    def num_wells_on(self):
+    def num_cmpnts_on(self):
         if not self.cmpnts_to_configure:
             logging.error('No components were linked for configuration.')
             raise ValueError(' '.join(['List of components to be configured',
@@ -435,19 +435,19 @@ class DataBasedRiskConfigurer(ComponentModel):
             out['status'] = self.details['status']
 
         out['num_leak_events'] = num_leak_events
-        out['num_wells_on'] = self.num_wells_on
+        out['num_cmpnts_on'] = self.num_cmpnts_on
         return out
 
 
 class WellDepthRiskConfigurer(ComponentModel):
     """
-    Component that compares the depth of a well to the depth of the reservoir 
-    to decide whether the well is going to leak or not.
+    Component that compares the depth of a well to the depth of the reservoir
+    to decide whether the well can be considered for leak scenario or not.
     """
     def __init__(self, name, parent, cmpnt_nms=None):
         """
         Constructor method of WellDepthRiskConfigurer class
-        
+
         :param name: name of component model
         :type name: str
 
@@ -458,12 +458,8 @@ class WellDepthRiskConfigurer(ComponentModel):
 
         :param cmpnt_nms: list of components whose parameters/keyword
             arguments/attributes will be controlled by the configurer
-        type cmpnt_nms: list()
-        
-        :param reservoirDepth: depth (m) to the top of the reservoir (default: 2000). 
-            This parameter is used to evaluate if a well penetrates the reservoir.
-        type cmpnt_nms: float or int
-        
+        type cmpnt_nms: list() or list of list() for multiple types of components
+            being handled
         """
         # Set up keyword arguments of the 'model' method provided by the system model
         model_kwargs = dict()
@@ -477,9 +473,12 @@ class WellDepthRiskConfigurer(ComponentModel):
 
         # Setup the list of names of components which can be configured during the run
         if cmpnt_nms is None:
-            self.cmpnts_to_configure = []
+            self.cmpnts_to_configure = np.array([])
         else:
-            self.cmpnts_to_configure = cmpnt_nms
+            self.cmpnts_to_configure = np.array(cmpnt_nms)
+            if len(self.cmpnts_to_configure.shape) == 1:
+                self.cmpnts_to_configure = self.cmpnts_to_configure.reshape((1, -1))
+            self.num_comp_types = self.cmpnts_to_configure.shape[0]
 
         # Set default parameters of the component model
         self.add_default_par('reservoirDepth', value=2000)
@@ -488,26 +487,29 @@ class WellDepthRiskConfigurer(ComponentModel):
         self.pars_bounds = dict()
         self.pars_bounds['reservoirDepth'] = [5.0, 30000.0]
 
-        msg = 'WellDepthRiskConfigurer created with name {name}'.format(
-            name=self.name)
+        msg = 'WellDepthRiskConfigurer created with name {}'.format(self.name)
         logging.debug(msg)
-        
+
         # The model only needs to be run once, as output for all times can be
         # obtained at once.
+        self.default_run_frequency = 1
         self.run_frequency = 1
 
     @property
-    def num_wells_on(self):
-        if not self.cmpnts_to_configure:
+    def num_cmpnts_on(self):
+        if self.cmpnts_to_configure.size == 0:
             logging.error('No components were linked for configuration.')
             raise ValueError(' '.join(['List of components to be configured',
                                        'is empty.']))
 
-        return sum([1 for nm in self.cmpnts_to_configure
-                        if self._parent.component_models[nm].run_frequency == 2])
+        return sum([1 for nm in self.cmpnts_to_configure.flatten()
+                        if self._parent.component_models[nm].run_frequency != 0])
 
-    
-    def simulation_model(self, p, time_point=365.25, wellDepth=None):
+    @property
+    def num_cmpnts(self):
+        return self.cmpnts_to_configure.size
+
+    def simulation_model(self, p, time_point=365.25, wellDepth=None, **kwargs):
         """
         Initiate leakage of the well based on wellDepth exceeding the reservoirDepth.
         """
@@ -515,45 +517,65 @@ class WellDepthRiskConfigurer(ComponentModel):
         actual_p = {k: v.value for k, v in self.default_pars.items()}
         # Update default values of parameters with the provided ones
         actual_p.update(p)
-        
+
         if wellDepth is not None:
-            if wellDepth < 0:
-                # The locZ values from a LocationGenerator component will be negative. 
-                # To be consistent with the conventions of other components, however, 
-                # the reservoirDepth parameter is taken as positive (e.g., the 
-                # OpenWellbore component's reservoirDepth parameter and the CementedWellbore's 
-                # wellDepth parameter are taken as positive). If wellDepth is negative, 
-                # it is made positive - we never focus on elevations above the Earth's surface.
-                wellDepth = -wellDepth
-        
+            # The locZ values from a LocationGenerator component will be negative.
+            # To be consistent with the conventions of other components, however,
+            # the reservoirDepth parameter is taken as positive (e.g., the
+            # OpenWellbore component's reservoirDepth parameter and the CementedWellbore's
+            # wellDepth parameter are taken as positive). If wellDepth is negative,
+            # it is made positive - we never focus on elevations above the Earth's surface.
+            well_depth = np.abs(wellDepth)
+        else:
+            err_msg = "".join([
+                "Argument 'wellDepth' is not defined (None). ",
+                "WellDepthRiskConfigurer {} cannot proceed with the ",
+                "setup."]).format(self.name)
+            logging.error(err_msg)
+            raise ValueError(err_msg)
+
+        # Get reservoir depth
+        reservoir_depth = kwargs.get('reservoirDepth', actual_p['reservoirDepth'])
+        if isinstance(reservoir_depth, (int, float)):  # scalar for a reservoir depth
+            reservoir_depth = reservoir_depth*np.ones(self.num_cmpnts//self.num_comp_types)
+        else:
+            if len(reservoir_depth) != self.num_cmpnts//self.num_comp_types:
+                err_msg = "".join([
+                    "Number of elements in the array keyword argument 'reservoirDepth' ",
+                    "is not equal to the number of components to be configured. ",
+                    "Check your input."])
+                logging.error(err_msg)
+                raise ValueError(err_msg)
+
         # Initialize the output dictionary of the model
         out = {}
-        
-        if len(self.cmpnts_to_configure) == 0:
+
+        if self.cmpnts_to_configure.size == 0:
             logging.error('No components were linked for configuration.')
             raise ValueError(
                 ' '.join(['The model method of component {}',
                           'cannot create a leakage configuration: the list of components',
-                          'to be configured is empty']).format(self.name))
+                          'to be configured is empty.']).format(self.name))
 
-        for ind, nm in enumerate(self.cmpnts_to_configure):
-            cmpnt = self._parent.component_models[nm]
-            
-            if wellDepth is not None:
-                if wellDepth < actual_p['reservoirDepth']:
-                    cmpnt.run_frequency = 0
+        less_indices = np.where(well_depth < reservoir_depth)[0]
+        for type_ind in range(self.num_comp_types):
+            for ind in less_indices:
+                cmpnt = self._parent.component_models[self.cmpnts_to_configure[type_ind, ind]]
+                cmpnt.run_frequency = 0
 
-        out['num_wells_on'] = self.num_wells_on
-        
+        out['num_cmpnts_on'] = self.num_cmpnts_on
+
         return out
-        
-        
+
 
 def test_case_pressure_based_risk_configurer():
     pass
 
 
 def test_case_data_based_risk_configurer():
+    pass
+
+def test_case_well_depth_risk_configurer():
     pass
 
 
