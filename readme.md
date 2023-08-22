@@ -16,21 +16,9 @@ Additionally, the archive of the tool can be obtained through
 NETL's Energy Data eXchange website: https://edx.netl.doe.gov/dataset/nrap-open-source-iam
 by requesting an access through e-mail addressed to NRAP@netl.doe.gov.
 
-Docker
--------
-We provide a Docker image that runs the GUI so that NRAP-Open-IAM can be tried out without installation.
-Docker will need to be installed on your computer: https://www.docker.com/products/docker-desktop
-Ensure that Docker has been started and you have signed into your Docker account.
-
-Then, on MacOSX/Linux, run: 
-
-xhost + 127.0.0.1
-
-docker run -e DISPLAY=host.docker.internal:0 -v $(pwd)/output:/output dharp/openiam-gui:beta
-
 Documentation
 -------------
-The NRAP-Open-IAM documentation can be accessed at https://nrap-iam.gitlab.io/UQ_example_setup
+The NRAP-Open-IAM documentation can be accessed at https://nrap.gitlab.io/nrap-open-iam-dev/
 
 Feedback
 ---------
