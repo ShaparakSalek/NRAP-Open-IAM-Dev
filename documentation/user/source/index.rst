@@ -19,4 +19,6 @@ NRAP-Open-IAM User's Guide
 
 .. include:: use_cases.rst
 
+.. include:: jupyter_notebooks.rst
+
 .. include:: bibliography.rst

@@ -38,31 +38,6 @@ before_script:
   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq texlive-latex-extra
     #- apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq libnvinfer-plugin6=6.0.1-1+cuda10.1
 
-# before_script:
-#   - python -V  # Print out python version for debugging
-#   - export PIP_CACHE_DIR=`pwd`/.cache/pip
-#   - export APT_CACHE_DIR=`pwd`/.cache/apt
-#   - pip install --cache-dir "$PIP_CACHE_DIR" --upgrade pip
-#   - pip install --cache-dir "$PIP_CACHE_DIR" virtualenv
-#   - virtualenv venv
-#   - source venv/bin/activate
-#   - pip install --cache-dir "$PIP_CACHE_DIR" tensorflow==2.6
-#   - pip install --cache-dir "$PIP_CACHE_DIR" keras
-#   - pip install --cache-dir "$PIP_CACHE_DIR" scikit-learn
-#   - pip install --cache-dir "$PIP_CACHE_DIR" scipy
-#   - pip install --cache-dir "$PIP_CACHE_DIR" matplotlib
-#   - pip install --cache-dir "$PIP_CACHE_DIR" pandas
-#   - pip install --cache-dir "$PIP_CACHE_DIR" pyyaml
-#   - pip install --cache-dir "$PIP_CACHE_DIR" --upgrade "protobuf<=3.20.1"
-#   - apt-get update
-#   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq gfortran
-#   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq latexmk
-#   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq xzdec
-#   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq texlive-fonts-recommended
-#   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq texlive-latex-recommended
-#   - apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq texlive-latex-extra
-#     #- apt-get -o Dir::Cache::Archives="$APT_CACHE_DIR" install -yqq libnvinfer-plugin6=6.0.1-1+cuda10.1
-
 test:
   stage: test
   script:
@@ -70,16 +45,6 @@ test:
     - echo $PYTHONPATH
     - cd setup
     - python openiam_setup_tests.py
-
-      #run:
-      #  script:
-      #    - python setup.py bdist_wheel
-      #    # an alternative approach is to install and run:
-      #    - pip install dist/*
-      #    # run the command here
-      #  artifacts:
-      #    paths:
-      #      - dist/*.whl
 
 pages:
   stage: deploy

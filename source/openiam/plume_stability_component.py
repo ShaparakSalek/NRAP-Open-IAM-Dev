@@ -185,6 +185,7 @@ class PlumeStability(ComponentModel):
         # Indicate to the system model that this component will be run only once:
         # at the very first time point
         self.run_frequency = 1
+        self.default_run_frequency = 1
 
         msg = 'PlumeStability object created with name {name}'.format(name=name)
         logging.debug(msg)
@@ -556,7 +557,7 @@ if __name__ == "__main__":
                        '2. https://gitlab.com/NRAP/Kimberlina_data \n'])
         logging.error(msg)
 
-    option = 3
+    option = 2
     if option == 1:
         num_years = 200
         # Time array different from time points provided in the data set
@@ -679,16 +680,16 @@ if __name__ == "__main__":
     out = s.collect_observations_as_time_series()
 
     # Plot results
-    font_size = 16
-    f, ax = plt.subplots(4, sharex=True, figsize=(10, 10))
+    font_size = 14
+    f1, ax = plt.subplots(4, sharex=True, figsize=(10, 10))
     for i in range(len(s.indices)):
         # Convert output from m^2 to km^2 or from m to km
-        ax[0].plot(out['sps.times'][i], out['sps.CO2saturation_areas'][i]/1.0e+6)
-        ax[1].plot(out['sps.times'][i], out['sps.CO2saturation_areas_dt'][i]/1.0e+6)
-        ax[2].plot(out['sps.times'][i], out['sps.CO2saturation_mobility'][i]/1.0e+3)
-        ax[3].plot(out['sps.times'][i], out['sps.CO2saturation_spreading'][i]/1.0e+6)
+        ax[0].plot(out['sps.times'][i], out['sps.CO2saturation_areas'][i]/1.0e+6, '-', linewidth=3)
+        ax[1].plot(out['sps.times'][i], out['sps.CO2saturation_areas_dt'][i]/1.0e+6, '-', linewidth=3)
+        ax[2].plot(out['sps.times'][i], out['sps.CO2saturation_mobility'][i]/1.0e+3, '-', linewidth=3)
+        ax[3].plot(out['sps.times'][i], out['sps.CO2saturation_spreading'][i]/1.0e+6, '-', linewidth=3)
 
-    f.subplots_adjust(left=0.15, bottom=0.1, right=0.95, top=0.95, wspace=0.1)
+    f1.subplots_adjust(left=0.2, bottom=0.1, right=0.95, top=0.95, wspace=0.1)
     ax[0].set_ylabel(r'Plume area,{}[km$^2$]'.format('\n'), fontsize=font_size)
     ax[1].set_ylabel(r'Change in plume area,{}[km$^2$/year]'.format('\n'), fontsize=font_size)
     ax[2].set_ylabel(r'Mobility,{}[m/year]'.format('\n'), fontsize=font_size)
@@ -697,6 +698,7 @@ if __name__ == "__main__":
 
     for ind in range(4):
         ax[ind].tick_params(axis='both', which='major', labelsize=font_size-2)
+        ax[ind].set_xlim(0, 150)
 
     # Align y-labels
     labelx = -0.1
@@ -706,10 +708,44 @@ if __name__ == "__main__":
     # but it may not be that useful to plot an entire ensemble of them.
 
     if data_dim == "2D":
-        f.savefig(file_directory + '\\plume_stability_graph_2D.jpg', format='jpg')
+        f1.savefig(file_directory + '\\plume_stability_graph_2Da.jpg', format='jpg')
     elif data_dim == "3D":
-        f.savefig(file_directory + '\\plume_stability_graph_3D.jpg', format='jpg')
-    f.show()
+        f1.savefig(file_directory + '\\plume_stability_graph_3Da.jpg', format='jpg')
+    f1.show()
+
+    # Plot one of the realizations
+    font_size = 14
+    f2, ax = plt.subplots(2, 2, figsize=(10, 10))
+    for i in [0]:
+        # Convert output from m^2 to km^2 or from m to km
+        ax[0, 0].plot(out['sps.times'][i], out['sps.CO2saturation_areas'][i]/1.0e+6, '-k', linewidth=3)
+        ax[0, 1].plot(out['sps.times'][i], out['sps.CO2saturation_areas_dt'][i]/1.0e+6, '-k', linewidth=3)
+        ax[1, 0].plot(out['sps.times'][i], out['sps.CO2saturation_mobility'][i]/1.0e+3, '-k', linewidth=3)
+        ax[1, 1].plot(out['sps.times'][i], out['sps.CO2saturation_spreading'][i]/1.0e+6, '-k', linewidth=3)
+
+    f2.subplots_adjust(left=0.1, bottom=0.1, right=0.95, top=0.95, wspace=0.3)
+    ax[0, 0].set_ylabel(r'Plume area,{}[km$^2$]'.format('\n'), fontsize=font_size)
+    ax[0, 1].set_ylabel(r'Change in plume area,{}[km$^2$/year]'.format('\n'), fontsize=font_size)
+    ax[1, 0].set_ylabel(r'Mobility,{}[m/year]'.format('\n'), fontsize=font_size)
+    ax[1, 1].set_ylabel(r'Spreading,{}[km$^2$/year]'.format('\n'), fontsize=font_size)
+
+    for ind1 in range(2):
+        for ind2 in range(2):
+            ax[ind1, ind2].set_xlabel('Time [years]', fontsize=font_size)
+            ax[ind1, ind2].tick_params(axis='both', which='major', labelsize=font_size-2)
+            ax[ind1, ind2].set_xlim(0, 150)
+
+    # Align y-labels
+    labelx = -0.12
+    for ind1 in range(2):
+        for ind2 in range(2):
+            ax[ind1, ind2].yaxis.set_label_coords(labelx, 0.5)
+
+    if data_dim == "2D":
+        f2.savefig(file_directory + '\\plume_stability_graph_2Db.jpg', format='jpg')
+    elif data_dim == "3D":
+        f2.savefig(file_directory + '\\plume_stability_graph_3Db.jpg', format='jpg')
+    f2.show()
 
     # Remove all handlers from the logger for proper work in the consecutive runs
     while logging.getLogger('').handlers:

@@ -18,6 +18,7 @@ GUI_EXAMPLES = [
     '11_LHS_AR_CWWR.OpenIAM',
     '12_LHS_FL.OpenIAM',
     '13_Forward_TR.OpenIAM',
+    '14_Forward_HCL.OpenIAM',
     ]
 
 CFI_EXAMPLES = {
@@ -162,4 +163,19 @@ CFI_EXAMPLES = {
                     'GriddedRadialMetric plot, forward']),
     '54d': ''.join(['Simple reservoir, Open wellbore, Generic aquifer, ',
                     'GriddedRadialMetric plot, LHS']),
+    '55a': 'LUT reservoir, Open wellbore, FutureGen 2 aquifer, Workflow: AoR',
+    '55b': ''.join(['LUT reservoir, Open wellbore, FutureGen 2 aquifer, ',
+                    'Workflow: AoR, spatially variable stratigraphy']),
+    '55c': ''.join(['LUT reservoir, Open wellbore, Generic aquifer, ',
+                    'Workflow: AoR, default settings']),
+    '55d': ''.join(['LUT reservoir, Open wellbore, FutureGen 2 aquifer, ',
+                    'Workflow: AoR, spatially variable stratigraphy, time list option']),
+    '56a': ''.join(['Simple reservoir, Open wellbore, Generic aquifer, ',
+                    'Workflow: AoR, simple settings']),
+    '56b': ''.join(['Simple reservoir, Open wellbore, FutureGen 2 aquifer, ',
+                    'Workflow: AoR, AoR plots']),
+    '56c': ''.join(['Simple reservoir, Open wellbore, FutureGen 2 aquifer, ',
+                    'Workflow: AoR']),
+    '56d': ''.join(['Simple reservoir, Open wellbore, FutureGen 2 aquifer, ',
+                    'Workflow: AoR']),
     }

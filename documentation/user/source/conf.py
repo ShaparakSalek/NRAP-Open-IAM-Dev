@@ -38,6 +38,11 @@ extensions = ['sphinx.ext.autodoc',
               'sphinxcontrib.bibtex',
               'sphinx_numfig.numfig',
               'nbsphinx']
+# If you want to include a notebook without outputs and yet don’t want nbsphinx
+# to execute it for you, you can explicitly disable this feature.
+# There are three possible settings, "always", "auto" and "never". By default
+# (= "auto"), notebooks with no outputs are executed and notebooks with at least
+# one output are not.
 nbsphinx_execute = 'never'
 bibtex_bibfiles = ['../../bibliography/project.bib']
 
