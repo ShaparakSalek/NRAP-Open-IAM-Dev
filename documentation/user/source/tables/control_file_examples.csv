@@ -79,3 +79,11 @@ ControlFile_ex54a.yaml,"Simple reservoir, open wellbore, generic aquifer",Forwar
 ControlFile_ex54b.yaml,"Simple reservoir, open wellbore, generic aquifer",Forward simulation. Example illustrates setup of gridded radial metric plot with default settings.
 ControlFile_ex54c.yaml,"Lookup table based reservoir, multisegmented wellbore, generic aquifer",Forward simulation. Example illustrates setup of gridded radial metric plot.
 ControlFile_ex54d.yaml,"Simple reservoir, open wellbore, generic aquifer","Latin hypercube sampling, 30 realizations. Example illustrates setup of gridded radial metric plot."
+ControlFile_ex55a.yaml,"Lookup table based reservoir, open wellbore, FutureGen2 aquifer","Forward simulation. Example illustrates setup of AoR workflow section."
+ControlFile_ex55b.yaml,"Lookup table based reservoir, open wellbore, FutureGen2 aquifer","Forward simulation. Example illustrates setup of spatially variable stratigraphy and AoR workflow sections."
+ControlFile_ex55c.yaml,"Lookup table based reservoir, open wellbore, generic aquifer","Forward simulation. Example illustrates setup of AoR workflow section with default settings."
+ControlFile_ex55d.yaml,"Lookup table based reservoir, open wellbore, FutureGen2 aquifer","Forward simulation. Example illustrates setup of spatially variable stratigraphy and AoR workflow sections."
+ControlFile_ex56a.yaml,"Simple reservoir, open wellbore, generic aquifer","Forward simulation. Example illustrates simplified setup of AoR workflow sections."
+ControlFile_ex56b.yaml,"Simple reservoir, open wellbore, FutureGen2 aquifer","Forward simulation. Example illustrates setup of AoR analysis and workflow sections."
+ControlFile_ex56c.yaml,"Simple reservoir, open wellbore, FutureGen2 aquifer","Forward simulation. Example illustrates setup of AoR workflow sections."
+ControlFile_ex56d.yaml,"Simple reservoir, open wellbore, FutureGen2 aquifer","Latin hypercube sampling, 30 realizations. Example illustrates setup of AoR workflow sections."

@@ -154,6 +154,7 @@ class HydrocarbonLeakage(ComponentModel):
         # The model only needs to be run once, as output for all times can be
         # obtained at once.
         self.run_frequency = 1
+        self.default_run_frequency = 1
 
         # Initiate solution object
         self.sol = hydrcarbrom.Solution()

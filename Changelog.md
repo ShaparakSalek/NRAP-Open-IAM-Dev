@@ -9,6 +9,7 @@ please perform the following actions:
     - documentation/user/source/conf.py
     - documentation/developer/source/conf.py
     - documentation/qaqc/source/conf.py
+    - documentation/website/source/conf.py
     - source/GUI/Dashboard.py
     - replace image of front page of GUI with the one stating new version
     of the tool in the documentation.
@@ -18,6 +19,22 @@ please perform the following actions:
   files in the current folder.
   - do not forget to commit the changes.
 
+
+## [a2.7.2 - 2023-08-25]
+### Added
+  - CFI: Added new section for workflows; examples illustrating AoR workflow
+  setup
+  - Auxiliary component: Well Depth Risk Configurer
+  - Jupyter notebooks illustrating setup and run of control file examples
+  including workflows, and TTFD and AoR types of analysis and visualization
+  - Output of the current NRAP-Open-IAM version and runtime information
+  to a text file for control and GUI files.
+### Updated
+  - Auxiliary Location Generator component: generation of z-coordinates,
+  in addition to x- and y-coordinates
+  - Logging handlers bug fix
+  - Moved CFI related files to a separate folder
+  - Documentation updates for webpage
 
 ## [a2.7.1 - 2023-06-30]
 ### Added
@@ -34,6 +51,10 @@ please perform the following actions:
   - Plume Stability component: option for the component metrics to be
   calculated for 3d data; option for the use of lookup tables in *.h5
   format; related tests to the test suite
+  - Auxiliary functionality: well data classifier, leak scorer from well integrity
+  study
+  - Auxiliary components: Parameter Setup, Pressure Based Risk Configurer,
+  Data Based Risk Configurer, Monitoring Scheduler, Monitoring Tool
   - Functionality to save gridded observations in formats different from *.npy
   - Documentation:
    - NRAP-Open-IAM workflows illustration figures
@@ -45,9 +66,8 @@ please perform the following actions:
   new CFI examples illustrating setup
   - Stratigraphy, time series, Total time to the first detection (TTFD), Area of Review
   workflows plots
-  -
   - Documentation:
-   - Description of existing and added visualization capabilities
+    - Description of existing and added visualization capabilities
 
 ## [a2.7.0 - 2023-02-15]
 ### Added
@@ -68,9 +88,9 @@ please perform the following actions:
 ### Updated
   - Setup of AmtPlumeSingle and AtmPlumeEnsemble plots
   - Documentation:
-   - Description of recently added components
-   - Description of new CFI examples
-   - Description of existing and added visualization capabilities
+    - Description of recently added components
+    - Description of new CFI examples
+    - Description of existing and added visualization capabilities
 
 ## [a2.6.1 - 2022-09-30]
 ### Added

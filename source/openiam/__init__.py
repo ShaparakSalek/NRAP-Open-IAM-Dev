@@ -47,7 +47,7 @@ from .monitoring_scheduler_component import (
     MonitoringScheduler1, MonitoringScheduler2, MonitoringScheduler3)
 
 
-__version__ = 'alpha_2.7.1-23.06.30'
+__version__ = 'alpha_2.7.2-23.08.25'
 
 __all__ = ['IAM_DIR',
            'SystemModel',

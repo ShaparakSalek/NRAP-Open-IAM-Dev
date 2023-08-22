@@ -27,7 +27,7 @@ author = 'D. Harp, V. Vasylkivska, D. Bacon'
 # The short X.Y version.
 version = 'a2.7'
 # The full version, including alpha/beta/rc tags.
-release = 'alpha 2.7.1-23.06.30'
+release = 'alpha 2.7.2-23.08.25'
 
 
 # -- General configuration ---------------------------------------------------

@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = 'NRAP-Open-IAM'
-copyright = '2023, Dylan R. Harp, Veronika Vasylkivska, Diana Bacon'
-author = 'Dylan R. Harp, Veronika Vasylkivska, Diana Bacon'
+copyright = '2023, DOE National Risk Assessment Partnership (NRAP)'
+author = 'NRAP-Open-IAM Development Team'
 
 # The short X.Y version.
 version = 'a2.7'
 # The full version, including alpha/beta/rc tags.
-release = 'alpha 2.7.1-23.06.30'
+release = 'alpha 2.7.2-23.08.25'
 
 
 # -- General configuration ---------------------------------------------------
@@ -134,7 +134,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'NRAPOpenIAM_web.tex', 'NRAPOpenIAM\\_web Documentation',
-     'Dylan R. Harp, Veronika Vasylkivska, Diana Bacon', 'manual'),
+     author, 'manual'),
 ]
 
 

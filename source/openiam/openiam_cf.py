@@ -74,8 +74,8 @@ parser.add_argument('--file', type=str, dest='yaml_cf_name',
                     # default='test_CFI',  # to test all control files examples
                     # default='test_GUI',  # to test all GUI examples
                     # default='../../test/test_control_file.yaml',
-                    default='../../examples/Control_Files/ControlFile_ex1a.yaml',
-                    # default='../../examples/GUI_Files/01_Forward_AR_CW.OpenIAM',
+                    default='../../examples/Control_Files/ControlFile_ex9a.yaml',
+                    # default='../../examples/GUI_Files/14_Forward_HCL.OpenIAM',
                     help='NRAP-Open-IAM Control File Name')
 parser.add_argument('--binary', type=bool, dest='binary_file',
                     default=False, help='Set to true for binary control file')
@@ -787,7 +787,7 @@ def main(yaml_filename, binary_file=False):
         # For GUI produced binary control files
         info_msg = ''.join([
             '\nSimulation results can be found in the output folder: \n{}.',
-            '\nProceed to the Post Processing tab to access plotting options.']).format(
+            '\nProceed to the Post Processing tab to access plotting options. \n']).format(
                 model_data['OutputDirectory'])
     else:
         info_msg = ''.join([
@@ -1180,7 +1180,7 @@ if __name__ == "__main__":
             print('Testing file ControlFile_ex{}.yaml:'.format(key))
             print('Example features: {}'.format(example_feature))
             try:
-                main('../../examples/Control_Files/ControlFile_ex{}.yaml'.format(key))
+                main('../../examples/Control_Files/ControlFile_ex{}.yaml'.format(key), False)
                 plt.close('all')
             except:
                 print('An exception was raised during run.')
@@ -1188,13 +1188,12 @@ if __name__ == "__main__":
         print('Test of all control file interface examples is done.')
 
     elif args.yaml_cf_name == 'test_GUI':
-        examples_description = GUI_EXAMPLES
 
-        args.binary_file = True
+        examples_description = GUI_EXAMPLES
 
         for key in examples_description:
             print('Testing file {}:'.format(key))
-            main('../../examples/GUI_Files/{}'.format(key))
+            main('../../examples/GUI_Files/{}'.format(key), True)
             plt.close('all')
 
         print('Test of all GUI examples is done.')
