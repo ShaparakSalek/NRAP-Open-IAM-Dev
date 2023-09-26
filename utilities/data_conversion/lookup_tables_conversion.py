@@ -60,7 +60,11 @@ def from_csv_to_h5(file_directory, time_file='time_points.csv',
 
 
 if __name__ == '__main__':
-    test_case = 1
+    # Setup case of data to be processed:
+    # 1: Kimberlina 54 sims
+    # 2: FutureGen2 1008 sims
+    # 3: Kimberlina 200 sims
+    test_case = 1  
 
     if test_case == 1:
 
