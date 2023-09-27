@@ -4,6 +4,7 @@ Some of the variables are constants.
 """
 d = {}
 componentVars = {}
+workflowVars = {}
 
 
 # componentChoices contains the names of the components already added to the simulation and
@@ -11,6 +12,11 @@ componentVars = {}
 componentChoices = []
 # componentTypeDictionary contains types of the components added to the simulation in the order they were added
 componentTypeDictionary = []
+# workflowChoices contains the names of the workflows already added to the simulation and
+# to which connections can be created
+workflowChoices = []
+# workflowTypeDictionary contains types of the workflows added to the simulation in the order they were added
+workflowTypeDictionary = []
 # connectionsDictionary contains names of the components to which the connections were created
 # by the components at the given index position
 connectionsDictionary = []
@@ -66,7 +72,7 @@ MODEL_TAB_LABEL_WIDTH3 = 8
 MODEL_TAB_ENTRY_WIDTH = 8
 MODEL_TAB_MENU_WIDTH = 10
 
-# Width of widgets on Add Components tab
+# Width of widgets on Add Components and Add Workflows tab
 SETUP_LABEL_WIDTH = 20
 SETUP_ENTRY_WIDTH = 26
 SETUP_MENU_WIDTH = 20
@@ -149,6 +155,13 @@ COMPONENT_TYPES = [
     'Atmospheric ROM',
     'Plume Stability',
     'Chemical Well Sealing']
+
+# Workflows available in the current version of GUI for NRAP-Open-IAM
+WORKFLOW_TYPES = [
+    'Area of Review',
+    ]
+
+WORKFLOW_COMPONENTS = {'Area of Review': ['reservoir','wellbore','aquifer']}
 
 # Types of processing/plotting analysis and/or capabilities available for a given simulation
 # Plotting is default and available for all simulations

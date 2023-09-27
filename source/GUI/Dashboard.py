@@ -13,6 +13,7 @@ import Pmw
 
 from OpenIAM_Page import OpenIAM_Page
 from PostProcessor_Page import PostProcessor_Page
+from Workflow_Page import Workflow_Page
 from dictionarydata import LABEL_FONT
 
 
@@ -155,16 +156,23 @@ class Dashboard_Page(tk.Frame):
         toolTip.bind(enter_params_button,
                      'Click to start entering parameters.')
 
+        create_workflow_button = ttk.Button(
+            buttons_frame, text="Use Workflow",
+            command=lambda: controller.show_frame(Workflow_Page))
+        create_workflow_button.grid(row=1, column=1, padx=5)
+        toolTip.bind(create_workflow_button,
+                     'Click to create a new workflow.')
+
         open_saved_sim_button = ttk.Button(
             buttons_frame, text="Load Simulation", command=open_simulation)
-        open_saved_sim_button.grid(row=1, column=1, padx=5)
+        open_saved_sim_button.grid(row=1, column=2, padx=5)
         toolTip.bind(open_saved_sim_button,
                      'Click to open existing simulation file.')
 
         post_processing_button = ttk.Button(
             buttons_frame, text='Post Processing',
             command=lambda: controller.show_frame(PostProcessor_Page))
-        post_processing_button.grid(row=1, column=2, padx=5)
+        post_processing_button.grid(row=1, column=3, padx=5)
         toolTip.bind(post_processing_button,
                      'Click to post-process and/or plot results.')
 
