@@ -3,13 +3,13 @@
 # This example demonstrates the use of the AoR plot type for 3-dimensional
 # LookupTableReservoir data.
 #
-# To use the AoR plot, you must have OpenWellbores distributed across
-# the area of interest. There are multiple ways of doing that, and this example uses
-# the file and lutr_points option. This option uses the x-, y-, and z-values
-# from the lookup table for LookupTableReservoir. To use the z-values in the table,
-# 'Interpolation2D' within the LookupTableReservoir should not be set to False.
-# It does not need to be set to True, however, it just needs to be ommitted.
-# One might want to use the points from the tables if the reservoir's dip
+# To use the AoR plot, you must have wellbores distributed across the area of 
+# interest. There are multiple ways of doing that, and this example uses
+# the file and lutr_points option for an OpenWellbore component. This option 
+# uses the x-, y-, and z-values from the lookup table for LookupTableReservoir. 
+# To use the z-values in the table, 'Interpolation2D' within the LookupTableReservoir 
+# should not be set to False. It does not need to be set to True, however, it 
+# just needs to be ommitted. One might want to use the points from the tables if the reservoir's dip
 # causes variations in the z-values. It might be difficult to correctly capture
 # the variation in z-values with the range option for the locations of OpenWellbores.
 #
@@ -158,29 +158,29 @@ Plots:
     Plot1:
         AoR: [pressure]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 200
         SaveCSVFiles: True
         CriticalPressureMPa: Calculated
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 200
         SaveCSVFiles: False
     Plot3:
         AoR: [pH_volume]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 200
         SaveCSVFiles: True
     Plot4:
         AoR: [TDS_volume]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 200
         SaveCSVFiles: True

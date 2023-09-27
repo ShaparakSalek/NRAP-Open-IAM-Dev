@@ -1,0 +1,76 @@
+# OpenIAM Control File Example 58c
+#
+# This example is similar to Control File Example 58b, but it 
+# examines the leakage rates into aquifer 2 ('AquiferName: aquifer2'), 
+# uses an OpenWellbore component ('WellboreComponentType: OpenWellbore'), 
+# and uses the TimeSeriesAndStats plot type ('PlotType: TimeSeriesAndStats').
+#
+# Last Modified: July, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 30
+    Components: []
+    OutputDirectory: 'output/output_ex58c_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 250.0
+    shale2Thickness:
+        vary: False
+        value: 250.0
+    shale3Thickness:
+        vary: False
+        value: 250.0
+    aquifer1Thickness:
+        vary: False
+        value: 100.0
+    aquifer2Thickness:
+        vary: False
+        value: 100.0
+    reservoirThickness:
+        vary: False
+        value: 30.0
+#-------------------------------------------------
+Workflow:
+    Type: LeakageAssessment
+    Options:
+        PlotType: TimeSeriesAndStats   # Options are TimeSeries, TimeSeriesStats, or TimeSeriesAndStats
+        FigureDPI: 300
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [14, 8]            # The default TimeSeriesStats FigureSize is [13, 8], so the figures produced will be wider at [14, 8]
+        FigureName: Name.tiff          # Because the LeakageAssessment workflow produces multiple figures, only the .tiff extension from this input will be used
+        ReservoirComponentType: AnalyticalReservoir
+        ReservoirOptions:
+            InjectionWell:
+                coordx: 0
+                coordy: 0
+            Parameters:
+                injRate: 0.5
+                reservoirRadius: 3000  # The wellbore locations used should not be beyond the radius of the AnalyticalReservoir
+                logResPerm:
+                    min: -14.0
+                    max: -13.0
+                    value: -13.5
+                brineDensity: 1100
+        WellboreComponentType: OpenWellbore
+        WellboreOptions:
+            Locations:                 # Locations input is required when using the LeakageAssessment Workflow
+                coordx: [1000, 1500]
+                coordy: [1000, 1500]
+            Parameters:
+                wellRadius: 0.05
+                brineDensity: 1100
+        AquiferName: aquifer2

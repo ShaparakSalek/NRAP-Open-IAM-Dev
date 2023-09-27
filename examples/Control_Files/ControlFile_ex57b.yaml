@@ -1,0 +1,67 @@
+# OpenIAM Control File Example 57b
+#
+# This example is similar to Control File example 57a, but this example uses 
+# a deterministic simulation ('Analysis: forward') and minmimal inputs. The 
+# parameters of the wellbore and aquifer components are allowed to resort to 
+# default values - the 'Parameters' section is not included under 'WellboreOptions' 
+# or 'AquiferOptions'. Monitoring sensor locations are also not provided 
+# ('MonitoringLocations' is not entered under 'Options'). The purpose of this example 
+# is to demonstrate that the TTFD Workflow can be used to quickly examine the evolution 
+# of plumes in an aquifer given the results from reservoir simulations (i.e., the 
+# LookupTableReservoir component). After such a preliminary examination, the user 
+# can delve further into constraining component parameters and TTFD settings 
+# (e.g., 'MonitoringLocations', 'SpecifyXandYGridLims', 'xGridSpacing, and '
+# 'yGridSpacing', all of which can be entered under 'Workflow: Options').
+#
+# This example requires the additional FutureGen 2.0 data set.
+# FutureGen 2.0 data set can be downloaded from the following source:
+# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+#
+# The downloaded data set should be placed here:
+#     source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55a.yaml
+#
+# Last Modified: July, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 15.0
+    TimeStep: 1.0
+    Analysis: forward
+    Components: []
+    OutputDirectory: 'output/output_ex57b_{datetime}'
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    shale1Thickness: 198.7
+    shale2Thickness: 74.4
+    shale3Thickness: 110.3
+    shale4Thickness: 118.9
+    shale5Thickness: 530.4
+    aquifer1Thickness: 33.2
+    aquifer2Thickness: 84.1
+    aquifer3Thickness: 31.1
+    aquifer4Thickness: 61.6
+    reservoirThickness: 7
+#-------------------------------------------------
+Workflow:
+    Type: TTFD
+    Options:
+        PlumeType: Dissolved_CO2
+        ReservoirComponentType: LookupTableReservoir
+        ReservoirOptions:
+            FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+            TimeFile: time_points.csv
+            ParameterFilename: parameters_and_filenames_trunc.csv
+            Interpolation2D: True
+            Parameters:
+                index: 5
+        WellboreComponentType: MultisegmentedWellbore
+        WellboreOptions:
+            Locations:
+                coordx: [236377.0, 236758.0]
+                coordy: [4409269.5, 4410107.6]
+        AquiferName: aquifer1
+        AquiferComponentType: FutureGen2AZMI

@@ -124,15 +124,15 @@ Plots:
             Realization: 1
             FigureDPI: 100
             PlotInjectionSites: True
-            InjectionCoordx: 3.68e4
-            InjectionCoordy: 4.83e4
+            InjectionCoordx: 3.68e+4
+            InjectionCoordy: 4.83e+4
             PlotReceptors: True
     ATM:
         AtmPlumeEnsemble:
             FigureDPI: 100
             PlotInjectionSites: True
-            InjectionCoordx: 3.68e4
-            InjectionCoordy: 4.83e4
+            InjectionCoordx: 3.68e+4
+            InjectionCoordy: 4.83e+4
             PlotReceptors: False
             xGridSpacing: 5
             yGridSpacing: 5

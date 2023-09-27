@@ -1,0 +1,118 @@
+# OpenIAM Control File Example 57a
+#
+# This example demonstrates the use of the TTFD Workflow. The TTFD Workflow 
+# is meant to allow the use of the TTFD plot type without the need to 
+# manually set up all of the components, component connections, and plot entries.
+#
+# The setup of this example is similar to Control File Example 40. Both that 
+# example and this one use the FutureGen 2.0 data set to read reservoir conditions 
+# through a LookupTableReservoir component. The pressures and CO2 saturations from 
+# the reservoir component then drive leakage through MultisegmentedWellbore 
+# components with the locations given under 'WellboreOptions: Locations'. The 
+# CO2 and brine leakage rates into aquifer 1 ('AquiferName: aquifer1') then drive 
+# the modeling of contaminant plumes in aquifer 1 by a FutureGen2AZMI component.
+#
+# The simulation uses Latin Hypercube Sampling ('Analysis: type: lhs') to stochastically 
+# vary wellbore permeability (logWellPerm) across 30 realizations ('siz: 30').
+# This example produces figures detailing the evolution of dissolved CO2 plumes 
+# ('PlumeType: Dissolved_CO2') in aquifer 1. The TTFD plots also examine how monitoring 
+# sensors at given locations can detect the dissolved CO2 plumes (input under 
+# 'MonitoringLocations' - see the TTFD plot documentation, section 2.7.5). A plume 
+# timing figure and monitoring TTFD figure are made for each realization. Additionally, 
+# a figure is made showing the probability of dissolved CO2 plume occurrence. The 
+# probability is calculated as the fraction of realizations in which a plume occurred 
+# at each location. Because 'WriteDreamOutput: True' is entered under 'Options', 
+# the TTFD plot will save .iam files containing the plume timings of each realization. 
+# These .iam files can be used as input to the Design for Risk Evaluation and Management 
+# (DREAM) program, which was developed by NRAP to optimize monitoring network design.
+#
+# Although this example does not use all of the optional entries for the TTFD plot type 
+# (e.g., 'xGridSpacing', 'yGridSpacing', 'SpecifyXandYGridLims', 'NumZPointsWithinAquifers', 
+# and 'NumZPointsWithinShales'), all of these entries can be given under 'Workflow: Options'.
+#
+# This example requires the additional FutureGen 2.0 data set.
+# FutureGen 2.0 data set can be downloaded from the following source:
+# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+#
+# The downloaded data set should be placed here:
+#     source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55a.yaml
+#
+# Last Modified: July, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 15.0
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 30
+    Components: []
+    OutputDirectory: 'output/output_ex57a_{datetime}'
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    shale1Thickness: 198.7
+    shale2Thickness: 74.4
+    shale3Thickness: 110.3
+    shale4Thickness: 118.9
+    shale5Thickness: 530.4
+    aquifer1Thickness: 33.2
+    aquifer2Thickness: 84.1
+    aquifer3Thickness: 31.1
+    aquifer4Thickness: 61.6
+    reservoirThickness: 7
+#-------------------------------------------------
+Workflow:
+    Type: TTFD
+    Options:
+        PlumeType: Dissolved_CO2
+        WriteDreamOutput: True
+        SaveCSVFiles: False
+        PlotInjectionSites: True
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
+        MonitoringLocations:
+            coordx: [236377.0, 236758.0, 236377.0, 236758.0]
+            coordy: [4409269.5, 4410107.6, 4409269.5, 4410107.6]
+            coordz: [-1015, -715, -1015, -715]         # Near the tops of aquifers 1 and 3
+            HorizontalWindow: 1
+            VerticalWindow: 5
+        FigureDPI: 300
+        ReservoirComponentType: LookupTableReservoir
+        ReservoirOptions:
+            FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+            TimeFile: time_points.csv
+            ParameterFilename: parameters_and_filenames_trunc.csv
+            Interpolation2D: True
+            Parameters:
+                index: 5
+        WellboreComponentType: MultisegmentedWellbore
+        WellboreOptions:
+            Locations:
+                coordx: [236377.0, 236758.0]
+                coordy: [4409269.5, 4410107.6]
+            Parameters:
+                wellRadius: 0.05715
+                logAqu1Perm: -13.39
+                logAqu2Perm: -11.05
+                logAqu3Perm: -12.48
+                logAqu4Perm: -11.92
+                logWellPerm:
+                    min: -14.0
+                    max: -11.0
+                    value: -13.0
+                brineDensity: 1030.9
+                CO2Density: 775.0
+                brineViscosity: 7.5e-4
+                CO2Viscosity: 6.6e-5
+        AquiferName: aquifer1
+        AquiferComponentType: FutureGen2AZMI
+        AquiferOptions:
+            Parameters:
+                por: 0.118
+                log_permh: -13.39
+                log_aniso: 0.3
+                rel_vol_frac_calcite: 0.1

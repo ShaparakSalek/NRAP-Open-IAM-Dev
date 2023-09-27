@@ -109,8 +109,8 @@ Plots:
             MinValue: 0.002
             FigureDPI: 300
             PlotInjectionSites: True
-            InjectionCoordx: 2.37e5
-            InjectionCoordy: 4.41e6
+            InjectionCoordx: 2.37e+5
+            InjectionCoordy: 4.41e+6
             DegreeInterval: 1
             SaveCSVFiles: True
     Gridded_CO2_Mass_Frac:

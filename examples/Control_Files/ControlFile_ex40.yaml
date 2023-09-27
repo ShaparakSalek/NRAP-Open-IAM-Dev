@@ -140,8 +140,8 @@ Plots:
             PlumeType: Dissolved_CO2
             FigureDPI: 300
             PlotInjectionSites: True
-            InjectionCoordx: 2.37e5
-            InjectionCoordy: 4.41e6
+            InjectionCoordx: 2.37e+5
+            InjectionCoordy: 4.41e+6
             MonitoringLocations:
                 # coordx: 236377.0
                 # coordy: 4409269.5

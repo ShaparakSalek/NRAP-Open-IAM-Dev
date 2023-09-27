@@ -381,11 +381,9 @@ def ttfd_plot(yaml_data, model_data, sm, s,
         if save_results:
             save_results_to_csv(
                 plumeProb, x_grid, y_grid, z_grid, output_dir, plume_metric_abbrev,
-                plotType, ttfd_list=ttfd_list, ttfd_x_list=ttfd_x_list,
-                ttfd_y_list=ttfd_y_list, ttfd_z_list=ttfd_z_list,
-                analysis=analysis, realization=realization,
-                num_samples=num_samples, var_type=var_type,
-                checkCarbAq=checkCarbAq)
+                plotType, ttfd_list=None, ttfd_x_list=None, ttfd_y_list=None, 
+                ttfd_z_list=None, analysis=analysis, realization=realization,
+                num_samples=num_samples, var_type=var_type, checkCarbAq=checkCarbAq)
 
         plot_plume_metric(
             plumeProb, plotType, yaml_data, num_samples, time_array, x_grid,

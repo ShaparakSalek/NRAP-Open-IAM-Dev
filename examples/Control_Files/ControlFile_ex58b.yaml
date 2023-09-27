@@ -1,0 +1,94 @@
+# OpenIAM Control File Example 58b
+#
+# This example demosntrates the use of the LeakageAssessment Workflow in 
+# a stochastic simulation using Latin Hypercube Sampling ('type: lhs'). 
+# Certain parameter values are varied across thirty different realizations 
+# ('siz: 30'). The varied parameters are the AnalyticalReservoir's permeability 
+# ('logResPerm') and the MultisegmentedWellbore's permeabilities ('logWellPerm' 
+# and 'logAquPerm'). Given the location of the injection well ('InjectionWell' 
+# under 'ReservoirOptions5') and the wellbores ('Locations' under 
+# 'WellboreOptions'), the wellbore component calculates the leakage rates 
+# of brine and CO2 to aquifer 1 ('AquiferName: aquifer1' under 'Options). 
+# The workflow produces TimeSeriesStats plots ('PlotType: TimeSeriesStats') 
+# showing these results. The figure names depend on the metric shown (pressure, 
+# CO2 saturation, brine leakate rates, or CO2 leakage rates), so the name 
+# provided under 'FigureName' is not used. The extension included in the input 
+# for 'FigureName' will be used, however (.tiff in 'FigureName: Name.tiff').
+#
+# Last Modified: July, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 30
+    Components: []
+    OutputDirectory: 'output/output_ex58b_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 250.0
+    shale2Thickness:
+        vary: False
+        value: 250.0
+    shale3Thickness:
+        vary: False
+        value: 250.0
+    aquifer1Thickness:
+        vary: False
+        value: 100.0
+    aquifer2Thickness:
+        vary: False
+        value: 100.0
+    reservoirThickness:
+        vary: False
+        value: 30.0
+#-------------------------------------------------
+Workflow:
+    Type: LeakageAssessment
+    Options:
+        PlotType: TimeSeriesStats      # Options are TimeSeries, TimeSeriesStats, or TimeSeriesAndStats
+        FigureDPI: 300
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [14, 8]            # the default TimeSeriesStats FigureSize is [13, 8], so the figures produced will be wider at [14, 8]
+        FigureName: Name.tiff          # Because the LeakageAssessment workflow produces multiple figures, only the .tiff extension from this input will be used
+        ReservoirComponentType: AnalyticalReservoir
+        ReservoirOptions:
+            InjectionWell:
+                coordx: 0
+                coordy: 0
+            Parameters:
+                injRate: 0.5
+                reservoirRadius: 3000  # The wellbore locations used should not be beyond the radius of the AnalyticalReservoir
+                logResPerm:
+                    min: -14.0
+                    max: -13.0
+                    value: -13.5
+                brineDensity: 1100
+        WellboreComponentType: MultisegmentedWellbore
+        WellboreOptions:
+            Locations:                 # Locations input is required when using the LeakageAssessment Workflow
+                coordx: [1000, 1500]
+                coordy: [1000, 1500]
+            Parameters:
+                wellRadius: 0.05
+                logWellPerm:
+                    min: -13.0
+                    max: -12.0
+                    value: -12.5
+                logAquPerm:
+                    min: -13.0
+                    max: -12.0
+                    value: -12.5
+                brineDensity: 1100
+        AquiferName: aquifer1

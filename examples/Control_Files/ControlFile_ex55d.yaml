@@ -40,12 +40,12 @@ Stratigraphy:
 Workflow:
     Type: AoR
     Options:
-        AoRFigureName: Overall_AoR_Plot.png
+        FigureName: Overall_AoR_Plot.png
         FigureDPI: 300
         TimeList: All            # [0, 1, 5, 10, 15 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         CriticalPressureMPa: Calculated
         AutomateResCompSetup: True
         AutomateWellCompSetup: True
@@ -56,14 +56,14 @@ Workflow:
             FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
-            Interpolation2D: False
+            Interpolation2D: False      # only set this to False if the wellbores are given z values
             Parameters:
                 index: 1
         WellboreComponentType: OpenWellbore
         WellboreOptions:
             Locations:
                 file: source/components/reservoir/lookuptables/FutureGen2/1008_sims/fg1.csv
-                read_z_values: True
+                read_z_values: True     # If this is set to False, then Interpolation2D under ReservoirOptions needs to be set to True
                 thin_point_density: True
                 min_x_spacing: 10000
                 min_y_spacing: 10000

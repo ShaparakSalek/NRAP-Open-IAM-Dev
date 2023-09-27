@@ -1226,13 +1226,16 @@ def read_strata_plot_yaml_input(yaml_data, name):
                 logging.debug(debug_msg)
                 yaml_input['plot_injection_sites'] = False
 
-            elif len(yaml_input['InjectionCoordx']) != len(yaml_input['InjectionCoordy']):
-                debug_msg = ''.join([
-                    'The InjectionCoordy provided for Stratigraphy plot ', name,
-                    'was not of the same length as the InjectionCoordx provided. ',
-                    'Check your input. Injection sites will not be displayed.'])
-                logging.debug(debug_msg)
-                yaml_input['plot_injection_sites'] = False
+            elif isinstance(yaml_input['InjectionCoordx'], list) and isinstance(
+                    yaml_input['InjectionCoordy'], list):
+                if len(yaml_input['InjectionCoordx']) != len(yaml_input['InjectionCoordy']):
+                    debug_msg = ''.join([
+                        'The InjectionCoordy provided for Stratigraphy plot ', name,
+                        'was not of the same length as the InjectionCoordx provided. ',
+                        'Check your input. Injection sites will not be displayed.'])
+                    logging.debug(debug_msg)
+                    
+                    yaml_input['plot_injection_sites'] = False
 
         if yaml_input['InjectionCoordx'] is not None and \
                 yaml_input['InjectionCoordy'] is None:

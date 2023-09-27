@@ -8,7 +8,8 @@
 # from HydrocarbonLeakage components represent the leaked masses of CO2 liquid
 # and gas, respectively. To clarify this point, a subplot title has been
 # manually added for the figure CO2_Leakage.
-# The mass_gas_aquifer and mass_oil_aquifer represent the cumulative masses
+#
+# The mass_gas_aquifer and mass_oil_aquifer outputs represent the cumulative masses
 # of all hydrocarbons (light, intermediate, and heavy) and CO2 in gas and
 # liquid phases, respectively, that have been leaked to the aquifer. The bottom
 # depth of the aquifer here is fixed at 18.288 m, and the aquifer extends

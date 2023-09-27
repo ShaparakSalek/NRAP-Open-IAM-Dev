@@ -250,7 +250,7 @@ in a *.yaml* file).
 The ``Stratigraphy``, ``TTFD``, and ``AtmPlumeEnsemble`` plots also have the optional
 entry ``SpecifyXandYGridLims``, which is a dictionary containing the ``gridXLims`` and
 ``gridYLims`` entries. ``AoR`` plots do not have grid entries because the x and y values
-used are those of the ``OpenWellbore`` components. ``GriddedRadialMetric`` plots use the
+used are those of the wellbore components. ``GriddedRadialMetric`` plots use the
 radial grids produced by a component (e.g., a ``GenericAquifer`` component), while
 ``GriddedMetric`` plots use only the locations corresponding with the output.
 
@@ -863,13 +863,13 @@ AoR
 Area of Review (``AoR``) plots are developed to estimate the AoR needed for a geologic
 carbon storage project based on the spatial extent of reservoir impacts (pressure
 and |CO2| saturation) and potential aquifer impacts (dissolved salt and dissolved
-|CO2| plume volumes). The potential extent is found by distributing ``OpenWellbore``
-components across the domain. We recommend setting ``OpenWellbore`` locations
-using the grid placement option (see examples *ControlFile_ex31a.yaml*  to *ControlFile_ex31d.yaml*).
-The ``OpenWellbore`` (components) are hypothetical and used to consider the aquifer impacts
-that could occur if a leakage pathway (extending from the reservoir to the aquifer being
-considered) was available at each ``OpenWellbore`` location. The approach used for ``AoR``
-plots is based on the work :cite:`BACON2020`.
+|CO2| plume volumes). The potential extent is found by distributing wellbore
+components across the domain. We recommend setting wellbore locations using the
+grid placement option (see examples *ControlFile_ex31a.yaml*  to *ControlFile_ex31d.yaml*).
+The wellbores are hypothetical and used to consider the aquifer impacts that could
+occur if a leakage pathway (extending from the reservoir to the aquifer being considered)
+was available at each ``OpenWellbore`` location. The approach used for ``AoR`` plots
+is based on the work :cite:`BACON2020`.
 
 Note that the ``AoR`` plot type is meant to be used only for one aquifer at a time,
 with that aquifer being represented by only one type of aquifer component
@@ -886,14 +886,14 @@ for aquifer 1.
 ``AoR`` plots can be created for the following types of outputs: **pressure**,
 **CO2saturation**, **pH_volume**, **TDS_volume**, **Dissolved_CO2_volume**,
 and **Dissolved_salt_volume**. The ``AoR`` plot type examines these metrics
-at each location in the domain (i.e., each hypothetical ``OpenWellbore``
-location) and displays the maximum value over time (across all times or at specific
+at each location in the domain (i.e., each hypothetical wellbore location)
+and displays the maximum value over time (across all times or at specific
 times, depending on the ``TimeList`` entry provided; this entry is discussed below).
 For LHS simulations, the ``AoR`` plot displays the maximum values over time at
 each location from all LHS realizations. This approach is meant to depict how
 severe the reservoir and aquifer impacts could become. Using the ``AoR`` plot type
 leads to the creation of *.csv* files containing the values shown in the ``AoR`` plots.
-Note that model run times can increase dramatically with the number of ``OpenWellbore``
+Note that model run times can increase dramatically with the number of wellbore
 locations. Additionally, some aquifer components generally require longer model run
 times (e.g., ``GenericAquifer``) in comparison with other aquifer components
 (e.g., ``FutureGen2Aquifer``). Also note that ``FutureGen2Aquifer`` is meant to be
@@ -902,9 +902,9 @@ to be set up for aquifers with bottom depths >= 700 m.
 
 When using the ``AoR`` plot type, we recommend setting ``GenerateOutputFiles`` and
 ``GenerateCombOutputFile`` to ``False`` in the ``ModelParams`` section of the *.yaml* file.
-The large number of ``OpenWellbore`` locations commonly used for ``AoR`` plots causes
+The large number of wellbore locations commonly used for ``AoR`` plots causes
 a large number of output files. A reservoir and aquifer component is created for
-each ``OpenWellbore`` location, and every component will have its output saved. The
+each wellbore location, and every component will have its output saved. The
 ``.csv`` files created for the ``AoR`` plots contain all of the necessary information
 and these files are much smaller in size.
 

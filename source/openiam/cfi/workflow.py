@@ -20,25 +20,63 @@ from openiam.visualize.area_of_review import CSV_FILE_NAME_TAGS as AOR_CSV_FILE_
 from openiam.visualize.area_of_review import CSV_FILE_COLUMNS as AOR_CSV_FILE_COLUMNS
 import openiam.visualize.area_of_review as AoR
 
+DEFAULT_RESERVOIR_COMP = 'LookupTableReservoir'
+
+DEFAULT_WELLBORE_COMP = 'OpenWellbore'
+
+DEFAULT_AQUIFER_COMP = 'GenericAquifer'
+
+# The default plume type has to work with the default aquifer component type
+DEFAULT_TTFD_PLUME_TYPE = 'Dissolved_salt'
+
+DEFAULT_FIGURE_DPI = 100
+
+DEFAULT_SAVE_CSV_FILES = True
+
+DEFAULT_TIME_SERIES_PLOT = 'TimeSeries'
 
 AOR_CRIT_PRESSURE_COLUMN = 'Critical Pressure [MPa]'
 
-WORKFLOW_OPTIONS = ['AoR']
+# If new workflows are added, some sections of the code needs to be updated. I 
+# used the term NEW_WORKFLOWS in those areas so they can be found more easily.
+WORKFLOW_OPTIONS = ['LeakageAssessment', 'AoR', 'TTFD']
+
+WORKFLOW_USE_RESERVOIR = {'LeakageAssessment': True, 'AoR': True, 
+                          'TTFD': True}
+
+WORKFLOW_USE_WELLBORE = {'LeakageAssessment': True, 'AoR': True, 
+                         'TTFD': True}
+
+WORKFLOW_USE_AQUIFER = {'LeakageAssessment': False, 'AoR': True, 
+                        'TTFD': True}
 
 WORKFLOW_PLOT_NAMES = {
+    'LeakageAssessment': [{'Pressure_Plot': 'pressure', 
+                           'CO2_Sat_Plot': 'CO2saturation', 
+                           'CO2_Leakage_Plot': 'CO2_aquifer{}', 
+                           'Brine_Leakage_Plot': 'brine_aquifer{}'}],
     'AoR': [{'Pressure_Plot': 'pressure'},
             {'CO2_Saturation_Plot': 'CO2saturation'},
             {'Aq_CO2_Impact_Plot': '{AqCO2Metric}'},
             {'Aq_Brine_Metric_Plot': '{AqSaltMetric}'}],
+    'TTFD': [{'TTFD_Plot': 'TTFD_Plot'}]
     }
 
 AOR_AQUIFER_COMPONENTS = ['FutureGen2Aquifer', 'FutureGen2AZMI',
                           'GenericAquifer', 'CarbonateAquifer',
                           'DeepAlluviumAquifer', 'DeepAlluviumAquiferML']
 
-AOR_RESERVOIR_COMPONENT_OUTPUT = ['pressure', 'CO2saturation']
+WORKFLOW_RESERVOIR_OUTPUT = {
+    'LeakageAssessment': ['pressure', 'CO2saturation'], 
+    'AoR': ['pressure', 'CO2saturation'], 
+    'TTFD': ['pressure', 'CO2saturation']
+    }
 
-AOR_WELLBORE_COMPONENT_OUTPUT = ['brine_aquifer{}', 'CO2_aquifer{}']
+WORKFLOW_WELLBORE_OUTPUT = {
+    'LeakageAssessment': ['brine_aquifer{}', 'CO2_aquifer{}'], 
+    'AoR': ['brine_aquifer{}', 'CO2_aquifer{}'], 
+    'TTFD': ['brine_aquifer{}', 'CO2_aquifer{}']
+    }
 
 AOR_AQUIFER_COMPONENT_OUTPUT = {
     'FutureGen2Aquifer': ['pH_volume', 'TDS_volume'],
@@ -46,7 +84,34 @@ AOR_AQUIFER_COMPONENT_OUTPUT = {
     'GenericAquifer': ['Dissolved_CO2_volume', 'Dissolved_salt_volume'],
     'CarbonateAquifer': ['pH_volume', 'TDS_volume'],
     'DeepAlluviumAquifer': ['pH_volume', 'TDS_volume'],
-    'DeepAlluviumAquiferML': ['pH_volume', 'TDS_volume']}
+    'DeepAlluviumAquiferML': ['pH_volume', 'TDS_volume']
+    }
+
+TTFD_AQUIFER_COMPONENT_OUTPUT = {
+    'FutureGen2Aquifer': {'pH': ['pH_dx', 'pH_dy', 'pH_dz'], 
+                          'TDS': ['TDS_dx', 'TDS_dy', 'TDS_dz'], 
+                          'Dissolved_CO2': ['Dissolved_CO2_dx', 'Dissolved_CO2_dy', 'Dissolved_CO2_dz'], 
+                          'Pressure': ['Pressure_dx', 'Pressure_dy', 'Pressure_dz'], 
+                          'Temperature': ['Temperature_dx', 'Temperature_dy', 'Temperature_dz']},
+    'FutureGen2AZMI': {'pH': ['pH_dx', 'pH_dy', 'pH_dz'], 
+                       'TDS': ['TDS_dx', 'TDS_dy', 'TDS_dz'], 
+                       'Dissolved_CO2': ['Dissolved_CO2_dx', 'Dissolved_CO2_dy', 'Dissolved_CO2_dz'], 
+                       'Pressure': ['Pressure_dx', 'Pressure_dy', 'Pressure_dz'], 
+                       'Temperature': ['Temperature_dx', 'Temperature_dy', 'Temperature_dz']},
+    'GenericAquifer': {'Dissolved_CO2': ['Dissolved_CO2_dr', 'Dissolved_CO2_dz'], 
+                       'Dissolved_salt': ['Dissolved_salt_dr', 'Dissolved_salt_dz']},
+    'CarbonateAquifer': {'CarbonateAquifer': ['dx', 'dy']},
+    'DeepAlluviumAquifer': {'pH': ['pH_dx', 'pH_dy', 'pH_dz'], 
+                            'TDS': ['TDS_dx', 'TDS_dy', 'TDS_dz'], 
+                            'Pressure': ['Pressure_dx', 'Pressure_dy', 'Pressure_dz']},
+    'DeepAlluviumAquiferML': {'pH': ['pH_dx', 'pH_dy', 'pH_dz'], 
+                              'TDS': ['TDS_dx', 'TDS_dy', 'TDS_dz'], 
+                              'Pressure': ['Pressure_dx', 'Pressure_dy', 'Pressure_dz']}
+    }
+
+WORKFLOW_AQUIFER_OUTPUT = {
+    'LeakageAssessment': [], 'AoR': AOR_AQUIFER_COMPONENT_OUTPUT, 
+    'TTFD': TTFD_AQUIFER_COMPONENT_OUTPUT}
 
 DEFAULT_LUTR_FILE_DIRECTORY = os.path.join(IAM_DIR, 'source', 'components',
                                            'reservoir', 'lookuptables',
@@ -62,6 +127,31 @@ YAML_INPUT_WARNING_MSG = ''.join([
     'The input provided for {} under the Workflow section of the .yaml file ',
     'was not of type {}. The default setting of {} will be used.'])
 
+# Default settings for TimeSeries plots
+DEFAULT_TIME_SERIES_SUBPLOT = {'Use': True}
+DEFAULT_TIME_SERIES_USE_MARKERS = False
+DEFAULT_TIME_SERIES_USE_LINES = True
+DEFAULT_TIME_SERIES_VARY_LINES = False
+
+# These are the default minimum spacings to use when thinning the point densities 
+# from LookupTableReservoir files.
+DEFAULT_MIN_X_SPACING = 20000
+DEFAULT_MIN_Y_SPACING = 20000
+
+# Default grid limits when using the AoR workflow and a reservoir component 
+# that is not a LookupTableReservoir.
+DEFAULT_AOR_XMIN = -50000
+DEFAULT_AOR_XMAX = 50000
+DEFAULT_AOR_XSIZE = 6
+
+DEFAULT_AOR_YMIN = -50000
+DEFAULT_AOR_YMAX = 50000
+DEFAULT_AOR_YSIZE = 6
+
+# Wellbore component types that have a brine density parameter (e.g., brineDensity).
+# If this component type is used AND a BrineDensity input is given under 
+# yaml_data['Workflow']['Options'], the the BrineDensity input will be removed.
+WELL_COMPS_WITH_BRINE_DENSITY = ['OpenWellbore', 'MultisegmentedWellbore']
 
 def iam_workflow_setup(yaml_data, strata):
     """
@@ -75,13 +165,11 @@ def iam_workflow_setup(yaml_data, strata):
     """
 
     if 'Type' in yaml_data['Workflow']:
-        if yaml_data['Workflow']['Type'] in WORKFLOW_OPTIONS:
-            workflow_type = yaml_data['Workflow']['Type']
-        else:
+        if yaml_data['Workflow']['Type'] not in WORKFLOW_OPTIONS:
             warning_msg = ''.join([
                 'A Workflow section was included in the .yaml file, but the Workflow ',
                 'Type provided (', yaml_data['Workflow']['Type'], ') was not ',
-                'recognized as one of the available options (', WORKFLOW_OPTIONS,
+                'recognized as one of the available options (', str(WORKFLOW_OPTIONS),
                 '). Therefore, the input in the Workflow section will not be used.'])
             logging.warning(warning_msg)
     else:
@@ -99,33 +187,64 @@ def iam_workflow_setup(yaml_data, strata):
 
         yaml_data['Workflow']['Options'] = {}
 
-    if workflow_type == 'AoR':
-        yaml_data = aor_workflow_setup(yaml_data, strata)
+    yaml_data = workflow_setup(yaml_data, strata)
 
     return yaml_data
 
 
-def aor_workflow_setup(yaml_data, strata):
+def workflow_setup(yaml_data, strata):
     """
-    Sets up the components and plots required for the AoR Workflow.
+    Sets up the components and plots required for the Workflow.
     """
+    workflow_type = yaml_data['Workflow']['Type']
+    
     automation_input = get_automation_input(yaml_data)
 
     res_component_type = yaml_data['Workflow']['Options'].get(
-        'ReservoirComponentType', 'LookupTableReservoir')
+        'ReservoirComponentType', DEFAULT_RESERVOIR_COMP)
 
     well_component_type = yaml_data['Workflow']['Options'].get(
-        'WellboreComponentType', 'OpenWellbore')
+        'WellboreComponentType', DEFAULT_WELLBORE_COMP)
 
     aquifer_component_type = yaml_data['Workflow']['Options'].get(
-        'AquiferComponentType', 'GenericAquifer')
+        'AquiferComponentType', DEFAULT_AQUIFER_COMP)
 
     strata_dict = iam_strata.get_strata_info_from_component(strata)
     default_aquifer_name = 'aquifer{}'.format(str(strata_dict['numberOfShaleLayers'] - 1))
 
     aquifer_name = yaml_data['Workflow']['Options'].get(
         'AquiferName', default_aquifer_name)
-
+    
+    # Check if AquiferName was included under AquiferOptions - if so, use that 
+    # input and log a warning message.
+    if 'AquiferOptions' in yaml_data['Workflow']['Options']:
+        if 'AquiferName' in yaml_data['Workflow']['Options']['AquiferOptions']:
+            aq_name_2 = yaml_data['Workflow']['Options']['AquiferOptions']
+            
+            if aquifer_name != aq_name_2:
+                warning_msg_pt1 = ''.join([
+                    'The AquiferName input was provided under AquiferOptions ',
+                    'entry (AquiferName: {}). '.format(aq_name_2)])
+                
+                if 'AquiferName' in yaml_data['Workflow']['Options']:
+                    warning_msg_pt2 = ''.join([
+                        'The AquiferName input was also provided under the Options ',
+                        'entry, however (AquiferName: {}). '.format(aquifer_name)])
+                else:
+                    warning_msg_pt2 = ''.join([
+                        'The AquiferName input was not provided under the Options ',
+                        'entry. '])
+                
+                warning_msg_pt3 = ''.join([
+                    'The AquiferName input provided under AquiferOptions ',
+                    'will be used (AquiferName: {}). '.format(aq_name_2)])
+                
+                warning_msg = warning_msg_pt1 + warning_msg_pt2 + warning_msg_pt3
+                
+                logging.warning(warning_msg)
+                
+                aquifer_name = aq_name_2
+    
     if 'Components' not in yaml_data['ModelParams']:
         yaml_data['ModelParams']['Components'] = []
 
@@ -136,29 +255,32 @@ def aor_workflow_setup(yaml_data, strata):
         for comp in comps:
             yaml_data['ModelParams']['Components'].append(comp)
 
-    if 'CriticalPressureMPa' not in yaml_data['Workflow']['Options']:
+    if workflow_type == 'AoR' and 'CriticalPressureMPa' not in yaml_data['Workflow']['Options']:
         yaml_data['Workflow']['Options']['CriticalPressureMPa'] = 'Calculated'
 
-    if automation_input['ResComp']:
-        yaml_data, res_component_name = add_aor_res_component_entries(
-            yaml_data, res_component_type)
+    if automation_input['ResComp'] and WORKFLOW_USE_RESERVOIR[workflow_type]:
+        yaml_data, res_component_name = add_res_component_entries(
+            yaml_data, res_component_type, workflow_type)
 
         yaml_data['ModelParams']['Components'].append(res_component_name)
 
-    if automation_input['WellComp']:
-        yaml_data, well_component_name = add_aor_well_component_entries(
-            yaml_data, well_component_type, aquifer_name, res_component_name)
+    if automation_input['WellComp'] and WORKFLOW_USE_WELLBORE[workflow_type]:
+        yaml_data, well_component_name = add_well_component_entries(
+            yaml_data, well_component_type, aquifer_name, res_component_name, 
+            workflow_type)
 
         yaml_data['ModelParams']['Components'].append(well_component_name)
 
-    if automation_input['AqComp']:
-        yaml_data, aq_component_name = add_aor_aq_component_entries(
-            yaml_data, aquifer_component_type, aquifer_name, well_component_name)
+    if automation_input['AqComp'] and WORKFLOW_USE_AQUIFER[workflow_type]:
+        yaml_data, aq_component_name = add_aq_component_entries(
+            yaml_data, aquifer_component_type, aquifer_name, well_component_name, 
+            workflow_type)
 
         yaml_data['ModelParams']['Components'].append(aq_component_name)
 
     if automation_input['Plots']:
-        yaml_data = set_up_aor_plots_section(yaml_data, aquifer_component_type)
+        yaml_data = set_up_plots_section(yaml_data, aquifer_component_type, 
+                                         workflow_type, aquifer_name)
 
     return yaml_data
 
@@ -167,10 +289,13 @@ def workflow_analysis(yaml_data, sm, analysis):
     """
     After the simulation has completed in openiam_cf.py, this function is called
     if a Workflow section is included. This function then checks for and runs
-    a specific Workflow analysis.
+    a specific Workflow analysis. Some, like TTFD, do not need to be run separately, 
+    as the TTFD plot is already run after the simulation (i.e., it is in the 
+    Plots section of the .yaml file). This function is for analyses that need 
+    to be run after everything else has finished.
     """
     if 'Type' in yaml_data['Workflow']:
-        # Add future Workflow analysis types here.
+        # Add future cases for NEW_WORKFLOWS here.
         if yaml_data['Workflow']['Type'] == 'AoR':
             aor_workflow_analysis(yaml_data, sm, analysis)
 
@@ -222,7 +347,7 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
     output_dir = yaml_data['ModelParams']['OutputDirectory']
 
     aquifer_component_type = yaml_data['Workflow']['Options'].get(
-        'AquiferComponentType', 'GenericAquifer')
+        'AquiferComponentType', DEFAULT_AQUIFER_COMP)
 
     # Get the stratigraphy information from the .yaml file
     strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
@@ -463,14 +588,14 @@ def verify_aor_points(pressure_x_km, pressure_y_km, CO2saturation_x_km,
     return All_x_points_km, All_y_points_km
 
 
-def add_aor_res_component_entries(yaml_data, res_component_type):
+def add_res_component_entries(yaml_data, res_component_type, workflow_type):
     """
-    This automatically sets up the reservoir component entry for the AoR
-    workflow, if AutomateResCompSetup is set to True.
+    This automatically sets up the reservoir component entry for the Workflow,
+    if AutomateResCompSetup is set to True.
     """
     compName = res_component_type + '1'
 
-    output_list = AOR_RESERVOIR_COMPONENT_OUTPUT
+    output_list = WORKFLOW_RESERVOIR_OUTPUT[workflow_type] 
 
     yaml_data[compName] = {'Type': res_component_type, 'Outputs': output_list}
 
@@ -512,17 +637,19 @@ def add_aor_res_component_entries(yaml_data, res_component_type):
     return yaml_data, compName
 
 
-def add_aor_well_component_entries(yaml_data, well_component_type, aquifer_name,
-                                   res_component_name):
+def add_well_component_entries(yaml_data, well_component_type, aquifer_name,
+                               res_component_name, workflow_type):
     """
-    This automatically sets up the component entries for the AoR workflow, if
+    This automatically sets up the component entries for the workflow, if
     AutomateWellCompSetup is set to True.
     """
     compName = well_component_type + '1'
 
     aquiferNum = aquifer_name[7:]
+    
+    workflow_output = WORKFLOW_WELLBORE_OUTPUT[workflow_type]
 
-    output_list = [val.format(aquiferNum) for val in AOR_WELLBORE_COMPONENT_OUTPUT]
+    output_list = [val.format(aquiferNum) for val in workflow_output]
 
     controls = {'critPressureApproach': True, 'enforceCritPressure': False}
 
@@ -534,59 +661,89 @@ def add_aor_well_component_entries(yaml_data, well_component_type, aquifer_name,
         if 'Locations' in yaml_data['Workflow']['Options']['WellboreOptions']:
             loc_data = yaml_data['Workflow']['Options']['WellboreOptions']['Locations']
             loc_data_check = True
+    
+    # Add more cases for NEW_WORKFLOWS here. Some workflows require Locations data.
+    if workflow_type == 'AoR':
+        if yaml_data[res_component_name]['Type'] == 'LookupTableReservoir' and not loc_data_check:
+            file_dir = yaml_data[res_component_name]['FileDirectory']
 
-    if yaml_data[res_component_name]['Type'] == 'LookupTableReservoir' and not loc_data_check:
-        file_dir = yaml_data[res_component_name]['FileDirectory']
+            par_file_name = yaml_data[res_component_name]['ParameterFilename']
 
-        par_file_name = yaml_data[res_component_name]['ParameterFilename']
+            index = int(yaml_data[res_component_name]['Parameters']['index'])
 
-        index = int(yaml_data[res_component_name]['Parameters']['index'])
+            data = pd.read_csv(os.path.join(IAM_DIR, file_dir, par_file_name))
 
-        data = pd.read_csv(os.path.join(IAM_DIR, file_dir, par_file_name))
+            filename = data['filename'][index]
 
-        filename = data['filename'][index]
+            file_name_dir = os.path.join(IAM_DIR, file_dir, filename)
 
-        file_name_dir = os.path.join(IAM_DIR, file_dir, filename)
+            read_z_values = False
 
-        read_z_values = False
+            data = pd.read_csv(file_name_dir)
 
-        data = pd.read_csv(file_name_dir)
+            if 'z' in data:
+                read_z_values = True
 
-        if 'z' in data:
-            read_z_values = True
+            del data
 
-        del data
+            # If no location data are given for the OpenWelbores, use the LUTR file itself by default
+            thin_point_density = yaml_data['Workflow']['Options'].get(
+                'thin_point_density', True)
+            min_x_spacing = yaml_data['Workflow']['Options'].get(
+                'min_x_spacing', DEFAULT_MIN_X_SPACING)
+            min_y_spacing = yaml_data['Workflow']['Options'].get(
+                'min_y_spacing', DEFAULT_MIN_Y_SPACING)
 
-        # If no location data are given for the OpenWelbores, use the LUTR file itself by default
-        thin_point_density = yaml_data['Workflow']['Options'].get(
-            'thin_point_density', True)
-        min_x_spacing = yaml_data['Workflow']['Options'].get(
-            'min_x_spacing', 20000)
-        min_y_spacing = yaml_data['Workflow']['Options'].get(
-            'min_y_spacing', 20000)
+            loc_data = {'file': file_name_dir, 'read_z_values': read_z_values,
+                        'thin_point_density': thin_point_density,
+                        'min_x_spacing': min_x_spacing, 'min_y_spacing': min_y_spacing}
+            loc_data_check = True
 
-        loc_data = {'file': file_name_dir, 'read_z_values': read_z_values,
-                    'thin_point_density': thin_point_density,
-                    'min_x_spacing': min_x_spacing, 'min_y_spacing': min_y_spacing}
-        loc_data_check = True
-
-    # If no wellbore locations were given and the simulation does not use a
-    # LookupTableReservoir (from which to draw wellbore locations), use default values
-    if not loc_data_check:
-        xmin = -50000
-        xmax = 50000
-        xsize = 6
-        ymin = -50000
-        ymax = 50000
-        ysize = 6
-        loc_data = {'grid': {'xmin': xmin, 'xmax': xmax, 'xsize': xsize,
-                             'ymin': ymin, 'ymax': ymax, 'ysize': ysize}}
+        # If no wellbore locations were given and the simulation does not use a
+        # LookupTableReservoir (from which to draw wellbore locations), use default values
+        if not loc_data_check:
+            xmin = DEFAULT_AOR_XMIN
+            xmax = DEFAULT_AOR_XMAX
+            xsize = DEFAULT_AOR_XSIZE
+            ymin = DEFAULT_AOR_YMIN
+            ymax = DEFAULT_AOR_YMAX
+            ysize = DEFAULT_AOR_YSIZE
+            loc_data = {'grid': {'xmin': xmin, 'xmax': xmax, 'xsize': xsize,
+                                 'ymin': ymin, 'ymax': ymax, 'ysize': ysize}}
+        
+    elif workflow_type != 'AoR' and not loc_data_check:
+        err_msg = ''.join([
+            'No Location data was provided under the WellboreOptions entry ', 
+            '(contained in the Workflow: Options section of the .yaml file). ', 
+            'The Workflow type was {}, however, and the {} Workflow '.format(
+                workflow_type, workflow_type), 
+            'requires the user to provide Location data for the wellbores. ', 
+            ' This simulation cannot proceed.'])
+        
+        logging.error(err_msg)
+        
+        raise KeyError(err_msg)
 
     yaml_data[compName] = {'Type': well_component_type, 'LeakTo': aquifer_name,
                            'Connection': res_component_name, 'Locations': loc_data,
-                           'Controls': controls, 'Outputs': output_list}
-
+                           'Outputs': output_list}
+    
+    if well_component_type == 'OpenWellbore':
+        yaml_data[compName]['Controls'] = controls
+    
     if 'WellboreOptions' in yaml_data['Workflow']['Options']:
+        if 'Controls' in yaml_data['Workflow']['Options']['WellboreOptions'] \
+            and well_component_type != 'OpenWellbore':
+                yaml_data[compName]['Controls'] = controls
+        
+        if 'LeakTo' in yaml_data['Workflow']['Options']['WellboreOptions']:
+            yaml_data[compName]['LeakTo'] = yaml_data['Workflow']['Options'][
+                'WellboreOptions']['LeakTo']
+        
+        if 'ThiefZone' in yaml_data['Workflow']['Options']['WellboreOptions']:
+            yaml_data[compName]['ThiefZone'] = yaml_data['Workflow']['Options'][
+                'WellboreOptions']['ThiefZone']
+        
         if 'Parameters' in yaml_data['Workflow']['Options']['WellboreOptions']:
             par_names = get_parameter_names(well_component_type)
 
@@ -612,17 +769,26 @@ def add_aor_well_component_entries(yaml_data, well_component_type, aquifer_name,
     return yaml_data, compName
 
 
-def add_aor_aq_component_entries(yaml_data, aquifer_component_type, aquifer_name,
-                                 well_component_name):
+def add_aq_component_entries(yaml_data, aquifer_component_type, aquifer_name,
+                             well_component_name, workflow_type):
     """
-    This automatically sets up the component entries for the AoR workflow, if
+    This automatically sets up the component entries for the workflow, if
     AutomateAqCompSetup is set to True.
     """
     compName = aquifer_component_type + '1'
-
-    output_list = AOR_AQUIFER_COMPONENT_OUTPUT.get(aquifer_component_type,
-                                                   AOR_AQUIFER_COMPONENT_OUTPUT['GenericAquifer'])
-
+    
+    # Add cases for NEW_WORKFLOWS here
+    if workflow_type == 'TTFD':
+        plume_type = yaml_data['Workflow']['Options'].get(
+            'PlumeType', DEFAULT_TTFD_PLUME_TYPE)
+        
+        output_list = WORKFLOW_AQUIFER_OUTPUT[workflow_type][aquifer_component_type].get(
+            plume_type, TTFD_AQUIFER_COMPONENT_OUTPUT[aquifer_component_type][plume_type])
+        
+    elif workflow_type == 'AoR':
+        output_list = WORKFLOW_AQUIFER_OUTPUT[workflow_type].get(
+            aquifer_component_type, AOR_AQUIFER_COMPONENT_OUTPUT[aquifer_component_type])
+        
     yaml_data[compName] = {'Type': aquifer_component_type, 'AquiferName': aquifer_name,
                            'Connection': well_component_name, 'Outputs': output_list}
 
@@ -644,31 +810,89 @@ def add_aor_aq_component_entries(yaml_data, aquifer_component_type, aquifer_name
     return yaml_data, compName
 
 
-def set_up_aor_plots_section(yaml_data, aquifer_component_type):
+def set_up_plots_section(yaml_data, aquifer_component_type, workflow_type, 
+                         aquifer_name):
     """
-    This automatically sets up the Plots section of the .yaml file for the AoR
+    This automatically sets up the Plots section of the .yaml file for the 
     Workflow, if AutomatePlotsSetup is set to True.
     """
 
     if 'Plots' not in yaml_data:
         yaml_data['Plots'] = {}
 
-    figure_dpi = yaml_data['Workflow']['Options'].get('FigureDPI', 100)
-
-    plot_types_to_add = WORKFLOW_PLOT_NAMES['AoR']
+    figure_dpi = yaml_data['Workflow']['Options'].get('FigureDPI', DEFAULT_FIGURE_DPI)
+    
+    if workflow_type == 'AoR':
+        brineDensityInput = yaml_data['Workflow']['Options'].get('BrineDensity', None)
+        
+        CriticalPressureMPa = yaml_data['Workflow']['Options'].get(
+            'CriticalPressureMPa', 'Calculated')
+    
+        if CriticalPressureMPa != 'Calculated' and brineDensityInput is not None:
+            warning_msg = ''.join([
+                'The CriticalPressureMPa input provided under the Workflow: Options ', 
+                'section of the .yaml file was not ''Calculated'', but the BrineDensity ', 
+                'input was also provided under the same section. The BrineDensity ',
+                'input is only meant to be used when CriticalPressureMPa is given as', 
+                ' ''Calculated'', so the BrineDensity input will not be used.'])
+            
+            logging.warning(warning_msg)
+            
+            # If a specific critical pressure is being used, then brineDensityInput 
+            # is not required. That value is only used to calculate critical pressure 
+            # in cases where CriticalPressureMPa == 'Calculated' and a wellbore 
+            # component with a brineDensity parameter is not being used. When the wellbore 
+            # component has a brineDensity parameter, that parameter will be used instead.
+            brineDensityInput = None
+        
+        elif CriticalPressureMPa == 'Calculated':
+            well_type = yaml_data['Workflow']['Options'].get('WellboreComponentType', 
+                                                             DEFAULT_WELLBORE_COMP)
+            
+            if well_type in WELL_COMPS_WITH_BRINE_DENSITY:
+                warning_msg = ''.join([
+                    'For the AoR Workflow, the BrineDensity input (BrineDensity: {})'.format(
+                        brineDensityInput),
+                    ' was given under the Workflow: Options section of the .yaml ',
+                    'file. The wellbore component used ({}) has a brine density parameter, '.format(
+                        well_type),
+                    'however. The AoR Workflow will use the value of the brine ',
+                    'density parameter when calculating critical pressure. The ',
+                    'BrineDensity input provided under Workflow: Options will ',
+                    'be ignored. This input is meant for cases were a calculated ',
+                    'critical pressure is used but the wellbore component does ',
+                    'not have a brine density parameter.'])
+                
+                logging.warning(warning_msg)
+                
+                # Set the BrineDensity input to None. The brineDensity parameter will 
+                # be used instead, and removing the BrineDensity input from the .yaml 
+                # file set up automatically (the file that ends with '_WorkflowSetup.yaml')
+                # is intended to reduce the possibility of confusion.
+                brineDensityInput = None
+    
+    plot_types_to_add = WORKFLOW_PLOT_NAMES[workflow_type]
 
     for plotNum, plot in enumerate(plot_types_to_add):
 
         for plotName in list(plot.keys()):
-
-            if plotNum == 2:
+            
+            # Add cases for NEW_WORKFLOWS here, if necessary
+            if plotNum == 2 and workflow_type == 'AoR':
                 metric = plot[plotName].format(
                     AqCO2Metric=AOR_AQUIFER_COMPONENT_OUTPUT[
                         aquifer_component_type][0])
-            elif plotNum == 3:
+                
+            elif plotNum == 3 and workflow_type == 'AoR':
                 metric = plot[plotName].format(
                     AqSaltMetric=AOR_AQUIFER_COMPONENT_OUTPUT[
                         aquifer_component_type][1])
+                
+            elif workflow_type == 'LeakageAssessment' and 'aquifer' in plot[plotName]:
+                aquiferNum = aquifer_name[7:]
+                
+                metric = plot[plotName].format(aquiferNum)
+                
             else:
                 metric = plot[plotName]
 
@@ -703,24 +927,141 @@ def set_up_aor_plots_section(yaml_data, aquifer_component_type):
                     'InjectionCoordy' in yaml_data['Workflow']['Options']:
                 InjectionCoordx = yaml_data['Workflow']['Options']['InjectionCoordx']
                 InjectionCoordy = yaml_data['Workflow']['Options']['InjectionCoordy']
+            
+            extension = ''
+            if 'FigureName' in yaml_data['Workflow']['Options']:
+                fig_name = yaml_data['Workflow']['Options']['FigureName']
+                if '.' in fig_name:
+                    extension = fig_name[fig_name.index('.'):]
+            
+            # Add cases for NEW_WORKFLOWS here.
+            # The setup of each plot depends on the plot type - options are 
+            # either intended under the plot name or the plot type.
+            if workflow_type == 'LeakageAssessment':
+                plot_type = yaml_data['Workflow']['Options'].get(
+                    'PlotType', DEFAULT_TIME_SERIES_PLOT)
+                
+                if 'subplot' in yaml_data['Workflow']['Options']:
+                    subplot = yaml_data['Workflow']['Options']['subplot']
+                else:
+                    subplot = yaml_data['Workflow']['Options'].get(
+                        'Subplot', DEFAULT_TIME_SERIES_SUBPLOT)
+                
+                use_markers = yaml_data['Workflow']['Options'].get(
+                    'UseMarkers', DEFAULT_TIME_SERIES_USE_MARKERS)
+                
+                use_lines = yaml_data['Workflow']['Options'].get(
+                    'UseLines', DEFAULT_TIME_SERIES_USE_LINES)
+                
+                vary_lines = yaml_data['Workflow']['Options'].get(
+                    'VaryLineStyles', DEFAULT_TIME_SERIES_VARY_LINES)
+                
+                yaml_data['Plots'][plotName + extension] = {
+                    plot_type: [metric], 'FigureDPI': figure_dpi, 
+                    'Subplot': subplot, 'UseMarkers': use_markers, 
+                    'UseLines': use_lines, 'VaryLineStyles': vary_lines}
+                
+                if 'FigureSize' in yaml_data['Workflow']['Options']:
+                    yaml_data['Plots'][plotName + extension]['FigureSize'] = yaml_data[
+                        'Workflow']['Options']['FigureSize']
+                
+            elif workflow_type == 'AoR':
+                # SaveCSVFiles is required for each of the AoR plots when using 
+                # the AoR Workflow
+                yaml_data['Plots'][plotName] = {'AoR': [metric], 'SaveCSVFiles': True,
+                                                'PlotInjectionSites': plot_injection_sites,
+                                                'FigureDPI': figure_dpi}
+                
+                if metric == 'pressure' and brineDensityInput:
+                    yaml_data['Plots'][plotName]['BrineDensity'] = brineDensityInput
+                
+                if TimeList is not None:
+                    yaml_data['Plots'][plotName]['TimeList'] = TimeList
+                
+                if plot[plotName] == 'pressure':
+                    critPressureInput = yaml_data['Workflow']['Options'].get(
+                        'CriticalPressureMPa', 'Calculated')
 
-            yaml_data['Plots'][plotName] = {'AoR': [metric], 'SaveCSVFiles': True,
-                                            'PlotInjectionSites': plot_injection_sites,
-                                            'FigureDPI': figure_dpi}
-
-            if TimeList is not None:
-                yaml_data['Plots'][plotName]['TimeList'] = TimeList
-
-            if InjectionCoordx is not None and InjectionCoordy is not None:
-                yaml_data['Plots'][plotName]['InjectionCoordx'] = InjectionCoordx
-                yaml_data['Plots'][plotName]['InjectionCoordy'] = InjectionCoordy
-
-            if plot[plotName] == 'pressure':
-                critPressureInput = yaml_data['Workflow']['Options'].get(
-                    'CriticalPressureMPa', 'Calculated')
-
-                yaml_data['Plots'][plotName][
-                    'CriticalPressureMPa'] = critPressureInput
+                    yaml_data['Plots'][plotName][
+                        'CriticalPressureMPa'] = critPressureInput
+                
+                if InjectionCoordx is not None and InjectionCoordy is not None:
+                    yaml_data['Plots'][plotName]['InjectionCoordx'] = InjectionCoordx
+                    yaml_data['Plots'][plotName]['InjectionCoordy'] = InjectionCoordy
+                
+                if 'FigureSize' in yaml_data['Workflow']['Options']:
+                    yaml_data['Plots'][plotName]['FigureSize'] = yaml_data[
+                        'Workflow']['Options']['FigureSize']
+                
+            elif workflow_type == 'TTFD':
+                plumeType = yaml_data['Workflow']['Options'].get(
+                    'PlumeType', DEFAULT_TTFD_PLUME_TYPE)
+                
+                compName = aquifer_component_type + '1'
+                
+                yaml_data['Plots'][plotName + extension] = {'TTFD': {
+                    'PlumeType': plumeType, 'ComponentNameList': [compName], 
+                    'PlotInjectionSites': plot_injection_sites, 
+                    'FigureDPI': figure_dpi}}
+                
+                if InjectionCoordx is not None and InjectionCoordy is not None:
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'InjectionCoordx'] = InjectionCoordx
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'InjectionCoordy'] = InjectionCoordy
+                
+                if 'WriteDreamOutput' in yaml_data['Workflow']['Options']:
+                    dream_output = yaml_data['Workflow']['Options']['WriteDreamOutput']
+                    
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'WriteDreamOutput'] = dream_output
+                
+                if 'MonitoringLocations' in yaml_data['Workflow']['Options']:
+                    monitors = yaml_data['Workflow']['Options']['MonitoringLocations']
+                    
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'MonitoringLocations'] = monitors
+                
+                if 'NumZPointsWithinAquifers' in yaml_data['Workflow']['Options']:
+                    numZPointsAq = yaml_data['Workflow']['Options']['NumZPointsWithinAquifers']
+                    
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'NumZPointsWithinAquifers'] = numZPointsAq
+                
+                if 'NumZPointsWithinShales' in yaml_data['Workflow']['Options']:
+                    numZPointsSh = yaml_data['Workflow']['Options']['NumZPointsWithinShales']
+                    
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'NumZPointsWithinShales'] = numZPointsSh
+                    
+                if 'SpecifyXandYLims' in yaml_data['Workflow']['Options']:
+                    lims = yaml_data['Workflow']['Options']['SpecifyXandYLims']
+                    
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'SpecifyXandYLims'] = lims
+                
+                if 'SpecifyXandYGridLims' in yaml_data['Workflow']['Options']:
+                    gridLims = yaml_data['Workflow']['Options']['SpecifyXandYGridLims']
+                    
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'SpecifyXandYGridLims'] = gridLims
+                
+                if 'xGridSpacing' in yaml_data['Workflow']['Options']:
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'xGridSpacing'] = yaml_data['Workflow']['Options']['xGridSpacing']
+                
+                if 'yGridSpacing' in yaml_data['Workflow']['Options']:
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'yGridSpacing'] = yaml_data['Workflow']['Options']['yGridSpacing']
+                
+                if 'FigureSize' in yaml_data['Workflow']['Options']:
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'FigureSize'] = yaml_data['Workflow']['Options']['FigureSize']
+                
+                if 'SaveCSVFiles' in yaml_data['Workflow']['Options']:
+                    yaml_data['Plots'][plotName + extension]['TTFD'][
+                        'SaveCSVFiles'] = yaml_data['Workflow']['Options']['SaveCSVFiles']
+            # End of loop through the plot entries
 
     return yaml_data
 

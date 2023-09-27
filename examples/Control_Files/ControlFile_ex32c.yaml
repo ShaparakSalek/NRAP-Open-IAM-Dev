@@ -107,8 +107,8 @@ Plots:
             PlotInjectionSites: True
             PlotInjectionSiteLabels: True
             PlotStratComponents: True
-            InjectionCoordx: 2.37e5
-            InjectionCoordy: 4.41e6
+            InjectionCoordx: 2.37e+5
+            InjectionCoordy: 4.41e+6
             View:
                 ViewAngleElevation: [5, 5, 5, 5, 5]
                 ViewAngleAzimuth: [240, 255, 270, 285, 300]
@@ -116,31 +116,31 @@ Plots:
         AoR: [pressure]
         TimeList: [1, 5, 10, 15, 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: True
     AoR_CO2Sat:
         AoR: [CO2saturation]
         TimeList: [1, 5, 10, 15, 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False
     AoR_pH:
         AoR: [pH_volume]
         TimeList: [10, 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False
     AoR_TDS:
         AoR: [TDS_volume]
         TimeList: All
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False

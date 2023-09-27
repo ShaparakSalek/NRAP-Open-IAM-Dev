@@ -148,37 +148,37 @@ Plots:
             PlotInjectionSites: True
             PlotInjectionSiteLabels: True
             PlotStratComponents: True
-            InjectionCoordx: 2.37e5
-            InjectionCoordy: 4.41e6
+            InjectionCoordx: 2.37e+5
+            InjectionCoordy: 4.41e+6
             View:
                 ViewAngleElevation: [5, 5, 5, 5, 5, 5, 5]
                 ViewAngleAzimuth: [270, 285, 300, 315, 330, 345, 360]
     AoR_Pressure:
         AoR: [pressure]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: True
         CriticalPressureMPa: Calculated
     AoR_CO2Sat:
         AoR: [CO2saturation]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False
     AoR_pH:
         AoR: [pH_volume]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False
     AoR_TDS:
         AoR: [TDS_volume]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False

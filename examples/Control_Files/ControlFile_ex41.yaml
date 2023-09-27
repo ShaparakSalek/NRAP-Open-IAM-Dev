@@ -21,8 +21,8 @@
 # Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
-    EndTime: 1
-    TimeStep: 0.1
+    EndTime: 10
+    TimeStep: 1
     Analysis: forward
     Components: [SimpleReservoir1, OpenWellbore1, OpenWellbore2,
                  GenericAquifer1, GenericAquifer2]

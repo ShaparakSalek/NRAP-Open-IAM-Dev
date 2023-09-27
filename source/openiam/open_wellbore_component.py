@@ -61,13 +61,13 @@ class OpenWellbore(ComponentModel):
 
         Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)),
 
-    where rho_w and rho_br are the densities of water and brine (by default,
-    1000 |kg/m^3|) defined by the brineDensity parameter, respectively,
-    g is gravitational acceleration(9.8 |m/s^2|), d_aq is the depth to the
-    bottom of the aquifer impacted by leakage (m) (defined by the wellTop
-    parameter value; if wellTop is 0 m, then the atmosphere receives leakage),
-    and d_res is the depth to the top of the reservoir (m). Higher brine densities
-    generally produce lower leakage rates.
+    where rho_w and rho_br are the densities of water (1000 |kg/m^3|) and brine
+    (the brineDensity parameter), respectively, g is gravitational acceleration 
+    (9.8 |m/s^2|), d_aq is the depth to the bottom of the aquifer impacted by 
+    leakage (m) (defined by the wellTop parameter value; if wellTop is 0 m, 
+    then the atmosphere receives leakage), and d_res is the depth to the top of 
+    the reservoir (m). Higher brine densities generally produce lower leakage 
+    rates.
 
     Instead of calculating critical pressure in this manner, one can enforce a
     particular critical pressure (the **critPressure** parameter) by setting the
