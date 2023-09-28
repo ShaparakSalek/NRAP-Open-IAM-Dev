@@ -18,14 +18,11 @@ containment assurance. NRAP-Open-IAM is currently in active development and
 is available for testing and feedback only.
 
 As this is a prototype of software being actively developed, we
-are seeking any feedback and/or issue reports. An online feedback form
-can be found here:
-https://docs.google.com/forms/d/e/1FAIpQLSed5mcX0OBx1dLNmYGbmS4Vfc0mdOLapIzFqw-6vHoho9B19A/viewform?usp=sf_link
+are seeking any feedback or bug reports. Feedback can be emailed to the
+NRAP-Open-IAM project at NRAP@netl.doe.gov, or the current development team lead
+at Nathaniel.Mitchell@netl.doe.gov, or any other member of the development team.
 
-Issue reports and feedback can be left at the forum on NETL's
-Energy Data eXchange webpage for NRAP-Open-IAM:
-https://edx.netl.doe.gov/workspace/forum/nrap-tools/topic?t=nrap-tools-nrap-open-iam
-or on GitLab issues page for NRAP-Open-IAM:
+Issues can also be reported on GitLab issues page for NRAP-Open-IAM:
 https://gitlab.com/NRAP/OpenIAM/-/issues?sort=created_date&state=opened
 
 If you have been given access to the code indirectly and would like to be
@@ -38,16 +35,14 @@ Downloading NRAP-Open-IAM
 NRAP-Open-IAM tool and examples can be downloaded from a public GitLab
 repository located at https://gitlab.com/NRAP/OpenIAM. If the NRAP-Open-IAM
 was downloaded from the GitLab repository, the folder name may have
-the repository's current hash appended to it. Feel free to rename the folder
+the repository's current hash appended to it. Feel free to rename the folder to
 something simple like *NRAPOpenIAM* to simplify the navigation.
 
-..
-    In addition to that,
-    the copy of the tool can be obtained through NETL's Energy Data eXchange
-    website: https://edx.netl.doe.gov/dataset/nrap-open-source-iam
-    by requesting an access through e-mail addressed to NRAP@netl.doe.gov.
-    The NRAP-Open-IAM is distributed as a zip file that can be extracted in the location
-    specified by user.
+In addition to that, the copy of the tool can be obtained through NETL's Energy Data eXchange
+website: https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam
+by requesting an access through e-mail addressed to NRAP@netl.doe.gov.
+The NRAP-Open-IAM is distributed as a zip file that can be extracted in the location
+specified by user.
 
 Installing NRAP-Open-IAM
 ========================
