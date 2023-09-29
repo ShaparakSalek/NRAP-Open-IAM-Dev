@@ -1,21 +1,24 @@
 # OpenIAM Control File Example 58b
 #
-# This example demosntrates the use of the LeakageAssessment Workflow in 
-# a stochastic simulation using Latin Hypercube Sampling ('type: lhs'). 
-# Certain parameter values are varied across thirty different realizations 
-# ('siz: 30'). The varied parameters are the AnalyticalReservoir's permeability 
-# ('logResPerm') and the MultisegmentedWellbore's permeabilities ('logWellPerm' 
-# and 'logAquPerm'). Given the location of the injection well ('InjectionWell' 
-# under 'ReservoirOptions5') and the wellbores ('Locations' under 
-# 'WellboreOptions'), the wellbore component calculates the leakage rates 
-# of brine and CO2 to aquifer 1 ('AquiferName: aquifer1' under 'Options). 
-# The workflow produces TimeSeriesStats plots ('PlotType: TimeSeriesStats') 
-# showing these results. The figure names depend on the metric shown (pressure, 
-# CO2 saturation, brine leakate rates, or CO2 leakage rates), so the name 
-# provided under 'FigureName' is not used. The extension included in the input 
+# This example demosntrates the use of the LeakageAssessment Workflow in
+# a stochastic simulation using Latin Hypercube Sampling ('type: lhs').
+# Certain parameter values are varied across thirty different realizations
+# ('siz: 30'). The varied parameters are the AnalyticalReservoir's permeability
+# ('logResPerm') and the MultisegmentedWellbore's permeabilities ('logWellPerm'
+# and 'logAquPerm'). Given the location of the injection well ('InjectionWell'
+# under 'ReservoirOptions5') and the wellbores ('Locations' under
+# 'WellboreOptions'), the wellbore component calculates the leakage rates
+# of brine and CO2 to aquifer 1 ('AquiferName: aquifer1' under 'Options).
+# The workflow produces TimeSeriesStats plots ('PlotType: TimeSeriesStats')
+# showing these results. The figure names depend on the metric shown (pressure,
+# CO2 saturation, brine leakate rates, or CO2 leakage rates), so the name
+# provided under 'FigureName' is not used. The extension included in the input
 # for 'FigureName' will be used, however (.tiff in 'FigureName: Name.tiff').
 #
-# Last Modified: July, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex58b.yaml
+#
+# Last Modified: September, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20

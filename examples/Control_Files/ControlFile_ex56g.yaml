@@ -3,17 +3,17 @@
 # This example demonstrates the use of the AoR Workflow in a simulation
 # using a CementedWellboreWR (WellboreComponentType: CementedWellboreWR).
 #
-# Because a specific critical pressure is not given, the AoR Workflow will 
+# Because a specific critical pressure is not given, the AoR Workflow will
 # use the default approach of calculating critical pressure. A critical pressure
-# is calcualted with a brine density. When the wellbore component has a brine 
-# density parameter (e.g., brineDensity from OpenWellbore or MultisegmentedWellbore 
-# components), that parameter value will be used when caluclating critical pressure. 
+# is calculated with a brine density. When the wellbore component has a brine
+# density parameter (e.g., brineDensity from OpenWellbore or MultisegmentedWellbore
+# components), that parameter value will be used when calculating critical pressure.
 # The CementedWellboreWR component does not have a brine density parameter, however.
-# In this case, a brine density value (in kg/(m^3)) can be provided through the 
+# In this case, a brine density value (in kg/(m^3)) can be provided through the
 # BrineDensity entry under 'Workflow: Options'.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56a.yaml
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56g.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------

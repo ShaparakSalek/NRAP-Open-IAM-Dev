@@ -74,7 +74,7 @@ parser.add_argument('--file', type=str, dest='yaml_cf_name',
                     # default='test_CFI',  # to test all control files examples
                     # default='test_GUI',  # to test all GUI examples
                     # default='../../test/test_control_file.yaml',
-                    default='../../examples/Control_Files/ControlFile_ex9a.yaml',
+                    default='../../examples/Control_Files/ControlFile_ex1a.yaml',
                     # default='../../examples/GUI_Files/14_Forward_HCL.OpenIAM',
                     help='NRAP-Open-IAM Control File Name')
 parser.add_argument('--binary', type=bool, dest='binary_file',

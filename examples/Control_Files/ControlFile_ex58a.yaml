@@ -1,39 +1,39 @@
 # OpenIAM Control File Example 58a
 #
 # This example demosntrates the use of the LeakageAssessment Workflow.
-# This Workflow automatically adds and sets up a reservoir component and a 
-# wellbore component (no aquifer component). The output of the wellbore 
-# component includes CO2 and brine leakage rates. The LeakageAssessment 
-# Workflow then makes a time series plot showing these leakage rates. This 
-# Workflow requires the inclusion of 'Locations' input under 
+# This Workflow automatically adds and sets up a reservoir component and a
+# wellbore component (no aquifer component). The output of the wellbore
+# component includes CO2 and brine leakage rates. The LeakageAssessment
+# Workflow then makes a time series plot showing these leakage rates. This
+# Workflow requires the inclusion of 'Locations' input under
 # 'Workflow: Options: WellboreOptions'.
 #
-# This example uses a deterministic simulation ('Analysis: forward') and 
-# produces four TimeSeries plots ('PlotType: TimeSeries'). If the 'PlotType' 
-# entry is not given when using the LeakageAssessment Workflow, then the default 
-# plot type is TimeSeries (as opposed to TimeSeriesStats or TimeSeriesAndStats). 
+# This example uses a deterministic simulation ('Analysis: forward') and
+# produces four TimeSeries plots ('PlotType: TimeSeries'). If the 'PlotType'
+# entry is not given when using the LeakageAssessment Workflow, then the default
+# plot type is TimeSeries (as opposed to TimeSeriesStats or TimeSeriesAndStats).
 #
-# Because 'Interpolation2D' is set to True for the LookupTableReservoir 
-# component, the reservoir component will not interpolate reservoir conditions 
-# in a three-dimensional manner. If 'Interpolation2D' is set to False, you have 
-# to provide 'coordz' values for the wellbores under 'Locations'. These 'coordz' 
-# values represent the base of the wellbore, within or at the top of the reservoir. 
-# For the depth of the wellbore base to be used in three-dimensional interpolation 
-# of the reservoir data, the LookupTableReservoir .csv files must also include 
-# depth ('z') values. Here, 'Interpolation2D' is set to True so the three-dimensional 
+# Because 'Interpolation2D' is set to True for the LookupTableReservoir
+# component, the reservoir component will not interpolate reservoir conditions
+# in a three-dimensional manner. If 'Interpolation2D' is set to False, you have
+# to provide 'coordz' values for the wellbores under 'Locations'. These 'coordz'
+# values represent the base of the wellbore, within or at the top of the reservoir.
+# For the depth of the wellbore base to be used in three-dimensional interpolation
+# of the reservoir data, the LookupTableReservoir .csv files must also include
+# depth ('z') values. Here, 'Interpolation2D' is set to True so the three-dimensional
 # reservoir data are turned into a flat, two-dimensional data set.
 #
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
-# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
 #
 # The downloaded data set should be placed here:
 #     source/components/reservoir/lookuptables/FutureGen2/1008_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55a.yaml
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex58a.yaml
 #
-# Last Modified: July, 2023
+# Last Modified: September, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20
@@ -90,7 +90,7 @@ Workflow:
             FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
-            Interpolation2D: True     # If you set this to True, you also have to provide coordz values for the wellbores
+            Interpolation2D: True     # If you set this to False, you also have to provide coordz values for the wellbores
             Parameters:
                 index: 1
         WellboreComponentType: OpenWellbore

@@ -1,29 +1,29 @@
 # OpenIAM Control File Example 57b
 #
-# This example is similar to Control File example 57a, but this example uses 
-# a deterministic simulation ('Analysis: forward') and minmimal inputs. The 
-# parameters of the wellbore and aquifer components are allowed to resort to 
-# default values - the 'Parameters' section is not included under 'WellboreOptions' 
-# or 'AquiferOptions'. Monitoring sensor locations are also not provided 
-# ('MonitoringLocations' is not entered under 'Options'). The purpose of this example 
-# is to demonstrate that the TTFD Workflow can be used to quickly examine the evolution 
-# of plumes in an aquifer given the results from reservoir simulations (i.e., the 
-# LookupTableReservoir component). After such a preliminary examination, the user 
-# can delve further into constraining component parameters and TTFD settings 
+# This example is similar to Control File example 57a, but this example uses
+# a deterministic simulation ('Analysis: forward') and minimal inputs. The
+# parameters of the wellbore and aquifer components are allowed to resort to
+# default values - the 'Parameters' section is not included under 'WellboreOptions'
+# or 'AquiferOptions'. Monitoring sensor locations are also not provided
+# ('MonitoringLocations' is not entered under 'Options'). The purpose of this example
+# is to demonstrate that the TTFD Workflow can be used to quickly examine the evolution
+# of plumes in an aquifer given the results from reservoir simulations (i.e., the
+# LookupTableReservoir component). After such a preliminary examination, the user
+# can delve further into constraining component parameters and TTFD settings
 # (e.g., 'MonitoringLocations', 'SpecifyXandYGridLims', 'xGridSpacing, and '
 # 'yGridSpacing', all of which can be entered under 'Workflow: Options').
 #
 # This example requires the additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
-# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
 #
 # The downloaded data set should be placed here:
 #     source/components/reservoir/lookuptables/FutureGen2/1008_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55a.yaml
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex57b.yaml
 #
-# Last Modified: July, 2023
+# Last Modified: September, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 15.0

@@ -6,7 +6,7 @@
 # Here, the critical pressure is specified as 15 MPa (CriticalPressureMPa: 15.0).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56a.yaml
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56f.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------

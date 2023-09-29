@@ -31,10 +31,17 @@
 # of other output .csv files by setting GenerateOutputFiles and
 # GenerateCombOutputFile to False in the ModelParams section of the .yaml file.
 #
+# This example requires additional FutureGen 2.0 data set.
+# FutureGen 2.0 data set can be downloaded from the following source:
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
+#
+# The downloaded data set should be placed here:
+#    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex54c.yaml
 #
-# Last Modified: June, 2023
+# Last Modified: September, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10.

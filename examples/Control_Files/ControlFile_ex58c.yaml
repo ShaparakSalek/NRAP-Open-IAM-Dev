@@ -1,11 +1,14 @@
 # OpenIAM Control File Example 58c
 #
-# This example is similar to Control File Example 58b, but it 
-# examines the leakage rates into aquifer 2 ('AquiferName: aquifer2'), 
-# uses an OpenWellbore component ('WellboreComponentType: OpenWellbore'), 
+# This example is similar to Control File Example 58b, but it
+# examines the leakage rates into aquifer 2 ('AquiferName: aquifer2'),
+# uses an OpenWellbore component ('WellboreComponentType: OpenWellbore'),
 # and uses the TimeSeriesAndStats plot type ('PlotType: TimeSeriesAndStats').
 #
-# Last Modified: July, 2023
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex58c.yaml
+#
+# Last Modified: September, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 20

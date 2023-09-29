@@ -1,32 +1,32 @@
 # OpenIAM Control File Example 57c
 #
-# This example demonstrates the use of the TTFD Workflow. The setup of the 
-# simulation is similar to Control File Example 41. This example is 
-# different, however, because the analysis only focuses on aquifer 2 
-# (AquiferName: aquifer2). The TTFD Workflow can only consider one aquifer 
-# at a time, but example 41 has two sets of OpenWellbore and GenericAquifer 
-# components for aquifers 1 and 2. The same results could be obtained by 
-# running this example twice, however, once with AquiferName: aquifer1 and 
-# once with AquiferName: aquifer2. The results would be saved in .csv files 
-# (if SaveCSVFiles is left at the default option of True), and these files 
-# could be used to compile a combined dataset of the plume timings in 
+# This example demonstrates the use of the TTFD Workflow. The setup of the
+# simulation is similar to Control File Example 41. This example is
+# different, however, because the analysis only focuses on aquifer 2
+# (AquiferName: aquifer2). The TTFD Workflow can only consider one aquifer
+# at a time, but example 41 has two sets of OpenWellbore and GenericAquifer
+# components for aquifers 1 and 2. The same results could be obtained by
+# running this example twice, however, once with AquiferName: aquifer1 and
+# once with AquiferName: aquifer2. The results would be saved in .csv files
+# (if SaveCSVFiles is left at the default option of True), and these files
+# could be used to compile a combined dataset of the plume timings in
 # aquifers 1 and 2.
 #
-# Despite such issues, the setup of a Workflow is meant to prevent common 
-# errors that could occur when using a standard control file (e.g., having 
-# a typo in a component's name in a 'Connection' entry or failing to have 
-# the correct output types included). The TTFD Workflow automatically sets 
-# up (1) the connections between reservoir, wellbore, and aquifer components, 
-# (2) the correct output types for the analysis being conducted (e.g., 
-# including Dissolved_salt_dr and Dissolved_salt_dz when assessing Dissolved 
-# salt plumes), and (3) the TTFD plot entry itself. Slight formatting or 
-# spelling errors in such efforts could cause the simulation to fail, and 
+# Despite such issues, the setup of a Workflow is meant to prevent common
+# errors that could occur when using a standard control file (e.g., having
+# a typo in a component's name in a 'Connection' entry or failing to have
+# the correct output types included). The TTFD Workflow automatically sets
+# up (1) the connections between reservoir, wellbore, and aquifer components,
+# (2) the correct output types for the analysis being conducted (e.g.,
+# including Dissolved_salt_dr and Dissolved_salt_dz when assessing Dissolved
+# salt plumes), and (3) the TTFD plot entry itself. Slight formatting or
+# spelling errors in such efforts could cause the simulation to fail, and
 # the TTFD Workflow is meant to prevent such issues.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex57b.yaml
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex57c.yaml
 #
-# Last Modified: July, 2023
+# Last Modified: September, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 10

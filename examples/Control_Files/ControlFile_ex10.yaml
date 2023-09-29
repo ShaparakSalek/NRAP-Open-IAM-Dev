@@ -21,8 +21,9 @@
 # This example requires the additional Kimberlina data set.
 # Kimberlina data set (kimb-closed-200-sims.zip or Kimb_closed_200_sims.zip)
 # can be downloaded from one of the following places:
-# 1. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
+# 1. https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/6b87c1ed-3d34-42dc-88b8-2da7e0477467
 # 2. https://gitlab.com/NRAP/Kimberlina_data
+# 3. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/Kimb_closed_200_sims
