@@ -49,13 +49,13 @@ def check_python():
     """
     Check whether the proper version of Python is being used.
 
-    Currently python above version 3.6 is supported.
+    Currently python above version 3.9 is supported.
     """
     logging.info('Checking Python version')
     py_major, py_minor = sys.version_info[0:2]
-    if py_major != 3 or py_minor < 6:
+    if py_major != 3 or py_minor < 9:
         error_msg = ''.join([
-            'Python 3.6 or above is required.\nPython {maj}.{mnr} ',
+            'Python 3.9 or above is required.\nPython {maj}.{mnr} ',
             'has been detected']).format(maj=py_major, mnr=py_minor)
         logging.error(error_msg)
     else:
