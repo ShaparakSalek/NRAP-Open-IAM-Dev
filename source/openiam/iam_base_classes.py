@@ -886,7 +886,7 @@ class SystemModel(matk):
                      'time_step': self.time_array[1] - self.time_array[0],
                      'time_index': 0}   # time_index is needed for dynamic kwargs
 
-        # Initializa system model outputs dictionary
+        # Initialize system model outputs dictionary
         total_out = {}
 
         # For some components the model method may not be run (run_frequency = 0)
@@ -1612,8 +1612,8 @@ class ComponentModel():
             if self.run_time_indices is not None:
                 # Obtain an intersection of the lists provided in the argument
                 # and defined in the component attribute
+                val_list = [val_list[ind] for ind in ind_array if ind in self.run_time_indices]
                 ind_array = [ind for ind in ind_array if ind in self.run_time_indices]
-                val_list = val_list[ind_array]
 
             # Add observation name to the list of base observations in the system model
             if base_nm not in self._parent.obs_base_names:
