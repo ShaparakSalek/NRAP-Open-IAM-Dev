@@ -1225,7 +1225,6 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
 
         if '.' in name:
             name_main = name[0:name.index('.')]
-            name_main += '_tIndex_{:.0f}'.format(time_index)
             name_extension = name[name.index('.'):]
         else:
             name_main = name
