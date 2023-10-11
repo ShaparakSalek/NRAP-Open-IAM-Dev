@@ -136,7 +136,7 @@ class alluviumaqROMs(object):
         self.f1mat = f1rommat[:, 0:np.shape(f1rommat)[1]-1]
 
         self.f1pindices = []
-        for i in range(np.int(self.f1mat.max())):
+        for i in range(int(self.f1mat.max())):
             self.f1pindices.append((self.f1mat == i+1.0).nonzero())
         self.f1zeroind = (self.f1mat == 0).nonzero()
 
@@ -145,7 +145,7 @@ class alluviumaqROMs(object):
         self.g1mat = g1rommat[:, 0:np.shape(g1rommat)[1]-1]
 
         self.g1pindices = []
-        for i in range(np.int(self.g1mat.max())):
+        for i in range(int(self.g1mat.max())):
             self.g1pindices.append((self.g1mat == i+1.0).nonzero())
         self.g1zeroind = (self.g1mat == 0).nonzero()
 

@@ -24,9 +24,6 @@ from .label_setup import (LEGEND_DICT, Y_LABEL_DICT, Y_LABEL_SPLIT_DICT,
                           Y_LABEL_2ROWS_DICT, Y_LABEL_2ROWS_SPLIT_DICT,
                           TITLE_DICT, TITLE_SPLIT_DICT)
 
-# Ignore futurewarning from numpy about record array subarray copies vs views.
-# warnings.simplefilter(action='ignore', category=FutureWarning)
-# warnings.simplefilter(action='ignore', category=matplotlib.cbook.mplDeprecation)
 
 # Constants used to adjust figure formatting
 DEFAULT_FIG_WIDTH = 13
