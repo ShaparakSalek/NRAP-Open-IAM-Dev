@@ -15,17 +15,21 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 -------------------------------------------------------------------------------
 """
 import logging  # For reporting errors
+import os
+import sys
+IAM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(IAM_DIR)
 
-import flt_compute as fcp   # For basic calc.s and memory ops
-import flt_file as fileop   # For file operations
-import flt_inout as fio     # For reservoir input
-import flt_intro as intro   # Gets YAML data and checks input
-import flt_message as mess  # For messages
-import flt_model as fmodl   # Fault model functions
-import flt_plot as fplot    # For plotting data
-import flt_profile as pro   # For T/P profile calculations
-import flt_reveal as revl   # Provides summary file and plots
-import flt_storage as stor  # For defining lists
+import openiam.components.fault.fault_flow.flt_compute as fcp   # For basic calc.s and memory ops
+import openiam.components.fault.fault_flow.flt_file as fileop   # For file operations
+import openiam.components.fault.fault_flow.flt_inout as fio     # For reservoir input
+import openiam.components.fault.fault_flow.flt_intro as intro   # Gets YAML data and checks input
+import openiam.components.fault.fault_flow.flt_message as mess  # For messages
+import openiam.components.fault.fault_flow.flt_model as fmodl   # Fault model functions
+import openiam.components.fault.fault_flow.flt_plot as fplot    # For plotting data
+import openiam.components.fault.fault_flow.flt_profile as pro   # For T/P profile calculations
+import openiam.components.fault.fault_flow.flt_reveal as revl   # Provides summary file and plots
+import openiam.components.fault.fault_flow.flt_storage as stor  # For defining lists
 
 # Details:
 __version__ = "6.7.5"

@@ -21,9 +21,9 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 """
 import math                     # For cosine
 
-import flt_file as fileop       # For file operations
-import flt_fluids as flu        # For T/P profile calculations
-import flt_units as funit       # For unit conversion
+from . import flt_file as fileop       # For file operations
+from . import flt_fluids as flu        # For T/P profile calculations
+from . import flt_units as funit       # For unit conversion
 
 # Constants for polynomial for saturation extension line.
 POLY_A = 2.36E-05               # Saturation line extension = ax^3

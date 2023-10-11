@@ -11,14 +11,14 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    from openiam.iam_base_classes import SystemModel, ComponentModel
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
 
 try:
-    import components.aquifer.alluvium.alluvium_aquifer_ROM as aarom
+    import openiam.components.aquifer.alluvium.alluvium_aquifer_ROM as aarom
 except ImportError:
     print('\nERROR: Unable to load ROM for Alluvium Aquifer component\n')
     sys.exit()

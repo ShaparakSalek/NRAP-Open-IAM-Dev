@@ -28,8 +28,8 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 """
 import math                     # for power ops
 
-import flt_units as funit         # For unit conversion
-import flt_file as fileop       # For file operations
+from . import flt_units as funit         # For unit conversion
+from . import flt_file as fileop       # For file operations
 
 # Permeability and heterogeneity constants.
 MIN_SATURATION = 0.001              # Numerical minimum limit

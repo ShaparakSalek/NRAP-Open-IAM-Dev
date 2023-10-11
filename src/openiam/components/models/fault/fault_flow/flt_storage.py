@@ -23,8 +23,8 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 """
 import numpy as np              # For array of values
 
-import flt_file as fileop       # For file operations
-import flt_config as scfg       # IO directory and file names
+from . import flt_file as fileop       # For file operations
+from . import flt_config as scfg       # IO directory and file names
 # import flt_units as funit     # For unit conversion
 
 

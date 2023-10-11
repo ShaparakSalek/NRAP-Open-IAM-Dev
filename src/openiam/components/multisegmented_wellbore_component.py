@@ -11,7 +11,7 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 try:
-    import components.wellbore.multisegmented.multisegmented_wellbore_ROM as mswrom
+    import openiam.components.wellbore.multisegmented.multisegmented_wellbore_ROM as mswrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Multisegmented Wellbore component\n')
     sys.exit()
@@ -429,7 +429,7 @@ def read_data(filename):
 
 def test_multisegmented_wellbore_component():
     try:
-        from openiam import AnalyticalReservoir
+        from openiam.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: {}'.format(err))
     import matplotlib.pyplot as plt

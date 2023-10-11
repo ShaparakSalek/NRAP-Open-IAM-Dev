@@ -34,9 +34,9 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 """
 import numpy as np              # For array operations
 
-import flt_file as fileop       # For paths and error reports
-import flt_config as scfg       # IO directory and file names
-import flt_units as funits      # For unit conversion
+from . import flt_file as fileop       # For paths and error reports
+from . import flt_config as scfg       # IO directory and file names
+from . import flt_units as funits      # For unit conversion
 
 # Constants for file handling & writing to Summary File
 ZIPX_IN = "  --> "              # Parameter start

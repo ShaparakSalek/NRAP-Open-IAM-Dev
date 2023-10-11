@@ -37,12 +37,12 @@ import sys                      # For stdout
 import math                     # For sin and other functions
 import numpy as np              # For array of values
 
-import flt_inout as fio         # File input/output operations
-import flt_file as fileop       # For file operations
-import flt_model as model       # For aperture variation
-import flt_units as funit       # For unit conversion
-import flt_basics as bcs        # For basic math operations
-import flt_config as scfg       # For a fixed random seed
+from . import flt_inout as fio         # File input/output operations
+from . import flt_file as fileop       # For file operations
+from . import flt_model as model       # For aperture variation
+from . import flt_units as funit       # For unit conversion
+from . import flt_basics as bcs        # For basic math operations
+from . import flt_config as scfg       # For a fixed random seed
 
 # SGR computation constants
 SGR_SLOPE = 0.02                # Slope of linear pressure relation of SGR

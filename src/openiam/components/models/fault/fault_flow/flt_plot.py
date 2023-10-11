@@ -31,8 +31,8 @@ import csv                      # For saving a list of lists
 import numpy as np              # For array operations
 import matplotlib.pyplot as plt   # For plots
 
-import flt_file as fileop       # For paths and error reports
-import flt_config as scfg       # IO directory and file names
+from . import flt_file as fileop       # For paths and error reports
+from. import flt_config as scfg       # IO directory and file names
 
 
 # Plot constants for figures

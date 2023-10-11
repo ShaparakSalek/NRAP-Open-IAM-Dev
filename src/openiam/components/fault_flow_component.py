@@ -10,23 +10,23 @@ import matplotlib.pyplot as plt
 
 source_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(source_folder)
-sys.path.append(os.path.join(source_folder, 'components', 'fault', 'fault_flow'))
+# sys.path.append(os.path.join(source_folder, 'components', 'fault', 'fault_flow'))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    from openiam.iam_base_classes import SystemModel, ComponentModel
     from openiam.cfi.commons import process_dynamic_inputs
 except ImportError as err:
     print('Unable to load IAM class module: '+ str(err))
 
 try:
-    from components.fault.fault_flow.fault_setup import FAULT_SETUP_DICT
-    import components.fault.fault_flow.flt_basics as bcs
-    import components.fault.fault_flow.flt_compute as fcp
-    import components.fault.fault_flow.flt_decipher as deci
-    import components.fault.fault_flow.flt_intro as intro
-    import components.fault.fault_flow.flt_profile as pro
-    import components.fault.fault_flow.flt_units as fit
-    import components.fault.fault_flow.flt_config as conf
+    from openiam.components.fault.fault_flow.fault_setup import FAULT_SETUP_DICT
+    import openiam.components.fault.fault_flow.flt_basics as bcs
+    import openiam.components.fault.fault_flow.flt_compute as fcp
+    import openiam.components.fault.fault_flow.flt_decipher as deci
+    import openiam.components.fault.fault_flow.flt_intro as intro
+    import openiam.components.fault.fault_flow.flt_profile as pro
+    import openiam.components.fault.fault_flow.flt_units as fit
+    import openiam.components.fault.fault_flow.flt_config as conf
 except ImportError:
     print('\nERROR: Unable to load ROM for Fault Flow component\n')
     sys.exit()

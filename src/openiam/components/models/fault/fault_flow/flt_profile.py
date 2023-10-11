@@ -28,11 +28,11 @@ Contents (13)
 Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 -------------------------------------------------------------------------------
 """
-import flt_file as fileop     # For file operations
-import flt_fluids as flu      # For T/P profile calculations
-import flt_message as mess    # For messages
-import flt_tail as ftal       # Tail operations
-import flt_units as funit     # For unit conversion
+from . import flt_file as fileop     # For file operations
+from . import flt_fluids as flu      # For T/P profile calculations
+from . import flt_message as mess    # For messages
+from . import flt_tail as ftal       # Tail operations
+from . import flt_units as funit     # For unit conversion
 
 # Constants
 SALINITY_DEFAULT = 0.0

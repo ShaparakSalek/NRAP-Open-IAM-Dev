@@ -30,10 +30,10 @@ import logging                  # For reporting errors
 import time                     # For calculating runtime
 from datetime import datetime   # For timing
 
-import flt_decipher as deci     # For converting yaml data
-import flt_file as fileop       # For file operations
-import flt_message as mess      # For messages
-import flt_warranty as war      # Print warranty
+from . import flt_decipher as deci     # For converting yaml data
+from . import flt_file as fileop       # For file operations
+from . import flt_message as mess      # For messages
+from . import flt_warranty as war      # Print warranty
 
 # Limit constants on flow
 ERR_IN = "\n    > "             # Secondary Error messages indent

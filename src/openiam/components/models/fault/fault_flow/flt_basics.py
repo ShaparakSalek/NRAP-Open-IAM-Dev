@@ -26,8 +26,8 @@ import math                         # For sin and other functions
 import numpy as np                  # For array of values
 from scipy.stats import truncnorm   # For a truncated normal function
 
-import flt_units as funit           # For unit conversion
-import flt_file as fileop           # For file operations
+from . import flt_units as funit           # For unit conversion
+from . import flt_file as fileop           # For file operations
 
 # Other constants
 DEG_TO_KAPPA = 0.00875          # Conversion factor for 2-sigma deg. to Kappa

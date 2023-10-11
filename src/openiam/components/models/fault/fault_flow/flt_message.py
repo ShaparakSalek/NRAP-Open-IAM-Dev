@@ -21,8 +21,8 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import time                     # For calculating time
 from datetime import timedelta  # For calculating runtime
 
-import flt_file as fileop       # For paths and error reports
-import flt_config as scfg       # IO directory and file names
+from . import flt_file as fileop       # For paths and error reports
+from . import flt_config as scfg       # IO directory and file names
 
 # Constants for file handling & writing to Summary File
 LEAD_IN = "\n  --> "            # Message start

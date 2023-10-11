@@ -34,7 +34,7 @@ from pathlib import Path        # To allow path definition - Windows/Unix
 import yaml                     # For structured control file input
 import numpy as np              # for array
 
-import flt_config as scfg       # IO directory and file names
+from . import flt_config as scfg       # IO directory and file names
 
 # Statement constants
 COD_IN = "  --> "               # Message start - no new line

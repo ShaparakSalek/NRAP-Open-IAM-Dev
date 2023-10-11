@@ -31,10 +31,10 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import numpy as np
 from scipy import interpolate
 
-import data_arrays as fdata     # Data arrays indices
-import flt_units as funit       # For unit conversion
-import flt_file as fileop       # For file operations
-import flt_config as scfg       # IO directory and file names
+from . import data_arrays as fdata     # Data arrays indices
+from . import flt_units as funit       # For unit conversion
+from . import flt_file as fileop       # For file operations
+from . import flt_config as scfg       # IO directory and file names
 
 # Other constants
 ECHO = False                    # DEBUG Print variables

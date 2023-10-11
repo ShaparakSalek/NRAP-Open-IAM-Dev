@@ -27,8 +27,8 @@ Contents (13)
 Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 -------------------------------------------------------------------------------
 """
-import flt_file as fileop  # For file operations
-import flt_units as funits  # For units
+from . import flt_file as fileop  # For file operations
+from . import flt_units as funits  # For units
 
 # Misc constants
 SMALL_DEV = 1.0e-6  # Minimum std deviation for aperture

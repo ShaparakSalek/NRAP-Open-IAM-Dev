@@ -28,8 +28,8 @@ from itertools import repeat    # For line input
 import csv                      # For saving a list of lists
 import numpy as np              # For arrays & input
 
-import flt_config as scfg       # Provides IO directory and file names
-import flt_file as fileop       # For file operations
+from . import flt_config as scfg       # Provides IO directory and file names
+from . import flt_file as fileop       # For file operations
 
 # Other constants
 ECHO = False                    # Print header lines

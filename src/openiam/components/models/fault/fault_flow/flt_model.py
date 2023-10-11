@@ -50,9 +50,9 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import math                     # For trigonometry, infinite, hypotenuse
 import copy                     # For <deepcopy>
 
-import flt_perm as perm         # Permeability
-import flt_tail as ftal         # Fault computations
-import flt_units as funits      # For unit conversion
+from . import flt_perm as perm         # Permeability
+from . import flt_tail as ftal         # Fault computations
+from . import flt_units as funits      # For unit conversion
 
 # Constants
 V_SMALL_ZERO = 1.0E-20          # Very small number in division by zero
