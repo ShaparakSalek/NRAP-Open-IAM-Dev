@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel, SimpleReservoir, CementedWellbore, CementedWellboreWR
+from openiam import SystemModel, AnalyticalReservoir, CementedWellbore, CementedWellboreWR
 
 
 if __name__=='__main__':
@@ -25,25 +25,26 @@ if __name__=='__main__':
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=500.0, max=550., value=535.0)
-    sres.add_par('shale2Thickness', min=450.0, max=500., value=475.0)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', min=500.0, max=550., value=535.0)
+    ares.add_par('shale2Thickness', min=450.0, max=500., value=475.0)
     # Shale 3 has a fixed thickness of 11.2 m
-    sres.add_par('shale3Thickness', value=11.2, vary=False)
+    ares.add_par('shale3Thickness', value=11.2, vary=False)
     # Aquifer 1 (thief zone has a fixed thickness of 22.4)
-    sres.add_par('aquifer1Thickness', value=22.4, vary=False)
+    ares.add_par('aquifer1Thickness', value=22.4, vary=False)
     # Aquifer 2 (shallow aquifer) has a fixed thickness of 19.2
-    sres.add_par('aquifer2Thickness', value=19.2, vary=False)
+    ares.add_par('aquifer2Thickness', value=19.2, vary=False)
     # Reservoir has a fixed thickness of 51.2
-    sres.add_par('reservoirThickness', value=51.2, vary=False)
+    ares.add_par('reservoirThickness', value=51.2, vary=False)
+    ares.add_par('injRate', value=0.025, vary=False)
 
     # Add observations of reservoir component model
     for key in ['pressure', 'CO2saturation']:
-        sres.add_obs(key)
-        sres.add_obs_to_be_linked(key)
+        ares.add_obs(key)
+        ares.add_obs_to_be_linked(key)
 
     # Add cemented wellbore components
     cw = {1: sm.add_component_model_object(CementedWellbore(name='cw1',
@@ -58,32 +59,32 @@ if __name__=='__main__':
 
     # Add parameters specific to CementedWellboreWR
     cw[2].add_par_linked_to_par('thiefZoneThickness',
-                                sres.deterministic_pars['aquifer2Thickness'])
+                                ares.deterministic_pars['aquifer2Thickness'])
     cw[2].add_par_linked_to_par('aquiferThickness',
-                                sres.deterministic_pars['aquifer1Thickness'])
+                                ares.deterministic_pars['aquifer1Thickness'])
     cw[2].add_par_linked_to_par('reservoirThickness',
-                                sres.deterministic_pars['reservoirThickness'])
+                                ares.deterministic_pars['reservoirThickness'])
 
     # Add keyword arguments of the cemented wellbore components
     for ind in [1, 2]:
         for key in ['pressure', 'CO2saturation']:
-            cw[ind].add_kwarg_linked_to_obs(key, sres.linkobs[key])
+            cw[ind].add_kwarg_linked_to_obs(key, ares.linkobs[key])
 
     # Add composite parameters of cemented wellbore component
         cw[ind].add_composite_par(
             'wellDepth', expr=' + '.join([
-                'sres.shale1Thickness', 'sres.shale2Thickness',
-                'sres.shale3Thickness', 'sres.aquifer1Thickness',
-                'sres.aquifer2Thickness']))
+                'ares.shale1Thickness', 'ares.shale2Thickness',
+                'ares.shale3Thickness', 'ares.aquifer1Thickness',
+                'ares.aquifer2Thickness']))
         cw[ind].add_composite_par('depthRatio',
             expr=''.join([
-                '(sres.shale2Thickness + sres.shale3Thickness',
-                '+ sres.aquifer2Thickness + sres.aquifer1Thickness/2)',
+                '(ares.shale2Thickness + ares.shale3Thickness',
+                '+ ares.aquifer2Thickness + ares.aquifer1Thickness/2)',
                 '/cw{}.wellDepth']).format(ind))
         cw[ind].add_composite_par('initPressure',
             expr=''.join([
-                'sres.datumPressure + cw{ind}.wellDepth*cw{ind}.g',
-                '*sres.brineDensity']).format(ind=ind))
+                'ares.datumPressure + cw{ind}.wellDepth*cw{ind}.g',
+                '*ares.brineDensity']).format(ind=ind))
 
         # Add observations of the cemented wellbore components
         for key in ['CO2_aquifer1', 'CO2_aquifer2', 'CO2_atm',
@@ -96,7 +97,7 @@ if __name__=='__main__':
     # Collect observations
     res_obs = {}
     for key in ['pressure', 'CO2saturation']:
-        res_obs[key] = sm.collect_observations_as_time_series(sres, key)
+        res_obs[key] = sm.collect_observations_as_time_series(ares, key)
 
     CO2_leakrates_aq1 = {}
     CO2_leakrates_aq2 = {}

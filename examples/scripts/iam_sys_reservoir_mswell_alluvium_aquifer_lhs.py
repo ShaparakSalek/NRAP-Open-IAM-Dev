@@ -1,6 +1,6 @@
 '''
-This example couples the simple reservoir, multisegmented wellbore and
-alluvium aquifer models. The saturation/pressure output produced by simple
+This example couples the analytical reservoir, multisegmented wellbore and
+alluvium aquifer models. The saturation/pressure output produced by analytical
 reservoir model is used to drive leakage from a single multisegmented wellbore
 model, which is passed to the input of an adapter that provides well
 coordinates, |CO2| and brine leakage rates and cumulative mass fluxes to the
@@ -13,7 +13,7 @@ $ python iam_sys_reservoir_mswell_aquifer_lhs.py
 import sys,os
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 import numpy as np
-from openiam import SystemModel, SimpleReservoir
+from openiam import SystemModel, AnalyticalReservoir
 from openiam import MultisegmentedWellbore, AlluviumAquifer, RateToMassAdapter
 import matplotlib.pyplot as plt
 
@@ -30,20 +30,21 @@ if __name__ == "__main__":
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm,
-                                                         locX=400, locY=400))
+    ares = sm.add_component_model_object(
+        AnalyticalReservoir(name='ares', parent=sm, locX=200, locY=200))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', value=35.0, vary=False)
-    sres.add_par('injRate', value=8.5, min=8.5, max=9)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', value=35.0, vary=False)
+    ares.add_par('injRate', value=3.5, min=1.5, max=3.7)
+    ares.add_par('reservoirRadius', value=1000, vary=False)
 
     # Add observations of reservoir component model
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs('mass_CO2_reservoir')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs('mass_CO2_reservoir')
 
     # Add multisegmented wellbore component
     ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms', parent=sm))
@@ -52,25 +53,25 @@ if __name__ == "__main__":
 
     # Add linked parameters: common to reservoir and wellbore components
     ms.add_par_linked_to_par('numberOfShaleLayers',
-                             sres.deterministic_pars['numberOfShaleLayers'])
+                             ares.deterministic_pars['numberOfShaleLayers'])
     ms.add_par_linked_to_par('shale1Thickness',
-                             sres.deterministic_pars['shale1Thickness'])
+                             ares.deterministic_pars['shale1Thickness'])
     ms.add_par_linked_to_par('shale2Thickness',
-                             sres.default_pars['shaleThickness'])
+                             ares.default_pars['shaleThickness'])
     ms.add_par_linked_to_par('shale3Thickness',
-                             sres.default_pars['shaleThickness'])
+                             ares.default_pars['shaleThickness'])
     ms.add_par_linked_to_par('aquifer1Thickness',
-                             sres.default_pars['aquiferThickness'])
+                             ares.default_pars['aquiferThickness'])
     ms.add_par_linked_to_par('aquifer2Thickness',
-                             sres.default_pars['aquiferThickness'])
+                             ares.default_pars['aquiferThickness'])
     ms.add_par_linked_to_par('reservoirThickness',
-                             sres.default_pars['reservoirThickness'])
+                             ares.default_pars['reservoirThickness'])
     ms.add_par_linked_to_par('datumPressure',
-                             sres.default_pars['datumPressure'])
+                             ares.default_pars['datumPressure'])
 
     # Add keyword arguments linked to the output provided by reservoir model
-    ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add observations of multisegmented wellbore component model
     ms.add_obs_to_be_linked('CO2_aquifer1')
@@ -172,7 +173,7 @@ if __name__ == "__main__":
     results = s.run(cpus=ncpus, verbose=False)
 
     # sm.obs_base_names:
-    # Observations: 'sres.pressure', 'sres.CO2saturation', 'sres.mass_CO2_reservoir',
+    # Observations: 'ares.pressure', 'ares.CO2saturation', 'ares.mass_CO2_reservoir',
     # 'ms.brine_aquifer1', 'ms.CO2_aquifer1', 'adapt.mass_CO2_aquifer1',
     # 'adapt.mass_brine_aquifer1', 'ca.pH_volume', 'ca.TDS_volume'
 

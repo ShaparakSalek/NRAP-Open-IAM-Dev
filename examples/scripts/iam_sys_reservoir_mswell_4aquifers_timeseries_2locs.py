@@ -12,7 +12,7 @@ This example is similar to iam_sys_reservoir_mswell_4aquifers_timeseries.py, but
 it utilizes multiple locations. The time_series_plot() function can handle
 multiple locations by location details in subplot titles and legends. Note that
 the component names must include the location designation '_###', where ### is
-the location number (e.g., 'sres_000' for the reservoir at location 1 and
+the location number (e.g., 'ares_000' for the reservoir at location 1 and
 'ca4_001' for Aquifer 4 at location 2). The function uses this approach for
 location designations because it is used by the control file interface.
 
@@ -38,7 +38,7 @@ import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 from openiam import (MultisegmentedWellbore, RateToMassAdapter, SystemModel,
-                     SimpleReservoir, CarbonateAquifer, Stratigraphy)
+                     AnalyticalReservoir, CarbonateAquifer, Stratigraphy)
 import openiam.visualize as vis
 
 if __name__ == "__main__":
@@ -85,51 +85,51 @@ if __name__ == "__main__":
     x_vals = [100, 500]
     y_vals = [100, 500]
 
-    sress = []
+    aress = []
     mss = []
     adapts = []
     cas = []
 
     for loc, (x_val, y_val) in enumerate(zip(x_vals, y_vals)):
-        # Add simple reservoir object
-        sress.append(sm.add_component_model_object(
-            SimpleReservoir(name='sres_{}'.format(loc+1), parent=sm,
-                            locX=x_val, locY=y_val)))
+        # Add analytical reservoir object
+        aress.append(sm.add_component_model_object(
+            AnalyticalReservoir(name='ares_{}'.format(loc+1), parent=sm,
+                                locX=x_val, locY=y_val)))
 
-        sress[-1].add_par('injRate', value=0.25, vary=False)
-        sress[-1].add_par('logResPerm', value=-12, vary=False)
+        aress[-1].add_par('injRate', value=0.25, vary=False)
+        aress[-1].add_par('logResPerm', value=-12, vary=False)
 
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'numberOfShaleLayers', strata.deterministic_pars['numberOfShaleLayers'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale1Thickness', strata.deterministic_pars['shale1Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale2Thickness', strata.deterministic_pars['shale2Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale3Thickness', strata.deterministic_pars['shale3Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale4Thickness', strata.deterministic_pars['shale4Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale5Thickness', strata.deterministic_pars['shale5Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'aquifer1Thickness', strata.deterministic_pars['aquifer1Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'aquifer2Thickness', strata.deterministic_pars['aquifer2Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'aquifer3Thickness', strata.deterministic_pars['aquifer3Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'aquifer4Thickness', strata.deterministic_pars['aquifer4Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'reservoirThickness', strata.deterministic_pars['reservoirThickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'datumPressure', strata.default_pars['datumPressure'])
 
         # Add observations of reservoir component model
-        sress[-1].add_obs_to_be_linked('pressure')
-        sress[-1].add_obs_to_be_linked('CO2saturation')
-        sress[-1].add_obs('pressure')
-        sress[-1].add_obs('CO2saturation')
-        sress[-1].add_obs('mass_CO2_reservoir')
+        aress[-1].add_obs_to_be_linked('pressure')
+        aress[-1].add_obs_to_be_linked('CO2saturation')
+        aress[-1].add_obs('pressure')
+        aress[-1].add_obs('CO2saturation')
+        aress[-1].add_obs('mass_CO2_reservoir')
 
         # Add multisegmented wellbore component.
         mss.append(sm.add_component_model_object(
@@ -167,8 +167,8 @@ if __name__ == "__main__":
             'datumPressure', strata.default_pars['datumPressure'])
 
         # Add keyword arguments linked to the output provided by reservoir model
-        mss[-1].add_kwarg_linked_to_obs('pressure', sress[-1].linkobs['pressure'])
-        mss[-1].add_kwarg_linked_to_obs('CO2saturation', sress[-1].linkobs['CO2saturation'])
+        mss[-1].add_kwarg_linked_to_obs('pressure', aress[-1].linkobs['pressure'])
+        mss[-1].add_kwarg_linked_to_obs('CO2saturation', aress[-1].linkobs['CO2saturation'])
 
         # Add observations of multisegmented wellbore component model
         mss[-1].add_obs_to_be_linked('CO2_aquifer1')
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     # FIGURE 1: PRESSURE
     fig_num += 1
     output_names = ['pressure']
-    output_list = {sress[0]: 'pressure', sress[1]: 'pressure'}
+    output_list = {aress[0]: 'pressure', aress[1]: 'pressure'}
 
     plot_data['TimeSeries'] = output_names
     vis.time_series_plot(output_names, sm, None, plot_data, output_list,
@@ -300,8 +300,8 @@ if __name__ == "__main__":
     # FIGURE 2: CO2 SATURATION AND CO2 MASS IN RESERVOIR
     fig_num += 1
     output_names = ['CO2saturation', 'mass_CO2_reservoir']
-    output_list = {sress[0]: ['CO2saturation', 'mass_CO2_reservoir'],
-                    sress[1]: ['CO2saturation', 'mass_CO2_reservoir']}
+    output_list = {aress[0]: ['CO2saturation', 'mass_CO2_reservoir'],
+                    aress[1]: ['CO2saturation', 'mass_CO2_reservoir']}
     subplot = {'use': True, 'ncols': 2}
 
     plot_data['TimeSeries'] = output_names

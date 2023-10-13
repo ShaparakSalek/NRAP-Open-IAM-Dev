@@ -1,6 +1,6 @@
 '''
 NRAP IAM AOR FutureGen Area of Review (AoR)
-This example couples the simple reservoir, open wellbore, and FutureGen2 Aquifer
+This example couples the analytical reservoir, open wellbore, and FutureGen2 Aquifer
 components. The saturation/pressure output produced by lookup table
 reservoir model is used to drive leakage from a single open wellbore
 model, which is passed to the input of an adapter that provides well
@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, SimpleReservoir, OpenWellbore,
+from openiam import (SystemModel, AnalyticalReservoir, OpenWellbore,
                      FutureGen2Aquifer, RateToMassAdapter, Stratigraphy)
 
 if __name__ == "__main__":
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     print('Number of locations: ', len(x_loc))
 
     output_directory = os.sep.join([
-        '..', '..', 'Output', 'sres_ow_fgen_AoR_{date_time_stamp}'.format(
+        '..', '..', 'Output', 'ares_ow_fgen_AoR_{date_time_stamp}'.format(
             date_time_stamp=datetime.datetime.now().strftime('%Y-%m-%d_%H'))])
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -90,44 +90,44 @@ if __name__ == "__main__":
     strata.add_par('reservoirThickness', value=150, vary=False)
     strata.add_par('datumPressure', value=101325, vary=False)
 
-    sress = []
+    aress = []
     ows = []
     adapts = []
     fgas = []
 
     for loc_ref in range(0, len(x_loc)):
         # Add reservoir component
-        sress.append(sm.add_component_model_object(SimpleReservoir(
-            name='sres' + str(loc_ref), parent=sm,
+        aress.append(sm.add_component_model_object(AnalyticalReservoir(
+            name='ares' + str(loc_ref), parent=sm,
             locX=x_loc[loc_ref], locY=y_loc[loc_ref])))
 
-        # Add parameters of simple reservoir component
-        sress[-1].add_par('injRate', value=1, vary=False)
-        sress[-1].add_par('logResPerm', value=-10.15, vary=False)
-        sress[-1].add_par('reservoirPorosity', value=0.3, vary=False)
+        # Add parameters of analytical reservoir component
+        aress[-1].add_par('injRate', value=1, vary=False)
+        aress[-1].add_par('logResPerm', value=-12.15, vary=False)
+        aress[-1].add_par('reservoirPorosity', value=0.25, vary=False)
 
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'reservoirThickness', strata.deterministic_pars['reservoirThickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'numberOfShaleLayers', strata.deterministic_pars['numberOfShaleLayers'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale1Thickness', strata.deterministic_pars['shale1Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale2Thickness', strata.deterministic_pars['shale2Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'shale3Thickness', strata.deterministic_pars['shale3Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'aquifer1Thickness', strata.deterministic_pars['aquifer1Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'aquifer2Thickness', strata.deterministic_pars['aquifer2Thickness'])
-        sress[-1].add_par_linked_to_par(
+        aress[-1].add_par_linked_to_par(
             'datumPressure', strata.deterministic_pars['datumPressure'])
 
         # Add observations of reservoir component model
-        sress[-1].add_obs('pressure')
-        sress[-1].add_obs('CO2saturation')
-        sress[-1].add_obs_to_be_linked('pressure')
-        sress[-1].add_obs_to_be_linked('CO2saturation')
+        aress[-1].add_obs('pressure')
+        aress[-1].add_obs('CO2saturation')
+        aress[-1].add_obs_to_be_linked('pressure')
+        aress[-1].add_obs_to_be_linked('CO2saturation')
 
         # Add open wellbore component
         ows.append(sm.add_component_model_object(
@@ -140,8 +140,8 @@ if __name__ == "__main__":
         ows[-1].add_par('brineSalinity', value=0.2, vary=False)
 
         # Add keyword arguments of the open wellbore component model
-        ows[-1].add_kwarg_linked_to_obs('pressure', sress[-1].linkobs['pressure'])
-        ows[-1].add_kwarg_linked_to_obs('CO2saturation', sress[-1].linkobs['CO2saturation'])
+        ows[-1].add_kwarg_linked_to_obs('pressure', aress[-1].linkobs['pressure'])
+        ows[-1].add_kwarg_linked_to_obs('CO2saturation', aress[-1].linkobs['CO2saturation'])
 
         # Add composite parameter of open wellbore component
         ows[-1].add_composite_par(
@@ -210,12 +210,12 @@ if __name__ == "__main__":
     for loc_ref in range(0, len(x_loc)):
         # Get results
         pressure = sm.collect_observations_as_time_series(
-            sress[loc_ref], 'pressure') / 1.0e6
+            aress[loc_ref], 'pressure') / 1.0e6
 
         results[loc_ref, 0] = max(pressure)
         results[loc_ref, 1] = max([p - pressure[0] for p in pressure])
         results[loc_ref, 2] = max(
-            sm.collect_observations_as_time_series(sress[loc_ref], 'CO2saturation'))
+            sm.collect_observations_as_time_series(aress[loc_ref], 'CO2saturation'))
         results[loc_ref, 3] = max(
             sm.collect_observations_as_time_series(fgas[loc_ref], 'pH_volume'))
         results[loc_ref, 4] = max(

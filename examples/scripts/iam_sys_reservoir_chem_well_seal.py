@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, SimpleReservoir, ChemicalWellSealing)
+from openiam import (SystemModel, AnalyticalReservoir, ChemicalWellSealing)
 from matk import pyDOE
 
 
@@ -48,26 +48,27 @@ if __name__ == '__main__':
     well_props = wellPropMins + pyDOE.lhs(4, samples=num_wells)*(
         wellPropMaxs-wellPropMins)
 
-    # Initialize the simple reservoir and the chemical well sealing models
-    sress = []
+    # Initialize the analytical reservoir and the chemical well sealing models
+    aress = []
     cwss = []
     for i, crds in enumerate(well_props):
 
-        # Add reservoir components with an injector at 0,0 and desired well locations
-        sress.append(sm.add_component_model_object(
-            SimpleReservoir(name='sres'+str(i), parent=sm,
-                            injX=0., injY=0., locX=crds[0], locY=crds[1])))
+        # Add reservoir components with an injector at (0, 0) and desired well locations
+        aress.append(sm.add_component_model_object(
+            AnalyticalReservoir(name='ares'+str(i), parent=sm,
+                                injX=0., injY=0., locX=crds[0], locY=crds[1])))
 
         # Add parameters of reservoir component model
-        sress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
-        sress[-1].add_par('injRate', value=0.04, vary=False)
-        sress[-1].add_par('shale1Thickness', min=30.0, max=50., value=40.0)
-        sress[-1].add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
-        sress[-1].add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
-        sress[-1].add_par('logResPerm', min=-13., max=-11., value=-12.5)
+        aress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
+        aress[-1].add_par('injRate', value=0.05, vary=False)
+        aress[-1].add_par('reservoirRadius', value=500.0, vary=False)
+        aress[-1].add_par('shale1Thickness', min=30.0, max=50., value=40.0)
+        aress[-1].add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
+        aress[-1].add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
+        aress[-1].add_par('logResPerm', min=-13., max=-12., value=-12.5)
 
         # Add observations of reservoir component model
-        sress[-1].add_obs('pressure')
+        aress[-1].add_obs('pressure')
 
     # Run the reservoir model
     sm.forward()
@@ -75,8 +76,8 @@ if __name__ == '__main__':
     maxOverpressure_values = []
 
     # Create the chemical well sealing component for each well
-    for i, sres in enumerate(sress):
-        pressure = sm.collect_observations_as_time_series(sres, 'pressure')
+    for i, ares in enumerate(aress):
+        pressure = sm.collect_observations_as_time_series(ares, 'pressure')
         # maxOverpressure = maximum increase in pressure experienced by the well
         maxOverpressure_value = np.amax(pressure)-pressure[0]
         maxOverpressure_values.append((np.amax(pressure)-pressure[0])/1000000)

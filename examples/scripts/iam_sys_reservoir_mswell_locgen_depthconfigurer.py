@@ -34,7 +34,7 @@ from matplotlib.lines import Line2D
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, Stratigraphy, SimpleReservoir,
+from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
                      MultisegmentedWellbore, LocationGenerator,
                      WellDepthRiskConfigurer)
 
@@ -70,11 +70,11 @@ if __name__ == "__main__":
     reservoirThickness = 50
 
     # Define boundaries of random wells domains
-    x_min = -5000.0
-    x_max = 5000.0
+    x_min = -2500.0
+    x_max = 2500.0
 
-    y_min = -5000.0
-    y_max = 5000.0
+    y_min = -2500.0
+    y_max = 2500.0
 
     injection_x_m = 0
     injection_y_m = 0
@@ -147,7 +147,7 @@ if __name__ == "__main__":
         'wellDepth', gen.linkobs['locZ'], obs_type='grid', constr_type='array')
     config.add_obs('num_cmpnts_on', index=[0])
 
-    sres = []
+    ares = []
     msw = []
 
     for comp_ref in range(num_wells):
@@ -155,39 +155,40 @@ if __name__ == "__main__":
             gen.add_local_obs(obs_nm+'{}'.format(comp_ref), grid_obs_name=obs_nm,
                               constr_type='array', loc_ind=comp_ref, index=[0])
 
-        # Add simple reservoir component
+        # Add analytical reservoir component
         # We don't specify the location for the reservoir component, although
         # there is a default reservoir setup with locX=100, locY=100
-        sres.append(sm.add_component_model_object(SimpleReservoir(
-            name='sres{}'.format(comp_ref), parent=sm,
+        ares.append(sm.add_component_model_object(AnalyticalReservoir(
+            name='ares{}'.format(comp_ref), parent=sm,
             injX=injection_x_m, injY=injection_y_m)))
 
         # Add parameters of reservoir component model
         # All parameters of the reservoir component are deterministic so all
         # uncertainty in the simulation comes from the uncertainty of the well location
-        sres[-1].add_par('numberOfShaleLayers', value=3, vary=False)
-        sres[-1].add_par('injRate', value=0.5, vary=False)
-        sres[-1].add_par('shale1Thickness', value=shale1Thickness, vary=False)
-        sres[-1].add_par('shale2Thickness', value=shale2Thickness, vary=False)
-        sres[-1].add_par('shale3Thickness', value=shale3Thickness, vary=False)
-        sres[-1].add_par('aquifer1Thickness', value=aquifer1Thickness, vary=False)
-        sres[-1].add_par('aquifer2Thickness', value=aquifer2Thickness, vary=False)
-        sres[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
+        ares[-1].add_par('numberOfShaleLayers', value=3, vary=False)
+        ares[-1].add_par('injRate', value=0.5, vary=False)
+        ares[-1].add_par('reservoirRadius', value=4500.0, vary=False)
+        ares[-1].add_par('shale1Thickness', value=shale1Thickness, vary=False)
+        ares[-1].add_par('shale2Thickness', value=shale2Thickness, vary=False)
+        ares[-1].add_par('shale3Thickness', value=shale3Thickness, vary=False)
+        ares[-1].add_par('aquifer1Thickness', value=aquifer1Thickness, vary=False)
+        ares[-1].add_par('aquifer2Thickness', value=aquifer2Thickness, vary=False)
+        ares[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
 
-        # Simple reservoir component has keyword arguments of the model method:
+        # analytical reservoir component has keyword arguments of the model method:
         # locX and locY which we would link to the output of the generator component
         # Generator component outputs 5 random locations according to the setup above.
         # We can link reservoir component locX and locY to any of these produced locations
         # using arguments constr_type='array' and loc_ind=[comp_ref].
         for obs_nm in ['locX', 'locY']:
-            sres[-1].add_kwarg_linked_to_obs(obs_nm, gen.linkobs[obs_nm],
+            ares[-1].add_kwarg_linked_to_obs(obs_nm, gen.linkobs[obs_nm],
                                              obs_type='grid', constr_type='array',
                                              loc_ind=[comp_ref])
 
         # Add observations of reservoir component model
         for obs_nm in ['pressure', 'CO2saturation']:
-            sres[-1].add_obs(obs_nm)
-            sres[-1].add_obs_to_be_linked(obs_nm)
+            ares[-1].add_obs(obs_nm)
+            ares[-1].add_obs_to_be_linked(obs_nm)
 
         # Add multisegmented wellbore component
         msw.append(sm.add_component_model_object(MultisegmentedWellbore(
@@ -207,7 +208,7 @@ if __name__ == "__main__":
 
         # Add keyword arguments linked to the output provided by reservoir model
         for obs_nm in ['pressure', 'CO2saturation']:
-            msw[-1].add_kwarg_linked_to_obs(obs_nm, sres[-1].linkobs[obs_nm])
+            msw[-1].add_kwarg_linked_to_obs(obs_nm, ares[-1].linkobs[obs_nm])
 
         # Add observations of multisegmented wellbore component model
         for obs_nm in ['CO2_aquifer1', 'CO2_aquifer2', 'brine_aquifer1', 'brine_aquifer2']:
@@ -279,7 +280,7 @@ if __name__ == "__main__":
             print('z = {:.2f} m'.format(sm.obs['gen.locZ{}_0'.format(comp_ref)].sim))
             print('    Pressure [Pa]: ',
                   sm.collect_observations_as_time_series(
-                      sres[comp_ref], 'pressure'), sep='\n')
+                      ares[comp_ref], 'pressure'), sep='\n')
             print('    Brine Leakage Rate [kg/s]: ',
                   sm.collect_observations_as_time_series(
                       msw[comp_ref], 'brine_aquifer1'), sep='\n')
@@ -378,25 +379,25 @@ if __name__ == "__main__":
                      color=markeredgecolor, zorder=2)
 
             pressure = sm.collect_observations_as_time_series(
-                sres[comp_ref], 'pressure')
+                ares[comp_ref], 'pressure')
 
             plt.figure(3)
             plt.plot(time_array / 365.25, pressure / 1.0e+6, color=markerfacecolor,
-                      linewidth=lineWidth)
+                     linewidth=lineWidth)
 
             brine_aquifer1 = sm.collect_observations_as_time_series(
                 msw[comp_ref], 'brine_aquifer1')
 
             plt.figure(4)
             plt.plot(time_array / 365.25, brine_aquifer1, color=markerfacecolor,
-                      linewidth=lineWidth)
+                     linewidth=lineWidth)
 
     fig = plt.figure(2)
 
     plt.axis('equal')
     plt.plot(injection_x_m / 1000, injection_y_m / 1000, color='k',
-              linestyle='none', marker=injectionSiteMarker, markerfacecolor='none',
-              markersize=injectionSiteMarkerSize, markeredgewidth=edgeWidthSite, zorder=3)
+             linestyle='none', marker=injectionSiteMarker, markerfacecolor='none',
+             markersize=injectionSiteMarkerSize, markeredgewidth=edgeWidthSite, zorder=3)
 
     # Manually create the legend items for figure 1
     fig1_handle_list = []

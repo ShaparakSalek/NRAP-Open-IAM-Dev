@@ -428,6 +428,7 @@ if __name__ == "__main__":
     # Add parameters of reservoir component model
     # Ebigbo 2007 setting (validated)
     res.add_par('logResPerm', value=-13.69897, vary=False)
+    res.add_par('reservoirRadius', value=500.0, vary=False)
     res.add_par('reservoirPorosity', value=0.15, vary=False)
     res.add_par('datumPressure', value=101325.0, vary=False)
     res.add_par('brineDensity', value=1045.0, vary=False)
@@ -435,7 +436,7 @@ if __name__ == "__main__":
     res.add_par('brineViscosity', value=2.535e-4, vary=False)
     res.add_par('CO2Viscosity', value=3.95e-5, vary=False)
     res.add_par('brineResSaturation', value=0.0, vary=False)
-    res.add_par('injRate', value=0.01, vary=False)
+    res.add_par('injRate', value=0.1, vary=False)
     res.add_par('reservoirRadius', value=500, vary=False)
     res.add_par('brineCompressibility', value=1.e-11, vary=False)
 

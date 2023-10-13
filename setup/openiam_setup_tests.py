@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-OpenIAM setup script to test Python
-environment, compile components, and
-test OpenIAM functionalility.
-Created on Tue Dec 12 10:02:24 2017
-Modified Feb 05 2020
+OpenIAM setup script to test Python environment, compile components, and
+test NRAP-Open-IAM functionalility.
+Created December  2017
+Modified October 2023
 
 @author: Seth King
 AECOM supporting NETL

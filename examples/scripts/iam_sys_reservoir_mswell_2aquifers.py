@@ -1,6 +1,6 @@
 '''
-This example couples the simple reservoir, multisegmented wellbore and
-carbonate aquifer models. The saturation/pressure output produced by simple
+This example couples the analytical reservoir, multisegmented wellbore and
+carbonate aquifer models. The saturation/pressure output produced by analytical
 reservoir model is used to drive leakage from a single multisegmented wellbore
 model, which is passed to the input of an adapter that provides well
 coordinates, |CO2| and brine leakage rates and cumulative mass fluxes to the
@@ -15,7 +15,7 @@ import os
 import numpy as np
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, SimpleReservoir, MultisegmentedWellbore,
+from openiam import (SystemModel, AnalyticalReservoir, MultisegmentedWellbore,
                      CarbonateAquifer, RateToMassAdapter)
 
 
@@ -29,25 +29,26 @@ if __name__ == "__main__":
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=10.0, max=25., value=15.0)
-    sres.add_par('shale2Thickness', min=10.0, max=25., value=25.0)
-    sres.add_par('shale3Thickness', min=300.0, max=500., value=350.0)
-    sres.add_par('injRate', min=0.1, max=10.0, value=1.0)
-    sres.add_par('aquifer1Thickness', min=100.0, max=150., value=120.0)
-    sres.add_par('aquifer2Thickness', min=100.0, max=140., value=110.0)
-    sres.add_par('reservoirThickness', min=30.0, max=50., value=40.0)
-    sres.add_par('logResPerm', min=-12.5, max=-11., value=-11.5)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', min=10.0, max=25., value=15.0)
+    ares.add_par('shale2Thickness', min=10.0, max=25., value=25.0)
+    ares.add_par('shale3Thickness', min=300.0, max=500., value=350.0)
+    ares.add_par('injRate', min=0.1, max=10.0, value=1.0)
+    ares.add_par('aquifer1Thickness', min=100.0, max=150., value=120.0)
+    ares.add_par('aquifer2Thickness', min=100.0, max=140., value=110.0)
+    ares.add_par('reservoirThickness', min=30.0, max=50., value=40.0)
+    ares.add_par('logResPerm', min=-13.5, max=-12.5, value=-13)
+    ares.add_par('injRate', value=0.025, vary=False)
 
     # Add observations of reservoir component model
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs('mass_CO2_reservoir')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs('mass_CO2_reservoir')
 
     # Add multisegmented wellbore component
     ms = sm.add_component_model_object(
@@ -57,19 +58,19 @@ if __name__ == "__main__":
 
     # Add linked parameters: common to reservoir and wellbore components
     ms.add_par_linked_to_par('numberOfShaleLayers',
-                             sres.deterministic_pars['numberOfShaleLayers'])
-    ms.add_par_linked_to_par('shale1Thickness', sres.pars['shale1Thickness'])
-    ms.add_par_linked_to_par('shale2Thickness', sres.pars['shale2Thickness'])
-    ms.add_par_linked_to_par('shale3Thickness', sres.pars['shale3Thickness'])
-    ms.add_par_linked_to_par('aquifer1Thickness', sres.pars['aquifer1Thickness'])
-    ms.add_par_linked_to_par('aquifer2Thickness', sres.pars['aquifer2Thickness'])
-    ms.add_par_linked_to_par('reservoirThickness', sres.pars['reservoirThickness'])
+                             ares.deterministic_pars['numberOfShaleLayers'])
+    ms.add_par_linked_to_par('shale1Thickness', ares.pars['shale1Thickness'])
+    ms.add_par_linked_to_par('shale2Thickness', ares.pars['shale2Thickness'])
+    ms.add_par_linked_to_par('shale3Thickness', ares.pars['shale3Thickness'])
+    ms.add_par_linked_to_par('aquifer1Thickness', ares.pars['aquifer1Thickness'])
+    ms.add_par_linked_to_par('aquifer2Thickness', ares.pars['aquifer2Thickness'])
+    ms.add_par_linked_to_par('reservoirThickness', ares.pars['reservoirThickness'])
     ms.add_par_linked_to_par('datumPressure',
-                             sres.default_pars['datumPressure'])
+                             ares.default_pars['datumPressure'])
 
     # Add keyword arguments linked to the output provided by reservoir model
-    ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add observations of multisegmented wellbore component model
     ms.add_obs_to_be_linked('CO2_aquifer1')
@@ -113,7 +114,7 @@ if __name__ == "__main__":
         cas[-1].add_par('aniso', min=1.1, max=49.1, value=25.1)
         cas[-1].add_par('mean_perm', min=-13.8, max=-10.3, value=-12.05)
         cas[-1].add_par_linked_to_par(
-            'aqu_thick', sres.pars['aquifer{}Thickness'.format(ind+1)])
+            'aqu_thick', ares.pars['aquifer{}Thickness'.format(ind+1)])
         cas[-1].add_par('hyd_grad', min=2.88e-4, max=1.89e-2, value=9.59e-3)
         cas[-1].add_par('calcite_ssa', min=0, max=1.e-2, value=5.5e-03)
         cas[-1].add_par('organic_carbon', min=0, max=1.e-2, value=5.5e-03)
@@ -152,10 +153,10 @@ if __name__ == "__main__":
     print('                  Forward method illustration ')
     print('------------------------------------------------------------------')
     print('pressure',
-          sm.collect_observations_as_time_series(sres, 'pressure'))
+          sm.collect_observations_as_time_series(ares, 'pressure'))
     print('------------------------------------------------------------------')
     print('CO2saturation',
-          sm.collect_observations_as_time_series(sres, 'CO2saturation'))
+          sm.collect_observations_as_time_series(ares, 'CO2saturation'))
     print('------------------------------------------------------------------')
     print('CO2_aquifer1',
           sm.collect_observations_as_time_series(ms, 'CO2_aquifer1'))

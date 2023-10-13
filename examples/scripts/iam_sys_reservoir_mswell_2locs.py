@@ -1,5 +1,5 @@
 """
-Example illustrates linking of two simple reservoir and multisegmented
+Example illustrates linking of two analytical reservoir and multisegmented
 wellbore components. The locations of the wellbores are random. Example also
 shows Latin Hypercube sampling study.
 
@@ -16,7 +16,7 @@ import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import SystemModel, SimpleReservoir, MultisegmentedWellbore
+from openiam import SystemModel, AnalyticalReservoir, MultisegmentedWellbore
 from matk import pyDOE
 
 
@@ -40,30 +40,31 @@ if __name__=='__main__':
     num_wells = 2
     well_xys = xymins + pyDOE.lhs(2, samples=num_wells)*(xymaxs-xymins)
 
-    sress = []
+    aress = []
     mss = []
     for i, crds in enumerate(well_xys):
 
         # Add reservoir components
-        sress.append(sm.add_component_model_object(
-                SimpleReservoir(name='sres'+str(i), parent=sm,
-                injX=0., injY=0., locX=crds[0], locY=crds[1])))
+        aress.append(sm.add_component_model_object(
+            AnalyticalReservoir(name='ares'+str(i), parent=sm,
+                                injX=0., injY=0., locX=crds[0], locY=crds[1])))
 
         # Add parameters of reservoir component model
-        sress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
-        sress[-1].add_par('injRate', value=0.8, vary=False)
-        sress[-1].add_par('shale1Thickness', min=30.0, max=50., value=40.0)
-        sress[-1].add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
-        sress[-1].add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
-        sress[-1].add_par('logResPerm', min=-13.,max=-11., value=-12.)
+        aress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
+        aress[-1].add_par('injRate', value=0.8, vary=False)
+        aress[-1].add_par('shale1Thickness', min=30.0, max=50., value=40.0)
+        aress[-1].add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
+        aress[-1].add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
+        aress[-1].add_par('logResPerm', min=-13.5, max=-12.5, value=-13.)
+        aress[-1].add_par('reservoirRadius', value=1000., vary=False)
 
         # Add observations of reservoir component model to be used by the next component
-        sress[-1].add_obs_to_be_linked('pressure')
-        sress[-1].add_obs_to_be_linked('CO2saturation')
+        aress[-1].add_obs_to_be_linked('pressure')
+        aress[-1].add_obs_to_be_linked('CO2saturation')
 
         # Add observations of reservoir component model
-        sress[-1].add_obs('pressure')
-        sress[-1].add_obs('CO2saturation')
+        aress[-1].add_obs('pressure')
+        aress[-1].add_obs('CO2saturation')
 
         # Add multisegmented wellbore components
         mss.append(sm.add_component_model_object(
@@ -73,20 +74,20 @@ if __name__=='__main__':
         # are the same as for the reservoir component
         # Add parameters linked to the same parameters from reservoir model
         mss[-1].add_par_linked_to_par(
-            'numberOfShaleLayers', sress[-1].deterministic_pars['numberOfShaleLayers'])
+            'numberOfShaleLayers', aress[-1].deterministic_pars['numberOfShaleLayers'])
         mss[-1].add_par_linked_to_par(
-            'shale1Thickness', sress[-1].pars['shale1Thickness'])
+            'shale1Thickness', aress[-1].pars['shale1Thickness'])
         mss[-1].add_par_linked_to_par(
-            'shale2Thickness', sress[-1].default_pars['shaleThickness'])
+            'shale2Thickness', aress[-1].default_pars['shaleThickness'])
         mss[-1].add_par_linked_to_par(
-            'shale3Thickness', sress[-1].default_pars['shaleThickness'])
+            'shale3Thickness', aress[-1].default_pars['shaleThickness'])
         mss[-1].add_par_linked_to_par(
-            'aquifer1Thickness', sress[-1].pars['aquifer1Thickness'])
+            'aquifer1Thickness', aress[-1].pars['aquifer1Thickness'])
         mss[-1].add_par_linked_to_par(
-            'aquifer2Thickness', sress[-1].pars['aquifer2Thickness'])
+            'aquifer2Thickness', aress[-1].pars['aquifer2Thickness'])
         # Add keyword arguments linked to the output provided by reservoir model
-        mss[-1].add_kwarg_linked_to_obs('pressure', sress[-1].linkobs['pressure'])
-        mss[-1].add_kwarg_linked_to_obs('CO2saturation', sress[-1].linkobs['CO2saturation'])
+        mss[-1].add_kwarg_linked_to_obs('pressure', aress[-1].linkobs['pressure'])
+        mss[-1].add_kwarg_linked_to_obs('CO2saturation', aress[-1].linkobs['CO2saturation'])
         mss[-1].add_obs('brine_aquifer1')
         mss[-1].add_obs('CO2_aquifer1')
 
@@ -99,9 +100,9 @@ if __name__=='__main__':
     linespec = ['-r', '-b', '-g', '-k', '-m']
     f1, ax = plt.subplots(2, 2, figsize=(20, 12))
     # Print and plot pressure and saturation
-    for i, sres in enumerate(sress):
-        pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-        CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
+    for i, ares in enumerate(aress):
+        pressure = sm.collect_observations_as_time_series(ares, 'pressure')
+        CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
         print('Pressure at wellbore {}:'.format(i+1), pressure, sep='\n')
         print('CO2 saturation at wellbore {}:'.format(i+1), CO2saturation, sep='\n')
         print('------------------------------------------------------------------')
@@ -139,7 +140,7 @@ if __name__=='__main__':
     s = sm.lhs(siz=30, seed=random.randint(500, 1100))   # create sample set
 
     # Run model using values in samples for parameter values
-    results = s.run(cpus=1, verbose=False)
+    results = s.run(cpus=4, verbose=False)
 
     print('Results of simulations')
     print(results)
