@@ -107,8 +107,12 @@ OpenWellbore1:
 Plots:
     Plot1:
         TimeSeries: [CO2_aquifer]
+        Subplot:
+            Use: False
     Plot2:
         TimeSeries: [brine_aquifer]
+        Subplot:
+            Use: False
     Strat_Plot:
         Stratigraphy:
             PlotWellbores: True

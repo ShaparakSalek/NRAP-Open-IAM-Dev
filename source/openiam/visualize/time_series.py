@@ -9,15 +9,12 @@ Last Modified: June, 2023
 @author: Veronika Vasylkivska (Veronika.Vasylkivska@NETL.DOE.GOV)
 LRST (Battelle/Leidos) supporting NETL
 """
-import warnings
 import logging
 import math
 import re
 
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.cbook
 import matplotlib.colors as clrs
 from matk.sampleset import percentile, mean
 from .label_setup import (LEGEND_DICT, Y_LABEL_DICT, Y_LABEL_SPLIT_DICT,
@@ -31,6 +28,8 @@ DEFAULT_FIG_HEIGHT = 8
 AXIS_LABEL_PAD_REF = 4
 TITLE_PAD_REF = 3
 SINGLE_PLOT_FONTSIZE_ADJUST = 1.5
+
+MIN_FONT_SIZE = 3
 
 AX_LINEWIDTH_REF = 1.5
 LINEWIDTH_REF = 2.5
@@ -849,11 +848,14 @@ def adjust_x_label(ax, fig, fig_setup, subplots_data):
 
         # If the xlabel is too long, shrink the fontsize
         if (width_frac > MAX_XLABEL_WIDTH_FRAC) or (height_frac > MAX_XLABEL_HEIGHT_FRAC):
-            fig_setup['xaxis_font_size'] = 0.95*fig_setup['xaxis_font_size']
-            h_xlabel = ax.set_xlabel(
-                'Time, t [years]', fontsize=fig_setup['xaxis_font_size'],
-                fontweight=fig_setup['label_font_weight'],
-                labelpad=fig_setup['axis_label_pad'])
+            if 0.95 * fig_setup['xaxis_font_size'] >= MIN_FONT_SIZE:
+                fig_setup['xaxis_font_size'] = 0.95 * fig_setup['xaxis_font_size']
+                h_xlabel = ax.set_xlabel(
+                    'Time, t [years]', fontsize=fig_setup['xaxis_font_size'],
+                    fontweight=fig_setup['label_font_weight'],
+                    labelpad=fig_setup['axis_label_pad'])
+            else:
+                continue_test = False
         else:
             continue_test = False
 
@@ -893,11 +895,14 @@ def adjust_y_label(obs_name, cmpnt_name, ax, fig, fig_setup, subplots_data, useM
         height_frac, width_frac = width_and_depth_frac(fig, h_ylabel, subplots_data)
         # If the ylabels are still too long, shrink the fontsize
         if (height_frac > MAX_YLABEL_HEIGHT_FRAC) or (width_frac > MAX_YLABEL_WIDTH_FRAC):
-            fig_setup['yaxis_font_size'] *= 0.95
-            h_ylabel = ax.set_ylabel(y_label,
-                                     fontsize=fig_setup['yaxis_font_size'],
-                                     fontweight=fig_setup['label_font_weight'],
-                                     labelpad=fig_setup['axis_label_pad'])
+            if 0.95 * fig_setup['yaxis_font_size'] >= MIN_FONT_SIZE:
+                fig_setup['yaxis_font_size'] *= 0.95
+                h_ylabel = ax.set_ylabel(y_label,
+                                         fontsize=fig_setup['yaxis_font_size'],
+                                         fontweight=fig_setup['label_font_weight'],
+                                         labelpad=fig_setup['axis_label_pad'])
+            else:
+                continue_test = False
         else:
             continue_test = False
 
@@ -959,11 +964,14 @@ def adjust_title(sub_title, ax, fig, fig_setup, subplots_data):
 
             # If the title is still too long, shrink the fontsize
             if (height_frac > MAX_TITLE_HEIGHT_FRAC) or (width_frac > MAX_TITLE_WIDTH_FRAC):
-                fig_setup['title_font_size'] *= 0.95
-                h_title = ax.set_title(sub_title,
-                                       fontsize=fig_setup['title_font_size'],
-                                       fontweight=fig_setup['label_font_weight'],
-                                       pad=fig_setup['title_pad'])
+                if fig_setup['title_font_size'] * 0.95 >= MIN_FONT_SIZE:
+                    fig_setup['title_font_size'] *= 0.95
+                    h_title = ax.set_title(sub_title,
+                                           fontsize=fig_setup['title_font_size'],
+                                           fontweight=fig_setup['label_font_weight'],
+                                           pad=fig_setup['title_pad'])
+                else:
+                    continue_test = False
             else:
                 continue_test = False
 
