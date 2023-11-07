@@ -9,17 +9,16 @@ import sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import (SystemModel, ComponentModel,
-                         ReservoirDataInterpolator, IAM_DIR)
-    from openiam.iam_gridded_observation import interp_weights
+    import openiam.components.iam_base_classes as iam_bc
+    from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+    from openiam.components.iam_gridded_observation import interp_weights
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM class module: {}'.format(err))
 
 try:
-    from matk.parameter import Parameter
+    from openiam.matk.parameter import Parameter
 except ImportError as err:
     print('Unable to load matk module: {}'.format(err))
 
@@ -83,7 +82,7 @@ def find_weights(loc_xyz, triangulation):
 
     return num_points, tri_vertices, tri_weights
 
-class LookupTableReservoir(ComponentModel):
+class LookupTableReservoir(iam_bc.ComponentModel):
     """
     The Lookup Table Reservoir component model is a reduced order model based on
     interpolation of data from a set of lookup tables. The lookup tables are based
@@ -181,12 +180,12 @@ class LookupTableReservoir(ComponentModel):
     should contain the necessary data to produce them. In addition, the component
     can return any other type of observations provided in the lookup tables.
 
-    For control file examples using the Lookup Table Reservoir component, see 
-    *ControlFile_ex6*, *ControlFile_ex9c*, *ControlFile_ex10*, *ControlFile_ex14*, 
-    *ControlFile_ex24*, *ControlFile_ex32a* to *ControlFile_ex32c*, *ControlFile_ex37*, 
-    *ControlFile_ex40*, and *ControlFile_ex55a* to *ControlFile_ex55d*. For script 
-    examples, see *iam_sys_lutreservoir_5locs.py*, *iam_sys_lutreservoir_mswell.py*, 
-    and *iam_sys_lutreservoir_openwell_futuregen_aor_3d.py*, and 
+    For control file examples using the Lookup Table Reservoir component, see
+    *ControlFile_ex6*, *ControlFile_ex9c*, *ControlFile_ex10*, *ControlFile_ex14*,
+    *ControlFile_ex24*, *ControlFile_ex32a* to *ControlFile_ex32c*, *ControlFile_ex37*,
+    *ControlFile_ex40*, and *ControlFile_ex55a* to *ControlFile_ex55d*. For script
+    examples, see *iam_sys_lutreservoir_5locs.py*, *iam_sys_lutreservoir_mswell.py*,
+    and *iam_sys_lutreservoir_openwell_futuregen_aor_3d.py*, and
     *iam_sys_lutreservoir_mswell_rand_allocated_wells_lhs.py*.
 
     """
@@ -432,7 +431,7 @@ class LookupTableReservoir(ComponentModel):
         :returns: None
         """
         if 'FileDirectory' in component_data:
-            self.file_directory = os.path.join(IAM_DIR,
+            self.file_directory = os.path.join(iam_bc.IAM_DIR,
                                                component_data['FileDirectory'])
         else:
             err_msg = ''.join(['FileDirectory must be provided for ',
@@ -1028,6 +1027,7 @@ class LinkError(Exception):
     table reservoir component is not linked to any interpolator family.
     """
 
+
 def test_lookup_table_reservoir_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
 
@@ -1049,11 +1049,11 @@ def test_lookup_table_reservoir_component(test_case=1):
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Read file with signatures of interpolators and names of files with the corresponding data
     sign_data = np.genfromtxt(
-        os.path.join('..', 'components', 'reservoir', 'lookuptables',
+        os.path.join('..', '..', '..', 'data', 'reservoir', 'lookuptables',
                      data_set_fldr, 'parameters_and_filenames.csv'),
         delimiter=",", dtype='str')
 

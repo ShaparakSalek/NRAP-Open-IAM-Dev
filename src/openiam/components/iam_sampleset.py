@@ -1,7 +1,10 @@
 from __future__ import print_function
+import os
+import sys
 from re import split
 import numpy as np
-from matk import sampleset
+
+from openiam.matk import sampleset
 
 
 class SampleSet(sampleset.SampleSet):

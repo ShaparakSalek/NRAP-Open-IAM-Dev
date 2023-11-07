@@ -6,15 +6,14 @@ import os
 import sys
 import logging
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
-class KimberlinaWellbore(ComponentModel):
+class KimberlinaWellbore(iam_bc.ComponentModel):
     """
     The module contains the solution class for the Kimberlina wellbore model
     based on deep Kimberlina reservoir simulations
@@ -107,7 +106,7 @@ class KimberlinaWellbore(ComponentModel):
             'KimberlinaWellbore', None)
 
         try:
-            import components.wellbore.kimberlina_wellbore.kimberlina_wellbore_rom as kwbrom
+            import openiam.components.models.wellbore.kimberlina_wellbore.kimberlina_wellbore_rom as kwbrom
         except ImportError:
             print('\nERROR: Unable to load ROM for Kimberlina Wellbore component\n')
             sys.exit()
@@ -264,7 +263,7 @@ def test_kimberlina_wellbore_component():
     time_array = 365.25*np.arange(0.0, 5.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
     # Add Kimberlina wellbore model object and define parameters
     kwb = sm.add_component_model_object(KimberlinaWellbore(name='kwb', parent=sm))
 

@@ -35,9 +35,9 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 from datetime import datetime       # For time stamp
 import numpy as np                  # For array operations
 
-import seal_config as scfg           # IO directory and file names
-import seal_file as sfile           # Error in file operations
-import seal_units as sun            # Unit conversion
+from . import seal_config as scfg           # IO directory and file names
+from . import seal_file as sfile           # Error in file operations
+from . import seal_units as sun            # Unit conversion
 
 # Constants for file handling
 OUTPUT_COLS = 8                     # Columns for output

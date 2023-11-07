@@ -7,19 +7,17 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 try:
-    from openiam import SystemModel, ComponentModel, IAM_DIR
-    from openiam.mesh2D import read_Mesh2D_data
-    from openiam.reservoir_data_interpolator import (check_file_format,
-                                                     read_time_points,
-                                                     read_data_headers)
+    import openiam.components.iam_base_classes as iam_bc
+    from openiam.components.mesh2D import read_Mesh2D_data
+    from openiam.components.reservoir_data_interpolator import (check_file_format,
+                                                                read_time_points,
+                                                                read_data_headers)
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 
-class PlumeStability(ComponentModel):
+class PlumeStability(iam_bc.ComponentModel):
     """
     The Plume Stability component model produces quantitative metrics of the area,
     change in area over time, mobility and spreading :cite:`harp2019development`.
@@ -89,8 +87,8 @@ class PlumeStability(ComponentModel):
     metrics are to be calculated and for which the data is provided in the data files
     used as input for the component, e.g. **pressure**, **CO2saturation**, etc.
 
-    For a control file example using the Plume Stability component, see 
-    *ControlFile_ex16*. For script examples, see *iam_plume_stability_FEHM.py*, 
+    For a control file example using the Plume Stability component, see
+    *ControlFile_ex16*. For script examples, see *iam_plume_stability_FEHM.py*,
     *iam_plume_stability_Kimb.py*, and *iam_plume_stability_Kimb_3d.py*.
 
     """
@@ -332,7 +330,7 @@ class PlumeStability(ComponentModel):
         :returns: None
         """
         if 'FileDirectory' in component_data:
-            self.file_directory = os.path.join(IAM_DIR,
+            self.file_directory = os.path.join(iam_bc.IAM_DIR,
                                                component_data['FileDirectory'])
         else:
             err_msg = ''.join(['FileDirectory keyword must be provided for ',
@@ -553,7 +551,7 @@ def test_plume_stability_component(option=2):
     # For multiprocessing in Spyder
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
-    file_directory = os.sep.join(['..', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):
@@ -589,7 +587,7 @@ def test_plume_stability_component(option=2):
     # It has to be defined as in the data set or whatever (in the latter case
     # interpolation will be used).
     sm_model_kwargs = {'time_array': time_array}
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     sps = sm.add_component_model_object(
         PlumeStability(name='sps', parent=sm, file_directory=file_directory,

@@ -23,35 +23,35 @@ with warnings.catch_warnings(record=True) as w:
 import numpy as np
 import Pmw
 
-from Disclaimer import Disclaimer_Page
-from Dashboard import Dashboard_Page
-from OpenIAM_Page import OpenIAM_Page, disable_time_frame_widgets
-from PostProcessor_Page import PostProcessor_Page
+from openiam.gu_interface.Disclaimer import Disclaimer_Page
+from openiam.gu_interface.Dashboard import Dashboard_Page
+from openiam.gu_interface.OpenIAM_Page import OpenIAM_Page, disable_time_frame_widgets
+from openiam.gu_interface.PostProcessor_Page import PostProcessor_Page
 
-from dictionarydata import (d, APP_SIZE, TAB_SIZE, componentVars, componentChoices,
-                            componentTypeDictionary, connectionsDictionary,
-                            DISTRIBUTION_OPTIONS, connections, connectionTypes,
-                            COMPONENT_TYPES, ANALYSIS_TYPES,
-                            DISTRIBUTION_MENU_WIDTH, DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH, PARAMETER_LABEL_WIDTH,
-                            GFR_PARAMETER_LABEL_WIDTH, STRATA_PARAMETER_LABEL_WIDTH,
-                            FL_PARAMETER_LABEL_WIDTH,
-                            MODEL_TAB_LABEL_WIDTH2, MODEL_TAB_LABEL_WIDTH3,
-                            MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH,
-                            DISTRIBUTION_PARS_LABELS, DISTRIBUTION_PARS_SETUPS)
+from openiam.gu_interface.dictionarydata import (
+    d, APP_SIZE, TAB_SIZE, componentVars, componentChoices,
+    componentTypeDictionary, connectionsDictionary,
+    DISTRIBUTION_OPTIONS, connections, connectionTypes,
+    COMPONENT_TYPES, ANALYSIS_TYPES,
+    DISTRIBUTION_MENU_WIDTH, DISTRIBUTION_ARG_LABEL_WIDTH,
+    DISTRIBUTION_ARG_TEXTFIELD_WIDTH, PARAMETER_LABEL_WIDTH,
+    GFR_PARAMETER_LABEL_WIDTH, STRATA_PARAMETER_LABEL_WIDTH,
+    FL_PARAMETER_LABEL_WIDTH,
+    MODEL_TAB_LABEL_WIDTH2, MODEL_TAB_LABEL_WIDTH3,
+    MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH,
+    DISTRIBUTION_PARS_LABELS, DISTRIBUTION_PARS_SETUPS)
 
-from cmpnts_tabs import (src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
-                         cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
-                         aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
-                         ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, locations)
-from cmpnts_tabs.parameter_entry import ParameterEntry
+from openiam.gu_interface.cmpnts_tabs import (
+    src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
+    cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
+    aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
+    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, locations)
+from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
+from openiam.components.iam_base_classes import IAM_DIR
 
 # Save location of source folder in the top level folder
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(SOURCE_DIR)
-CODE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-USER_DIR = os.sep.join([CODE_DIR, 'examples', 'user'])
+USER_DIR = os.sep.join([IAM_DIR, 'examples', 'user'])
 
 
 class NRAPOpenIAM(tk.Tk):
@@ -216,7 +216,7 @@ class NRAPOpenIAM(tk.Tk):
                 data = inp_data.split(',')
                 d['ModelParams']['TimePoints'] = [float(val.strip()) for val in data]
             else:
-                inp_data_file_path = os.path.join(CODE_DIR, inp_data)
+                inp_data_file_path = os.path.join(IAM_DIR, inp_data)
                 if os.path.isfile(inp_data_file_path):
                     d['ModelParams']['TimePoints'] = inp_data
                 else:
@@ -577,7 +577,7 @@ class NRAPOpenIAM(tk.Tk):
                             str(item) for item in inp_data))
                     # Check whether string was provided
                     elif isinstance(inp_data, str):
-                        inp_data_file_path = os.path.join(CODE_DIR, inp_data)
+                        inp_data_file_path = os.path.join(IAM_DIR, inp_data)
                         if os.path.isfile(inp_data_file_path):
                             dyn_data.append(inp_data)
                         else:
@@ -1158,7 +1158,7 @@ class NRAPOpenIAM(tk.Tk):
 
             for _, dyn_data_el in enumerate(dyn_data):
                 dyn_data_vars.append(StringVar())
-                inp_data_file_path = os.path.join(CODE_DIR, dyn_data_el)
+                inp_data_file_path = os.path.join(IAM_DIR, dyn_data_el)
                 if os.path.isfile(inp_data_file_path):
                     dyn_data_vars[-1].set(dyn_data_el)
                 else:
@@ -1373,7 +1373,7 @@ class NRAPOpenIAM(tk.Tk):
         self.populate_dictionary(ask_to_save=False)
 
         filename = self.sim_file
-        run_file = os.path.join(SOURCE_DIR, 'openiam', 'openiam_cf.py')
+        run_file = os.path.join(IAM_DIR, 'src', 'openiam', 'components', 'openiam_cf.py')
         # Add quotation marks around path to the control file to avoid problems
         # with spaces in paths
         run_command = 'python "{0}" --file "{1}" --binary True'.format(

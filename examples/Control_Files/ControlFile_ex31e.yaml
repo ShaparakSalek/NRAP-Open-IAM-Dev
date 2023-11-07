@@ -21,7 +21,7 @@
 # would include a warning that the default brine density was used, however.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31e.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31e.yaml
 #
 # Last Modified: August, 2023
 #-------------------------------------------------

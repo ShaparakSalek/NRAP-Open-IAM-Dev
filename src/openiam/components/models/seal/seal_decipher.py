@@ -34,10 +34,10 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import logging                      # For reporting errors
 import time                         # For calculating runtime
 
-import seal_file as sfile           # For file operations
-import seal_config as scfg           # IO directory and file names
-import seal_units as sun           # Unit translations
-import seal_warranty as war         # Print warranty
+from . import seal_file as sfile           # For file operations
+from . import seal_config as scfg           # IO directory and file names
+from . import seal_units as sun           # Unit translations
+from . import seal_warranty as war         # Print warranty
 
 # Constants
 MINIMUM_PERM = 1.0e-06              # Minimum std. dev. of permeability

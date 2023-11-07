@@ -34,20 +34,17 @@ from matplotlib import cm
 from matplotlib.lines import Line2D
 from matk.sampleset import percentile
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(SOURCE_DIR)
-
 try:
-    import openiam as iam
+    import openiam.base as iam_base
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
-import openiam.cfi.commons as iamcommons
-import openiam.cfi.strata as iam_strata
+import openiam.cf_interface.commons as iam_commons
+import openiam.cf_interface.strata as iam_strata
 
 # If new components types are added to any of these three lists, you also have to edit
-# the instances where a component type is called with the approach iam.ComponentName
-# (e.g., iam.LookupTableReservoir, iam.GeneralizedFlowRate, or iam.GenericAquifer).
+# the instances where a component type is called with the approach iam_base.ComponentName
+# (e.g., iam_base.LookupTableReservoir, iam_base.GeneralizedFlowRate, or iam_base.GenericAquifer).
 AOR_RESERVOIR_COMPONENTS = ['LookupTableReservoir', 'SimpleReservoir',
                             'AnalyticalReservoir', 'GenericReservoir',
                             'TheisReservoir']
@@ -204,7 +201,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
     :type output_names: list
 
     :param sm: OpenIAM System model for which plots are created
-    :type sm: openiam.SystemModel object
+    :type sm: iam_base.SystemModel object
 
     :param s: SampleSet with results of analysis performed on the system model.
         None for forward analysis.
@@ -406,7 +403,6 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 else:
                     InjectionCoordx.append(inj_x)
                     InjectionCoordy.append(inj_y)
-
 
         InjectionCoordx, InjectionCoordy = remove_redundant_inj_coords(
             InjectionCoordx, InjectionCoordy)
@@ -620,9 +616,9 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
             # It it's a wellbore component and critPressureInput is 'Calculated',
             # get the critical pressure
             if critPressureInput == 'Calculated' and isinstance(
-                    output_component, (iam.OpenWellbore, iam.MultisegmentedWellbore,
-                                       iam.CementedWellbore, iam.CementedWellboreWR,
-                                       iam.GeneralizedFlowRate)):
+                    output_component, (iam_base.OpenWellbore, iam_base.MultisegmentedWellbore,
+                                       iam_base.CementedWellbore, iam_base.CementedWellboreWR,
+                                       iam_base.GeneralizedFlowRate)):
                 if strata_type in types_strata_pars and critPressure is None:
                     # If using uniform stratigraphy, only do this once
                     critPressureVal = get_crit_pressure(
@@ -649,16 +645,16 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                 aq_comp_check = False
                 res_comp_check = False
 
-                if isinstance(output_component, (iam.FutureGen2Aquifer,
-                                                 iam.FutureGen2AZMI,
-                                                 iam.GenericAquifer,
-                                                 iam.DeepAlluviumAquifer)):
+                if isinstance(output_component, (iam_base.FutureGen2Aquifer,
+                                                 iam_base.FutureGen2AZMI,
+                                                 iam_base.GenericAquifer,
+                                                 iam_base.DeepAlluviumAquifer)):
                     aq_comp_check = True
 
-                if isinstance(output_component, (iam.SimpleReservoir,
-                                                 iam.AnalyticalReservoir,
-                                                 iam.LookupTableReservoir,
-                                                 iam.TheisReservoir)):
+                if isinstance(output_component, (iam_base.SimpleReservoir,
+                                                 iam_base.AnalyticalReservoir,
+                                                 iam_base.LookupTableReservoir,
+                                                 iam_base.TheisReservoir)):
                     res_comp_check = True
 
                 # If the component is a reservoir or aquifer component, proceed
@@ -1508,24 +1504,24 @@ def get_crit_pressure(output_component, sm=None, yaml_data=None,
 
         if aq_number is None:
             # Assume that the highest aquifer is the focus
-            numShaleLayers = iamcommons.get_parameter_val(
+            numShaleLayers = iam_commons.get_parameter_val(
                 strat_comp, 'numberOfShaleLayers', sm=sm, yaml_data=yaml_data)
 
             aq_number = numShaleLayers - 1
 
         # Get the bottom depth of the aquifer
-        wellTop = iamcommons.get_parameter_val(
+        wellTop = iam_commons.get_parameter_val(
             strat_comp, 'aquifer{}Depth'.format(aq_number), sm=sm, yaml_data=yaml_data)
 
         # This is the bottom depth of shale 1, which is the top depth of the reservoir
-        reservoirDepth = iamcommons.get_parameter_val(strat_comp, 'shale1Depth',
-                                                      sm=sm, yaml_data=yaml_data)
+        reservoirDepth = iam_commons.get_parameter_val(strat_comp, 'shale1Depth',
+                                                       sm=sm, yaml_data=yaml_data)
 
         # This checks if the output_component has a brineDensity parameter. If not,
         # a None value is returned.
         try:
-            brineDensityParam = iamcommons.get_parameter_val(output_component, 'brineDensity',
-                                                             sm=sm, yaml_data=yaml_data)
+            brineDensityParam = iam_commons.get_parameter_val(output_component, 'brineDensity',
+                                                              sm=sm, yaml_data=yaml_data)
         except:
             brineDensityParam = None
 
@@ -1538,8 +1534,8 @@ def get_crit_pressure(output_component, sm=None, yaml_data=None,
             # lower case characters with an underscore seems the next most likely
             # convention.
             try:
-                brineDensityParam = iamcommons.get_parameter_val(output_component, 'brine_density',
-                                                                 sm=sm, yaml_data=yaml_data)
+                brineDensityParam = iam_commons.get_parameter_val(output_component, 'brine_density',
+                                                                  sm=sm, yaml_data=yaml_data)
             except:
                 brineDensityParam = None
 
@@ -1573,14 +1569,14 @@ def get_crit_pressure(output_component, sm=None, yaml_data=None,
                 brineDensity = DEFAULT_BRINE_DENSITY
 
     else:
-        wellTop = iamcommons.get_parameter_val(output_component, 'wellTop',
-                                               sm=sm, yaml_data=yaml_data)
+        wellTop = iam_commons.get_parameter_val(output_component, 'wellTop',
+                                                sm=sm, yaml_data=yaml_data)
 
-        reservoirDepth = iamcommons.get_parameter_val(output_component, 'reservoirDepth',
-                                                      sm=sm, yaml_data=yaml_data)
+        reservoirDepth = iam_commons.get_parameter_val(output_component, 'reservoirDepth',
+                                                       sm=sm, yaml_data=yaml_data)
 
-        brineDensity = iamcommons.get_parameter_val(output_component, 'brineDensity',
-                                                    sm=sm, yaml_data=yaml_data)
+        brineDensity = iam_commons.get_parameter_val(output_component, 'brineDensity',
+                                                     sm=sm, yaml_data=yaml_data)
 
     critPressureVal = (wellTop * GRAV_ACCEL * WATER_DENSITY) + (
         brineDensity * GRAV_ACCEL * (reservoirDepth - wellTop))

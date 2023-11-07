@@ -19,7 +19,7 @@
 # realizations.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31c.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31c.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

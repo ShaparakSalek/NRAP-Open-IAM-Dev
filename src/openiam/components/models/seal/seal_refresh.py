@@ -38,9 +38,9 @@ from scipy.stats import truncnorm   # For stochastic thickness generation
 from scipy.ndimage import gaussian_filter    # For smoothing thickness data
 import numpy as np                  # For arrays & input
 
-import seal_config as scfg           # IO directory and filenames
-import seal_file as sfile           # For file operations
-import seal_units as sun            # For unit conversion
+from . import seal_config as scfg           # IO directory and filenames
+from . import seal_file as sfile           # For file operations
+from . import seal_units as sun            # For unit conversion
 
 # Other operations constants
 MUSE = 1.0                          # Level of Gaussian smoothing

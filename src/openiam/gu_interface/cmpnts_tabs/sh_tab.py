@@ -10,18 +10,18 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import StringVar, IntVar, BooleanVar
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
-from dictionarydata import DISTRIBUTION_OPTIONS, SPEC_DISTRIBUTION_OPTIONS
+from openiam.gu_interface.dictionarydata import (
+    componentVars, componentChoices, connectionsDictionary,
+    componentTypeDictionary, DISTRIBUTION_OPTIONS, SPEC_DISTRIBUTION_OPTIONS)
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
-                            DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            OUTPUT_LABEL_WIDTH1,
-                            PARAMETER_FRAME_PADX, CB_PADX)
-from cmpnts_tabs.locations import add_cell_locs_frame_widgets, disable_cell_locs_frame_widgets
-from cmpnts_tabs.commons import commons_read_tab_vars
+from openiam.gu_interface.dictionarydata import (
+    LABEL_FONT, PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
+    DISTRIBUTION_ARG_LABEL_WIDTH, DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+    OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
+
+from openiam.gu_interface.cmpnts_tabs.locations import (add_cell_locs_frame_widgets,
+                                                        disable_cell_locs_frame_widgets)
+from openiam.gu_interface.cmpnts_tabs.commons import commons_read_tab_vars
 
 
 SH_CELL_PARAMETERS = ['area', 'thickness', 'permeability', 'baseDepth',

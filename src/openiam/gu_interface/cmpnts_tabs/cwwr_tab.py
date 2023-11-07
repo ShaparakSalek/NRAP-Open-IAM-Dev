@@ -10,22 +10,20 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import StringVar, IntVar, BooleanVar
 
-# Save location of GUI folder
-GUI_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(GUI_DIR)
+from openiam.gu_interface.dictionarydata import componentVars, componentChoices
+from openiam.gu_interface.dictionarydata import connectionsDictionary, componentTypeDictionary
+from openiam.gu_interface.dictionarydata import DISTRIBUTION_OPTIONS, connections
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
-from dictionarydata import DISTRIBUTION_OPTIONS, connections
+from openiam.gu_interface.dictionarydata import LABEL_FONT
+from openiam.gu_interface.dictionarydata import (
+    PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
+    DISTRIBUTION_ARG_LABEL_WIDTH,
+    DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+    OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
-                            DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
-
-from cmpnts_tabs.locations import read_locations_data, add_wellbore_frame_widgets
-from cmpnts_tabs.commons import commons_read_tab_vars
+from openiam.gu_interface.cmpnts_tabs.locations import (read_locations_data,
+                                                        add_wellbore_frame_widgets)
+from openiam.gu_interface.cmpnts_tabs.commons import commons_read_tab_vars
 
 
 CW_WR_PARAMETERS = ['logWellPerm', 'logThiefPerm', 'wellRadius']

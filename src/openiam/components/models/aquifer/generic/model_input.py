@@ -95,6 +95,7 @@ def generate_input(inputArray):
 
     return input_images
 
+
 if __name__ == "__main__":
 
     # parameters from test run 1006 of 625 (2100-2499m)

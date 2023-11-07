@@ -65,16 +65,16 @@ Observations from the Generic Aquifer component are:
 * **Dissolved_CO2_dz** [|m|] - height of plume where dissolved
   |CO2| mass fraction > dissolved_co2_threshold
 """
-
 import sys
 import os
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from openiam.components.models.aquifer.generic.model_input import (generate_input,
+                                                                   get_vertices,
+                                                                   get_dimensions)
+from openiam.components.models.aquifer.generic.salt_predict import model as salt_model
+from openiam.components.models.aquifer.generic.co2_predict import model as co2_model
 
-from model_input import generate_input, get_vertices, get_dimensions
-from salt_predict import model as salt_model
-from co2_predict import model as co2_model
 
 class Solution():
     def __init__(self):
@@ -102,8 +102,10 @@ class Solution():
         self.GriddedOutputs[1, :, :] = -z_coord
 
         # gridded concentrations
-        salt_mass_frac = salt_model(inputArray)[0, :, 0, :, 0]
+        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
         co2_mass_frac = co2_model(inputArray)[0, :, 0, :, 0]
+        salt_mass_frac = salt_model(inputArray)[0, :, 0, :, 0]
+
 
         self.GriddedOutputs[2, :, :] = np.clip(salt_mass_frac, 0, None)
         self.GriddedOutputs[3, :, :] = np.clip(co2_mass_frac, 0, None)

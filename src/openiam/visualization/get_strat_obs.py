@@ -3,12 +3,11 @@ import os
 import logging
 import numpy as np
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(SOURCE_DIR)
-
 try:
-    from openiam import (IAM_DIR, SystemModel, LookupTableStratigraphy,
-                         StratigraphyDataInterpolator, DippingStratigraphy)
+    from openiam.components.iam_base_classes import IAM_DIR, SystemModel
+    from openiam.components.lookup_table_stratigraphy_component import LookupTableStratigraphy
+    from openiam.components.stratigraphy_data_interpolator import StratigraphyDataInterpolator
+    from openiam.components.dipping_stratigraphy_component import DippingStratigraphy
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 

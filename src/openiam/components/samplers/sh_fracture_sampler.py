@@ -6,33 +6,28 @@ import sys
 import logging
 import numpy as np
 
-source_folder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(source_folder)
-sys.path.append(os.path.join(source_folder, 'components', 'seal'))
-
-
 try:
-    from openiam import SystemModel, SamplerModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+ str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import components.seal.frac_decipher as fde
-    import components.seal.frac_origin as fog
-    import components.seal.frac_stochastic as fstoch
-    import components.seal.frac_user as fuser
-    import components.seal.seal_config as sconf
-    import components.seal.seal_intro as sintro
-    import components.seal.seal_model as smod
-    import components.seal.seal_units as sunit
-    from components.seal.frac_setup import FRAC_SETUP_DICT
-    from components.seal.seal_setup import SEAL_SETUP_DICT
+    import openiam.components.models.seal.frac_decipher as fde
+    import openiam.components.models.seal.frac_origin as fog
+    import openiam.components.models.seal.frac_stochastic as fstoch
+    import openiam.components.models.seal.frac_user as fuser
+    import openiam.components.models.seal.seal_config as sconf
+    import openiam.components.models.seal.seal_intro as sintro
+    import openiam.components.models.seal.seal_model as smod
+    import openiam.components.models.seal.seal_units as sunit
+    from openiam.components.models.seal.frac_setup import FRAC_SETUP_DICT
+    from openiam.components.models.seal.seal_setup import SEAL_SETUP_DICT
 except ImportError:
     print('\nERROR: Unable to load Fracture Sampler for Seal Horizon\n')
     sys.exit()
 
 
-class SHFractureSampler(SamplerModel):
+class SHFractureSampler(iam_bc.SamplerModel):
     """
     Class for model providing fractured seal permeability for Seal Horizon component.
 
@@ -895,7 +890,7 @@ def test_scenario1():
 
     output_dir = '../../../output/samplers/'
     # Create system model
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     nx = 10
     ny = 12
     dx = 30
@@ -1017,7 +1012,7 @@ def test_scenario2():
 
     output_dir = '../../../output/samplers/'
     # Create system model
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     nx = 10
     ny = 12
     dx = 30

@@ -13,25 +13,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 import joblib
 from scipy import interpolate
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# For now ignoring warning related to differences between versions of skikit
+# For now ignoring warning related to differences between versions of scikit
 # used when saving and loading the ML-based models
 warnings.filterwarnings("ignore", category=UserWarning)
 
 try:
-    from openiam import IAM_DIR, SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import components.reservoir.generic.generic_reservoir_ROM as resrom
+    from openiam.components.models.reservoir.generic import generic_reservoir_ROM as resrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Generic Reservoir component\n')
     sys.exit()
 
 
-class GenericReservoir(ComponentModel):
+class GenericReservoir(iam_bc.ComponentModel):
     """
     The Generic Reservoir component model is a reduced-order-model to predict
     pressure and |CO2| saturation of the top part of the reservoir during |CO2| injection
@@ -107,10 +106,10 @@ class GenericReservoir(ComponentModel):
         """
         # Check that component model data is present
         if not self.model_data_check():
-            pressure_folder = os.sep.join([IAM_DIR, 'source', 'components',
-                                           'reservoir', 'generic', 'pressure'])
-            saturation_folder = os.sep.join([IAM_DIR, 'source', 'components',
-                                             'reservoir', 'generic', 'saturation'])
+            pressure_folder = os.sep.join([iam_bc.IAM_DIR, 'src', 'components',
+                                           'models', 'reservoir', 'generic', 'pressure'])
+            saturation_folder = os.sep.join([iam_bc.IAM_DIR, 'src', 'components',
+                                             'models', 'reservoir', 'generic', 'saturation'])
             error_msg = ''.join(['Generic Reservoir component {} cannot be created ',
                                  'as required model files are missing ',
                                  'in the folders\n {}\n and/or\n {}.']).format(
@@ -173,7 +172,7 @@ class GenericReservoir(ComponentModel):
         self.sol = resrom.Solution()
 
         componentPath0 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        componentPath = os.path.join(componentPath0, 'components', 'reservoir')
+        componentPath = os.path.join(componentPath0, 'components', 'models', 'reservoir')
 
         TargetVars = ['pressure', 'saturation']
 
@@ -370,7 +369,8 @@ class GenericReservoir(ComponentModel):
         and placed to the right place.
         """
         model_data_dir = os.sep.join([
-            IAM_DIR, 'source', 'components', 'reservoir', 'generic'])
+            iam_bc.IAM_DIR, 'src', 'openiam', 'components', 'models',
+            'reservoir', 'generic'])
         outputs = ['pressure', 'saturation']
 
         model_files = {'pressure': ['PressureRegModel1.joblib',
@@ -393,6 +393,7 @@ class GenericReservoir(ComponentModel):
 
 def test_generic_reservoir_component():
     __spec__ = None
+
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model
     to_save = False    # figure save
@@ -403,7 +404,7 @@ def test_generic_reservoir_component():
     time_array = 365.25*np.arange(0, num_years+1, 5)
 
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     res = sm.add_component_model_object(GenericReservoir(

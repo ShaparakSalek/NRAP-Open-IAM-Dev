@@ -4,10 +4,8 @@ import logging
 import collections
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 try:
-    import openiam.visualize as iam_vis
+    import openiam.visualization as iam_vis
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
@@ -358,20 +356,20 @@ def stacked_sensitivity_bars(analysis_dict, model_data, sm, s, output_list, time
                         model_data['OutputDirectory'], 'csv_files'))
 
             sensitivities = s.rbd_fast(obsname=ob, print_to_console=False)
-            
+
             if True in np.isnan(sensitivities['S1']):
                 nan_check = True
-            
+
             sensitivities_list.append(sensitivities)
-        
+
         if nan_check:
             logging.warning(''.join([
                 'While assessing the observation {} at the time index {}, '.format(
-                    ob, cp), 
-                'the sensitivities for the StackedSensitivityBars Analysis type ', 
-                'included a nan value. This outcome can occur when the observation ', 
-                'is constant with time (e.g., remaining at zero). The ', 
-                'StackedSensitivityBars Analysis plot for this observation and ', 
+                    ob, cp),
+                'the sensitivities for the StackedSensitivityBars Analysis type ',
+                'included a nan value. This outcome can occur when the observation ',
+                'is constant with time (e.g., remaining at zero). The ',
+                'StackedSensitivityBars Analysis plot for this observation and ',
                 'time index will not be made.']))
         else:
             iam_vis.stacked_sensitivities_barplot(
@@ -393,7 +391,7 @@ def time_series_sensitivity(analysis_dict, model_data, sm, s, output_list, time_
     else:
         obs = analysis_dict['TimeSeriesSensitivity']
         sens_dict = {}
-    
+
     if isinstance(obs, str):
         obs = [obs]
 

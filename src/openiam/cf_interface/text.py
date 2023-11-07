@@ -9,8 +9,9 @@ import os
 import numpy as np
 import sys
 import collections
-import matk
 import re
+
+import openiam.matk as matk
 
 import warnings
 # Suppress FutureWarning on empty string check

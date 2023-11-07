@@ -3,15 +3,14 @@ import os
 import sys
 import logging
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
-class Stratigraphy(ComponentModel):
+class Stratigraphy(iam_bc.ComponentModel):
     """
     The Stratigraphy component is a component containing parameters describing
     the structure of the storage reservoir system. The stratigraphy component
@@ -333,7 +332,7 @@ class Stratigraphy(ComponentModel):
 
 def test_stratigraphy_component():
     try:
-        from openiam import AnalyticalReservoir
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
@@ -342,7 +341,7 @@ def test_stratigraphy_component():
     num_years = 50
     time_array = 365.25*np.arange(0.0, num_years+1) # time is in days
     sm_model_kwargs = {'time_array': time_array}
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     strata = sm.add_component_model_object(Stratigraphy(name='strata', parent=sm))
 

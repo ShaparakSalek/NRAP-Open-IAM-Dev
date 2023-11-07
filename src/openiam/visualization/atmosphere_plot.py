@@ -31,10 +31,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
-source_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(source_dir)
-
-from openiam import IAM_DIR
+from openiam.components.iam_base_classes import IAM_DIR
 
 RC_FONT = {'family': 'Arial', 'weight': 'normal', 'size': None}
 BACKGROUND_COLOR = [0.67, 0.67, 0.67]

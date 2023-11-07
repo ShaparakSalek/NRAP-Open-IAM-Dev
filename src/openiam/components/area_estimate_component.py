@@ -3,12 +3,11 @@ import logging
 import sys
 import os
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
 PARAMETERS_GROUPS =  {
@@ -156,7 +155,7 @@ DELINEATION_FUNCTION = {1: simple_delineation,
                         2: under_pressurized_case_delineation,
                         3: hydrostatic_case_delineation}
 
-class AreaEstimate(ComponentModel):
+class AreaEstimate(iam_bc.ComponentModel):
     """
     NRAP-Open-IAM Area Estimate component class.
 

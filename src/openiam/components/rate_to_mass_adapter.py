@@ -11,14 +11,14 @@ import sys
 import os
 import logging
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
-class RateToMassAdapter(ComponentModel):
+class RateToMassAdapter(iam_bc.ComponentModel):
     """ NRAP-Open-IAM RateToMassAdapter component class. """
     def __init__(self, name, parent, calc_method=2):
         """
@@ -151,7 +151,8 @@ def test_rate_to_mass_adapter():
     logging.basicConfig(level=logging.WARNING)
 
     try:
-        from openiam import AnalyticalReservoir, MultisegmentedWellbore
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+        from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
@@ -161,7 +162,7 @@ def test_rate_to_mass_adapter():
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))

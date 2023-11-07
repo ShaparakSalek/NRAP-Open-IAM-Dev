@@ -10,17 +10,13 @@ from tkinter import messagebox
 # Pwm is imported to allow hover text
 import Pmw
 
-from dictionarydata import (
+from openiam.gu_interface.dictionarydata import (
     POSTPROCESSOR_LABEL_WIDTH, BUTTON_WIDTH,
     POSTPROCESSOR_SPINBOX_WIDTH, POSTPROCESSOR_ENTRY_WIDTH,
     POSTPROCESSOR_FILE_ENTRY_WIDTH, POSTPROCESSOR_CHECKBOX_WIDTH,
-    POSTPROCESSOR_MENU_WIDTH)
-from dictionarydata import LABEL_FONT
-from dictionarydata import plotTypes
-from dictionarydata import processingTypes
+    POSTPROCESSOR_MENU_WIDTH, LABEL_FONT, plotTypes, processingTypes)
 
-sys.path.append(os.path.join('..', '..', 'source'))
-from openiam.visualize.iam_post_processor import IAM_Post_Processor
+from openiam.visualization.iam_post_processor import IAM_Post_Processor
 
 
 class PostProcessor_Page(tk.Frame):

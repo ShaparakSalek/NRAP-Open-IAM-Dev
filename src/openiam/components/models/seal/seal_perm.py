@@ -34,10 +34,10 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import random                       # For variability in values
 import math                         # For Tanh + other functions
 
-import seal_config as scfg          # IO directory and file names
-import seal_file as sfile           # Input/output related operations
-import seal_units as sun            # For unit conversion
-import frac_random as fran          # Random value generators
+from . import seal_config as scfg          # IO directory and file names
+from . import seal_file as sfile           # Input/output related operations
+from . import seal_units as sun            # For unit conversion
+from . import frac_random as fran          # Random value generators
 
 # Seal model parameters
 AXIS_SHIFT = 2.5                    # <S> - shift on x-axis for time model

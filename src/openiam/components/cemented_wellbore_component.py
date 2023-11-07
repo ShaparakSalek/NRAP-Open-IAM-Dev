@@ -4,29 +4,28 @@ import sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from matk.ordereddict import OrderedDict
+from openiam.matk.ordereddict import OrderedDict
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.strata import get_comp_types_strata_pars, get_comp_types_strata_obs
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.strata import get_comp_types_strata_pars, get_comp_types_strata_obs
 
 try:
-    import components.wellbore.cemented as cwmodel
-    import components.wellbore.cemented.cemented_wellbore_ROM as cwrom
-    from components.wellbore.cemented.utilities import (first_derivative,
-                                                        second_derivative)
+    import openiam.components.models.wellbore.cemented as cwmodel
+    import openiam.components.models.wellbore.cemented.cemented_wellbore_ROM as cwrom
+    from openiam.components.models.wellbore.cemented.utilities import (
+        first_derivative, second_derivative)
 except ImportError:
     print('\nERROR: Unable to load ROM for Cemented Wellbore component\n')
     sys.exit()
 
 
-class CementedWellbore(ComponentModel):
+class CementedWellbore(iam_bc.ComponentModel):
     """
     The Cemented Wellbore component model is based on a multiphase well leakage
     model implemented in the NRAP-IAM-CS, :cite:`HARP2016150`. The model is
@@ -482,15 +481,15 @@ class CementedWellbore(ComponentModel):
 
         # Process dynamic inputs if any
         process_dynamic_inputs(self, component_data)
-        
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
 
         # Get strata component
         strata = name2obj_dict['strata']
-        
+
         # Determine number of shale layers
         num_shale_layers = strata.get_num_shale_layers()
 
@@ -523,20 +522,20 @@ class CementedWellbore(ComponentModel):
                     res_depth += ('+ {nm}.aquifer{il}Thickness + {nm}.shale{ilp1}Thickness '
                                   .format(nm=strata.name, il=il, ilp1=il+1))
                 self.add_composite_par('wellDepth', res_depth)
-                
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             if 'wellDepth' in self.pars or 'wellDepth' in self.deterministic_pars:
                 warning_msg = strata.parameter_assignment_warning_msg().format(
                     'wellDepth', 'shale1Depth')
-                
+
                 logging.warning(warning_msg)
-                    
+
                 if 'wellDepth' in self.pars:
                     del self.pars['wellDepth']
-                
+
                 elif 'wellDepth' in self.deterministic_pars:
                     del self.deterministic_pars['wellDepth']
-            
+
             self.add_par_linked_to_obs('wellDepth', strata.linkobs['shale1Depth'])
 
         tz = self.thief_zone
@@ -555,10 +554,10 @@ class CementedWellbore(ComponentModel):
             depth_ratio += ' + {nm}.shale{nsl}Thickness)'.format(
                 nm=strata.name, nsl=num_shale_layers)
             depth_ratio += '/{selfm}.wellDepth'.format(selfm=self.name)
-            
+
             if name2obj_dict['strata_type'] in types_strata_pars:
                 self.add_composite_par('depthRatio', depth_ratio)
-                
+
             elif name2obj_dict['strata_type'] in types_strata_obs:
                 self.add_par_linked_to_composite_obs('depthRatio', depth_ratio)
 
@@ -598,9 +597,10 @@ class CementedWellbore(ComponentModel):
 
 def test_cemented_wellbore_component():
     try:
-        from openiam import AnalyticalReservoir
+        from openiam.components.iam_base_classes import SystemModel
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
-        print('Unable to load IAM class module: '+str(err))
+        print('Unable to load NRAP-Open-IAM class module: {}'.format(err))
 
     logging.basicConfig(level=logging.WARNING)
 
@@ -608,7 +608,7 @@ def test_cemented_wellbore_component():
     num_years = 50.
     time_array = 365.25*np.arange(0.0, num_years+1)
     sm_model_kwargs = {'time_array': time_array}     # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))

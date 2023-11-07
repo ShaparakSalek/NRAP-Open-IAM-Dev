@@ -5,22 +5,17 @@ import logging
 import numpy as np
 from numpy.random import default_rng
 
-source_folder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(source_folder)
-sys.path.append(os.path.join(source_folder, 'components', 'seal'))
-
-
 try:
-    from openiam import SystemModel, SamplerModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+ str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import components.seal.seal_intro as intro
-    import components.seal.seal_perm as perm
-    import components.seal.frac_random as fran
-    import components.seal.seal_units as sunit
-    from components.seal.seal_setup import SEAL_SETUP_DICT
+    import openiam.components.models.seal.seal_intro as intro
+    import openiam.components.models.seal.seal_perm as perm
+    import openiam.components.models.seal.frac_random as fran
+    import openiam.components.models.seal.seal_units as sunit
+    from openiam.components.models.seal.seal_setup import SEAL_SETUP_DICT
 except ImportError:
     print('\nERROR: Unable to load Permeability Sampler for Seal Horizon\n')
     sys.exit()
@@ -70,7 +65,7 @@ def evaluate_areal_heter(perm_array, perm_heter_factor, percent=perm.PERCENT,
     return perm_array
 
 
-class SHPermeabilitySampler(SamplerModel):
+class SHPermeabilitySampler(iam_bc.SamplerModel):
     """
     Class for model providing permeability parameter for Seal Horizon component.
 
@@ -334,7 +329,7 @@ def test_scenario1():
 
     output_dir = '../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     perm_sampler = sm.add_component_model_object(
         SHPermeabilitySampler(name='ps', parent=sm, grid_shape=(10, 10)))
     perm_sampler.add_par('seed', value=234, vary=False)
@@ -368,7 +363,7 @@ def test_scenario2():
 
     output_dir = '../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     perm_sampler = sm.add_component_model_object(
         SHPermeabilitySampler(name='ps', parent=sm, grid_shape=(10, 10),
                               constr_type='matrix'))
@@ -438,7 +433,7 @@ def test_scenario3():
 
     output_dir = '../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     perm_sampler = sm.add_component_model_object(
         SHPermeabilitySampler(name='ps', parent=sm, grid_shape=(100,)))
     perm_sampler.add_par('seed', value=234, vary=False)
@@ -480,7 +475,7 @@ def test_scenario4():
 
     output_dir = '../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
 
     # Define samplers parameters
     mean_val = 1.0e-18

@@ -158,7 +158,7 @@ def create_libraries():
     """
     logging.info('Checking internal NRAP-Open-IAM libraries')
     platform = sys.platform
-    components_dir = os.path.join('..', 'source', 'components')
+    components_dir = os.path.join('..', 'src', 'openiam', 'components', 'models')
     carb_aqu_dir = os.path.join(components_dir, 'aquifer', 'carbonate')
     ca_make_filename = 'make_carbonate.yaml'
     atm_rom_dir = os.path.join(components_dir, 'atmosphere')

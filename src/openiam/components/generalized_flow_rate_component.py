@@ -4,17 +4,16 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters
+from openiam.cf_interface.commons import process_parameters
 
 
-class GeneralizedFlowRate(ComponentModel):
+class GeneralizedFlowRate(iam_bc.ComponentModel):
     """
     The Generalized Flow Rate component model is a model representing wide range of
     carbon dioxide (|CO2|) and brine leakage flow rates and created based
@@ -317,14 +316,14 @@ def test_generalized_flow_rate_component():
 
     example = 1
     if example == 1:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.WARN)
         # Define keyword arguments of the system model
         num_years = 50
         time_array = 365.25*np.arange(0.0, num_years+1)
         sm_model_kwargs = {'time_array': time_array} # time is given in days
 
         # Create system model
-        sm = SystemModel(model_kwargs=sm_model_kwargs)
+        sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
         gfr = sm.add_component_model_object(GeneralizedFlowRate(
             name='gfr', parent=sm))

@@ -20,7 +20,7 @@
 # (aquifers 1 and 2, respectively) as well as the atmosphere.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex29.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex29.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -57,7 +57,7 @@ Stratigraphy:
 #-------------------------------------------------
 LookupTableReservoir1:
     Type: LookupTableReservoir
-    FileDirectory: source/components/reservoir/lookuptables/Test_3d
+    FileDirectory: data/reservoir/lookuptables/Test_3d
     TimeFile: time_points.csv
     ParameterFilename: parameters_and_filenames.csv
     Interpolation2D: False

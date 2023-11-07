@@ -6,25 +6,23 @@ import csv
 import numpy as np
 import pandas as pd
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(SOURCE_DIR)
-
 try:
-    from openiam import IAM_DIR
+    from openiam.components.iam_base_classes import IAM_DIR
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
-import openiam as iam
+from openiam.components.open_wellbore_component import OpenWellbore
 
-from openiam.cfi.strata import (get_strata_type_from_yaml,
-                                get_comp_types_strata_pars,
-                                get_comp_types_strata_obs)
+from openiam.cf_interface.strata import (get_strata_type_from_yaml,
+                                         get_comp_types_strata_pars,
+                                         get_comp_types_strata_obs)
 
-from openiam.visualize.area_of_review import CSV_FILE_NAME_TAGS as AOR_CSV_FILE_NAME_TAGS
-from openiam.visualize.area_of_review import CSV_FILE_COLUMNS as AOR_CSV_FILE_COLUMNS
-import openiam.visualize.area_of_review as AoR
+import openiam.visualization.area_of_review as AoR
+from openiam.visualization.area_of_review import CSV_FILE_NAME_TAGS as AOR_CSV_FILE_NAME_TAGS
+from openiam.visualization.area_of_review import CSV_FILE_COLUMNS as AOR_CSV_FILE_COLUMNS
 
-from openiam.cfi.workflow_defaults import DEFAULT_AQUIFER_COMP
+
+from openiam.cf_interface.workflow_defaults import DEFAULT_AQUIFER_COMP
 
 DEFAULT_CRIT_PRESSURE_SETTING = 'Calculated'
 
@@ -403,7 +401,7 @@ def get_crit_pressure_aor_analysis(num_pressure_points, yaml_data, sm):
 
     for output_component in components:
 
-        if isinstance(output_component, iam.OpenWellbore):
+        if isinstance(output_component, OpenWellbore):
             if strata_type in types_strata_pars and critPressure is None:
                 # If using uniform stratigraphy, only do this once
                 critPressureVal = AoR.get_crit_pressure(

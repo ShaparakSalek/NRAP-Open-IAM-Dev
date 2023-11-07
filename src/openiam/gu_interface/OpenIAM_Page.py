@@ -5,23 +5,17 @@ from tkinter import StringVar, DoubleVar, BooleanVar
 from tkinter import messagebox
 import Pmw
 
-from dictionarydata import componentVars, APP_SIZE, TAB_SIZE
-from dictionarydata import aquifers
-from dictionarydata import connections
-from dictionarydata import ANALYSIS_TYPES
-from dictionarydata import LOGGING_TYPES
-from dictionarydata import COMPONENT_TYPES
-from dictionarydata import savedDictionary
-from dictionarydata import LABEL_FONT
-from dictionarydata import INSTRUCTIONS_FONT
-from dictionarydata import BUTTON_WIDTH, FILE_ENTRY_WIDTH
-from dictionarydata import (MODEL_TAB_LABEL_WIDTH1, MODEL_TAB_LABEL_WIDTH2,
-                            MODEL_TAB_LARGE_LABEL_WIDTH, PARAMETER_LABEL_WIDTH,
-                            MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH)
-from dictionarydata import (SETUP_LABEL_WIDTH, SETUP_ENTRY_WIDTH, SETUP_MENU_WIDTH)
+from openiam.gu_interface.dictionarydata import (
+    componentVars, APP_SIZE, TAB_SIZE, aquifers, connections,
+    ANALYSIS_TYPES, LOGGING_TYPES, COMPONENT_TYPES, savedDictionary,
+    LABEL_FONT, INSTRUCTIONS_FONT, BUTTON_WIDTH, FILE_ENTRY_WIDTH,
+    MODEL_TAB_LABEL_WIDTH1, MODEL_TAB_LABEL_WIDTH2,
+    MODEL_TAB_LARGE_LABEL_WIDTH, PARAMETER_LABEL_WIDTH,
+    MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH,
+    SETUP_LABEL_WIDTH, SETUP_ENTRY_WIDTH, SETUP_MENU_WIDTH)
 
-from cmpnts_tabs import strata_tab
-from cmpnts_tabs.locations import add_file_input_widgets
+from openiam.gu_interface.cmpnts_tabs import strata_tab
+from openiam.gu_interface.cmpnts_tabs.locations import add_file_input_widgets
 
 
 WELL_DYN_INPUT_SETUP_TEXTS = {

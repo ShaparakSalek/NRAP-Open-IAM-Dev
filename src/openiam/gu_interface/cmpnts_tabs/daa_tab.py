@@ -8,16 +8,16 @@ from tkinter import ttk
 from tkinter import StringVar
 from tkinter import BooleanVar
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
-from dictionarydata import DISTRIBUTION_OPTIONS, connections
+from openiam.gu_interface.dictionarydata import componentVars, componentChoices
+from openiam.gu_interface.dictionarydata import connectionsDictionary, componentTypeDictionary
+from openiam.gu_interface.dictionarydata import DISTRIBUTION_OPTIONS, connections
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
-                            DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            OUTPUT_LABEL_WIDTH2, PARAMETER_FRAME_PADX, CB_PADX)
-from cmpnts_tabs.commons import commons_read_tab_vars
+from openiam.gu_interface.dictionarydata import LABEL_FONT
+from openiam.gu_interface.dictionarydata import (
+    PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
+    DISTRIBUTION_ARG_LABEL_WIDTH, DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+    OUTPUT_LABEL_WIDTH2, PARAMETER_FRAME_PADX, CB_PADX)
+from openiam.gu_interface.cmpnts_tabs.commons import commons_read_tab_vars
 
 
 DAA_PARAMETERS = [

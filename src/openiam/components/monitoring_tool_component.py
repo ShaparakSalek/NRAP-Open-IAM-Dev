@@ -11,16 +11,15 @@ import os
 import logging
 import numpy as np
 
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
-    from openiam import ComponentModel
-    from openiam.parameter_setup_component import generate_seq
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
+
+from openiam.components.parameter_setup_component import generate_seq
 
 
-class MonitoringTool1(ComponentModel):
+class MonitoringTool1(iam_bc.ComponentModel):
     """
     Monitoring Tool 1 component compares the distance between its associated
     location and a wellbore component and under consideration of the amount
@@ -168,7 +167,7 @@ class MonitoringTool1(ComponentModel):
         return out
 
 
-class MonitoringTool2(ComponentModel):
+class MonitoringTool2(iam_bc.ComponentModel):
     """
     Monitoring Tool 2 component checks whether any of the linked wellbore
     components have any integrity issues.
@@ -329,7 +328,7 @@ class MonitoringTool2(ComponentModel):
         return out
 
 
-class MonitoringTool3(ComponentModel):
+class MonitoringTool3(iam_bc.ComponentModel):
     """
     Monitoring Tool 3 component checks whether mass of CO2 or brine leaked from
     any of the leaked wellbore components exceeds the predefined thresholds.
@@ -571,7 +570,7 @@ def reservoir_data():
 
 
 def test_monitoring_tool1():
-    from openiam import SystemModel, MultisegmentedWellbore
+    from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
     num_years = 10
     time_array = 365.25*np.arange(0.0, num_years+1)
@@ -580,7 +579,7 @@ def test_monitoring_tool1():
     pressure_data, saturation_data = reservoir_data()
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Create randomly located leaky well locations
     # within box defined by xmin,xmax,ymin,ymax
@@ -646,7 +645,7 @@ def test_monitoring_tool1():
 
 
 def test_monitoring_tool2():
-    from openiam import SystemModel, MultisegmentedWellbore
+    from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
     num_years = 10
     time_array = 365.25*np.arange(0.0, num_years+1)
@@ -655,7 +654,7 @@ def test_monitoring_tool2():
     pressure_data, saturation_data = reservoir_data()
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Create randomly located leaky well locations
     # within box defined by xmin,xmax,ymin,ymax
@@ -729,7 +728,7 @@ def test_monitoring_tool2():
     print(mntr.details['cmpnts_indices'])
 
 def test_monitoring_tool3():
-    from openiam import SystemModel, MultisegmentedWellbore
+    from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
     num_years = 10
     time_array = 365.25*np.arange(0.0, num_years+1)
@@ -738,7 +737,7 @@ def test_monitoring_tool3():
     pressure_data, saturation_data = reservoir_data()
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Create randomly located leaky well locations
     # within box defined by xmin,xmax,ymin,ymax

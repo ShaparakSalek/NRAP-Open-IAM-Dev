@@ -5,6 +5,7 @@ from math import ceil
 import numpy as np
 import glob
 
+
 # STOMP run directory
 class STOMP_Run:
 

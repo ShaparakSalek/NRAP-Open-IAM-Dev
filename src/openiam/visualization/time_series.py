@@ -16,7 +16,8 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as clrs
-from matk.sampleset import percentile, mean
+
+from openiam.matk.sampleset import percentile, mean
 from .label_setup import (LEGEND_DICT, Y_LABEL_DICT, Y_LABEL_SPLIT_DICT,
                           Y_LABEL_2ROWS_DICT, Y_LABEL_2ROWS_SPLIT_DICT,
                           TITLE_DICT, TITLE_SPLIT_DICT)

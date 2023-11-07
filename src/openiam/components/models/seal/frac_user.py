@@ -22,9 +22,9 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import math
 import numpy as np                  # Array operations
 
-import frac_model as fmod           # Class definitions
-import frac_random as fran          # Random value generators
-import frac_stochastic as fsch      # Basic functions for stochastic fractures
+from . import frac_model as fmod           # Class definitions
+from . import frac_random as fran          # Random value generators
+from . import frac_stochastic as fsch      # Basic functions for stochastic fractures
 
 # Constants
 P_MATIX = 0.25                      # Matrix permeability exponent

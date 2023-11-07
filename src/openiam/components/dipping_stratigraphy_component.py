@@ -6,9 +6,9 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 DIP_DIRECTION_DEGREE_OPTIONS = [0, 90, 180, 270, 360]
 DIP_DIRECTION_OPTIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
@@ -20,200 +20,200 @@ CHECK_CONDITIONS_MSG = ''.join([
     'conditions.'])
 
 REFERENCE_LOC_WARNING = ''.join([
-    'The input given for the {} coordinate of the reference location for the ', 
-    'DippingStratigraphy component was not of type int or float. The input given ', 
-    'was {}. Check your input. The reference {} coordinate will instead be set to ', 
+    'The input given for the {} coordinate of the reference location for the ',
+    'DippingStratigraphy component was not of type int or float. The input given ',
+    'was {}. Check your input. The reference {} coordinate will instead be set to ',
     '{} m.'])
 
 DIP_DIRECTION_WARNING = ''.join([
-    'The dipDirection ({}) provided to the  DippingStratigraphy component was ', 
-    'not one of the available options ({}). The dipDirection will be set to ', 
-    '90 degrees clockwise from the direction of strike(when viewed in a ', 
+    'The dipDirection ({}) provided to the  DippingStratigraphy component was ',
+    'not one of the available options ({}). The dipDirection will be set to ',
+    '90 degrees clockwise from the direction of strike(when viewed in a ',
     'map-view figure).'])
 
-class DippingStratigraphy(ComponentModel):
+class DippingStratigraphy(iam_bc.ComponentModel):
     """
-    The Dipping Stratigraphy component is similar to to the Stratigraphy component, 
-    but it portrays dipping units. This component takes strike and dip values 
-    as well as unit thicknesses for a reference location. It then uses that input 
-    to produce unit thicknesses and depths at for the given output location(s). 
-    This component 
+    The Dipping Stratigraphy component is similar to to the Stratigraphy component,
+    but it portrays dipping units. This component takes strike and dip values
+    as well as unit thicknesses for a reference location. It then uses that input
+    to produce unit thicknesses and depths at for the given output location(s).
+    This component
 
-    The arrangement of geologic units for this component is the same as the that 
-    for the ``Stratigraphy`` component. The reservoir is the lowest unit. Alternating 
-    shale and aquifer layers overlie the reservoir. These units each have an index, 
-    with the index number increasing closer to the surface. Shale 1 is above the 
-    reservoir, aquifer 1 is above shale 1, and shale 2 is above aquifer 1. This 
-    pattern continues until shale ``N``, where ``N`` is the number of shale units 
-    used (the *numberOfShaleLayers* parameter). There are ``N - 1`` aquifers. The 
+    The arrangement of geologic units for this component is the same as the that
+    for the ``Stratigraphy`` component. The reservoir is the lowest unit. Alternating
+    shale and aquifer layers overlie the reservoir. These units each have an index,
+    with the index number increasing closer to the surface. Shale 1 is above the
+    reservoir, aquifer 1 is above shale 1, and shale 2 is above aquifer 1. This
+    pattern continues until shale ``N``, where ``N`` is the number of shale units
+    used (the *numberOfShaleLayers* parameter). There are ``N - 1`` aquifers. The
     *numberOfShaleLayers* parameter cannot vary across the domain.
-    
-    The ``dipDirection`` keyword can be used to specify the direction of dip. The 
-    ``dipDirection`` can be given as a cardinal direction (``N``, ``E``, ``S``, 
-    ``W``, ``NE``, ``SE``, ``SW``, and ``NW``). In the control file interface, 
-    the ``dipDirection`` can be specified under the ``Controls`` entry, which 
-    is entered directly under ``DippingStratigraphy``. For example, the *strike* 
-    and *dip* parameters could be given as 45 |deg| and 3 |deg|, respectively. 
-    Because the strike is to the northwest, the ``dipDirection`` could be to the 
-    southeast or northwest (``SE`` or ``NW``). In this example, providing a 
-    ``dipDirection`` to the south or north (``S`` or ``N``) will also be taken 
-    as a dip to the southeast or northeast, respectively (i.e., a southwards 
-    component of dip vs. a northwards component). If the ``dipDirection`` keyword 
-    is not specified, then the ``dipDirection`` will be taken as 90 |deg| clockwise 
-    from the strike direction, if viewed in a map-view image (i.e., the 
-    right-hand rule in geology; when facing in the direction of strike, 
+
+    The ``dipDirection`` keyword can be used to specify the direction of dip. The
+    ``dipDirection`` can be given as a cardinal direction (``N``, ``E``, ``S``,
+    ``W``, ``NE``, ``SE``, ``SW``, and ``NW``). In the control file interface,
+    the ``dipDirection`` can be specified under the ``Controls`` entry, which
+    is entered directly under ``DippingStratigraphy``. For example, the *strike*
+    and *dip* parameters could be given as 45 |deg| and 3 |deg|, respectively.
+    Because the strike is to the northwest, the ``dipDirection`` could be to the
+    southeast or northwest (``SE`` or ``NW``). In this example, providing a
+    ``dipDirection`` to the south or north (``S`` or ``N``) will also be taken
+    as a dip to the southeast or northeast, respectively (i.e., a southwards
+    component of dip vs. a northwards component). If the ``dipDirection`` keyword
+    is not specified, then the ``dipDirection`` will be taken as 90 |deg| clockwise
+    from the strike direction, if viewed in a map-view image (i.e., the
+    right-hand rule in geology; when facing in the direction of strike,
     the dip direction is to your right).
-    
-    In the NRAP-Open-IAM control file interface, the type name for the Dipping 
+
+    In the NRAP-Open-IAM control file interface, the type name for the Dipping
     Stratigraphy component is ``DippingStratigraphy``.
-    
+
     Descriptions of the component's parameters are provided below.
-    
-    * **strike** [-] (0 to 360) - strike of the units in degrees (default: 315). 
-      In a map-view image, this parameter is taken as increasing from zero with 
-      rotation clockwise from north. For example, *strike* values of 0, 90, 180, 
-      and 270 would represent units striking to the north, east, south, and west, 
+
+    * **strike** [-] (0 to 360) - strike of the units in degrees (default: 315).
+      In a map-view image, this parameter is taken as increasing from zero with
+      rotation clockwise from north. For example, *strike* values of 0, 90, 180,
+      and 270 would represent units striking to the north, east, south, and west,
       repsectively.
 
-    * **dip** [-] (0.1 to 89.9) - dip of the units in degrees (default: 5). 
-      If the dip causes any unit thicknesses in the domain to fall outside the 
-      range of 1 |m| to 1600 |m|, that unit thickness will be set to the closest 
+    * **dip** [-] (0.1 to 89.9) - dip of the units in degrees (default: 5).
+      If the dip causes any unit thicknesses in the domain to fall outside the
+      range of 1 |m| to 1600 |m|, that unit thickness will be set to the closest
       limit.
-    
+
     * **numberOfShaleLayers** [-] (3 to 30) - number of shale layers in the
       system (default: 3). The shale units must be separated by an aquifer.
 
-    * **shaleThickness** [|m|] (1 to 1600) - thickness of shale layers at the 
-      reference location (default: 250). Thickness of shale layer 1, for example, 
-      can be defined by **shale1Thickness**; otherwise, shale layers for which 
+    * **shaleThickness** [|m|] (1 to 1600) - thickness of shale layers at the
+      reference location (default: 250). Thickness of shale layer 1, for example,
+      can be defined by **shale1Thickness**; otherwise, shale layers for which
       the thickness is not defined will be assigned a default thickness.
 
-    * **aquiferThickness** [|m|] (1 to 1600) - thickness of aquifers at the reference 
-      location (default: 100). Thickness of aquifer 1, for example, can be defined 
-      by **aquifer1Thickness**; otherwise, aquifers for which the thickness is 
+    * **aquiferThickness** [|m|] (1 to 1600) - thickness of aquifers at the reference
+      location (default: 100). Thickness of aquifer 1, for example, can be defined
+      by **aquifer1Thickness**; otherwise, aquifers for which the thickness is
       not defined will be assigned a default thickness.
 
-    * **reservoirThickness** [|m|] (1 to 1600) - thickness of the reservoir at 
+    * **reservoirThickness** [|m|] (1 to 1600) - thickness of the reservoir at
       the reference location (default: 50)
 
     * **datumPressure** [|Pa|] (80,000 to 300,000) - pressure at the top of the
       system (default: 101,325)
 
-    Unit thicknesses and the depths to the bottom, middle, and top of each unit 
+    Unit thicknesses and the depths to the bottom, middle, and top of each unit
     at specific locations (``x`` and ``y`` values) are produced as observations:
-    
+
     The observations from the Lookup Table Stratigraphy component are:
-    
-    * **shale#Thickness** [|m|] - thickness of shale ``#`` at the output location(s), 
+
+    * **shale#Thickness** [|m|] - thickness of shale ``#`` at the output location(s),
       where ``#`` is an index ranging from one to *numberOfShaleLayers* .
 
-    * **aquifer#Thickness** [|m|] - thickness of aquifer ``#`` at the output 
-      location(s), where ``#`` is an index ranging from one to 
+    * **aquifer#Thickness** [|m|] - thickness of aquifer ``#`` at the output
+      location(s), where ``#`` is an index ranging from one to
       (*numberOfShaleLayers* - 1).
 
     * **reservoirThickness** [|m|] - reservoir thickness at the output location(s).
-    
-    * **shale#Depth** [|m|] - depth to the bottom of the shale unit with index 
+
+    * **shale#Depth** [|m|] - depth to the bottom of the shale unit with index
       ``#`` at the output location(s).
 
-    * **aquifer#Depth** [|m|] - depth to the bottom of aquifer unit with index 
+    * **aquifer#Depth** [|m|] - depth to the bottom of aquifer unit with index
       ``#`` at the output location(s).
 
-    * **reservoirDepth** [|m|] - depth to the base of the reservoir at the 
+    * **reservoirDepth** [|m|] - depth to the base of the reservoir at the
       output location(s).
-    
-    * **shale#MidDepth** [|m|] - depth to the middle of the shale layer with 
+
+    * **shale#MidDepth** [|m|] - depth to the middle of the shale layer with
       index ``#`` at the output location(s).
 
-    * **aquifer#MidDepth** [|m|] - depth to the middle of the aquifer layer with 
+    * **aquifer#MidDepth** [|m|] - depth to the middle of the aquifer layer with
       index ``#`` at the output location(s).
 
-    * **reservoirMidDepth** [|m|] - depth to the middle of the reservoir at the 
+    * **reservoirMidDepth** [|m|] - depth to the middle of the reservoir at the
       output location(s).
-    
-    * **shale#TopDepth** [|m|] - depth to the top of the shale unit with index 
+
+    * **shale#TopDepth** [|m|] - depth to the top of the shale unit with index
       ``#`` at the output location(s).
 
-    * **aquifer#TopDepth** [|m|] - depth to the top of the aquifer unit with 
+    * **aquifer#TopDepth** [|m|] - depth to the top of the aquifer unit with
       index ``#`` at the output location(s).
 
-    * **reservoirTopDepth** [|m|] - depth to the top of the reservoir at the 
+    * **reservoirTopDepth** [|m|] - depth to the top of the reservoir at the
       output location(s).
 
-    If the component produces a unit thickness for a shale, aquifer, or reservoir 
-    that falls outside the range of 1 |m| to 1600 |m|, then that thickness will 
-    be set to the lower or upper limit (whichever is closer). For example, if the 
-    unit thickness would be 1700 |m|, based on the parameters and output locations 
+    If the component produces a unit thickness for a shale, aquifer, or reservoir
+    that falls outside the range of 1 |m| to 1600 |m|, then that thickness will
+    be set to the lower or upper limit (whichever is closer). For example, if the
+    unit thickness would be 1700 |m|, based on the parameters and output locations
     used, then that thickness observation will instead be set to 1600 |m|.
-    
-    For control file examples using the ``DippingStratigraphy`` component, see 
-    *ControlFile_ex33a.yaml* to *ControlFile_ex35.yaml*, and *ControlFile_ex39b.yaml*. 
-    For script examples, see *iam_sys_dippingstrata.py*, *iam_sys_dippingstrata_gridded.py*, 
-    *iam_sys_reservoir_mswell_stratplot_dipping_strata.py*, and 
+
+    For control file examples using the ``DippingStratigraphy`` component, see
+    *ControlFile_ex33a.yaml* to *ControlFile_ex35.yaml*, and *ControlFile_ex39b.yaml*.
+    For script examples, see *iam_sys_dippingstrata.py*, *iam_sys_dippingstrata_gridded.py*,
+    *iam_sys_reservoir_mswell_stratplot_dipping_strata.py*, and
     *iam_sys_reservoir_mswell_futuregen_ttfdplot_dipping_strata.py*
     """
-    def __init__(self, name, parent, locXRef=0, locYRef=0, locZRef=0, 
+    def __init__(self, name, parent, locXRef=0, locYRef=0, locZRef=0,
                  dipDirection=None, locX=None, locY=None):
         """
         Constructor method of DippingStratigraphy Class.
-        
+
         :param name: name of component model
         :type name: str
 
         :param parent: the SystemModel object that the component model
             belongs to
         :type parent: SystemModel object
-        
-        :param locXRef: x-coordinate of the reference location (default: 0 |m|). 
-            The unit thicknesses at the reference location (assigned as parameters) 
-            are used to calculate unit thicknesses and depths at different 
+
+        :param locXRef: x-coordinate of the reference location (default: 0 |m|).
+            The unit thicknesses at the reference location (assigned as parameters)
+            are used to calculate unit thicknesses and depths at different
             locations.
         :type locXRef: float
 
-        :param locYRef: y-coordinate of the reference location (default: 0 |m|). 
-            The unit thicknesses at the reference location (assigned as parameters) 
-            are used to calculate unit thicknesses and depths at different 
+        :param locYRef: y-coordinate of the reference location (default: 0 |m|).
+            The unit thicknesses at the reference location (assigned as parameters)
+            are used to calculate unit thicknesses and depths at different
             locations.
         :type locYRef: float
-        
-        :param locX: x-coordinate of the location at which stratigraphy information 
+
+        :param locX: x-coordinate of the location at which stratigraphy information
             is to to be calculated.
             By default, it is None, which means that the whole grid data is requested
         :type locX: float or array-like of floats
 
-        :param locY: y-coordinate of the location at which stratigraphy information 
+        :param locY: y-coordinate of the location at which stratigraphy information
             is to to be calculated.
             By default, it is None, which means that the whole grid data is requested
         :type locY: float or array-like of floats
         """
         # Set up keyword arguments of the 'model' method provided by the system model
         model_kwargs = {'time_point': 365.25}  # default value of 365.25 days
-        
+
         super().__init__(name, parent, model=self.simulation_model,
                          model_kwargs=model_kwargs)
-        
+
         # The model only needs to be run once
         self.run_frequency = 1
         self.default_run_frequency = 1
 
         # Add type attribute
         self.class_type = 'DippingStratigraphy'
-        
+
         if dipDirection:
             if not dipDirection in DIP_DIRECTION_OPTIONS:
                 logging.warning(DIP_DIRECTION_WARNING.format(
                     dipDirection, DIP_DIRECTION_OPTIONS))
                 self.dipDirection = None
-                
+
             else:
                 self.dipDirection = dipDirection
         else:
             self.dipDirection = dipDirection
-        
+
         self.locXRef = locXRef
         self.locYRef = locYRef
         self.locZRef = locZRef
-        
+
         # Set up location attributes
         if locX is not None and locY is not None:
             self.locX = np.asarray(locX).flatten()
@@ -228,7 +228,7 @@ class DippingStratigraphy(ComponentModel):
                 self.grid_obs_requested = True
             else:
                 self.grid_obs_requested = False
-            
+
             self.num_points = len(self.locX)
         else:
             self.grid_obs_keys = []
@@ -301,34 +301,34 @@ class DippingStratigraphy(ComponentModel):
                         'Parameter {} is not recognized as an input parameter ',
                         'of Stratigraphy component {}.']).format(key, self.name)
                     logging.warning(warn_msg)
-    
+
     def parameter_assignment_warning_msg(self):
         """
-        Generates a warning message. This warning message is meant to be used 
-        in the connect_with_system() methods of components in the control file 
-        interface. Specifically, it is used when the parameter of the component 
-        is assigned as a stochastic or deterministic parameter when it should 
-        instead be linked to an observation from the DippingStratigraphy 
+        Generates a warning message. This warning message is meant to be used
+        in the connect_with_system() methods of components in the control file
+        interface. Specifically, it is used when the parameter of the component
+        is assigned as a stochastic or deterministic parameter when it should
+        instead be linked to an observation from the DippingStratigraphy
         component.
         """
         warning_msg = ''.join([
-            'When using a DippingStratigraphy component, the {} parameter ', 
-            'cannot be specified as a stochastic or deterministic ', 
-            'parameter. The parameter needs to be linked to the ', 
-            '{} observation of the DippingStratigraphy component. ', 
-            'The input provided for that parameter will not be used. ', 
-            'In the control file interface, the parameter linkage is performed ', 
-            'automatically. In a script application, the parameter can be linked ', 
-            'with the add_par_linked_to_obs() method of the component with the ', 
-            'parameter being linked to a DippingStratigraphy observation. ', 
-            'Before linking the DippingStratigraphy observation to the ', 
-            'parameter, use the add_obs() and add_obs_to_be_linked() methods ', 
-            'of the DippingStratigraphy component. The add_obs() method ', 
-            'can include the obsertvation name and index=[0]. For example, ', 
+            'When using a DippingStratigraphy component, the {} parameter ',
+            'cannot be specified as a stochastic or deterministic ',
+            'parameter. The parameter needs to be linked to the ',
+            '{} observation of the DippingStratigraphy component. ',
+            'The input provided for that parameter will not be used. ',
+            'In the control file interface, the parameter linkage is performed ',
+            'automatically. In a script application, the parameter can be linked ',
+            'with the add_par_linked_to_obs() method of the component with the ',
+            'parameter being linked to a DippingStratigraphy observation. ',
+            'Before linking the DippingStratigraphy observation to the ',
+            'parameter, use the add_obs() and add_obs_to_be_linked() methods ',
+            'of the DippingStratigraphy component. The add_obs() method ',
+            'can include the obsertvation name and index=[0]. For example, ',
             'DipStratComponentName.add_obs(obs_name, index=[0]).'])
-        
+
         return warning_msg
-    
+
     def get_num_shale_layers(self, cfi=False):
         """
         Returns the value of the numberOfShaleLayers parameter.
@@ -339,90 +339,90 @@ class DippingStratigraphy(ComponentModel):
                                'stochastic for the control file interface.'])
             logging.error(err_msg)
             raise TypeError(err_msg)
-            
+
         elif 'numberOfShaleLayers' in self.pars and not cfi:
             numberOfShaleLayers = self.pars['numberOfShaleLayers'].value
-            
+
         elif 'numberOfShaleLayers' in self.deterministic_pars:
             numberOfShaleLayers = self.deterministic_pars['numberOfShaleLayers'].value
-            
+
         else:
             numberOfShaleLayers = self.default_pars['numberOfShaleLayers'].value
-            
+
             warn_msg = ''.join([
-                'Parameter numberOfShaleLayers is not defined in the control ', 
-                'file interface. The parameter will be assigned a default value ', 
+                'Parameter numberOfShaleLayers is not defined in the control ',
+                'file interface. The parameter will be assigned a default value ',
                 'of {}.'.format(numberOfShaleLayers)])
             logging.warn(warn_msg)
-            
+
             self.add_par('numberOfShaleLayers', value=numberOfShaleLayers, vary=False)
-        
+
         return numberOfShaleLayers
-    
+
     def get_unit_thicknesses_ref_point(self):
         """
-        Returns lists of shale and aqufier thicknesses at the reference location 
-        as well as the reservoir thickness. The shale and aquifer thickness lists 
-        are arranged with the lower units at the beginning of the list. For example, 
-        shale1Thickness is stored in index 0 of the list, while shale3Thickness 
+        Returns lists of shale and aqufier thicknesses at the reference location
+        as well as the reservoir thickness. The shale and aquifer thickness lists
+        are arranged with the lower units at the beginning of the list. For example,
+        shale1Thickness is stored in index 0 of the list, while shale3Thickness
         is stored in index 2.
         """
         numberOfShaleLayers = self.get_num_shale_layers()
-        
+
         shaleThicknessList = []
         aquiferThicknessList = []
-        
+
         warn_msg = ''.join([
-            'The DippingStratigraphy parameter {} is not defined. The parameter ', 
-            'will be assigned a default value of {} m. Note that this ', 
-            'parameter is representative of the reference location for the ', 
-            'DippingStratigraphy component. The thicknesses and depths at the ', 
-            'output location are produced as observations by the ', 
+            'The DippingStratigraphy parameter {} is not defined. The parameter ',
+            'will be assigned a default value of {} m. Note that this ',
+            'parameter is representative of the reference location for the ',
+            'DippingStratigraphy component. The thicknesses and depths at the ',
+            'output location are produced as observations by the ',
             'DippingStratigraphy component.'])
-        
+
         for unitRef in range(numberOfShaleLayers):
             unit_name = 'shale{}Thickness'.format(unitRef + 1)
-            
+
             if unit_name in self.pars:
                 shaleThicknessList.append(self.pars[unit_name].value)
-                
+
             elif unit_name in self.deterministic_pars:
                 shaleThicknessList.append(self.deterministic_pars[unit_name].value)
-                
+
             else:
                 logging.warn(warn_msg.format(
                     unit_name, self.default_pars['shaleThickness'].value))
                 shaleThicknessList.append(self.default_pars['shaleThickness'].value)
-            
+
             if (unitRef + 1) < numberOfShaleLayers:
                 unit_name = 'aquifer{}Thickness'.format(unitRef + 1)
-                
+
                 if unit_name in self.pars:
                     aquiferThicknessList.append(self.pars[unit_name].value)
-                    
+
                 elif unit_name in self.deterministic_pars:
                     aquiferThicknessList.append(self.deterministic_pars[unit_name].value)
-                    
+
                 else:
                     logging.warn(warn_msg.format(
                         unit_name, self.default_pars['aquiferThickness'].value))
                     aquiferThicknessList.append(self.default_pars['aquiferThickness'].value)
-        
+
         unit_name = 'reservoirThickness'
-        
+
         if unit_name in self.pars:
             reservoirThickness = self.pars[unit_name].value
-            
+
         elif unit_name in self.deterministic_pars:
             reservoirThickness = self.deterministic_pars[unit_name].value
-            
+
         else:
             logging.warn(warn_msg.format(
                 unit_name, self.default_pars[unit_name].value))
             reservoirThickness = self.default_pars[unit_name].value
-        
+
         return shaleThicknessList, aquiferThicknessList, reservoirThickness
-    
+
     def get_par_values(self, par_names):
         """
         Returns the values of the given parameter names.
@@ -431,15 +431,15 @@ class DippingStratigraphy(ComponentModel):
         for par in par_names:
             if par in self.pars:
                 par_values.append(self.pars[par].value)
-                
+
             elif par in self.deterministic_pars:
                 par_values.append(self.deterministic_pars[par].value)
-                
+
             else:
                 par_values.append(self.default_pars[par].value)
-        
+
         return par_values
-    
+
     def layer_thickness_bound_debug_message(self, unit, bound, locx, locy, msg_option=1):
         """
         Returns string delivering debug message regarding setting unit thickness to
@@ -468,7 +468,7 @@ class DippingStratigraphy(ComponentModel):
                     unit, side[bound], bound, locx, locy, bound)
 
         return msg
-    
+
     def make_xyz_points_from_strike_and_dip(self, L1=100,L2=100, L3=100, L4=100,
                                             point0_xyz=None):
         """
@@ -484,7 +484,7 @@ class DippingStratigraphy(ComponentModel):
         but all five points are needed in the stratigraphy_plot() function in
         stratigraphy_plot.py.
 
-        Point (p0) is at the location in point0_xyz. The 2nd (p1) is at a distance of 
+        Point (p0) is at the location in point0_xyz. The 2nd (p1) is at a distance of
         dx and dy from p0 in the direction of dip. The 3rd and 4th points (p2 and p3)
         are at distances dx and dy away from p0 in the directions of strike (one
         in each direction). The 5th point (p4) is at a distances of dx and dy from
@@ -493,8 +493,8 @@ class DippingStratigraphy(ComponentModel):
         (L1, L2, L3, and L4) in a way that depends on dip direction.
 
         Note that L4 is doubled for certain values of dipDirectionDegrees because
-        in Stratigraphy plots, those cases the dip number would often look like 
-        it is right on top of the strike and dip symbol (for the default perspectives 
+        in Stratigraphy plots, those cases the dip number would often look like
+        it is right on top of the strike and dip symbol (for the default perspectives
         set by view_elev and view_azimuth).
 
         :param L1: Length scale (m) used to calculate the position of point 1,
@@ -529,9 +529,9 @@ class DippingStratigraphy(ComponentModel):
         """
         par_values = self.get_par_values(['dip'])
         dip = par_values[0]
-        
+
         dipDirectionDegrees = self.obtain_dip_direction_degrees()
-        
+
         if point0_xyz is None:
             x_p0, y_p0, z_p0 = 0, 0, 0
         else:
@@ -745,7 +745,7 @@ class DippingStratigraphy(ComponentModel):
         z_points = [z_p0, z_p1, z_p2, z_p3, z_p4]
 
         return x_points, y_points, z_points
-    
+
     def obtain_dip_direction_degrees(self):
         """
         Function that provides the dip direction in degrees clockwise from north,
@@ -763,17 +763,17 @@ class DippingStratigraphy(ComponentModel):
         """
         par_values = self.get_par_values(['strike'])
         strike = par_values[0]
-        
+
         if not self.dipDirection:
             dipDirectionDegrees = strike + 90
-            
+
             if dipDirectionDegrees >= 360:
                 dipDirectionDegrees -= 360
-            
+
         else:
             if self.dipDirection not in DIP_DIRECTION_OPTIONS:
                 err_msg = ''.join([
-                    'Dip direction provided to DippingStratigraphy component ', 
+                    'Dip direction provided to DippingStratigraphy component ',
                     '{} does not match any of the available options ({}).'.format(
                         self.dipDirection, DIP_DIRECTION_OPTIONS)])
                 raise KeyError(err_msg)
@@ -824,7 +824,7 @@ class DippingStratigraphy(ComponentModel):
                 raise ValueError(err_msg)
 
         return dipDirectionDegrees
-    
+
     def depth_increases_from_strike_dip(self, x_locations, y_locations,
                                         output_type='single_point'):
         """
@@ -868,28 +868,28 @@ class DippingStratigraphy(ComponentModel):
 
         if isinstance(x_locations, list) and not isinstance(y_locations, list):
             err_msg = ''.join([
-                'The x_locations provided to the DippingStratigraphy component ', 
-                'method depth_increases_from_strike_dip() were a list, but the ', 
+                'The x_locations provided to the DippingStratigraphy component ',
+                'method depth_increases_from_strike_dip() were a list, but the ',
                 'y_locations were not a list. Check your input.'])
             raise TypeError(err_msg)
 
         if not isinstance(x_locations, list) and isinstance(y_locations, list):
             err_msg = ''.join([
-                'The y_locations provided to the DippingStratigraphy component ', 
-                'method depth_increases_from_strike_dip() were a list, but the ', 
+                'The y_locations provided to the DippingStratigraphy component ',
+                'method depth_increases_from_strike_dip() were a list, but the ',
                 'x_locations were not a list. Check your input.'])
             raise TypeError(err_msg)
 
         # Create a 3-dimensional plane representing the changes in the depth of
         # each unit's base. To create the plane, use the change in depths for 3
         # locations. One location is the reference point (x = locXRef, y = locYRef,
-        # and z = 0). The two other locations will have z values calculated with 
-        # the strike and dip. Point p1 is in the dip direction, while point p2 
-        # is 90 degrees counter clockwise from the dip direction (in one of the 
+        # and z = 0). The two other locations will have z values calculated with
+        # the strike and dip. Point p1 is in the dip direction, while point p2
+        # is 90 degrees counter clockwise from the dip direction (in one of the
         # directions of strike). Points 3 and 4 aren't needed here.
 
         x_points, y_points, z_points = self.make_xyz_points_from_strike_and_dip(
-            L1=100, L2=100, L3=100, L4=100, 
+            L1=100, L2=100, L3=100, L4=100,
             point0_xyz=[self.locXRef, self.locYRef, self.locZRef])
 
         x_p0 = x_points[0]
@@ -949,8 +949,8 @@ class DippingStratigraphy(ComponentModel):
                              - (normal[1] * y_locations[x_ref, y_ref]) - d) / normal[2]
 
         return depth_increase
-    
-    def update_stratigraphy_by_strike_and_dip(self, location_x, location_y, 
+
+    def update_stratigraphy_by_strike_and_dip(self, location_x, location_y,
                                               updated_strat=None, ind=None):
         """
         This function provides updated thicknesses for shales, aquifers, and the
@@ -964,12 +964,12 @@ class DippingStratigraphy(ComponentModel):
         :param location_y: y value [|m|] for the location at which the function is
             estimating unit thicknesses.
         :type location_y: int, float, or numpy.ndarray (if output_in_progress)
-        
-        :param updated_strat: Output dictionary. If set to None, updated_strat 
-            is made as a dictionary containing one output value per key. Otherwise, 
-            for each key (e.g., 'shale1Thickness', 'aquifer2MidDepth', or 'reservoirTopDepth') 
-            the dictionary is assumed to contain numpy array contaning thicknesses 
-            and depths at different locations corresponding with index ind in 
+
+        :param updated_strat: Output dictionary. If set to None, updated_strat
+            is made as a dictionary containing one output value per key. Otherwise,
+            for each key (e.g., 'shale1Thickness', 'aquifer2MidDepth', or 'reservoirTopDepth')
+            the dictionary is assumed to contain numpy array contaning thicknesses
+            and depths at different locations corresponding with index ind in
             the array. If so, the dictionary is updated repeatedly with this method.
         :type  updated_strat: None or numpy.ndarray
 
@@ -977,10 +977,10 @@ class DippingStratigraphy(ComponentModel):
             thicknesses and depths for all shales, aquifers, and the reservoir.
         """
         numberOfShaleLayers = self.get_num_shale_layers()
-        
+
         shaleThicknessList, aquiferThicknessList, reservoirThickness = \
             self.get_unit_thicknesses_ref_point()
-        
+
         depth_increase = self.depth_increases_from_strike_dip(
             location_x, location_y, output_type='single_point')
 
@@ -1112,10 +1112,10 @@ class DippingStratigraphy(ComponentModel):
 
         reservoirTopDepthUpdated = np.sum([shaleThicknessListUpdated])
         reservoirTopDepthUpdated += np.sum([aquiferThicknessListUpdated])
-        
+
         reservoirMidDepthUpdated = reservoirTopDepthUpdated + (
             reservoirThicknessUpdated / 2)
-        
+
         reservoirDepthUpdated = reservoirTopDepthUpdated + reservoirThicknessUpdated
 
         if reservoirTopDepthUpdated < self.pars_bounds['depth'][0]:
@@ -1165,10 +1165,10 @@ class DippingStratigraphy(ComponentModel):
                     'beneath this shale. ', CHECK_CONDITIONS_MSG]).format(
                         shaleRef + 1, shaleRef + 2, location_x, location_y)
                 raise ValueError(err_msg)
-            
+
             aquiferMidDepthListUpdated[shaleRef] = aquiferTopDepthListUpdated[
                 shaleRef] + (aquiferThicknessListUpdated[shaleRef] / 2)
-            
+
             aquiferDepthListUpdated[shaleRef] = aquiferTopDepthListUpdated[
                 shaleRef] + aquiferThicknessListUpdated[shaleRef]
 
@@ -1190,144 +1190,144 @@ class DippingStratigraphy(ComponentModel):
                     'aquifer. ', CHECK_CONDITIONS_MSG]).format(
                         shaleRef + 1, shaleRef + 1, location_x, location_y)
                 raise ValueError(err_msg)
-            
+
             shaleMidDepthListUpdated[shaleRef] = shaleTopDepthListUpdated[
                 shaleRef] + (shaleThicknessListUpdated[shaleRef] / 2)
-            
+
             shaleDepthListUpdated[shaleRef] = shaleTopDepthListUpdated[
                 shaleRef] + shaleThicknessListUpdated[shaleRef]
 
         if not updated_strat:
             updated_strat = dict()
-        
+
         for shaleRef in range(numberOfShaleLayers):
             nm = 'shale{}Thickness'.format(shaleRef + 1)
             val = shaleThicknessListUpdated[shaleRef]
-            
+
             updated_strat = self.format_output(nm, val, updated_strat, ind)
-            
+
             nm = 'shale{}Depth'.format(shaleRef + 1)
             val = shaleDepthListUpdated[shaleRef]
-            
+
             updated_strat = self.format_output(nm, val, updated_strat, ind)
-            
+
             nm = 'shale{}MidDepth'.format(shaleRef + 1)
             val = shaleMidDepthListUpdated[shaleRef]
-            
+
             updated_strat = self.format_output(nm, val, updated_strat, ind)
-            
+
             nm = 'shale{}TopDepth'.format(shaleRef + 1)
             val = shaleTopDepthListUpdated[shaleRef]
-            
+
             updated_strat = self.format_output(nm, val, updated_strat, ind)
-            
+
             if (shaleRef + 1) < numberOfShaleLayers:
                 nm = 'aquifer{}Thickness'.format(shaleRef + 1)
                 val = aquiferThicknessListUpdated[shaleRef]
-                
+
                 updated_strat = self.format_output(nm, val, updated_strat, ind)
-                
+
                 nm = 'aquifer{}Depth'.format(shaleRef + 1)
                 val = aquiferDepthListUpdated[shaleRef]
-                
+
                 updated_strat = self.format_output(nm, val, updated_strat, ind)
-                
+
                 nm = 'aquifer{}MidDepth'.format(shaleRef + 1)
                 val = aquiferMidDepthListUpdated[shaleRef]
-                
+
                 updated_strat = self.format_output(nm, val, updated_strat, ind)
-                
+
                 nm = 'aquifer{}TopDepth'.format(shaleRef + 1)
                 val = aquiferTopDepthListUpdated[shaleRef]
-                
+
                 updated_strat = self.format_output(nm, val, updated_strat, ind)
-        
+
         nm = 'reservoirThickness'
         val = reservoirThicknessUpdated
-        
+
         updated_strat = self.format_output(nm, val, updated_strat, ind)
-        
+
         nm = 'reservoirDepth'
         val = reservoirDepthUpdated
-        
+
         updated_strat = self.format_output(nm, val, updated_strat, ind)
-        
+
         nm = 'reservoirMidDepth'
         val = reservoirMidDepthUpdated
-        
+
         updated_strat = self.format_output(nm, val, updated_strat, ind)
-        
+
         nm = 'reservoirTopDepth'
         val = reservoirTopDepthUpdated
-        
+
         updated_strat = self.format_output(nm, val, updated_strat, ind)
 
         return updated_strat
-    
+
     def format_output(self, nm, val, updated_strat, ind):
         """
-        Checks if update_stratigraphy_by_strike_and_dip() is updating a dictionary 
-        (updated_strat) containing numpy.ndarrays. If the index ind is not None, 
-        the index of the array within updated_strat[nm] is set to val. Otherwise, 
+        Checks if update_stratigraphy_by_strike_and_dip() is updating a dictionary
+        (updated_strat) containing numpy.ndarrays. If the index ind is not None,
+        the index of the array within updated_strat[nm] is set to val. Otherwise,
         the output dictionary (updated_strat) for the given key nm is set to val.
         """
         if ind is None:
             updated_strat[nm] = float(val)
         else:
             updated_strat[nm][ind] = float(val)
-            
+
         return updated_strat
-    
+
     def get_thickness_obs_names(self):
         """
         Returns a list of the thickness observation names, given the numberOfShaleLayers.
         """
         numberOfShaleLayers = self.get_num_shale_layers()
-        
+
         obs_names = ['shale{}Thickness'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}Thickness'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'reservoirThickness']
-        
+
         return obs_names
-    
+
     def get_depth_obs_names(self):
         """
         Returns a list of the depth observation names, given the numberOfShaleLayers.
         """
         numberOfShaleLayers = self.get_num_shale_layers()
-        
+
         obs_names = ['shale{}Depth'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}Depth'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'reservoirDepth']
-        
+
         obs_names += ['shale{}MidDepth'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}MidDepth'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'reservoirMidDepth']
-        
+
         obs_names += ['shale{}TopDepth'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}TopDepth'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'depth', 'reservoirTopDepth']
-        
+
         return obs_names
-    
+
     def check_data_for_ref_loc(self, comp_data):
         """
-        Checks the dictionary comp_data for input related to the reference 
-        location's x, y, and z coordinates. If the input is present and formatted 
+        Checks the dictionary comp_data for input related to the reference
+        location's x, y, and z coordinates. If the input is present and formatted
         correctly, it is given to the component.
         """
         if 'ReferenceLocation' in comp_data:
             if 'coordx' in comp_data['ReferenceLocation']:
                 locXRef = comp_data['ReferenceLocation']['coordx']
-                
+
                 if isinstance(locXRef, list):
                     if len(locXRef) == 1:
                         self.locXRef = locXRef[0]
@@ -1339,10 +1339,10 @@ class DippingStratigraphy(ComponentModel):
                 else:
                     logging.warning(REFERENCE_LOC_WARNING.format(
                         'x', locXRef, 'x', self.locX))
-            
+
             if 'coordy' in comp_data['ReferenceLocation']:
                 locYRef = comp_data['ReferenceLocation']['coordy']
-                
+
                 if isinstance(locYRef, list):
                     if len(locYRef) == 1:
                         self.locYRef = locYRef[0]
@@ -1354,10 +1354,10 @@ class DippingStratigraphy(ComponentModel):
                 else:
                     logging.warning(REFERENCE_LOC_WARNING.format(
                         'y', locYRef, 'y', self.locYRef))
-            
+
             if 'coordz' in comp_data['ReferenceLocation']:
                 locZRef = comp_data['ReferenceLocation']['coordz']
-                
+
                 if isinstance(locZRef, list):
                     if len(locZRef) == 1:
                         self.locZRef = locZRef[0]
@@ -1369,7 +1369,7 @@ class DippingStratigraphy(ComponentModel):
                 else:
                     logging.warning(REFERENCE_LOC_WARNING.format(
                         'z', locZRef, 'z', self.locZRef))
-    
+
     def connect_with_system(self, component_data):
         """
         Code to add stratigraphy to system model for control file interface.
@@ -1377,58 +1377,58 @@ class DippingStratigraphy(ComponentModel):
         if 'ReferenceLocation' in component_data:
             if 'coordx' in component_data['ReferenceLocation']:
                 locXRef = component_data['ReferenceLocation']['coordx']
-                
+
                 if isinstance(locXRef, list):
                     if len(locXRef) == 1:
                         locXRef = locXRef[0]
                     else:
                         logging.warning(REFERENCE_LOC_WARNING.format('x', locXRef, 'x'))
-                
+
                 if isinstance(locXRef, (int, float)):
                     self.locXRef = component_data['ReferenceLocation']['coordx']
                 else:
                     logging.warning(REFERENCE_LOC_WARNING.format('x', locXRef, 'x'))
-            
+
             if 'coordy' in component_data['ReferenceLocation']:
                 locYRef = component_data['ReferenceLocation']['coordy']
-                
+
                 if isinstance(locYRef, list):
                     if len(locYRef) == 1:
                         locYRef = locYRef[0]
                     else:
                         logging.warning(REFERENCE_LOC_WARNING.format('y', locYRef, 'y'))
-                
+
                 if isinstance(locYRef, (int, float)):
                     self.locYRef = component_data['ReferenceLocation']['coordy']
                 else:
                     logging.warning(REFERENCE_LOC_WARNING.format('y', locYRef, 'y'))
-            
+
             if 'coordz' in component_data['ReferenceLocation']:
                 locZRef = component_data['ReferenceLocation']['coordz']
-                
+
                 if isinstance(locZRef, list):
                     if len(locZRef) == 1:
                         locZRef = locZRef[0]
                     else:
                         logging.warning(REFERENCE_LOC_WARNING.format('z', locZRef, 'z'))
-                
+
                 if isinstance(locZRef, (int, float)):
                     self.locZRef = component_data['ReferenceLocation']['coordz']
                 else:
                     logging.warning(REFERENCE_LOC_WARNING.format('z', locZRef, 'z'))
-        
+
         if 'Controls' in component_data:
             if 'dipDirection' in component_data['Controls']:
                 dipDirection = component_data['Controls']['dipDirection']
-                
+
                 if component_data['Controls']['dipDirection'] in DIP_DIRECTION_OPTIONS:
                     self.dipDirection = dipDirection
                 else:
                     logging.warning(DIP_DIRECTION_WARNING.format(
                         dipDirection, DIP_DIRECTION_OPTIONS))
                     self.dipDirection = None
-        
-        # Run this to check is numberOfShaleLayers is stochastic, which does not 
+
+        # Run this to check is numberOfShaleLayers is stochastic, which does not
         # work for the control file interface.
         _ = self.get_num_shale_layers(cfi=True)
 
@@ -1449,35 +1449,35 @@ class DippingStratigraphy(ComponentModel):
                     'a default value of {}.']).format(par_nm, default_value)
                 logging.warn(warn_msg)
                 self.add_par(par_nm, value=default_value, vary=False)
-        
-        # For the control file interface, locX and locY are handled in the 
+
+        # For the control file interface, locX and locY are handled in the
         # function strata.process_spatially_variable_strata()
         self.grid_obs_requested = False
-        
-        # Run this to check is numberOfShaleLayers is stochastic, which does not 
+
+        # Run this to check is numberOfShaleLayers is stochastic, which does not
         # work for the control file interface.
         _ = self.get_num_shale_layers(cfi=True)
-        
+
         thickness_obs = self.get_thickness_obs_names()
-        
+
         for ob_nm in thickness_obs:
             self.add_obs(ob_nm, index=[0])
             self.add_obs_to_be_linked(ob_nm)
-        
+
         depth_obs = self.get_depth_obs_names()
-        
+
         for ob_nm in depth_obs:
             self.add_obs(ob_nm, index=[0])
             self.add_obs_to_be_linked(ob_nm)
-    
+
     def simulation_model(self, p, time_point=365.25, locX=None, locY=None):
         """
         Return unit thicknesses and depths at the location given.
-        
+
         :param p: input parameters of LookupTableStratigraphy model
         :type p: dict
-        
-        :param time_point: time point (in days). This input is not used here, 
+
+        :param time_point: time point (in days). This input is not used here,
             but it is kept for compatibility.
         :type time_point: float
 
@@ -1490,12 +1490,12 @@ class DippingStratigraphy(ComponentModel):
         :type locY: float or array-like of floats
 
         :returns: out - dictionary of observations of lookup table stratigraphy
-            component model; keys (here, N is the numberOfShaleLayers): 
-                ['reservoirThickness','shale1Thickness', aquifer1Thickness', 
-                 'shale2Thickness', 'aquifer2Thickness', ..., 'shaleNThickness', 
-                 'reservoirDepth', 'reservoirMidDepth', 'reservoirTopDepth', 
-                 'shale1Depth', 'shale1MidDepth', 'shale1TopDepth', 
-                 'aquifer1Depth', 'aquifer1MidDepth', 'aquifer1TopDepth', ..., 
+            component model; keys (here, N is the numberOfShaleLayers):
+                ['reservoirThickness','shale1Thickness', aquifer1Thickness',
+                 'shale2Thickness', 'aquifer2Thickness', ..., 'shaleNThickness',
+                 'reservoirDepth', 'reservoirMidDepth', 'reservoirTopDepth',
+                 'shale1Depth', 'shale1MidDepth', 'shale1TopDepth',
+                 'aquifer1Depth', 'aquifer1MidDepth', 'aquifer1TopDepth', ...,
                  'shaleNDepth', 'shaleNMidDepth', 'shaleNTopDepth']
         """
         # Check whether locations are provided as keyword arguments
@@ -1527,7 +1527,7 @@ class DippingStratigraphy(ComponentModel):
                 self.locX = prov_locX
                 self.locY = prov_locY
                 self.grid_obs_requested = False
-        
+
         # Initialize output dictionary
         out = dict()
 
@@ -1536,15 +1536,15 @@ class DippingStratigraphy(ComponentModel):
                 self.locX, self.locY)
         else:
             thickness_obs = self.get_thickness_obs_names()
-            
+
             for obs in thickness_obs:
                 out[obs] = np.zeros(self.num_points)
-            
+
             depth_obs = self.get_depth_obs_names()
-            
+
             for obs in depth_obs:
                 out[obs] = np.zeros(self.num_points)
-            
+
             for ind in range(self.num_points):
                 out = self.update_stratigraphy_by_strike_and_dip(
                     self.locX[ind], self.locY[ind], out, ind=ind)
@@ -1555,32 +1555,32 @@ class DippingStratigraphy(ComponentModel):
 
 if __name__ == "__main__":
     try:
-        from openiam import AnalyticalReservoir
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
     logging.basicConfig(level=logging.WARNING)
-    
+
     # Reference location for the DippingStratigraphy component
     locXRef = 0
     locYRef = 0
-    
+
     # Location at which to evaluate results
     locX = 3535.35
     locY = 3535.35
-    
+
     # Define keyword arguments of the system model
     num_years = 5
     time_array = 365.25*np.arange(0.0, num_years+1) # time is in days
     sm_model_kwargs = {'time_array': time_array}
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # dipDirection is not specified, so it will be based on the right-hand rule
     strata = sm.add_component_model_object(DippingStratigraphy(
-        name='strata', parent=sm, locXRef=locXRef, locYRef=locYRef, 
+        name='strata', parent=sm, locXRef=locXRef, locYRef=locYRef,
         locX=locX, locY=locY))
 
-    # Add parameters of stratigraphy component model. Parameters that are not 
+    # Add parameters of stratigraphy component model. Parameters that are not
     # entered will resort to default values.
     strata.add_par('numberOfShaleLayers', value=3, vary=False)
     strata.add_par('shale1Thickness', value=260.0, vary=False)
@@ -1591,21 +1591,21 @@ if __name__ == "__main__":
     strata.add_par('reservoirThickness', value=12.0, vary=False)
     strata.add_par('strike', value=340, vary=False)
     strata.add_par('dip', value=2, vary=False)
-    
+
     thickness_obs = strata.get_thickness_obs_names()
-    
-    # The thicness and depths observations are only produced in the first time 
+
+    # The thicness and depths observations are only produced in the first time
     # step, so use index=[0] when adding these observations.
     for ob_nm in thickness_obs:
         strata.add_obs(ob_nm, index=[0])
         strata.add_obs_to_be_linked(ob_nm)
-    
+
     depth_obs = strata.get_depth_obs_names()
-    
+
     for ob_nm in depth_obs:
         strata.add_obs(ob_nm, index=[0])
         strata.add_obs_to_be_linked(ob_nm)
-    
+
     # Add reservoir component
     ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
@@ -1613,12 +1613,12 @@ if __name__ == "__main__":
     ares.add_par('injRate', value=0.5, vary=False)
     ares.add_par('logResPerm', value=-14.0, vary=False)
     ares.add_par('brineResSaturation', value=0.02, vary=False)
-    
+
     ares.add_par_linked_to_par('numberOfShaleLayers',
                                strata.deterministic_pars['numberOfShaleLayers'])
     ares.add_par_linked_to_par('datumPressure',
                                strata.default_pars['datumPressure'])
-    
+
     ares.add_par_linked_to_obs('shale1Thickness', strata.linkobs['shale1Thickness'])
     ares.add_par_linked_to_obs('shale2Thickness', strata.linkobs['shale2Thickness'])
     ares.add_par_linked_to_obs('shale3Thickness', strata.linkobs['shale3Thickness'])
@@ -1628,14 +1628,14 @@ if __name__ == "__main__":
 
     ares.add_obs('pressure')
     ares.add_obs('CO2saturation')
-    
+
     # Run system model using current values of its parameters
     sm.forward()
 
     print('------------------------------------------------------------------')
     print('                  Forward method illustration ')
     print('------------------------------------------------------------------')
-    
+
     # Print results
     print('Results at x = {} m, y = {} m: '.format(locX, locY))
     print('Aquifer 1 Bottom Depth (m): ', sm.collect_observations_as_time_series(

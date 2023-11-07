@@ -10,9 +10,8 @@ import numpy as np
 
 from scipy.spatial import Delaunay
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from openiam.matk.observation import Observation
 
-from matk.observation import Observation
 
 def interp_weights(triangulation, xyz):
     """

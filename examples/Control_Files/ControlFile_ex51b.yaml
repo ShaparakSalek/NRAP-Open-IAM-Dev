@@ -9,7 +9,7 @@
 # a specified domain (inputs under the 'RandomLocDomain' entry').
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex51b.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex51b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

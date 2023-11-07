@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=58", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "openiam"
+authors = [
+  { name="Veronika Vasylkivska", email="veronika.vasylkivska@netl.doe.gov" },
+  { name="Nathaniel Mitchell", email="nathaniel.mitchell@netl.doe.gov" },
+]
+description = "Integrated Assessment Model for Quantitative Geological Carbon Storage Risk Assessment"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["version", "readme", "entry-points", "license", "scripts", "gui-scripts", "dependencies", "optional-dependencies"]
+
+
+[tool.setuptools.dynamic]
+version = {file = "src/openiam/VERSION"}
+readme = {file = "README.md"}
+
+
+[project.urls]
+"Homepage" = "https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam"
+"Documentation" = "https://nrap.gitlab.io/OpenIAM/"
+"Repository" = "https://gitlab.com/NRAP/OpenIAM"

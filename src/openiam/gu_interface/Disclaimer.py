@@ -4,8 +4,8 @@ import Pmw
 import tkinter as tk
 from tkinter import ttk
 
-from Dashboard import Dashboard_Page
-from dictionarydata import LABEL_FONT
+from openiam.gu_interface.Dashboard import Dashboard_Page
+from openiam.gu_interface.dictionarydata import LABEL_FONT
 
 
 class Disclaimer_Page(tk.Frame):

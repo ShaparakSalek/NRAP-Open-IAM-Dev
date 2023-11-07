@@ -7,17 +7,15 @@ from numpy.random import default_rng
 np.set_printoptions(threshold=np.inf)
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 try:
-    from openiam import SystemModel, SamplerModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+ str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import components.seal.seal_refresh as sref
-    import components.seal.seal_intro as intro
-    from components.seal.seal_setup import SEAL_SETUP_DICT
+    import openiam.components.models.seal.seal_refresh as sref
+    import openiam.components.models.seal.seal_intro as intro
+    from openiam.components.models.seal.seal_setup import SEAL_SETUP_DICT
 except ImportError:
     print('\nERROR: Unable to load Thickness Sampler for Seal Horizon\n')
     sys.exit()
@@ -28,7 +26,7 @@ SCTS_PARAMETERS = ['thickness_ave', 'thickness_std',
                    'thickness_min', 'thickness_max']  # seal_controls pars
 
 
-class SHThicknessSampler(SamplerModel):
+class SHThicknessSampler(iam_bc.SamplerModel):
     """
     Class for model providing thickness parameter for Seal Horizon component.
 
@@ -247,9 +245,9 @@ def test_scenario1():
     # Define keyword arguments of the system model.
     model_kwargs = {'time_point': 0.0} # time is given in days
 
-    output_dir = '../../../output/samplers/'
+    output_dir = '../../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     t_sampler = sm.add_component_model_object(
         SHThicknessSampler(name='ts', parent=sm, grid_shape=(3, 3)))
     t_sampler.add_par('seed', value=234, vary=False)
@@ -281,9 +279,9 @@ def test_scenario2():
     # Define keyword arguments of the system model.
     model_kwargs = {'time_point': 0.0} # time is given in days
 
-    output_dir = '../../../output/samplers/'
+    output_dir = '../../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     t_sampler = sm.add_component_model_object(
         SHThicknessSampler(name='ts', parent=sm, grid_shape=(10, 10),
                            constr_type='matrix'))
@@ -333,9 +331,9 @@ def test_scenario3():
     # Define keyword arguments of the system model.
     model_kwargs = {'time_point': 0.0} # time is given in days
 
-    output_dir = '../../../output/samplers/'
+    output_dir = '../../../../output/samplers/'
     # Create system model.
-    sm = SystemModel(model_kwargs=model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=model_kwargs)
     t_sampler = sm.add_component_model_object(
         SHThicknessSampler(name='ts', parent=sm, grid_shape=(100,)))
     t_sampler.add_par('seed', value=234, vary=False)

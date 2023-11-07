@@ -8,28 +8,25 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-source_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(source_folder)
-sys.path.append(os.path.join(source_folder, 'components', 'seal'))
-
 try:
-    from openiam import SystemModel, ComponentModel, IAM_DIR, LookupTableReservoir
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+ str(err))
-import components.seal.seal_model as smod
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_dynamic_inputs
+import openiam.components.models.seal.seal_model as smod
+
+from openiam.cf_interface.commons import process_dynamic_inputs
 
 try:
-    import components.seal.seal_config as sconf
-    import components.seal.seal_decipher as sdeci
-    import components.seal.seal_intro as sintro
-    import components.seal.seal_fluids as sfluid
-    import components.seal.seal_perm as perm
-    import components.seal.seal_refresh as sref
-    import components.seal.seal_units as sunit
-    import components.seal.frac_random as fran
-    from components.seal.seal_setup import SEAL_SETUP_DICT
+    import openiam.components.models.seal.seal_config as sconf
+    import openiam.components.models.seal.seal_decipher as sdeci
+    import openiam.components.models.seal.seal_intro as sintro
+    import openiam.components.models.seal.seal_fluids as sfluid
+    import openiam.components.models.seal.seal_perm as perm
+    import openiam.components.models.seal.seal_refresh as sref
+    import openiam.components.models.seal.seal_units as sunit
+    import openiam.components.models.seal.frac_random as fran
+    from openiam.components.models.seal.seal_setup import SEAL_SETUP_DICT
 except ImportError:
     print('\nERROR: Unable to load additional modules for Seal Horizon component\n')
     sys.exit()
@@ -48,7 +45,7 @@ SH_CFI_CONTROLS = {'correlate_entry_approach': ['correlateApproach', False],
                    'vary_pressure_approach': ['varyPressureApproach', False]}
 
 
-class SealHorizon(ComponentModel):
+class SealHorizon(iam_bc.ComponentModel):
     """
     The Seal Horizon component model simulates the flow of |CO2| through a low
     permeability but fractured rock horizon (a "seal" formation) overlying the
@@ -287,8 +284,8 @@ class SealHorizon(ComponentModel):
       (for all cells) mass of the |CO2| and brine leaked through seal layer
       into overlying aquifer.
 
-    For control file examples using the Seal Horizon component, see *ControlFile_ex19* 
-    and *ControlFile_ex23*. For script examples, see *iam_sys_lutreservoir_seal_horizon.py* 
+    For control file examples using the Seal Horizon component, see *ControlFile_ex19*
+    and *ControlFile_ex23*. For script examples, see *iam_sys_lutreservoir_seal_horizon.py*
     and *iam_sys_lutreservoir_seal_horizon_samplers.py*.
 
     """
@@ -1121,7 +1118,7 @@ class SealHorizon(ComponentModel):
         for key in default_vals:
             if key in cell_data:
                 if isinstance(cell_data[key], str):
-                    filename = os.path.join(IAM_DIR, cell_data[key])
+                    filename = os.path.join(iam_bc.IAM_DIR, cell_data[key])
                     # Using somewhat elaborate way to extract data from txt data file
                     # to make sure all sizes of data works, including size of 1
                     # Data file looks like a column, similar to input for
@@ -1438,6 +1435,7 @@ def test_scenario1():
     Run script example illustrating work of Seal Horizon component with its input
     linked to the output of the Lookup Table Reservoir component.
     """
+    from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
     # Setup location of lookup table data set
     file_directory = os.sep.join(['..', 'components', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
@@ -1456,7 +1454,7 @@ def test_scenario1():
     seal_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model.
-    sm = SystemModel(model_kwargs=seal_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=seal_model_kwargs)
 
     # Add reservoir component.
     loc_X = [35315.8, 36036.4, 36757.1, 37477.7, 38198.4, 38919, 39639.7,
@@ -1563,7 +1561,7 @@ def test_scenario2():
     seal_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model.
-    sm = SystemModel(model_kwargs=seal_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=seal_model_kwargs)
     shc = sm.add_component_model_object(
         SealHorizon(name='shc', parent=sm,
                     locX=[50.0], locY=[550.0], area=[100.0]))

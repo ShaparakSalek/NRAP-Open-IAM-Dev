@@ -14,7 +14,7 @@ for all the imports to work properly or placed in the folder above root folder
 for NRAP-Open-IAM.
 
 The required data files decatur_pressure.hdf5 and decaturSeismic.hdf5 should be
-placed in the folder source/components/reservoir/lookuptables/Decatur. The resulting
+placed in the folder data/reservoir/lookuptables/Decatur. The resulting
 output lookup table and other files needed for the Lookup Table Reservoir component
 will be placed there.
 
@@ -49,15 +49,15 @@ except ModuleNotFoundError:
     except Exception as exc:
         raise ModuleNotFoundError('Package orion is not available on this system.') from exc
 
-sys.path.insert(0, os.sep.join(['..', '..', '..', '..', 'source']))
+sys.path.insert(0, os.sep.join(['..', '..', '..', '..', 'src']))
 
-from openiam import IAM_DIR
+from openiam.components.iam_base_classes import IAM_DIR
 
 
 if __name__ == '__main__':
     # Setup input folder and required files names
     decatur_example_dir = os.sep.join([
-        IAM_DIR, 'source', 'components', 'reservoir', 'lookuptables', 'Decatur'])
+        IAM_DIR, 'data', 'reservoir', 'lookuptables', 'Decatur'])
     figures_output_dir = os.sep.join([IAM_DIR, 'output', 'Decatur_example'])
     pressure_file_name = 'decatur_pressure.hdf5'
     seismic_file_name = 'decaturSeismic.hdf5'

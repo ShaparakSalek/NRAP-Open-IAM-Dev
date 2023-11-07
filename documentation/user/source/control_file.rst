@@ -324,7 +324,7 @@ the filename *ControlFile_ex1a.yaml*. To run this example, open a command prompt
 *examples/Control_Files* directory, activate the environment created for NRAP-Open-IAM,
 and run the command::
 
-    python ../../source/openiam/openiam_cf.py --file ControlFile_ex1a.yaml
+    python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex1a.yaml
 
 Note: use \\ on Windows and / on Mac and Linux.
 
@@ -335,7 +335,7 @@ NRAP-Open-IAM. For more details regarding the visualization options available, s
 section :ref:`cfi_visualization`.
 
 In a control file, an entry situated above the other entries will be read into Python as a
-dictionary. For example, the ``Plots`` section shwon above will be converted into the
+dictionary. For example, the ``Plots`` section shown above will be converted into the
 following format in Python:
 
 .. code-block:: python
@@ -371,7 +371,7 @@ following format in Python:
             }
 
 In Python, the '{' and  '}' characters mark the start and end of a dictionary. The entire
-control file is read into *openiam_cf.py* as a dictionary called yaml_data. If a user only
+control file is read by *openiam_cf.py* as a dictionary called yaml_data. If a user only
 wants to run simulations with the CFI, then it is not necessary for the user to understand
 this conversion or to know Python. If a user wants to access parts of the CFI through a
 script-based approach (e.g., using the NRAP-Open-IAM plot types in a user-created script),

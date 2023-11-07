@@ -13,8 +13,10 @@ import sys
 import logging
 import numpy as np
 
-sys.path.insert(0,os.sep.join(['..','..','source']))
-from openiam import DataInterpolator, Stratigraphy, AnalyticalReservoir
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.iam_gridded_observation import DataInterpolator
 
 try:
     from openiam import SystemModel
@@ -36,7 +38,7 @@ if __name__ == "__main__":
 
     int1 = DataInterpolator(name='int1', parent=sm,
                             header_file_dir=os.path.join(
-                                '..', '..', 'source', 'components', 'reservoir',
+                                '..', '..', 'data', 'reservoir',
                                 'lookuptables', 'Test_2d'),
                             data_file='shale1Thickness.csv')
     strata = sm.add_component_model_object(Stratigraphy(name='strata', parent=sm))

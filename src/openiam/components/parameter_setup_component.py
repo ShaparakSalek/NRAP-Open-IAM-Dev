@@ -13,16 +13,16 @@ import logging
 from math import ceil
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
-    from openiam import SamplerModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
 PERM_GROUPS_DISTRIBUTIONS = {'small': [-20.0, -18.0],
                             'medium': [-18.0, -10.0],
                             'large': [-10.0, -9.0]}
+
 
 def generate_seq(num_elems, seed=None, array_to_be_returned=2):
     """
@@ -67,7 +67,7 @@ def generate_seq(num_elems, seed=None, array_to_be_returned=2):
     return indices_permuted, rand_val
 
 
-class ParameterSetup1(SamplerModel):
+class ParameterSetup1(iam_bc.SamplerModel):
     """
     ParameterSetup1 component generates permeability values for wellbore
     components of interest. Risk scores, if assigned to wellbores, can be used
@@ -340,7 +340,7 @@ class ParameterSetup1(SamplerModel):
         return out
 
 
-class ParameterSetup2(SamplerModel):
+class ParameterSetup2(iam_bc.SamplerModel):
     """
     ParameterSetup2 component generates permeability values for wellbore
     components of interest. Different permeability distribution can be specified
@@ -551,7 +551,7 @@ class ParameterSetup2(SamplerModel):
         return out
 
 
-class ParameterSetup3(SamplerModel):
+class ParameterSetup3(iam_bc.SamplerModel):
     """
     ParameterSetup3 component generates permeability values for wellbore
     components of interest. Different permeability distribution can be specified
@@ -805,7 +805,7 @@ class ParameterSetup3(SamplerModel):
         return out
 
 
-class ParameterSetup4(SamplerModel):
+class ParameterSetup4(iam_bc.SamplerModel):
     """
     ParameterSetup4 component generates permeability values for wellbore
     components of interest. Different permeability distribution can be specified
@@ -1059,7 +1059,7 @@ class ParameterSetup4(SamplerModel):
         return out
 
 
-class ParameterSetup5(SamplerModel):
+class ParameterSetup5(iam_bc.SamplerModel):
     """
     ParameterSetup5 component generates permeability values for wellbore
     components of interest. The wells are separated into groups based on
@@ -1290,8 +1290,9 @@ class ParameterSetup5(SamplerModel):
 
 def test_parameter_setup1():
     # Import needed packages and classes
-    from matk import pyDOE
-    from openiam import SystemModel, AnalyticalReservoir, MultisegmentedWellbore
+    from openiam.matk import pyDOE
+    from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+    from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
     # Define output directory
     output_directory = os.path.join('..', '..', 'output',
@@ -1305,7 +1306,7 @@ def test_parameter_setup1():
     sm_model_kwargs = {'time_array': time_array}   # time is given in days
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Create randomly located leaky well locations
     # within box defined by xmin,xmax,ymin,ymax

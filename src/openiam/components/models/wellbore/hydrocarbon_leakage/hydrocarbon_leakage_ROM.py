@@ -14,9 +14,7 @@ from sklearn.preprocessing import MinMaxScaler
 # This suppresses the excessive messages produced by tensorflow
 tf.get_logger().setLevel(logging.ERROR)
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from openiam import IAM_DIR
+from ....iam_base_classes import IAM_DIR
 
 OUTPUT_NAMES = ['mass_CO2_aquifer', 'mass_CO2_gas_aquifer',
                 'mass_methane_oil_aquifer', 'mass_methane_gas_aquifer',
@@ -76,8 +74,8 @@ class Solution():
         if input_array_clip[0].shape[0] > 0:
             input_values_scaled = scale_input(input_array_copy)
 
-            model_directory = os.path.join(IAM_DIR, 'source', 'components',
-                                           'wellbore', 'hydrocarbon_leakage')
+            model_directory = os.path.join(IAM_DIR, 'src', 'openiam', 'components',
+                                           'models', 'wellbore', 'hydrocarbon_leakage')
             os.chdir(model_directory)
 
             rom_output = np.zeros((input_array_copy.shape[0],

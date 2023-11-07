@@ -36,9 +36,9 @@ import copy                                     # For array adjustment
 from scipy.interpolate import griddata          # For irregular points
 import numpy as np                              # For array operations
 
-import seal_config as scfg                       # IO directory names
-import seal_file as sfile                       # For paths and error reports
-import seal_units as sun                        # Unit conversion
+from . import seal_config as scfg                       # IO directory names
+from . import seal_file as sfile                       # For paths and error reports
+from . import seal_units as sun                        # Unit conversion
 
 # Constants for starting for statements
 LED_IN = "      --> "                           # General message start

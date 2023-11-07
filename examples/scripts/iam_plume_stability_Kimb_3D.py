@@ -19,9 +19,10 @@ $ python iam_plume_stability_Kimb_3D.py
 import sys
 import os
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam.mesh2D import read_Mesh2D_data
-from openiam.reservoir_data_interpolator import read_time_points
+
+from openiam.components.mesh2D import read_Mesh2D_data
+from openiam.components.reservoir_data_interpolator import read_time_points
+
 
 if __name__ == '__main__':
     # For multiprocessing in Spyder

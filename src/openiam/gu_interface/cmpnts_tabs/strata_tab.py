@@ -14,21 +14,18 @@ from tkinter import (StringVar, DoubleVar, IntVar, BooleanVar)
 
 import Pmw
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
-from dictionarydata import DISTRIBUTION_OPTIONS
-from dictionarydata import connections
+from openiam.components.iam_base_classes import IAM_DIR
+from openiam.gu_interface.dictionarydata import componentVars, componentChoices
+from openiam.gu_interface.dictionarydata import (connectionsDictionary,
+                                                 componentTypeDictionary)
+from openiam.gu_interface.dictionarydata import DISTRIBUTION_OPTIONS
+from openiam.gu_interface.dictionarydata import connections
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (STRATA_PARAMETER_LABEL_WIDTH,
-                            DISTRIBUTION_MENU_WIDTH,
-                            DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX,
-                            CB_PADX)
-
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(SOURCE_DIR)
+from openiam.gu_interface.dictionarydata import LABEL_FONT
+from openiam.gu_interface.dictionarydata import (
+    STRATA_PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
+    DISTRIBUTION_ARG_LABEL_WIDTH, DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+    OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
 
 
 STRATA_PARAMETERS = ['numberOfShaleLayers', 'datumPressure', 'reservoirThickness']
@@ -192,7 +189,8 @@ def add_widgets(controller, tab, toolTip):
     hint_frame = tk.Frame(tab)
     hint_frame.grid(row=2, column=0, sticky='w', pady=10)
     controller.strata_layers_image = tk.PhotoImage(
-        file=os.path.join(SOURCE_DIR, 'GUI', 'images', 'ShaleLayers.gif'))
+        file=os.path.join(IAM_DIR, 'src', 'openiam', 'gu_interface',
+                          'images', 'ShaleLayers.gif'))
     options = [controller.strata_layers_image]
     hint_menu_var = StringVar()
     hint_menu_var.set('Stratigraphy layers')

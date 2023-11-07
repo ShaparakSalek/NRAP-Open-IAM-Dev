@@ -17,12 +17,9 @@ from matplotlib import animation
 import pandas as pd
 
 np.set_printoptions(threshold=sys.maxsize)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel
-    from openiam.iam_gridded_observation import interp_weights
-    from openiam.iam_gridded_observation import interpolate
+    from openiam.components.iam_gridded_observation import interp_weights, interpolate
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
@@ -834,6 +831,10 @@ class ReservoirDataInterpolator():
 
 
 def test_case1():
+    try:
+        from openiam.components.iam_base_classes import SystemModel
+    except ImportError as err:
+        print('Unable to load NRAP-Open-IAM class module: {}'.format(err))
     # The code below (test 1) tests only interpolator and plotting/animation
     # capabilities but it needs a system model for the parent parameter.
     # Thus, we need to create a system model first.
@@ -847,7 +848,7 @@ def test_case1():
     int1 = sm.add_interpolator(
         ReservoirDataInterpolator(
             name='int1', parent=sm, header_file_dir=os.path.join(
-                '..', 'components', 'reservoir', 'lookuptables', 'Kimb_54_sims'),
+                '..', '..', '..', 'data', 'reservoir', 'lookuptables', 'Kimb_54_sims'),
             time_file='time_points.csv',
             data_file='Reservoir_data_sim02.csv',
             index=2,

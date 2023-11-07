@@ -15,16 +15,17 @@ import numpy as np
 GUI_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(GUI_DIR)
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
-from dictionarydata import DISTRIBUTION_OPTIONS
+from openiam.gu_interface.dictionarydata import componentVars, componentChoices
+from openiam.gu_interface.dictionarydata import (connectionsDictionary,
+                                                 componentTypeDictionary)
+from openiam.gu_interface.dictionarydata import DISTRIBUTION_OPTIONS
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (HCL_PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
-                            DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
-from cmpnts_tabs.commons import commons_read_tab_vars
+from openiam.gu_interface.dictionarydata import LABEL_FONT
+from openiam.gu_interface.dictionarydata import (
+    HCL_PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
+    DISTRIBUTION_ARG_LABEL_WIDTH, DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+    OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
+from openiam.gu_interface.cmpnts_tabs.commons import commons_read_tab_vars
 
 HCL_PARAMETERS = ['NTG', 'logResPerm',   'reservoirPressureMult', 'logWellPerm',
                   'avgWaterSaturation', 'FCO2', 'FC1', 'FC4', 'FC7Plus']

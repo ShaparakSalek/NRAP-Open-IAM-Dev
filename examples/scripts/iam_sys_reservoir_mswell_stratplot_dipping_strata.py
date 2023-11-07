@@ -1,9 +1,9 @@
 '''
-This example demonstrates the use of the DippingStratigraphy component and 
-the Stratigraphy plot type. The stratigraphy_plot function in stratigraphy_plot.py 
-requires the input dictionaries yaml_data and model_data. These dictionaries can 
-be made with .yaml Control Files, but they can also be made manually as 
-demonstrated here. Note that the function requires 
+This example demonstrates the use of the DippingStratigraphy component and
+the Stratigraphy plot type. The stratigraphy_plot function in stratigraphy_plot.py
+requires the input dictionaries yaml_data and model_data. These dictionaries can
+be made with .yaml Control Files, but they can also be made manually as
+demonstrated here. Note that the function requires
 yaml_data['Plots'][plotName]['Stratigraphy'], where plotName is an arbitrary
 user defined string (e.g., 'Plot1' or 'StratPlot'). The function does not
 require any of the plotting options that can be contained within
@@ -19,13 +19,12 @@ import os
 import numpy as np
 import random
 import datetime
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, DippingStratigraphy, AnalyticalReservoir,
-                     MultisegmentedWellbore)
-
-import openiam as iam
-import openiam.visualize as iam_vis
+from openiam.components.iam_base_classes import SystemModel, IAM_DIR
+from openiam.components.dipping_stratigraphy_component import DippingStratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+import openiam.visualization as iam_vis
 
 
 if __name__ == "__main__":
@@ -64,24 +63,24 @@ if __name__ == "__main__":
     # Set up the dictionaries required by stratigraphy_plot()
     model_data = dict()
     model_data['OutputDirectory'] = os.path.join(
-        iam.IAM_DIR, 'output', 'stratplot_example_dipping_strata_'
+        IAM_DIR, 'output', 'stratplot_example_dipping_strata_'
         + str(datetime.date.today()))
 
     yaml_data = dict()
-    
-    # A 'DippingStratigraphy' key needs to be in yaml_data - the TTFD plot type 
+
+    # A 'DippingStratigraphy' key needs to be in yaml_data - the TTFD plot type
     # checks yaml_data to see what kind of stratigraphy is being used.
     yaml_data['DippingStratigraphy'] = dict()
-    
+
     # yaml_data also needs a dictionary containing all of the parameters
     pars_for_yaml = {
-        'numberOfShaleLayers': numberOfShaleLayers, 'datumPressure': datumPressure, 
-        'shale1Thickness': shale1Thickness, 'shale2Thickness': shale2Thickness, 
-        'shale3Thickness': shale3Thickness, 'aquifer1Thickness': aquifer1Thickness, 
+        'numberOfShaleLayers': numberOfShaleLayers, 'datumPressure': datumPressure,
+        'shale1Thickness': shale1Thickness, 'shale2Thickness': shale2Thickness,
+        'shale3Thickness': shale3Thickness, 'aquifer1Thickness': aquifer1Thickness,
         'aquifer2Thickness': aquifer2Thickness, 'reservoirThickness': reservoirThickness}
-    
+
     yaml_data['DippingStratigraphy']['Parameters'] = pars_for_yaml
-    
+
     plotName = 'Plot1.png'
     yaml_data['Plots'] = dict()
     yaml_data['Plots'][plotName] = dict()
@@ -124,7 +123,7 @@ if __name__ == "__main__":
     # List of all components except for stratigraphy components. This list is
     # needed for the stratigraphy_plot() function.
     components = []
-    
+
     numberOfWells = 6
     np.random.seed(random.randint(0, 1.0e6))
     well_x_values = np.random.rand(1, numberOfWells) * max_x_value
@@ -142,11 +141,11 @@ if __name__ == "__main__":
         # visualization codes, like stratigraphy_plot.py, are made to use this
         # naming convention.
         strataName = 'strata' + msName
-        
+
         strata.append(sm.add_component_model_object(DippingStratigraphy(
-            name=strataName, parent=sm, locXRef=locXRef, locYRef=locYRef, 
+            name=strataName, parent=sm, locXRef=locXRef, locYRef=locYRef,
             dipDirection=dipDirection, locX=well_x_values[locRef], locY=well_y_values[locRef])))
-        
+
         # Add parameters for the dipping stratrigraphy component
         strata[-1].add_par('numberOfShaleLayers',
                            value=numberOfShaleLayers, vary=False)
@@ -166,26 +165,26 @@ if __name__ == "__main__":
 
         strata[-1].add_par('strike', value=strike, vary=False)
         strata[-1].add_par('dip', value=dip, vary=False)
-        
-        # Only use get_thickness_obs_names() and get_depth_obs_names() after the 
+
+        # Only use get_thickness_obs_names() and get_depth_obs_names() after the
         # numberOfShaleLayers parameter has been assigned.
         thickness_obs = strata[-1].get_thickness_obs_names()
-        
-        # The thicness and depths observations are only produced in the first time 
+
+        # The thicness and depths observations are only produced in the first time
         # step, so use index=[0] when adding these observations.
         for ob_nm in thickness_obs:
             strata[-1].add_obs(ob_nm, index=[0])
             strata[-1].add_obs_to_be_linked(ob_nm)
-        
+
         depth_obs = strata[-1].get_depth_obs_names()
-        
+
         for ob_nm in depth_obs:
             strata[-1].add_obs(ob_nm, index=[0])
             strata[-1].add_obs_to_be_linked(ob_nm)
-        
+
         # Add reservoir component for the current well
         ares.append(sm.add_component_model_object(AnalyticalReservoir(
-            name=aresName, parent=sm, locX=well_x_values[locRef], 
+            name=aresName, parent=sm, locX=well_x_values[locRef],
             locY=well_y_values[locRef], injX=injectionX, injY=injectionY)))
 
         # Add parameters of reservoir component model
@@ -198,17 +197,17 @@ if __name__ == "__main__":
         ares[-1].add_par('CO2Viscosity', value=6.6e-5, vary=False)
         ares[-1].add_par('numberOfShaleLayers',
                          value=numberOfShaleLayers, vary=False)
-        
+
         ares[-1].add_par_linked_to_par(
             'numberOfShaleLayers', strata[-1].deterministic_pars['numberOfShaleLayers'])
         ares[-1].add_par_linked_to_par(
             'datumPressure', strata[-1].deterministic_pars['datumPressure'])
-        
-        # Link the analytical reservoir's unit thicknesses to the dipping 
+
+        # Link the analytical reservoir's unit thicknesses to the dipping
         # stratigraphy component's unit thicknesses.
         for ob_nm in thickness_obs:
             ares[-1].add_par_linked_to_obs(ob_nm, strata[-1].linkobs[ob_nm])
-        
+
         ares[-1].add_obs('pressure')
         ares[-1].add_obs('CO2saturation')
         ares[-1].add_obs_to_be_linked('pressure')
@@ -234,7 +233,7 @@ if __name__ == "__main__":
         ms[-1].add_par_linked_to_par(
             'datumPressure', strata[-1].deterministic_pars['datumPressure'])
 
-        # Link the analytical reservoir's unit thicknesses to the dipping 
+        # Link the analytical reservoir's unit thicknesses to the dipping
         # stratigraphy component's unit thicknesses.
         for ob_nm in thickness_obs:
             ms[-1].add_par_linked_to_obs(ob_nm, strata[-1].linkobs[ob_nm])

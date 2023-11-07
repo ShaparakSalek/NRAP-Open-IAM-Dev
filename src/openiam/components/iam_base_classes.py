@@ -14,28 +14,24 @@ from datetime import datetime
 
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from openiam.matk import matk
+from openiam.matk.lmfit.asteval import Interpreter
+from openiam.matk.parameter import Parameter
+from openiam.matk.observation import Observation
+from openiam.matk.ordereddict import OrderedDict
+from openiam.components.iam_sampleset import SampleSet
+from openiam.cf_interface.text import system_model_to_text, component_models_to_text
+from openiam.cf_interface.output import process_output
 
-from matk import matk
-from matk.lmfit.asteval import Interpreter
-from matk.parameter import Parameter
-from matk.observation import Observation
-from matk.ordereddict import OrderedDict
-from openiam.iam_sampleset import SampleSet
-from openiam.cfi.text import system_model_to_text, component_models_to_text
-from openiam.cfi.output import process_output
-
-try:
-    from openiam.iam_gridded_observation import GriddedObservation
-except ImportError:
-    from .iam_gridded_observation import GriddedObservation
+from openiam.components.iam_gridded_observation import GriddedObservation
 
 import openiam as iam
-IAM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__))))
+
+IAM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))))
 
 
-class SystemModel(matk):
+class SystemModel(matk.matk):
     """ IAM System Model class. """
     def __init__(self, model_kwargs=None):
         """

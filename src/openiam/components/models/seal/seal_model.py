@@ -27,8 +27,8 @@ Other (1):
 Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 -------------------------------------------------------------------------------
 """
-import seal_units as sun        # For unit conversion
-import seal_perm as perm        # For permeability definitions/computations
+from . import seal_units as sun   # For unit conversion
+from . import seal_perm as perm   # For permeability definitions/computations
 
 # Other constants
 LIMIT_SAT = 1.0e-01           # Small saturation - start solubility option

@@ -7,25 +7,25 @@ import logging
 import os
 import sys
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel, IAM_DIR
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
-                                get_strat_param_dict_for_link)
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.strata import (get_comp_types_strata_pars,
+                                         get_comp_types_strata_obs,
+                                         get_strat_param_dict_for_link)
 
 try:
-    import components.aquifer.FutureGen2.azmi.futuregen2_azmi_ROM as fgarom
+    import openiam.components.models.aquifer.FutureGen2.azmi.futuregen2_azmi_ROM as fgarom
 except ImportError:
     print('\nERROR: Unable to load ROM for FutureGen2 AZMI component\n')
     sys.exit()
 
 
-class FutureGen2AZMI(ComponentModel):
+class FutureGen2AZMI(iam_bc.ComponentModel):
     """
     The FutureGen 2.0 Above Zone Monitoring Interval (AZMI) component model is a
     reduced order model that can be used to predict the impact that carbon dioxide
@@ -131,9 +131,9 @@ class FutureGen2AZMI(ComponentModel):
     * **Temperature_dz** [|m|] - height of plume where relative change
       in temperature > 0.03%
 
-    For control file examples using the FutureGen 2.0 AZMI component, see 
-    *ControlFile_ex15*, *ControlFile_ex39a*, and *ControlFile_ex39b*. For script 
-    examples, see *iam_sys_reservoir_openwell_futuregen_aor_plot.py*  
+    For control file examples using the FutureGen 2.0 AZMI component, see
+    *ControlFile_ex15*, *ControlFile_ex39a*, and *ControlFile_ex39b*. For script
+    examples, see *iam_sys_reservoir_openwell_futuregen_aor_plot.py*
     and *iam_sys_lutreservoir_mswell_futuregen_dream.py*.
 
     """
@@ -398,33 +398,33 @@ class FutureGen2AZMI(ComponentModel):
                 'brine_mass', adapter.linkobs['mass_brine_{aquifer_name}'.format(
                     aquifer_name=aq_name)])
         # End Connection if statement
-        
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter depth (to the bottom of the aquifer)
         strata = name2obj_dict['strata']
-        
+
         if name2obj_dict['strata_type'] in types_strata_pars:
             if 'depth' not in self.pars and \
                     'depth' not in self.deterministic_pars:
                 self.add_par_linked_to_par(
                     'depth', strata.composite_pars['{}Depth'.format(aq_name)])
-            
+
             # Take care of parameter thick (possibly) defined by stratigraphy component
             if 'aqu_thick' not in self.pars and \
                     'aqu_thick' not in self.deterministic_pars:
                 sparam = '{aq}Thickness'.format(aq=aq_name)
-                
+
                 connect = get_strat_param_dict_for_link(sparam, strata)
-                
+
                 if connect is None:
                     sparam = 'aquiferThickness'
-                    
+
                     connect = get_strat_param_dict_for_link(sparam, strata)
-                    
+
                     if connect is None:
                         err_msg = ''.join([
                             'Unable to find "{}" or "{}" parameters. Please ',
@@ -434,35 +434,35 @@ class FutureGen2AZMI(ComponentModel):
                         raise KeyError(err_msg)
 
                 self.add_par_linked_to_par('aqu_thick', connect[sparam])
-            
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             if 'depth' in self.pars or 'depth' in self.deterministic_pars:
                 warning_msg = strata.parameter_assignment_warning_msg().format(
                     'depth', '{}Depth'.format(aq_name))
-                
+
                 logging.warning(warning_msg)
-                    
+
                 if 'depth' in self.pars:
                     del self.pars['depth']
-                
+
                 elif 'depth' in self.deterministic_pars:
                     del self.deterministic_pars['depth']
-            
+
             self.add_par_linked_to_obs(
                 'depth', strata.linkobs['{}Depth'.format(aq_name)])
-            
+
             if 'aqu_thick' in self.pars or 'aqu_thick' in self.deterministic_pars:
                 warning_msg = strata.parameter_assignment_warning_msg().format(
                     'aqu_thick', '{}Thickness'.format(aq_name))
-                
+
                 logging.warning(warning_msg)
-                    
+
                 if 'aqu_thick' in self.pars:
                     del self.pars['aqu_thick']
-                
+
                 elif 'aqu_thick' in self.deterministic_pars:
                     del self.deterministic_pars['aqu_thick']
-            
+
             self.add_par_linked_to_obs(
                 'aqu_thick', strata.linkobs['{}Thickness'.format(aq_name)])
 
@@ -471,7 +471,7 @@ def test_futuregen2_azmi_component():
     # Create system model
     time_array = 365.25*np.arange(0, 2)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add FutureGen AZMI model object and define parameters
     fga = sm.add_component_model_object(FutureGen2AZMI(name='fga', parent=sm))

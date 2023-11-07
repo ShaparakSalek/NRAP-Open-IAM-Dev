@@ -12,9 +12,13 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import (SystemModel, ComponentModel,
-                         StratigraphyDataInterpolator, IAM_DIR)
-    from openiam.iam_gridded_observation import interp_weights
+    import openiam.components.iam_base_classes as iam_bc
+except ImportError as err:
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
+
+try:
+    from openiam.components.stratigraphy_data_interpolator import  StratigraphyDataInterpolator
+    from openiam.components.iam_gridded_observation import interp_weights
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
@@ -67,57 +71,58 @@ def find_weights(loc_xyz, triangulation):
 
     return num_points, tri_vertices, tri_weights
 
-class LookupTableStratigraphy(ComponentModel):
+
+class LookupTableStratigraphy(iam_bc.ComponentModel):
     """
-    The Lookup Table Stratigraphy component can be used to read stratigraphy 
-    data from a *.csv* or *.hdf5* file and then utilize this stratigraphy data 
-    in a simulation. Unit thicknesses are specified for different coordinates 
-    in the file, and spatial interpolation is used to produce unit thicknesses 
-    at different locations within the domain. This approach is meant to allow 
-    greater flexibility, but it also requires the user to be careful when setting 
-    up the data file used. The output from the Lookup Table Stratigraphy component 
-    can be checked with the ``Stratigraphy`` and ``StratigraphicColumn`` plot 
+    The Lookup Table Stratigraphy component can be used to read stratigraphy
+    data from a *.csv* or *.hdf5* file and then utilize this stratigraphy data
+    in a simulation. Unit thicknesses are specified for different coordinates
+    in the file, and spatial interpolation is used to produce unit thicknesses
+    at different locations within the domain. This approach is meant to allow
+    greater flexibility, but it also requires the user to be careful when setting
+    up the data file used. The output from the Lookup Table Stratigraphy component
+    can be checked with the ``Stratigraphy`` and ``StratigraphicColumn`` plot
     types in the control file interface.
-    
-    In the NRAP-Open-IAM control file interface, the type name for the Lookup 
+
+    In the NRAP-Open-IAM control file interface, the type name for the Lookup
     Table Stratigraphy component is ``LookupTableStratigraphy``.
-    
+
     The arrangement of geologic units for this component is the same as the that for
-    the ``Stratigraphy`` component. The lowest unit considered is the reservoir. There 
-    are alternating shales and aquifers overlying the reservoir. The lowest shale, 
-    shale 1, is immediately above the reservoir. Aquifer 1 is above shale 1, and 
-    shale 2 is above aquifer 1. This pattern continues until shale ``N``, which 
-    extends to the surface, where ``N`` is the number of shale units used. There 
-    are ``N - 1`` aquifers, and the number of shale layers is specified with the 
-    *numberOfShaleLayers* parameter. The *numberOfShaleLayers* cannot vary across 
-    the domain. If one wants a unit to effectively pinch out in certain areas, 
-    however, its thickness values for that area in the file can be decreased to 
+    the ``Stratigraphy`` component. The lowest unit considered is the reservoir. There
+    are alternating shales and aquifers overlying the reservoir. The lowest shale,
+    shale 1, is immediately above the reservoir. Aquifer 1 is above shale 1, and
+    shale 2 is above aquifer 1. This pattern continues until shale ``N``, which
+    extends to the surface, where ``N`` is the number of shale units used. There
+    are ``N - 1`` aquifers, and the number of shale layers is specified with the
+    *numberOfShaleLayers* parameter. The *numberOfShaleLayers* cannot vary across
+    the domain. If one wants a unit to effectively pinch out in certain areas,
+    however, its thickness values for that area in the file can be decreased to
     to the minimum thickness of 1 |m|.
 
-    In the NRAP-Open-IAM control file interface, the ``FileDirectory`` and 
-    ``FileName`` keywords must be specified. The ``FileDirectory`` keyword 
-    indicates the directory where the data files for the lookup tables are 
-    located. The ``FileName`` keyword is the name of the *.csv* or *.hdf5* file 
-    that stores the unit thicknesses. The name should be given with the extension 
-    included (e.g., ``stratigraphy.csv``). The first two columns in the file should 
-    be labeled as ``x`` and ``y``, with these two columns containing easting and 
-    northing distances, respectively. The other columns in the file should be 
-    labeled with names that correspond with shale units (``shale#Thickness``), 
-    aquifer units (``aquifer#Thickness``), or the reservoir (``reservoirThickness``). 
-    Here, the ``#`` character shown for shales and aquifers should be replaced 
-    with the index (e.g., ``shale5Thickness`` for shale 5). The unit thicknesses 
-    in each row of the file represent the stratigraphy at the corresponding ``x`` 
-    and ``y`` values. Unit thicknesses can vary over space, but they cannot change 
+    In the NRAP-Open-IAM control file interface, the ``FileDirectory`` and
+    ``FileName`` keywords must be specified. The ``FileDirectory`` keyword
+    indicates the directory where the data files for the lookup tables are
+    located. The ``FileName`` keyword is the name of the *.csv* or *.hdf5* file
+    that stores the unit thicknesses. The name should be given with the extension
+    included (e.g., ``stratigraphy.csv``). The first two columns in the file should
+    be labeled as ``x`` and ``y``, with these two columns containing easting and
+    northing distances, respectively. The other columns in the file should be
+    labeled with names that correspond with shale units (``shale#Thickness``),
+    aquifer units (``aquifer#Thickness``), or the reservoir (``reservoirThickness``).
+    Here, the ``#`` character shown for shales and aquifers should be replaced
+    with the index (e.g., ``shale5Thickness`` for shale 5). The unit thicknesses
+    in each row of the file represent the stratigraphy at the corresponding ``x``
+    and ``y`` values. Unit thicknesses can vary over space, but they cannot change
     with time in a simulation.
 
-    The Lookup Table Stratigraphy component produces the output using spatial 
-    interpolation within the domain defined by the coordinates in the data file 
-    used. An error will occur if the component is asked to produce output for 
-    a location that lies outside of the domain covered by the file. If this 
-    error occurs, the user can expand the domain covered by the data file by adding 
-    more rows with unit thicknesses at ``x`` and ``y`` values outside the current 
+    The Lookup Table Stratigraphy component produces the output using spatial
+    interpolation within the domain defined by the coordinates in the data file
+    used. An error will occur if the component is asked to produce output for
+    a location that lies outside of the domain covered by the file. If this
+    error occurs, the user can expand the domain covered by the data file by adding
+    more rows with unit thicknesses at ``x`` and ``y`` values outside the current
     ranges.
-    
+
     Descriptions of the component's parameters are provided below.
 
     * **numberOfShaleLayers** [-] (3 to 30) - number of shale layers in the
@@ -125,74 +130,74 @@ class LookupTableStratigraphy(ComponentModel):
 
     * **datumPressure** [|Pa|] (80,000 to 300,000) - pressure at the top of the
       system (default: 101,325).
-    
+
     The observations from the Lookup Table Stratigraphy component are:
 
     * **shale#Thickness** [|m|] - thickness of shale unit ``#``, where ``#`` is
-      an index ranging from one to *numberOfShaleLayers*. If data for a particular 
-      shale layer are not included in the file used, that layer will be assigned 
+      an index ranging from one to *numberOfShaleLayers*. If data for a particular
+      shale layer are not included in the file used, that layer will be assigned
       a default thickness is 250 |m|.
 
-    * **aquifer#Thickness** [|m|] - thickness of aquifer unit ``#``, where ``#`` 
-      is an index ranging from one to (*numberOfShaleLayers* - 1). If data for a 
-      particular aquifer layer are not included in the file used, that layer will 
+    * **aquifer#Thickness** [|m|] - thickness of aquifer unit ``#``, where ``#``
+      is an index ranging from one to (*numberOfShaleLayers* - 1). If data for a
+      particular aquifer layer are not included in the file used, that layer will
       be assigned a default thickness of 100 |m|.
-     
-    * **reservoirThickness** [|m|] - thickness of the storage reservoir. If data 
-      for the reservoir are not included in the file used, the default reservoir 
+
+    * **reservoirThickness** [|m|] - thickness of the storage reservoir. If data
+      for the reservoir are not included in the file used, the default reservoir
       thickness is 50 |m|.
-    
-    * **shale#Depth** [|m|] - depth to the bottom of shale unit ``#``, where 
+
+    * **shale#Depth** [|m|] - depth to the bottom of shale unit ``#``, where
       ``#`` is an index ranging from one to *numberOfShaleLayers*.
 
-    * **aquifer#Depth** [|m|] - depth to the bottom of aquifer unit ``#``, where 
+    * **aquifer#Depth** [|m|] - depth to the bottom of aquifer unit ``#``, where
       ``#`` is an index ranging from one to (*numberOfShaleLayers* - 1).
-      
+
     * **reservoirDepth** [|m|] - depth to the bottom of the storage reservoir.
-    
-    * **shale#MidDepth** [|m|] - depth to the middle of shale unit ``#``, where 
+
+    * **shale#MidDepth** [|m|] - depth to the middle of shale unit ``#``, where
       ``#`` is an index ranging from one to *numberOfShaleLayers*.
-    
-    * **aquifer#MidDepth** [|m|] - depth to the middle of aquifer unit ``#``, where 
+
+    * **aquifer#MidDepth** [|m|] - depth to the middle of aquifer unit ``#``, where
       ``#`` is an index ranging from one to (*numberOfShaleLayers* - 1).
-    
-    * **reservoirMidDepth** [|m|] - depth to the middle of the storage reservoir. 
-    
-    * **shale#TopDepth** [|m|] - depth to the top of shale unit ``#``, where 
+
+    * **reservoirMidDepth** [|m|] - depth to the middle of the storage reservoir.
+
+    * **shale#TopDepth** [|m|] - depth to the top of shale unit ``#``, where
       ``#`` is an index ranging from one to *numberOfShaleLayers*.
-    
-    * **aquifer#TopDepth** [|m|] - depth to the top of aquifer unit ``#``, where 
+
+    * **aquifer#TopDepth** [|m|] - depth to the top of aquifer unit ``#``, where
       ``#`` is an index ranging from one to (*numberOfShaleLayers* - 1).
-    
-    * **reservoirTopDepth** [|m|] - depth to the top of the storage reservoir. 
-      The same value can also be produced with the observation name **depth**, 
-      however. The use of the **depth** output name is included to conform with 
+
+    * **reservoirTopDepth** [|m|] - depth to the top of the storage reservoir.
+      The same value can also be produced with the observation name **depth**,
+      however. The use of the **depth** output name is included to conform with
       the ``Stratigraphy`` component.
-    
-    If the component produces a unit thickness for a shale, aquifer, or reservoir 
-    that falls outside the range of 1 |m| to 1600 |m|, then that thickness will 
-    be set to the lower or upper limit (whichever is closer). For example, if an 
-    interpolated thickness is 0.1 |m|, based on the values included in the data 
+
+    If the component produces a unit thickness for a shale, aquifer, or reservoir
+    that falls outside the range of 1 |m| to 1600 |m|, then that thickness will
+    be set to the lower or upper limit (whichever is closer). For example, if an
+    interpolated thickness is 0.1 |m|, based on the values included in the data
     file, then that thickness observation will be set to 1 |m| instead.
-    
-    Currently, this component cannot be used to produce unit thicknesses that vary 
-    stochastically in a simulation. The unit thicknesses and depths produced by 
-    a ``LookupTableStratigraphy`` component can vary over space within a simulation, 
-    but the thicknesses and depths produced for one location cannot vary across 
-    different realizations of a simulation. If one wanted to assess how altering 
-    unit thicknesses would impact results in a simulation using Latin Hypercube 
-    Sampling (``LHS``), for example, one should run multiple ``LHS`` simulations 
-    with different files used for the ``LookupTableStratigraphy`` components 
+
+    Currently, this component cannot be used to produce unit thicknesses that vary
+    stochastically in a simulation. The unit thicknesses and depths produced by
+    a ``LookupTableStratigraphy`` component can vary over space within a simulation,
+    but the thicknesses and depths produced for one location cannot vary across
+    different realizations of a simulation. If one wanted to assess how altering
+    unit thicknesses would impact results in a simulation using Latin Hypercube
+    Sampling (``LHS``), for example, one should run multiple ``LHS`` simulations
+    with different files used for the ``LookupTableStratigraphy`` components
     (with the files containing different stratigraphy inputs).
-    
-    For control file examples using the ``LookupTableStratigraphy`` component, 
-    see *ControlFile_ex32b.yaml* to *ControlFile_ex32c.yaml*, *ControlFile_ex38a.yaml* 
-    to *ControlFile_ex38c.yaml*, *ControlFile_ex39c.yaml*, *ControlFile_ex55b.yaml*, 
-    and *ControlFile_ex55d.yaml*. For script example examples, see *iam_sys_lutstrata.py*, 
-    *iam_sys_lutstrata_gridded.py*, *iam_sys_lutstrata_reservoir_openwell.py*, 
+
+    For control file examples using the ``LookupTableStratigraphy`` component,
+    see *ControlFile_ex32b.yaml* to *ControlFile_ex32c.yaml*, *ControlFile_ex38a.yaml*
+    to *ControlFile_ex38c.yaml*, *ControlFile_ex39c.yaml*, *ControlFile_ex55b.yaml*,
+    and *ControlFile_ex55d.yaml*. For script example examples, see *iam_sys_lutstrata.py*,
+    *iam_sys_lutstrata_gridded.py*, *iam_sys_lutstrata_reservoir_openwell.py*,
     *iam_sys_lutstrata_reservoir_mswell.py*, and *iam_sys_lutstrata_reservoir_cmwell.py*.
     """
-    def __init__(self, name, parent, intr_family=None, locX=None, locY=None, 
+    def __init__(self, name, parent, intr_family=None, locX=None, locY=None,
                  file_directory=None, file_name=None):
         """
         Constructor method of LookupTableStratigraphy class.
@@ -208,19 +213,19 @@ class LookupTableStratigraphy(ComponentModel):
             system model and whose data will be used for stratigraphy observations
         :type intr_family: str
 
-        :param locX: x-coordinate of the location at which stratigraphy information 
+        :param locX: x-coordinate of the location at which stratigraphy information
             is to to be calculated.
             By default, it is None, which means that the whole grid data is requested
         :type locX: float or array-like of floats
 
-        :param locY: y-coordinate of the location at which stratigraphy information 
+        :param locY: y-coordinate of the location at which stratigraphy information
             is to to be calculated.
             By default, it is None, which means that the whole grid data is requested
         :type locY: float or array-like of floats
 
-        :param file_directory: location (directory) of the stratigraphy data 
-            that will be used to create stratigraphy family of interpolators 
-            in the case those are not created before the LookupTableStratigraphy 
+        :param file_directory: location (directory) of the stratigraphy data
+            that will be used to create stratigraphy family of interpolators
+            in the case those are not created before the LookupTableStratigraphy
             component.
         :type file_directory: str
 
@@ -235,7 +240,7 @@ class LookupTableStratigraphy(ComponentModel):
 
         super().__init__(name, parent, model=self.simulation_model,
                          model_kwargs=model_kwargs)
-        
+
         # The model only needs to be run once
         self.run_frequency = 1
         self.default_run_frequency = 1
@@ -250,7 +255,7 @@ class LookupTableStratigraphy(ComponentModel):
         self.intr_names = None
 
         self.file_directory = file_directory
-        
+
         self.file_name = file_name
 
         # Set up location attributes
@@ -264,7 +269,7 @@ class LookupTableStratigraphy(ComponentModel):
 
             if len(self.locX) > 1:
                 self.grid_obs_keys = []
-            
+
             self.grid_obs_requested = False
 
         else:
@@ -278,18 +283,18 @@ class LookupTableStratigraphy(ComponentModel):
         self.num_points = None
         self.tri_vertices = None
         self.tri_weights = None
-        
+
         # Add one of the default parameters
         self.add_default_par('numberOfShaleLayers', value=3)
         self.add_default_par('datumPressure', value=101325.0)
-        
+
         self.pars_bounds = dict()
         self.pars_bounds['numberOfShaleLayers'] = [3, 30]
         self.pars_bounds['datumPressure'] = [8.0e+4, 3.0e+5]
 
         # Setup default observations of the component
         self.default_obs = {'shaleThickness': 250,
-                            'aquiferThickness': 100, 
+                            'aquiferThickness': 100,
                             'reservoirThickness': 50}
 
         if intr_family and intr_family in self._parent.interpolators:
@@ -308,39 +313,39 @@ class LookupTableStratigraphy(ComponentModel):
 
         :returns: None
         """
-        # Run this to check if numberOfShaleLayers is stochastic, which does not 
+        # Run this to check if numberOfShaleLayers is stochastic, which does not
         # work for the control file interface.
         _ = self.get_num_shale_layers(cfi=True)
-        
+
         thickness_obs = self.get_thickness_obs_names()
-        
+
         for ob_nm in thickness_obs:
             self.add_obs(ob_nm, index=[0])
             self.add_obs_to_be_linked(ob_nm)
-        
+
         depth_obs = self.get_depth_obs_names()
-        
+
         for ob_nm in depth_obs:
             self.add_obs(ob_nm, index=[0])
             self.add_obs_to_be_linked(ob_nm)
-        
+
         err_msg = ''.join(['{} must be provided for ',
                            'LookupTableStratigraphy Component.'])
-        
+
         if 'FileDirectory' in component_data:
-            self.file_directory = os.path.join(IAM_DIR,
+            self.file_directory = os.path.join(iam_bc.IAM_DIR,
                                                component_data['FileDirectory'])
         else:
             logging.error(err_msg.format('FileDirectory'))
             raise IOError(err_msg.format('FileDirectory'))
-        
+
         if 'FileName' in component_data:
             self.file_name = component_data['FileName']
         else:
             logging.error(err_msg.format('FileName'))
             raise IOError(err_msg.format('FileName'))
 
-        # For the control file interface, locX and locY are handled in the 
+        # For the control file interface, locX and locY are handled in the
         # function strata.process_spatially_variable_strata()
         self.grid_obs_requested = False
 
@@ -352,36 +357,36 @@ class LookupTableStratigraphy(ComponentModel):
 
         else:
             self.link_to_interpolators(intr_family='stratigraphy')
-    
+
     def parameter_assignment_warning_msg(self):
         """
-        Generates a warning message. This warning message is meant to be used 
-        in the connect_with_system() methods of components in the control file 
-        interface. Specifically, it is used when the parameter of the component 
-        is assigned as a stochastic or deterministic parameter when it should 
-        instead be linked to an observation from the LookupTableStratigraphy 
+        Generates a warning message. This warning message is meant to be used
+        in the connect_with_system() methods of components in the control file
+        interface. Specifically, it is used when the parameter of the component
+        is assigned as a stochastic or deterministic parameter when it should
+        instead be linked to an observation from the LookupTableStratigraphy
         component.
         """
         warning_msg = ''.join([
-            'When using LookupTableStratigraphy, the {} parameter ', 
-            'cannot be specified as a stochastic or deterministic ', 
-            'parameter. The parameter needs to be linked to the ', 
-            '{} observation of the LookupTableStratigraphy component. ', 
-            'The input provided for that parameter will not be used. ', 
-            'In the control file interface, the parameter linkage is performed ', 
-            'automatically. In a script application, the parameter can be linked ', 
-            'with the add_par_linked_to_obs() method of the component with the ', 
-            'parameter being linked to a LookupTableStratigraphy observation. ', 
-            'Before linking the LookupTableStratigraphy observation to the ', 
-            'parameter, use the add_obs() and add_obs_to_be_linked() methods ', 
-            'of the LookupTableStratigraphy component. The add_obs() method ', 
-            'should include the observation name and index=[0]. For example, ', 
+            'When using LookupTableStratigraphy, the {} parameter ',
+            'cannot be specified as a stochastic or deterministic ',
+            'parameter. The parameter needs to be linked to the ',
+            '{} observation of the LookupTableStratigraphy component. ',
+            'The input provided for that parameter will not be used. ',
+            'In the control file interface, the parameter linkage is performed ',
+            'automatically. In a script application, the parameter can be linked ',
+            'with the add_par_linked_to_obs() method of the component with the ',
+            'parameter being linked to a LookupTableStratigraphy observation. ',
+            'Before linking the LookupTableStratigraphy observation to the ',
+            'parameter, use the add_obs() and add_obs_to_be_linked() methods ',
+            'of the LookupTableStratigraphy component. The add_obs() method ',
+            'should include the observation name and index=[0]. For example, ',
             'LUTSComponentName.add_obs(obs_name, index=[0]).'])
-        
+
         return warning_msg
-    
-    def build_and_link_interpolators(self, file_directory=None, file_name=None, 
-                                     intr_family=None, default_values=None, 
+
+    def build_and_link_interpolators(self, file_directory=None, file_name=None,
+                                     intr_family=None, default_values=None,
                                      build_on_the_fly=False):
         """
         Builds interpolators for component model to use.
@@ -414,15 +419,15 @@ class LookupTableStratigraphy(ComponentModel):
         """
         if file_directory:
             self.file_directory = file_directory
-        
+
         if file_name:
             self.file_name = file_name
-        
+
         if intr_family:
             self.intr_family = intr_family
         else:
             self.intr_family = 'stratigraphy'
-        
+
         # Only need one interpolator for LookupTableStratigraphy
         if 'stratigraphy' in self._parent.interpolators:
             if not 'int1' in self._parent.interpolators[intr_family].items():
@@ -489,7 +494,7 @@ class LookupTableStratigraphy(ComponentModel):
                                'not exist.']).format(self.name, intr_family)
             logging.error(err_msg)
             raise KeyError(err_msg)
-    
+
     def get_num_shale_layers(self, cfi=False):
         """
         Returns the value of the numberOfShaleLayers parameter.
@@ -498,102 +503,102 @@ class LookupTableStratigraphy(ComponentModel):
         if 'numberOfShaleLayers' in self.pars and cfi:
             err_msg = ''.join(['Parameter numberOfShaleLayers cannot be ',
                                'stochastic for the control file interface.'])
-            
+
             logging.error(err_msg)
             raise TypeError(err_msg)
-            
+
         elif 'numberOfShaleLayers' in self.pars and not cfi:
             numberOfShaleLayers = self.pars['numberOfShaleLayers'].value
-            
+
         elif 'numberOfShaleLayers' in self.deterministic_pars:
             numberOfShaleLayers = self.deterministic_pars['numberOfShaleLayers'].value
-            
+
         else:
             numberOfShaleLayers = self.default_pars['numberOfShaleLayers'].value
-            
+
             warn_msg = ''.join([
-                'Parameter numberOfShaleLayers is not defined in the control ', 
-                'file interface. The parameter will be assigned a default value ', 
+                'Parameter numberOfShaleLayers is not defined in the control ',
+                'file interface. The parameter will be assigned a default value ',
                 'of {}.'.format(numberOfShaleLayers)])
             logging.warn(warn_msg)
-            
+
             self.add_par('numberOfShaleLayers', value=numberOfShaleLayers, vary=False)
-        
+
         return numberOfShaleLayers
-    
+
     def get_thickness_obs_names(self):
         """
-        Returns a list of the thickness observation names, given the numberOfShaleLayers. 
+        Returns a list of the thickness observation names, given the numberOfShaleLayers.
         These are the observations that are expected to be in the data file.
         """
         numberOfShaleLayers = self.get_num_shale_layers()
-        
+
         obs_names = ['shale{}Thickness'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}Thickness'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'reservoirThickness']
-        
+
         return obs_names
-    
+
     def get_depth_obs_names(self):
         """
-        Returns a list of the depth observation names, given the numberOfShaleLayers. 
-        These are observations that are not expected to be in the data file, they 
+        Returns a list of the depth observation names, given the numberOfShaleLayers.
+        These are observations that are not expected to be in the data file, they
         are calculated based on unit thicknesses.
         """
         numberOfShaleLayers = self.get_num_shale_layers()
-        
+
         obs_names = ['shale{}Depth'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}Depth'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'reservoirDepth']
-        
+
         obs_names += ['shale{}MidDepth'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}MidDepth'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'reservoirMidDepth']
-        
+
         obs_names += ['shale{}TopDepth'.format(ind) \
                      for ind in range(1, numberOfShaleLayers + 1)] + [
                          'aquifer{}TopDepth'.format(ind) \
                              for ind in range(1, numberOfShaleLayers)] + [
                                      'depth', 'reservoirTopDepth']
-        
+
         return obs_names
-    
+
     def format_output(self, out, nm, val, spat_format=False, ind=None):
         """
-        Takes output from either calculate_csv_based_output() or 
-        calculate_hdf5_based_output() and adjusts the out dictionary entry. 
-        If spat_format is True, then the output is treated as an array, with 
-        positions defined by ind. If ind is given as 'all', then it loops 
+        Takes output from either calculate_csv_based_output() or
+        calculate_hdf5_based_output() and adjusts the out dictionary entry.
+        If spat_format is True, then the output is treated as an array, with
+        positions defined by ind. If ind is given as 'all', then it loops
         through all positions and assigns the given value.
         """
         if spat_format:
             if not nm in out:
                 out[nm] = np.zeros(self.num_points)
-            
+
             if ind == 'all':
                 for ind in range(self.num_points):
                     out[nm][ind] = val
             else:
                 out[nm][ind] = val
-            
+
         else:
             out[nm] = val
-        
+
         return out
-    
+
     def calculate_unit_depths(self, out):
         """
-        Takes the output dictionary from simulation_model() and gives it any 
+        Takes the output dictionary from simulation_model() and gives it any
         missing unit thicknesses (default values) as well as all unit depths.
         """
         obs_names = self.get_thickness_obs_names()
-        
+
         numberOfShaleLayers = self.get_num_shale_layers()
         if self.grid_obs_requested or self.num_points == 1:
             for ob_nm in obs_names:
@@ -604,75 +609,75 @@ class LookupTableStratigraphy(ComponentModel):
                         obs_type = 'aquiferThickness'
                     else:
                         obs_type  = ob_nm
-                    
+
                     val = self.default_obs[obs_type]
                     out = self.format_output(out, ob_nm, val)
-            
+
             depth_temp = 0
             ob_nm = 'shale{}TopDepth'.format(numberOfShaleLayers)
             out = self.format_output(out, ob_nm, depth_temp)
-            
+
             depth_temp = out['shale{}Thickness'.format(numberOfShaleLayers)] / 2
-            
+
             ob_nm = 'shale{}MidDepth'.format(numberOfShaleLayers)
             out = self.format_output(out, ob_nm, depth_temp)
-            
+
             depth_temp = out['shale{}Thickness'.format(numberOfShaleLayers)]
-            
+
             ob_nm = 'shale{}Depth'.format(numberOfShaleLayers)
             out = self.format_output(out, ob_nm, depth_temp)
-            
+
             for shaleRef in range(numberOfShaleLayers - 1, 0, -1):
                 ob_nm = 'aquifer{}TopDepth'.format(shaleRef)
                 out = self.format_output(out, ob_nm, depth_temp)
-                
+
                 depth_temp_v2 = depth_temp + (out['aquifer{}Thickness'.format(shaleRef)] / 2)
-                
+
                 ob_nm = 'aquifer{}MidDepth'.format(shaleRef)
                 out = self.format_output(out, ob_nm, depth_temp_v2)
-                
+
                 depth_temp += out['aquifer{}Thickness'.format(shaleRef)]
-                
+
                 ob_nm = 'aquifer{}Depth'.format(shaleRef)
                 out = self.format_output(out, ob_nm, depth_temp)
-                
+
                 ob_nm = 'shale{}TopDepth'.format(shaleRef)
                 out = self.format_output(out, ob_nm, depth_temp)
-                
+
                 depth_temp_v2 = depth_temp + (out['shale{}Thickness'.format(shaleRef)] / 2)
-                
+
                 ob_nm = 'shale{}MidDepth'.format(shaleRef)
                 out = self.format_output(out, ob_nm, depth_temp_v2)
-                
+
                 depth_temp += out['shale{}Thickness'.format(shaleRef)]
-                
+
                 ob_nm = 'shale{}Depth'.format(shaleRef)
                 out = self.format_output(out, ob_nm, depth_temp)
-                    
+
             # depth is also equal to shale1Depth
             ob_nm = 'depth'
             out = self.format_output(out, ob_nm, depth_temp)
-            
-            # Keeping the 'depth' observation to be consistent with the Stratigraphy 
-            # component, but here the same value is also represented by the 
+
+            # Keeping the 'depth' observation to be consistent with the Stratigraphy
+            # component, but here the same value is also represented by the
             # reservoirTopDepth observation
             ob_nm = 'reservoirTopDepth'
             out = self.format_output(out, ob_nm, depth_temp)
-            
+
             depth_temp_v2 = depth_temp + (out['reservoirThickness'] / 2)
-            
+
             ob_nm = 'reservoirMidDepth'
             out = self.format_output(out, ob_nm, depth_temp_v2)
-            
+
             depth_temp += out['reservoirThickness']
-            
+
             ob_nm = 'reservoirDepth'
             out = self.format_output(out, ob_nm, depth_temp)
-            
+
         else:
             for ob_nm in obs_names:
                 obs_type = ob_nm
-                
+
                 if not obs_type in out:
                     if 'shale' and 'Thickness' in ob_nm:
                         obs_type = 'shaleThickness'
@@ -680,109 +685,109 @@ class LookupTableStratigraphy(ComponentModel):
                         obs_type = 'aquiferThickness'
                     else:
                         obs_type = ob_nm
-                    
+
                     val = self.default_obs[obs_type]
-                    out = self.format_output(out, ob_nm, val, 
+                    out = self.format_output(out, ob_nm, val,
                                              spat_format=True, ind='all')
-            
+
             # Interpolate over all requested points
             for ind in range(self.num_points):
                 depth_temp = 0
-                
+
                 ob_nm = 'shale{}TopDepth'.format(numberOfShaleLayers)
-                out = self.format_output(out, ob_nm, depth_temp, 
+                out = self.format_output(out, ob_nm, depth_temp,
                                          spat_format=True, ind=ind)
-                
+
                 ob_nm = 'shale{}Thickness'.format(numberOfShaleLayers)
                 depth_temp_v2 = out[ob_nm][ind] / 2
-                
+
                 ob_nm = 'shale{}MidDepth'.format(numberOfShaleLayers)
                 out = self.format_output(out, ob_nm, depth_temp_v2)
-                
+
                 # The highest shale's bottom depth is just that shale's thickness
                 ob_nm = 'shale{}Thickness'.format(numberOfShaleLayers)
-                
+
                 depth_temp = out[ob_nm][ind]
-                
+
                 ob_nm = 'shale{}Depth'.format(numberOfShaleLayers)
-                out = self.format_output(out, ob_nm, depth_temp, 
+                out = self.format_output(out, ob_nm, depth_temp,
                                          spat_format=True, ind=ind)
-                
+
                 for shaleRef in range(numberOfShaleLayers - 1, 0, -1):
                     ob_nm = 'aquifer{}TopDepth'.format(shaleRef)
-                    out = self.format_output(out, ob_nm, depth_temp, 
-                                             spat_format=True, ind=ind) 
-                    
+                    out = self.format_output(out, ob_nm, depth_temp,
+                                             spat_format=True, ind=ind)
+
                     ob_nm = 'aquifer{}Thickness'.format(shaleRef)
-                    
+
                     depth_temp_v2 = depth_temp + (out[ob_nm][ind] / 2)
-                    
+
                     ob_nm = 'aquifer{}MidDepth'.format(shaleRef)
-                    out = self.format_output(out, ob_nm, depth_temp_v2, 
+                    out = self.format_output(out, ob_nm, depth_temp_v2,
                                              spat_format=True, ind=ind)
-                    
+
                     ob_nm = 'aquifer{}Thickness'.format(shaleRef)
-                    
+
                     depth_temp += out[ob_nm][ind]
-                    
+
                     ob_nm = 'aquifer{}Depth'.format(shaleRef)
-                    out = self.format_output(out, ob_nm, depth_temp, 
-                                             spat_format=True, ind=ind) 
-                    
+                    out = self.format_output(out, ob_nm, depth_temp,
+                                             spat_format=True, ind=ind)
+
                     ob_nm = 'shale{}TopDepth'.format(shaleRef)
-                    out = self.format_output(out, ob_nm, depth_temp, 
+                    out = self.format_output(out, ob_nm, depth_temp,
                                              spat_format=True, ind=ind)
-                    
+
                     ob_nm = 'shale{}Thickness'.format(shaleRef)
-                    
+
                     depth_temp_v2 = depth_temp + (out[ob_nm][ind] / 2)
-                    
+
                     ob_nm = 'shale{}MidDepth'.format(shaleRef)
-                    out = self.format_output(out, ob_nm, depth_temp_v2, 
+                    out = self.format_output(out, ob_nm, depth_temp_v2,
                                              spat_format=True, ind=ind)
-                    
+
                     ob_nm = 'shale{}Thickness'.format(shaleRef)
-                    
+
                     depth_temp += out[ob_nm][ind]
-                    
+
                     ob_nm = 'shale{}Depth'.format(shaleRef)
-                    out = self.format_output(out, ob_nm, depth_temp, 
-                                             spat_format=True, ind=ind) 
-                
+                    out = self.format_output(out, ob_nm, depth_temp,
+                                             spat_format=True, ind=ind)
+
                 # The bottom depth of shale 1 is also the top of the reservoir
                 ob_nm = 'depth'
-                out = self.format_output(out, ob_nm, depth_temp, 
+                out = self.format_output(out, ob_nm, depth_temp,
                                          spat_format=True, ind=ind)
-                
+
                 ob_nm = 'reservoirTopDepth'
-                out = self.format_output(out, ob_nm, depth_temp, 
+                out = self.format_output(out, ob_nm, depth_temp,
                                          spat_format=True, ind=ind)
-                
+
                 ob_nm = 'reservoirThickness'
                 depth_temp_v2 = depth_temp + (out[ob_nm][ind] / 2)
-                
+
                 ob_nm = 'reservoirMidDepth'
-                out = self.format_output(out, ob_nm, depth_temp_v2, 
+                out = self.format_output(out, ob_nm, depth_temp_v2,
                                          spat_format=True, ind=ind)
-                
+
                 ob_nm = 'reservoirThickness'
                 depth_temp += out[ob_nm][ind]
-                
+
                 ob_nm = 'reservoirDepth'
-                out = self.format_output(out, ob_nm, depth_temp, 
+                out = self.format_output(out, ob_nm, depth_temp,
                                          spat_format=True, ind=ind)
             # End of ind loop
-        
+
         return out
 
     def simulation_model(self, p, time_point=365.25, locX=None, locY=None):
         """
         Return unit thicknesses and depths at the location given.
-        
+
         :param p: input parameters of LookupTableStratigraphy model
         :type p: dict
-        
-        :param time_point: time point (in days). This input is not used here, 
+
+        :param time_point: time point (in days). This input is not used here,
             but it is kept for compatibility.
         :type time_point: float
 
@@ -795,12 +800,12 @@ class LookupTableStratigraphy(ComponentModel):
         :type locY: float or array-like of floats
 
         :returns: out - dictionary of observations of lookup table stratigraphy
-            component model; keys (here, N is the numberOfShaleLayers): 
-                ['reservoirThickness','shale1Thickness', aquifer1Thickness', 
-                 'shale2Thickness', 'aquifer2Thickness', ..., 'shaleNThickness', 
-                 'reservoirDepth', 'reservoirMidDepth', 'reservoirTopDepth', 
-                 'shale1Depth', 'shale1MidDepth', 'shale1TopDepth', 
-                 'aquifer1Depth', 'aquifer1MidDepth', 'aquifer1TopDepth', ..., 
+            component model; keys (here, N is the numberOfShaleLayers):
+                ['reservoirThickness','shale1Thickness', aquifer1Thickness',
+                 'shale2Thickness', 'aquifer2Thickness', ..., 'shaleNThickness',
+                 'reservoirDepth', 'reservoirMidDepth', 'reservoirTopDepth',
+                 'shale1Depth', 'shale1MidDepth', 'shale1TopDepth',
+                 'aquifer1Depth', 'aquifer1MidDepth', 'aquifer1TopDepth', ...,
                  'shaleNDepth', 'shaleNMidDepth', 'shaleNTopDepth']
         """
         # Check whether locations are provided as keyword arguments
@@ -845,42 +850,42 @@ class LookupTableStratigraphy(ComponentModel):
 
         # Initialize output dictionary
         out = dict()
-        
+
         # Only one interpolator is used in the stratigraphy family, int1
         interpr = self._parent.interpolators[self.intr_family]['int1']
 
         if self.grid_obs_requested:
             interpr_out = interpr()
-            
+
             for nm in interpr_out:
                 out[nm] = interpr_out[nm]
-            
+
         else:
             if self.num_points == 1:
                 interpr_out = interpr(
                     self.tri_vertices, self.tri_weights)
-                
+
                 # Create dictionary of output
                 for nm in interpr_out:
                     out[nm] = interpr_out[nm][0]
-                    
+
             else:
                 # Interpolate over all requested points
                 for ind in range(self.num_points):
                     interpr_out = interpr(self.tri_vertices[[ind]],
                                           self.tri_weights[[ind]])
-                    
+
                     for nm in interpr_out:
                         if not nm in out:
                             out[nm] = np.zeros(self.num_points)
-                        
+
                         out[nm][ind] = interpr_out[nm][0]
 
             debug_msg = '{} model call output {}'.format(self.name, out)
             logging.debug(debug_msg)
-        
+
         out = self.calculate_unit_depths(out)
-        
+
         # Return dictionary of outputs
         return out
 
@@ -891,44 +896,44 @@ class LookupTableStratigraphy(ComponentModel):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
 
-    file_directory = os.sep.join(['..', '..', 'examples', 'Control_Files', 
+    file_directory = os.sep.join(['..', '..', 'examples', 'Control_Files',
                                   'input_data', 'ex38a'])
 
     # Define keyword arguments of the system model
     num_years = 10
     time_array = 365.25 * np.arange(0.0, num_years + 1)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    
+
     numberOfShaleLayers = 3
-    
+
     locX = 2000
     locY = 2000
-    
+
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
-    
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
+
     intpr = sm.add_interpolator(StratigraphyDataInterpolator(
         name='int1', parent=sm,
         header_file_dir=file_directory,
-        data_file='stratigraphy.csv'), 
+        data_file='stratigraphy.csv'),
         intr_family='stratigraphy')
 
     # Add stratigraphy component
     luts = sm.add_component_model_object(LookupTableStratigraphy(
         name='luts', parent=sm, intr_family='stratigraphy', locX=locX, locY=locY))
-    
+
     luts.add_par('numberOfShaleLayers', value=numberOfShaleLayers, vary=False)
-    
+
     thickness_obs = luts.get_thickness_obs_names()
-    
+
     for ob_nm in thickness_obs:
         luts.add_obs(ob_nm, index=[0])
-    
+
     depth_obs = luts.get_depth_obs_names()
-    
+
     for ob_nm in depth_obs:
         luts.add_obs(ob_nm, index=[0])
-    
+
     # Run system model using current values of its parameters
     sm.forward()  # system model is run deterministically
 
@@ -948,7 +953,7 @@ if __name__ == "__main__":
         luts, 'aquifer2Thickness', indices=[0])
     shale3Thickness = sm.collect_observations_as_time_series(
         luts, 'shale3Thickness', indices=[0])
-    
+
     print('Unit thicknesses (m):')
     print('    reservoirThickness: ', reservoirThickness)
     print('    shale1Thickness: ', shale1Thickness)
@@ -957,7 +962,7 @@ if __name__ == "__main__":
     print('    aquifer2Thickness: ', aquifer2Thickness)
     print('    shale3Thickness: ', shale3Thickness)
     print('')
-    
+
     # Collect depth observations
     reservoirDepth = sm.collect_observations_as_time_series(
         luts, 'reservoirDepth', indices=[0])
@@ -971,9 +976,9 @@ if __name__ == "__main__":
         luts, 'aquifer2Depth', indices=[0])
     shale3Depth = sm.collect_observations_as_time_series(
         luts, 'shale3Depth', indices=[0])
-    
+
     print('Depths (m) to the bottom of each unit:')
-    print('    reservoirDepth: ', reservoirDepth)     
+    print('    reservoirDepth: ', reservoirDepth)
     print('    shale1Depth: ', shale1Depth)
     print('    aquiferDepth: ', aquifer1Depth)
     print('    shale2Depth: ', shale2Depth)

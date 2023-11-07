@@ -26,11 +26,8 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(SOURCE_DIR)
-
-import openiam.cfi.strata as iam_strata
-from openiam.visualize.get_strat_obs import get_strat_comp_obs
+import openiam.cf_interface.strata as iam_strata
+from openiam.visualization.get_strat_obs import get_strat_comp_obs
 
 DEPTH_LABEL = '{:.2f} m'
 

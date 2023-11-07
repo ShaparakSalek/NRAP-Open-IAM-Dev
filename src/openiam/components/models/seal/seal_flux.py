@@ -16,19 +16,19 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 """
 import logging                      # For warnings
 
-import seal_config as scfg          # config variables for I/O
-import seal_decipher as dec         # Read yaml data
-import seal_display as dis          # Save summary data and create plots
-import seal_file as sfile           # Input/output related operations
-import seal_fluids as fluid         # Functions for density & viscosity
-import seal_intro as intro          # Gets YAML data and checks input
-import seal_model as mod            # Functions for Class definitions
-import seal_perm as perm            # Functions for permeability definition
-import seal_plot as splot           # Plot results
-import seal_refresh as sref         # Functions for thickness and depth
-import seal_upload as sup           # Input file data
-import frac_origin as fog           # Fracture setup & generation
-import frac_view as view            # Save fracture summary data
+from . import seal_config as scfg          # config variables for I/O
+from . import seal_decipher as dec         # Read yaml data
+from . import seal_display as dis          # Save summary data and create plots
+from . import seal_file as sfile           # Input/output related operations
+from . import seal_fluids as fluid         # Functions for density & viscosity
+from . import seal_intro as intro          # Gets YAML data and checks input
+from . import seal_model as mod            # Functions for Class definitions
+from . import seal_perm as perm            # Functions for permeability definition
+from . import seal_plot as splot           # Plot results
+from . import seal_refresh as sref         # Functions for thickness and depth
+from . import seal_upload as sup           # Input file data
+from . import frac_origin as fog           # Fracture setup & generation
+from . import frac_view as view            # Save fracture summary data
 
 # Define Details
 __version__: str = '3.13.5'

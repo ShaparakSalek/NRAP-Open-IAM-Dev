@@ -4,19 +4,18 @@ import sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.strata import get_comp_types_strata_pars, get_comp_types_strata_obs
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.strata import get_comp_types_strata_pars, get_comp_types_strata_obs
 
 try:
-    import components.wellbore.open as owmodel
-    import components.wellbore.open.open_wellbore_ROM as owrom
+    import openiam.components.models.wellbore.open as owmodel
+    import openiam.components.models.wellbore.open.open_wellbore_ROM as owrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Open Wellbore component\n')
     sys.exit()
@@ -29,7 +28,7 @@ GRAV_ACCEL = 9.81
 WATER_DENSITY = 1000
 
 
-class OpenWellbore(ComponentModel):
+class OpenWellbore(iam_bc.ComponentModel):
     """
     The Open Wellbore model is a lookup table reduced order model based on the
     drift-flux approach, see :cite:`RN1899`. This model treats the leakage of |CO2|
@@ -350,7 +349,7 @@ class OpenWellbore(ComponentModel):
 
         # Determine number of shale layers in the stratigraphy
         strata = name2obj_dict['strata']
-        
+
         num_shale_layers = strata.get_num_shale_layers()
 
         # Determine to which aquifer the leakage is simulated
@@ -383,7 +382,7 @@ class OpenWellbore(ComponentModel):
                 connection.add_obs_to_be_linked(sinput)
                 self.add_kwarg_linked_to_obs(sinput, connection.linkobs[sinput])
 
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
@@ -400,20 +399,20 @@ class OpenWellbore(ComponentModel):
 
                     # Depth to the top of reservoir (usually)
                     self.add_composite_par('reservoirDepth', res_depth_expr)
-                    
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             if 'reservoirDepth' in self.pars or 'reservoirDepth' in self.deterministic_pars:
                 warning_msg = strata.parameter_assignment_warning_msg().format(
                     'reservoirDepth', 'shale1Depth')
-                
+
                 logging.warning(warning_msg)
-                    
+
                 if 'reservoirDepth' in self.pars:
                     del self.pars['reservoirDepth']
-                
+
                 elif 'reservoirDepth' in self.deterministic_pars:
                     del self.deterministic_pars['reservoirDepth']
-                        
+
             self.add_par_linked_to_obs('reservoirDepth', strata.linkobs['shale1Depth'])
 
         if leak_to == 'atmosphere':
@@ -426,20 +425,20 @@ class OpenWellbore(ComponentModel):
                             nm=strata.name, ind1=ind+1, ind2=ind) for ind in range(
                                 self.leak_layer, num_shale_layers)])
                     self.add_composite_par('wellTop', well_top_expr)
-                    
+
             elif name2obj_dict['strata_type'] in types_strata_obs:
                 if 'wellTop' in self.pars or 'wellTop' in self.deterministic_pars:
                     warning_msg = strata.parameter_assignment_warning_msg().format(
                         'wellTop', 'aquifer{}Depth'.format(self.leak_layer))
-                    
+
                     logging.warning(warning_msg)
-                    
+
                     if 'wellTop' in self.pars:
                         del self.pars['wellTop']
-                        
+
                     elif 'wellTop' in self.deterministic_pars:
                         del self.deterministic_pars['wellTop']
-                
+
                 self.add_par_linked_to_obs('wellTop', strata.linkobs[
                     'aquifer{}Depth'.format(self.leak_layer)])
 
@@ -451,7 +450,7 @@ class OpenWellbore(ComponentModel):
 
 def test_open_wellbore_component(test_case=1):
     try:
-        from openiam import AnalyticalReservoir
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
@@ -465,7 +464,7 @@ def test_open_wellbore_component(test_case=1):
     delta_t = 0.1
     time_array = 365.25*np.arange(0.0, num_years+delta_t, delta_t)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))

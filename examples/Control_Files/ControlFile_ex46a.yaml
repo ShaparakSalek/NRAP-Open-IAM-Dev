@@ -14,7 +14,7 @@
 # is the same, each well still needs its own injTimes list.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex46a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex46a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

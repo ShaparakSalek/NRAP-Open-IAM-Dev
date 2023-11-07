@@ -37,10 +37,10 @@ from matplotlib import cm           # For color map
 
 # For older matplotlib, import of Axes 3D is needed for projection=3d keyword.
 # from mpl_toolkits.mplot3d import Axes3D
-import seal_pluto as aux            # Support functions for plot
-import seal_file as sfile           # For error report
-import seal_config as scfg           # config variables for I/O
-import seal_units as sun             # Unit conversion
+from . import seal_pluto as aux            # Support functions for plot
+from . import seal_file as sfile           # For error report
+from . import seal_config as scfg           # config variables for I/O
+from . import seal_units as sun             # Unit conversion
 
 # Start characters for statements
 MAJ_IN = "\n  --> "                 # Page + general message start

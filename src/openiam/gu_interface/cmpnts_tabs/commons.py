@@ -5,10 +5,9 @@ Created on Fri May 13 16:34:16 2022
 """
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))))
-from openiam import IAM_DIR
-from dictionarydata import componentVars
+
+from openiam.components.iam_base_classes import IAM_DIR
+from openiam.gu_interface.dictionarydata import componentVars
 
 def commons_read_tab_vars(cmpnt_nm, cmpnt_type, parameter_names=None,
                           dynamic_kwarg_names=None, observation_names=None,

@@ -7,12 +7,9 @@ import sys
 
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-try:
-    from openiam import SystemModel, FaultLeakage
-except ImportError as err:
-    print('Unable to load NRAP-Open-IAM modules: {}'.format(err))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.fault_leakage_component import FaultLeakage
 
 
 if __name__ == "__main__":

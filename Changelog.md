@@ -29,7 +29,8 @@ please perform the following actions:
   function of parameters and/or observations.
   - Added CFI and script examples demonstrating the use of the new components.
 ### Updated
-  - Can now use workflows in the GUI.
+  - NRAP-Open-IAM is now can be installed with pip
+  - Setup of workflows is possible in the GUI.
   - Updates to account for the new stratigraphy components. Unit thicknesses
   and depths being produced as observations (instead of parameters) required
   changes to many files.

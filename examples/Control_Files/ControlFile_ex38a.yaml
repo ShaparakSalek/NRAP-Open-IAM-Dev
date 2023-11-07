@@ -1,38 +1,38 @@
 # OpenIAM Control File Example 38a
 #
 # This example demonstrates the use of a LookupTableStratigraphy component.
-# The name and location of the table containing unit thicknesses must be 
-# setup with 'FileName' and 'FileDirectory', respectively. These entries are 
-# indented under 'LookupTableStratigraphy'. The file used should have columns 
-# with x and y values representing distances east and north in the domain. 
-# The other columns in the file should indicate the unit thicknesses at the 
-# corresponding x and y coordinates (i.e., the coordinates in the same row). 
-# The column labels for each unit thickness should be formatted as 'reservoirThickness', 
-# 'shale#Thickness', or 'aquifer#Thickness', where '#' is a unit number. 
-# For shales, the unit number should range from 1 to the number of shale layers, 
-# which is set with the 'numberOfShaleLayers' parameter of the LookupTableStratigraphy 
-# component. For aquifers, the unit number should range from 1 to 
-# (numberOfShaleLayers - 1). Note that the same number of units must be present 
-# at each location (i.e., you cannot vary numberOfShaleLayers over space). If you 
-# want a unit to effectively pinch out in certain areas, however, you could reduce 
-# the unit's thickness to the minimum of 1 m in those areas (i.e., at certain x 
+# The name and location of the table containing unit thicknesses must be
+# setup with 'FileName' and 'FileDirectory', respectively. These entries are
+# indented under 'LookupTableStratigraphy'. The file used should have columns
+# with x and y values representing distances east and north in the domain.
+# The other columns in the file should indicate the unit thicknesses at the
+# corresponding x and y coordinates (i.e., the coordinates in the same row).
+# The column labels for each unit thickness should be formatted as 'reservoirThickness',
+# 'shale#Thickness', or 'aquifer#Thickness', where '#' is a unit number.
+# For shales, the unit number should range from 1 to the number of shale layers,
+# which is set with the 'numberOfShaleLayers' parameter of the LookupTableStratigraphy
+# component. For aquifers, the unit number should range from 1 to
+# (numberOfShaleLayers - 1). Note that the same number of units must be present
+# at each location (i.e., you cannot vary numberOfShaleLayers over space). If you
+# want a unit to effectively pinch out in certain areas, however, you could reduce
+# the unit's thickness to the minimum of 1 m in those areas (i.e., at certain x
 # and y coordinates).
 #
-# Note that when using a LookupTableStratigraphy component, any unit thicknesses that 
-# fall outside the range of 1 m to 1600 m will be set to the closest limit. The 
-# unit thicknesses are produced as observations of the LookupTableStratigraphy 
-# component, but you do not have to include an 'Outputs' entry for this 
-# component type in the control file interface. In the control file interface, 
-# the observations of LookupTableStratigraphy components are automatically set 
+# Note that when using a LookupTableStratigraphy component, any unit thicknesses that
+# fall outside the range of 1 m to 1600 m will be set to the closest limit. The
+# unit thicknesses are produced as observations of the LookupTableStratigraphy
+# component, but you do not have to include an 'Outputs' entry for this
+# component type in the control file interface. In the control file interface,
+# the observations of LookupTableStratigraphy components are automatically set
 # according to the 'numberOfShaleLayers' parameter provided.
 #
-# The well locations are also set using x, y, and z values stored in a .csv file. 
-# The six well locations are arranged in a circle around the injection site. Because 
-# each site has the same distance from the injeciton site, the results for each site 
+# The well locations are also set using x, y, and z values stored in a .csv file.
+# The six well locations are arranged in a circle around the injection site. Because
+# each site has the same distance from the injeciton site, the results for each site
 # are the same.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex38a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex38a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

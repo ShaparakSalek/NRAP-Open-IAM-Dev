@@ -12,15 +12,15 @@ import os
 import logging
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
-    from openiam import ComponentModel
-    from openiam.parameter_setup_component import generate_seq
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
+
+from openiam.components.parameter_setup_component import generate_seq
 
 
-class PressureBasedRiskConfigurer(ComponentModel):
+class PressureBasedRiskConfigurer(iam_bc.ComponentModel):
     """
     Component that uses pressure at the bottom of the well to decide whether
     a particular well is going to leak or not.
@@ -186,7 +186,7 @@ class PressureBasedRiskConfigurer(ComponentModel):
         return out
 
 
-class DataBasedRiskConfigurer(ComponentModel):
+class DataBasedRiskConfigurer(iam_bc.ComponentModel):
     """
     Component that uses pressure at the bottom of the well and its risk score
     to decide whether the well is going to leak or not.
@@ -439,7 +439,7 @@ class DataBasedRiskConfigurer(ComponentModel):
         return out
 
 
-class WellDepthRiskConfigurer(ComponentModel):
+class WellDepthRiskConfigurer(iam_bc.ComponentModel):
     """
     Component that compares the depth of a well to the depth of the reservoir
     to decide whether the well can be considered for leak scenario or not.

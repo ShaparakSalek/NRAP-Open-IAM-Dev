@@ -9,14 +9,14 @@ from numpy import ma
 from scipy.interpolate import RegularGridInterpolator
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from matk.ordereddict import OrderedDict
 from copy import copy
 import warnings
 from math import atan2, degrees
 import pandas as pd
 
 np.set_printoptions(threshold=sys.maxsize)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from openiam.matk.ordereddict import OrderedDict
 
 
 class Mesh2D():

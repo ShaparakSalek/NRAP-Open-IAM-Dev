@@ -14,16 +14,16 @@ import logging
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, ReservoirDataInterpolator,
-                     LookupTableReservoir)
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components',
+    file_directory = os.sep.join(['..', '..', 'data',
                                   'reservoir', 'lookuptables', 'IBDP'])
 
     # with h5py.File(os.path.join(file_directory, 'Reservoir_sim_BCIBDP.h5'), 'r') as hf:

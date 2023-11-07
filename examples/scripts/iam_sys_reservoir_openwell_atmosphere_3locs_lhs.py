@@ -16,10 +16,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.open_wellbore_component import OpenWellbore
+from openiam.components.atmRom_component import AtmosphericROM
 
-from openiam import SystemModel, AnalyticalReservoir, OpenWellbore, AtmosphericROM
-import openiam.visualize as viz
+import openiam.visualization as viz
 
 
 if __name__ == '__main__':

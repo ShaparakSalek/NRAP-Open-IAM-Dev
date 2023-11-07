@@ -36,7 +36,7 @@
 # this text is disabled in StratCol2 and StratCol3 with the entry "DepthText: False".
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex35.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex35.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

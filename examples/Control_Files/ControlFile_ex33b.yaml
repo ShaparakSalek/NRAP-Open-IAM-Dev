@@ -42,7 +42,7 @@
 # setting the optional entry DepthText to False (shown in Plot4).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex33b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex33b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

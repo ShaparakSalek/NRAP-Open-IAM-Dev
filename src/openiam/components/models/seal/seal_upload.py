@@ -32,9 +32,9 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 from itertools import repeat        # For line input
 import numpy as np                  # For arrays & input
 
-import seal_config as scfg           # IO directory and file names
-import seal_file as sfile           # For file operations
-import seal_refresh as sref         # Functions for thickness and depth
+from . import seal_config as scfg           # IO directory and file names
+from . import seal_file as sfile           # For file operations
+from . import seal_refresh as sref         # Functions for thickness and depth
 
 # Other constants
 ECHO = False                            # DEBUG printout - status of input.

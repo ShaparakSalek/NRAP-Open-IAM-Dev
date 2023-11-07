@@ -7,7 +7,7 @@
 # the TTFD plot must have "PlumeType: CarbonateAquifer."
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex42.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex42.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

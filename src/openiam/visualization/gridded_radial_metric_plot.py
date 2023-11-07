@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib import ticker
 
-from openiam.visualize import time_series
-import openiam.cfi.strata as iam_strata
+from openiam.visualization import time_series
+import openiam.cf_interface.strata as iam_strata
 from .label_setup import Y_LABEL_DICT
 
 

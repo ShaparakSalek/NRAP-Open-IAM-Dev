@@ -17,9 +17,9 @@ Contents (4)
 Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 -------------------------------------------------------------------------------
 """
-import seal_file as sfile           # For file operations
-import seal_config as scfg          # IO directory and file names
-import seal_decipher as yam         # For routine to check units
+from . import seal_file as sfile           # For file operations
+from . import seal_config as scfg          # IO directory and file names
+from . import seal_decipher as yam         # For routine to check units
 
 # Constants
 MISSING = [None, "default"]         # Check for Yaml file

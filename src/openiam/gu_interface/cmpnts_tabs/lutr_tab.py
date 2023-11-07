@@ -16,25 +16,24 @@ from tkinter import messagebox
 
 import Pmw
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(SOURCE_DIR)
+from openiam.gu_interface.dictionarydata import componentVars, componentChoices
+from openiam.gu_interface.dictionarydata import (connectionsDictionary,
+                                                 componentTypeDictionary)
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
+from openiam.gu_interface.dictionarydata import LABEL_FONT
+from openiam.gu_interface.dictionarydata import (
+    DISTRIBUTION_MENU_WIDTH, DISTRIBUTION_ARG_LABEL_WIDTH,
+    DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+    PARAMETER_LABEL_WIDTH, BUTTON_WIDTH,
+    OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX,
+    CB_PADX, FILE_ENTRY_WIDTH)
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (DISTRIBUTION_MENU_WIDTH, DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            PARAMETER_LABEL_WIDTH, BUTTON_WIDTH,
-                            OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX,
-                            CB_PADX, FILE_ENTRY_WIDTH)
+from openiam.gu_interface.cmpnts_tabs.locations import (add_obs_locs_frame_widgets,
+                                                        read_obs_locations_data)
 
-from cmpnts_tabs.locations import (add_obs_locs_frame_widgets,
-                                   read_obs_locations_data)
+from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
-from cmpnts_tabs.parameter_entry import ParameterEntry
-
-from openiam import IAM_DIR
+from openiam.components.iam_base_classes import IAM_DIR
 
 
 def read_tab_vars(cmpnt_nm):
@@ -366,8 +365,7 @@ def choose_input_dir(variables):
     file_dialog.withdraw()
 
     # Determine initial directory for file dialog
-    initial_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.abspath(__file__)))), 'components', 'reservoir', 'lookuptables')
+    initial_dir = os.path.join(IAM_DIR, 'data', 'reservoir', 'lookuptables')
     if variables['file_dir'].get():
         initial_dir = os.path.join(IAM_DIR, variables['file_dir'].get())
 
@@ -394,8 +392,7 @@ def choose_time_points_file(variables):
     file_dialog.withdraw()
 
     # Determine initial directory for file dialog
-    initial_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.abspath(__file__)))), 'components', 'reservoir', 'lookuptables')
+    initial_dir = os.path.join(IAM_DIR, 'data', 'reservoir', 'lookuptables')
 
     if variables['file_dir'].get():
         initial_dir = os.path.join(IAM_DIR, variables['file_dir'].get())
@@ -429,8 +426,7 @@ def choose_parameters_filenames_file(app, variables, lutr_setup_frame):
     file_dialog.withdraw()
 
     # Determine initial directory for file dialog
-    initial_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.abspath(__file__)))), 'components', 'reservoir', 'lookuptables')
+    initial_dir = os.path.join(IAM_DIR, 'data', 'reservoir', 'lookuptables')
 
     if variables['file_dir'].get():
         initial_dir = os.path.join(IAM_DIR, variables['file_dir'].get())

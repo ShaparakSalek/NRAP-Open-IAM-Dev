@@ -7,26 +7,21 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-source_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(source_folder)
-# sys.path.append(os.path.join(source_folder, 'components', 'fault', 'fault_flow'))
-
 try:
-    from openiam.iam_base_classes import SystemModel, ComponentModel
-    from openiam.cfi.commons import process_dynamic_inputs
+    import openiam.components.iam_base_classes as iam_bc
+    from openiam.cf_interface.commons import process_dynamic_inputs
 except ImportError as err:
-    print('Unable to load IAM class module: '+ str(err))
+    print('Unable to load NRAP-Open-IAM class module: {}'.format(err))
 
 try:
-    from openiam.components.fault.fault_flow.fault_setup import FAULT_SETUP_DICT
-    import openiam.components.fault.fault_flow.flt_basics as bcs
-    import openiam.components.fault.fault_flow.flt_compute as fcp
-    import openiam.components.fault.fault_flow.flt_decipher as deci
-    import openiam.components.fault.fault_flow.flt_intro as intro
-    import openiam.components.fault.fault_flow.flt_profile as pro
-    import openiam.components.fault.fault_flow.flt_units as fit
-    import openiam.components.fault.fault_flow.flt_config as conf
+    from openiam.components.models.fault.fault_flow.fault_setup import FAULT_SETUP_DICT
+    import openiam.components.models.fault.fault_flow.flt_basics as bcs
+    import openiam.components.models.fault.fault_flow.flt_compute as fcp
+    import openiam.components.models.fault.fault_flow.flt_decipher as deci
+    import openiam.components.models.fault.fault_flow.flt_intro as intro
+    import openiam.components.models.fault.fault_flow.flt_profile as pro
+    import openiam.components.models.fault.fault_flow.flt_units as fit
+    import openiam.components.models.fault.fault_flow.flt_config as conf
 except ImportError:
     print('\nERROR: Unable to load ROM for Fault Flow component\n')
     sys.exit()
@@ -42,7 +37,7 @@ FF_CFI_CONTROLS = {'profile_type': ['profileType', 0],
                    'pressure_approach': ['pressureApproach', False],
                    'interpolate_approach': ['interpolateApproach', False]}
 
-class FaultFlow(ComponentModel):
+class FaultFlow(iam_bc.ComponentModel):
     """
     The Fault Flow component model simulates the flow of carbon dioxide along
     a low permeability fault from an injection horizon (into which carbon dioxide
@@ -1239,7 +1234,7 @@ def test_case1():
     sm_model_kwargs = {'time_array': time_array}     # time is given in days
 
     # Create system model.
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     pressure = np.array([
         3.035851266631769761e+07, 3.035851266631769761e+07, 3.035851266631769761e+07,
@@ -1344,7 +1339,7 @@ def test_case2():
     sm_model_kwargs = {'time_array': time_array}     # time is given in days
 
     # Create system model.
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     pressure = np.array([
         3.035851266631769761e+07, 3.035851266631769761e+07, 3.035851266631769761e+07,

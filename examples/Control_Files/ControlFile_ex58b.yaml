@@ -16,7 +16,7 @@
 # for 'FigureName' will be used, however (.tiff in 'FigureName: Name.tiff').
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex58b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex58b.yaml
 #
 # Last Modified: September, 2023
 #-------------------------------------------------

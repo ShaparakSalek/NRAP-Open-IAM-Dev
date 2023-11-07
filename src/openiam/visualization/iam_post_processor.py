@@ -10,22 +10,16 @@ from re import split
 import pickle
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from openiam.components.atmRom_component import AtmosphericROM
+from openiam.components.generic_aquifer_component import GenericAquifer
+from openiam.components.seal_horizon_component import SealHorizon
+from openiam.components.fault_flow_component import FaultFlow
 
-import openiam
-
-try:
-    from .time_series import time_series_plot
-    from .atmosphere_plot import map_plume_plot_single, map_plume_plot_ensemble
-    from .sensitivity_analysis import (
-        correlations_at_time, simple_sensitivities_barplot,
-        multi_sensitivities_barplot, time_series_sensitivities)
-except ModuleNotFoundError:
-    from time_series import time_series_plot
-    from atmosphere_plot import map_plume_plot_single, map_plume_plot_ensemble
-    from sensitivity_analysis import (
-        correlations_at_time, simple_sensitivities_barplot,
-        multi_sensitivities_barplot, time_series_sensitivities)
+from .time_series import time_series_plot
+from .atmosphere_plot import map_plume_plot_single, map_plume_plot_ensemble
+from .sensitivity_analysis import (
+    correlations_at_time, simple_sensitivities_barplot,
+    multi_sensitivities_barplot, time_series_sensitivities)
 
 
 class IAM_Post_Processor():
@@ -237,7 +231,7 @@ class IAM_Post_Processor():
         Method to find AtmosphericROM component of a system model
         """
         for comp in self.components[::-1]:
-            if isinstance(comp, openiam.AtmosphericROM):
+            if isinstance(comp, AtmosphericROM):
                 return comp
 
         return False
@@ -248,7 +242,7 @@ class IAM_Post_Processor():
         """
         comp_list = []
         for comp in self.components[::-1]:
-            if isinstance(comp, openiam.GenericAquifer):
+            if isinstance(comp, GenericAquifer):
                 comp_list.append(comp)
 
         if comp_list:
@@ -265,7 +259,7 @@ class IAM_Post_Processor():
         """
         comp_list = []
         for comp in self.components[::-1]:
-            if isinstance(comp, openiam.SealHorizon):
+            if isinstance(comp, SealHorizon):
                 comp_list.append(comp)
 
         if comp_list:
@@ -281,7 +275,7 @@ class IAM_Post_Processor():
         """
         comp_list = []
         for comp in self.components[::-1]:
-            if isinstance(comp, openiam.FaultFlow):
+            if isinstance(comp, FaultFlow):
                 comp_list.append(comp)
 
         if comp_list:

@@ -38,7 +38,7 @@
 # under the plot name (under Plot1, 'CriticalPressureMPa: 22.07' for 22.07 MPa).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

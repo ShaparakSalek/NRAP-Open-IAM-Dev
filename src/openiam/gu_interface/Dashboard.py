@@ -11,16 +11,11 @@ from tkinter import messagebox
 
 import Pmw
 
-from OpenIAM_Page import OpenIAM_Page
-from PostProcessor_Page import PostProcessor_Page
-from dictionarydata import LABEL_FONT
+from openiam.gu_interface.OpenIAM_Page import OpenIAM_Page
+from openiam.gu_interface.PostProcessor_Page import PostProcessor_Page
+from openiam.gu_interface.dictionarydata import LABEL_FONT
 
-
-# Save location of source folder in the top level folder
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(SOURCE_DIR)
-
-from openiam import IAM_DIR
+from openiam.components.iam_base_classes import IAM_DIR
 
 
 class Dashboard_Page(tk.Frame):

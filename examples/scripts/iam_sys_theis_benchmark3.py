@@ -20,9 +20,10 @@ except ModuleNotFoundError:
     err_msg = "Your environment is missing tqdm library. Please update and try again."
     raise ModuleNotFoundError(err_msg)
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel, TheisReservoir
-from openiam.enmesh import Grid
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.theis_reservoir_component import TheisReservoir
+from openiam.components.enmesh import Grid
+
 
 if __name__=='__main__':
 

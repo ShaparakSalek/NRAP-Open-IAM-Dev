@@ -6,19 +6,19 @@ import logging
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel, IAM_DIR
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters
-from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
-                                get_strat_param_dict_for_link)
+from openiam.cf_interface.commons import process_parameters
+from openiam.cf_interface.strata import (get_comp_types_strata_pars,
+                                         get_comp_types_strata_obs,
+                                         get_strat_param_dict_for_link)
 
 try:
-    import components.reservoir.theis.theis_reservoir_ROM as tresrom
+    import openiam.components.models.reservoir.theis.theis_reservoir_ROM as tresrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Theis Reservoir component\n')
     sys.exit()
@@ -27,7 +27,7 @@ except ImportError:
 INJECTION_DATA_UNITS = {'injRates': 'm^3/s^{-1}', 'injTimes': 'year'}
 
 
-class TheisReservoir(ComponentModel):
+class TheisReservoir(iam_bc.ComponentModel):
     """
     The Theis Reservoir component model is an analytical model for pressure in the
     reservoir. This component can simulate the use of multiple injection and/or
@@ -331,8 +331,8 @@ class TheisReservoir(ComponentModel):
         # of injection wells
         self.process_injection_and_location_args(
             injX, injY, locX, locY, injTimes, injRates, setup=1)
-        
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
@@ -343,7 +343,7 @@ class TheisReservoir(ComponentModel):
         if (par_name not in self.pars) and (par_name not in self.deterministic_pars):
             if name2obj_dict['strata_type'] in types_strata_pars:
                 connect = get_strat_param_dict_for_link(par_name, strata)
-                
+
                 if connect is None:
                     err_msg = ''.join(['Unable to find "reservoirThickness" ',
                                        'parameter. Please check setup of the stratigraphy.'])
@@ -351,7 +351,7 @@ class TheisReservoir(ComponentModel):
                     raise KeyError(err_msg)
 
                 self.add_par_linked_to_par(par_name, connect[par_name])
-                
+
             elif name2obj_dict['strata_type'] in types_strata_obs:
                 self.add_par_linked_to_obs(par_name, strata.linkobs[par_name])
 
@@ -372,7 +372,7 @@ class TheisReservoir(ComponentModel):
             input_from_yaml = component_data[input_type]
 
         elif isinstance(component_data[input_type], str):  # possibly a path to file
-            fileDirName = os.path.join(IAM_DIR, component_data[input_type])
+            fileDirName = os.path.join(iam_bc.IAM_DIR, component_data[input_type])
 
             if os.path.isfile(fileDirName):
                 data = np.genfromtxt(
@@ -609,7 +609,7 @@ def test_theis_reservoir_component():
     # Define keyword arguments of the system model
     time_array = np.array([0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11.])
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     rates = [5.0e-3, 6.0e-3, 7.0e-3, 8.0e-3, 0, 0, 0, 0, 0, 0, 0, 0,]

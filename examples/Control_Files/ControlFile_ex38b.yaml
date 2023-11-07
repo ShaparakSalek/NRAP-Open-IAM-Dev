@@ -1,12 +1,12 @@
 # OpenIAM Control File Example 38b
 #
-# This example is similar to control file example 38a, but it uses a 
-# different file for the LookupTableStratigraphy component and the well 
-# locations are randomly generated. The domain is shown with the 
+# This example is similar to control file example 38a, but it uses a
+# different file for the LookupTableStratigraphy component and the well
+# locations are randomly generated. The domain is shown with the
 # Stratigraphy plot type.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex38b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex38b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

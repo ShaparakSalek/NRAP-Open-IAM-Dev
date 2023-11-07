@@ -8,25 +8,24 @@ Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following pla
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/Kimb_54_sims
+    data/reservoir/lookuptables/Kimb_54_sims
 
 Example of run:
 $ python iam_plume_stability_Kimb.py
 """
-
 import sys
 import os
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam.mesh2D import read_Mesh2D_data
-from openiam.reservoir_data_interpolator import read_time_points
+
+from openiam.components.mesh2D import read_Mesh2D_data
+from openiam.components.reservoir_data_interpolator import read_time_points
 
 
 if __name__ == '__main__':
     ##############
     # User input #
     ##############
-    datafolder = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    datafolder = os.sep.join(['..', '..', 'data', 'reservoir',
                               'lookuptables', 'Kimb_54_sims'])
     if not os.path.exists(os.sep.join([datafolder, 'Reservoir_data_sim01.csv'])):
         msg = ''.join(['\nKimberlina data set can be downloaded ',

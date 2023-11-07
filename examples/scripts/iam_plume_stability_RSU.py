@@ -13,8 +13,7 @@ import os
 from glob import glob
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam.mesh2D import Mesh2D
+from openiam.components.mesh2D import Mesh2D
 
 ##############
 # User input #

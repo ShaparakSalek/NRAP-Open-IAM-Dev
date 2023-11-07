@@ -10,12 +10,10 @@ import numpy as np
 from numpy.random import RandomState
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 try:
-    from openiam import SystemModel, SamplerModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
 def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None,
@@ -68,7 +66,7 @@ def generate_locations(x_min, x_max, y_min, y_max, num_locations, seed=None,
     return x_coords, y_coords, z_coords
 
 
-class LocationGenerator(SamplerModel):
+class LocationGenerator(iam_bc.SamplerModel):
     """ NRAP-Open-IAM LocationGenerator component class. """
     def __init__(self, name, parent, x_min=0, x_max=1000, y_min=0, y_max=1000,
                  num_locations=1, reproducible=True, z_min=None, z_max=None):
@@ -184,10 +182,13 @@ class LocationGenerator(SamplerModel):
 
 
 def test_location_generator():
+    try:
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+    except ImportError as err:
+        print('Unable to load NRAP-Open-IAM class module: {}'.format(err))
+
     # For multiprocessing in Spyder
     __spec__ = None
-
-    from openiam import AnalyticalReservoir
 
     # Define keyword arguments of the system model
     num_years = 50
@@ -195,7 +196,7 @@ def test_location_generator():
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Define number of wells
     num_wells = 5

@@ -3,8 +3,8 @@ Test example illustrates sampling of model parameters utilizing pyDOE.bbdesign
 """
 import sys
 import os
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from matk import matk, pyDOE
+
+from openiam.matk import matk, pyDOE
 
 # Number of samples
 numsamples = 480

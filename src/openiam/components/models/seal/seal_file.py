@@ -39,7 +39,7 @@ from pathlib import Path            # To allow path definition - Windows/Unix
 import yaml                         # For structured control file input
 import numpy as np                  # for array
 
-import seal_config as scfg           # IO directory and file names
+from . import seal_config as scfg           # IO directory and file names
 
 # Print Constants
 LED_IN = "\n  --> "                 # Message start

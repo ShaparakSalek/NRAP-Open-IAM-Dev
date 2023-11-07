@@ -12,8 +12,6 @@ import os
 
 import numpy as np
 import pandas as pd
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 
 # Lists of probability options
 DETECTION_PROBABILITY_OPTIONS = ['always', 'never', 'likely', 'possibly']

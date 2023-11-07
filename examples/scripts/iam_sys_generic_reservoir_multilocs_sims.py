@@ -24,10 +24,10 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.generic_reservoir_component import GenericReservoir
+from openiam.matk import pyDOE
 
-from openiam import SystemModel, GenericReservoir
-from matk import pyDOE
 
 if __name__=='__main__':
 

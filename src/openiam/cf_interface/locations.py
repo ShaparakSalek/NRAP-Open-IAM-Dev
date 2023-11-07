@@ -11,10 +11,8 @@ import random
 import numpy as np
 import pandas as pd
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 try:
-    from openiam import IAM_DIR
+    from openiam.components.iam_base_classes import IAM_DIR
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
@@ -502,10 +500,10 @@ def coord_locations(cmpnt_name, loc_data):
     else:
         locations['coordx'] = loc_data['coordx']
         locations['coordy'] = loc_data['coordy']
-        
+
         if not isinstance(locations['coordx'], list):
             locations['coordx'] = [locations['coordx']]
-        
+
         if not isinstance(locations['coordy'], list):
             locations['coordy'] = [locations['coordy']]
 

@@ -9,7 +9,7 @@
 # components (which do not use a critical pressure).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56f.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex56f.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------

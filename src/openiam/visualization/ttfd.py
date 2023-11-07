@@ -29,13 +29,9 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib import ticker
 
-
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(SOURCE_DIR)
-
-import openiam.cfi.commons as iamcommons
-import openiam.cfi.strata as strata
-from openiam.visualize.get_strat_obs import get_strat_comp_obs
+import openiam.cf_interface.commons as iamcommons
+import openiam.cf_interface.strata as strata
+from openiam.visualization.get_strat_obs import get_strat_comp_obs
 
 TTFD_RESERVOIR_COMPONENTS = ['LookupTableReservoir',
                              'SimpleReservoir',

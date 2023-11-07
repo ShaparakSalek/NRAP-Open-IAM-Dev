@@ -25,13 +25,14 @@ import random
 import datetime
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel, IAM_DIR
+from openiam.components.dipping_stratigraphy_component import DippingStratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.futuregen2_azmi_component import FutureGen2AZMI
 
-from openiam import (SystemModel, DippingStratigraphy, AnalyticalReservoir,
-                     MultisegmentedWellbore, RateToMassAdapter, FutureGen2AZMI)
-
-import openiam as iam
-import openiam.visualize as iam_vis
+import openiam.visualization as iam_vis
 
 
 if __name__ == "__main__":
@@ -39,11 +40,11 @@ if __name__ == "__main__":
     num_years = 50
     time_array = 365.25 * np.arange(0.0, num_years + 1)
     sm_model_kwargs = {'time_array': time_array}   # time is given in days
-    
+
     # Index for the aquifer to be assessed in the TTFD plots
     selected_aq = 0
-    
-    # Specifies whether the monitoring sensor is placed at the 'top', 'mid', 
+
+    # Specifies whether the monitoring sensor is placed at the 'top', 'mid',
     # or 'bottom' of the selected aquifer.
     monitor_position = 'mid'
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     aquifer1Thickness = 90
     aquifer2Thickness = 210
     reservoirThickness = 75
-    
+
     num_aquifers = 2
 
     strike = 315
@@ -74,22 +75,22 @@ if __name__ == "__main__":
     # Set up the dictionaries required by stratigraphy_plot()
     model_data = dict()
     model_data['OutputDirectory'] = os.path.join(
-        iam.IAM_DIR, 'output', 'ttfdplot_example_dipping_strata_'
+        IAM_DIR, 'output', 'ttfdplot_example_dipping_strata_'
         + str(datetime.date.today()))
 
     yaml_data = dict()
-    
-    # A 'DippingStratigraphy' key needs to be in yaml_data - the TTFD plot type 
+
+    # A 'DippingStratigraphy' key needs to be in yaml_data - the TTFD plot type
     # checks yaml_data to see what kind of stratigraphy is being used.
     yaml_data['DippingStratigraphy'] = dict()
-    
+
     # yaml_data also needs a dictionary containing all of the parameters
     pars_for_yaml = {
-        'numberOfShaleLayers': numberOfShaleLayers, 'datumPressure': datumPressure, 
-        'shale1Thickness': shale1Thickness, 'shale2Thickness': shale2Thickness, 
-        'shale3Thickness': shale3Thickness, 'aquifer1Thickness': aquifer1Thickness, 
+        'numberOfShaleLayers': numberOfShaleLayers, 'datumPressure': datumPressure,
+        'shale1Thickness': shale1Thickness, 'shale2Thickness': shale2Thickness,
+        'shale3Thickness': shale3Thickness, 'aquifer1Thickness': aquifer1Thickness,
         'aquifer2Thickness': aquifer2Thickness, 'reservoirThickness': reservoirThickness}
-    
+
     yaml_data['DippingStratigraphy']['Parameters'] = pars_for_yaml
 
     plotName = 'Plot1.png'
@@ -129,7 +130,7 @@ if __name__ == "__main__":
 
         monitor_coordx = [1000, 2000, 3000, 4000]
         monitor_coordy = [1000, 2000, 3000, 4000]
-        
+
         if monitor_position == 'top':
             depth_str = 'aquifer{}TopDepth'.format(selected_aq + 1)
         elif monitor_position == 'mid':
@@ -181,11 +182,11 @@ if __name__ == "__main__":
         # visualization codes, like stratigraphy_plot.py, are made to use this
         # naming convention.
         strataName = 'strata' + msName
-        
+
         strata.append(sm.add_component_model_object(DippingStratigraphy(
-            name=strataName, parent=sm, locXRef=locXRef, locYRef=locYRef, 
+            name=strataName, parent=sm, locXRef=locXRef, locYRef=locYRef,
             dipDirection=dipDirection, locX=well_x_values[locRef], locY=well_y_values[locRef])))
-        
+
         # Add parameters for the dipping stratrigraphy component
         strata[-1].add_par('numberOfShaleLayers',
                            value=numberOfShaleLayers, vary=False)
@@ -205,26 +206,26 @@ if __name__ == "__main__":
 
         strata[-1].add_par('strike', value=strike, vary=False)
         strata[-1].add_par('dip', value=dip, vary=False)
-        
-        # Only use get_thickness_obs_names() and get_depth_obs_names() after the 
+
+        # Only use get_thickness_obs_names() and get_depth_obs_names() after the
         # numberOfShaleLayers parameter has been assigned.
         thickness_obs = strata[-1].get_thickness_obs_names()
-        
-        # The thicness and depths observations are only produced in the first time 
+
+        # The thicness and depths observations are only produced in the first time
         # step, so use index=[0] when adding these observations.
         for ob_nm in thickness_obs:
             strata[-1].add_obs(ob_nm, index=[0])
             strata[-1].add_obs_to_be_linked(ob_nm)
-        
+
         depth_obs = strata[-1].get_depth_obs_names()
-        
+
         for ob_nm in depth_obs:
             strata[-1].add_obs(ob_nm, index=[0])
             strata[-1].add_obs_to_be_linked(ob_nm)
 
         # Add reservoir component for the current well
         ares.append(sm.add_component_model_object(AnalyticalReservoir(
-            name=aresName, parent=sm, locX=well_x_values[locRef], 
+            name=aresName, parent=sm, locX=well_x_values[locRef],
             locY=well_y_values[locRef], injX=injectionX, injY=injectionY)))
 
         # Add parameters of reservoir component model
@@ -237,17 +238,17 @@ if __name__ == "__main__":
         ares[-1].add_par('CO2Viscosity', value=6.6e-5, vary=False)
         ares[-1].add_par('numberOfShaleLayers',
                          value=numberOfShaleLayers, vary=False)
-        
+
         ares[-1].add_par_linked_to_par(
             'numberOfShaleLayers', strata[-1].deterministic_pars['numberOfShaleLayers'])
         ares[-1].add_par_linked_to_par(
             'datumPressure', strata[-1].deterministic_pars['datumPressure'])
-        
-        # Link the analytical reservoir's unit thicknesses to the dipping 
+
+        # Link the analytical reservoir's unit thicknesses to the dipping
         # stratigraphy component's unit thicknesses.
         for ob_nm in thickness_obs:
             ares[-1].add_par_linked_to_obs(ob_nm, strata[-1].linkobs[ob_nm])
-        
+
         ares[-1].add_obs('pressure')
         ares[-1].add_obs('CO2saturation')
         ares[-1].add_obs_to_be_linked('pressure')
@@ -272,12 +273,12 @@ if __name__ == "__main__":
             'numberOfShaleLayers', strata[-1].deterministic_pars['numberOfShaleLayers'])
         ms[-1].add_par_linked_to_par(
             'datumPressure', strata[-1].deterministic_pars['datumPressure'])
-        
-        # Link the analytical reservoir's unit thicknesses to the dipping 
+
+        # Link the analytical reservoir's unit thicknesses to the dipping
         # stratigraphy component's unit thicknesses.
         for ob_nm in thickness_obs:
             ms[-1].add_par_linked_to_obs(ob_nm, strata[-1].linkobs[ob_nm])
-        
+
         # Add keyword arguments linked to the output provided by reservoir model
         ms[-1].add_kwarg_linked_to_obs('pressure', ares[-1].linkobs['pressure'])
         ms[-1].add_kwarg_linked_to_obs('CO2saturation', ares[-1].linkobs['CO2saturation'])
@@ -335,14 +336,14 @@ if __name__ == "__main__":
         fgaq[-1].add_par('log_permh', value=-12.0, vary=False)
         fgaq[-1].add_par('log_aniso', value=0.3, vary=False)
         fgaq[-1].add_par('rel_vol_frac_calcite', value=0.1, vary=False)
-        
-        # Link the thickness and depth to the observations of the dipping 
+
+        # Link the thickness and depth to the observations of the dipping
         # stratigraphy component.
         fgaq[-1].add_par_linked_to_obs('aqu_thick', strata[-1].linkobs[
             'aquifer{}Thickness'.format(selected_aq + 1)])
         fgaq[-1].add_par_linked_to_obs('depth', strata[-1].linkobs[
             'aquifer{}Depth'.format(selected_aq + 1)])
-        
+
         fgaq[-1].add_kwarg_linked_to_obs('co2_rate', ms[-1].linkobs['CO2_aquifer1'])
         fgaq[-1].add_kwarg_linked_to_obs('brine_rate', ms[-1].linkobs['brine_aquifer1'])
 
@@ -399,10 +400,10 @@ if __name__ == "__main__":
 
     analysis = 'forward'
     s = None
-    
+
     print('Making TTFD plots...')
 
     iam_vis.ttfd_plot(yaml_data, model_data, sm, s, model_data['OutputDirectory'],
                       name=plotName, analysis=analysis)
-    
+
     print('TTFD plots saved to {}.'.format(model_data['OutputDirectory']))

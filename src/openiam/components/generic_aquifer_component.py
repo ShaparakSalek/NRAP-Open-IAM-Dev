@@ -7,17 +7,17 @@ import os
 import sys
 import logging
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel, IAM_DIR
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM class module: {}'.format(err))
 
-import components.aquifer.generic.generic_aquifer_ROM as genrom
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
-                                get_strat_param_dict_for_link)
+import openiam.components.models.aquifer.generic.generic_aquifer_ROM as iam_gen
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.strata import (get_comp_types_strata_pars,
+                                         get_comp_types_strata_obs,
+                                         get_strat_param_dict_for_link)
 
 GA_SCALAR_OBSERVATIONS = [
     'Dissolved_salt_volume', 'Dissolved_salt_dr', 'Dissolved_salt_dz',
@@ -27,7 +27,7 @@ GA_GRID_OBSERVATIONS = ['Dissolved_CO2_mass_fraction', 'Dissolved_salt_mass_frac
 GA_GRID_COORDINATES = ['r_coordinate', 'z_coordinate']
 
 
-class GenericAquifer(ComponentModel):
+class GenericAquifer(iam_bc.ComponentModel):
     """
     The Generic Aquifer component model is a surrogate model
     that can be used to predict the leakage of carbon dioxide (|CO2|) and
@@ -44,10 +44,10 @@ class GenericAquifer(ComponentModel):
     parameters were varied using Latin Hypercube Sampling across wide ranges.
 
     In the NRAP-Open-IAM control file, the type name for the Generic Aquifer component
-    is ``GenericAquifer``. The gridded output of the Generic Aquifer component 
-    can be displayed using the ``GriddedRadialMetric`` plot type; this plot type 
+    is ``GenericAquifer``. The gridded output of the Generic Aquifer component
+    can be displayed using the ``GriddedRadialMetric`` plot type; this plot type
     can also save *.csv* files showing results across the domain.
-    
+
     Descriptions of the component's parameters are provided below:
 
     * **aqu_thick** [|m|] (25 to 250) - thickness of unit (default: 33.2);
@@ -63,50 +63,50 @@ class GenericAquifer(ComponentModel):
 
     * **log_aniso** [-] (0 to 3) - anisotropy ratio Kh/Kv (default: 0.3)
 
-    * **aquifer_salinity** [-] (0.0 to 0.015) - salt mass fraction in the aquifer's 
+    * **aquifer_salinity** [-] (0.0 to 0.015) - salt mass fraction in the aquifer's
       water (default: 0.005).  This value is a dimensionless mass fraction.
 
-    * **reservoir_salinity** [-] (0.015 to 0.05) - salt mass fraction in the water 
-      leaked from the reservoir to the aquifer (default: 0.03). This value is a 
+    * **reservoir_salinity** [-] (0.015 to 0.05) - salt mass fraction in the water
+      leaked from the reservoir to the aquifer (default: 0.03). This value is a
       dimensionless mass fraction.
 
     * **dissolved_salt_threshold** [-] (0.0 to 1.0) - threshold for salt mass
-      fraction (default: 0.02). This threshold is a dimensionless mass fraction. 
-      Any regions of the aquifer with dissolved salt mass fractions exceeding 
-      this value will be included in the dissolved salt plumes calculated by 
+      fraction (default: 0.02). This threshold is a dimensionless mass fraction.
+      Any regions of the aquifer with dissolved salt mass fractions exceeding
+      this value will be included in the dissolved salt plumes calculated by
       this component.
 
     * **dissolved_co2_threshold** [-] (0.0 to 1.0) - threshold for |CO2| mass
-      fraction (default: 0.01). This threshold is a dimensionless mass fraction. 
-      Any regions of the aquifer with dissolved |CO2| concentrations exceeding 
-      this mass fraction threshold will be included in the dissolved |CO2| plumes 
+      fraction (default: 0.01). This threshold is a dimensionless mass fraction.
+      Any regions of the aquifer with dissolved |CO2| concentrations exceeding
+      this mass fraction threshold will be included in the dissolved |CO2| plumes
       calculated by this component.
-    
-    The **aquifer_salinity**, **reservoir_salinity**, and **dissolved_salt_threshold** 
-    parameters of this component are dimensionless mass fractions representing 
-    the aquifer's initial salinity, the reservoir's salinity, and the threshold 
-    for dissolved salt plume formation in the aquifer, respectively. Total 
-    dissolved solid (TDS) concentrations in |mg/L| can be converted to mass 
-    fractions by converting to |mg/m^3| (multiply by 1000 |L/m^3|), then 
-    converting to |g/m^3| (multiply by 0.001 |mg/g|), then converting to |kg/m^3| 
-    (multiply by 0.001 |g/kg|), and finally dividing by a water density in 
-    |kg/m^3|. When considering the **dissolved_salt_threshold** parameter, the 
-    bulk density of the mixture can change once brine leaks into the aquifer 
-    (likely increasing slightly, if the brine has a higher density). For the 
-    purposes of this converison, however, you can use a water density of 1000 
-    |kg/m^3|. Using this approach, the default **dissolved_salt_threshold** value 
-    of 0.02 would correspond with a TDS threshold of 20,000 |mg/L|. Any regions of 
-    the aquifer with dissolved salt concentrations exceeding this threshold will 
-    be included in the dissolved salt plumes determined by this component. 
-    Additionally, with this approach the default **aquifer_salinity** and 
-    **reservoir_salinity** values of 0.005 and 0.03 would correspond with TDS 
-    concentration of 5000 |mg/L| and 30,000 |mg/L|, respectively. If the brine 
-    in the reservoir has a density higher than 1000 |kg/m^3|, however, using 
-    that density instead of 1000 |kg/m^3| would change the conversion. For 
-    example, using a brine density of 1100 |kg/m^3| would cause the default 
-    **reservoir_salinity** value of 0.03 to correspond with a TDS concentration 
+
+    The **aquifer_salinity**, **reservoir_salinity**, and **dissolved_salt_threshold**
+    parameters of this component are dimensionless mass fractions representing
+    the aquifer's initial salinity, the reservoir's salinity, and the threshold
+    for dissolved salt plume formation in the aquifer, respectively. Total
+    dissolved solid (TDS) concentrations in |mg/L| can be converted to mass
+    fractions by converting to |mg/m^3| (multiply by 1000 |L/m^3|), then
+    converting to |g/m^3| (multiply by 0.001 |mg/g|), then converting to |kg/m^3|
+    (multiply by 0.001 |g/kg|), and finally dividing by a water density in
+    |kg/m^3|. When considering the **dissolved_salt_threshold** parameter, the
+    bulk density of the mixture can change once brine leaks into the aquifer
+    (likely increasing slightly, if the brine has a higher density). For the
+    purposes of this converison, however, you can use a water density of 1000
+    |kg/m^3|. Using this approach, the default **dissolved_salt_threshold** value
+    of 0.02 would correspond with a TDS threshold of 20,000 |mg/L|. Any regions of
+    the aquifer with dissolved salt concentrations exceeding this threshold will
+    be included in the dissolved salt plumes determined by this component.
+    Additionally, with this approach the default **aquifer_salinity** and
+    **reservoir_salinity** values of 0.005 and 0.03 would correspond with TDS
+    concentration of 5000 |mg/L| and 30,000 |mg/L|, respectively. If the brine
+    in the reservoir has a density higher than 1000 |kg/m^3|, however, using
+    that density instead of 1000 |kg/m^3| would change the conversion. For
+    example, using a brine density of 1100 |kg/m^3| would cause the default
+    **reservoir_salinity** value of 0.03 to correspond with a TDS concentration
     of 33,000 |mg/L|.
-    
+
     Component model dynamic inputs:
 
     * **brine_mass** [|kg|] (0 to 6.985e+10) - cumulative brine mass
@@ -142,7 +142,7 @@ class GenericAquifer(ComponentModel):
       pore water on a 100x10 radial grid surrounding the leaky well
 
     * **r_coordinate** [|m|] - radial coordinates of the points in the
-      100x10 radial grid surrounding the leaky well. The 100 radii range from 
+      100x10 radial grid surrounding the leaky well. The 100 radii range from
       1.62 |m| to about 77.5 |km|.
 
     * **z_coordinate** [|m|] - depth coordinates of the points in the 100x10
@@ -153,11 +153,11 @@ class GenericAquifer(ComponentModel):
       of the aquifer. The increment used between depth values is 10%
       of the aquifer's thickness.
 
-    For control file examples using the Generic Aquifer component, see 
-    to *ControlFile_ex24*, *ControlFile_ex31b*, *ControlFile_ex34*, *ControlFile_ex41*, 
-    and *ControlFile_ex54a* to *ControlFile_ex54d*. For script examples, see 
-    *iam_sys_strata_reservoir_openwell_genericaquifer.py*, 
-    *iam_sys_analytical_mswell_generic.py*, *iam_sys_analytical_mswell_generic_lhs.py*, 
+    For control file examples using the Generic Aquifer component, see
+    to *ControlFile_ex24*, *ControlFile_ex31b*, *ControlFile_ex34*, *ControlFile_ex41*,
+    and *ControlFile_ex54a* to *ControlFile_ex54d*. For script examples, see
+    *iam_sys_strata_reservoir_openwell_genericaquifer.py*,
+    *iam_sys_analytical_mswell_generic.py*, *iam_sys_analytical_mswell_generic_lhs.py*,
     and *iam_sys_strata_reservoir_openwell_genericaquifer_5locs.py*.
 
     """
@@ -175,8 +175,8 @@ class GenericAquifer(ComponentModel):
         :returns: GenericAquifer class object
         """
         if not self.model_data_check():
-            model_files_folder = os.sep.join([IAM_DIR, 'source', 'components',
-                                              'aquifer', 'generic'])
+            model_files_folder = os.sep.join([iam_bc.IAM_DIR, 'src', 'openiam', 'components',
+                                              'models', 'aquifer', 'generic'])
             error_msg = ''.join(['Generic Aquifer component {} cannot be created ',
                                  'as required model files are missing ',
                                  'in the folder\n {}.']).format(
@@ -227,7 +227,7 @@ class GenericAquifer(ComponentModel):
         self.grid_obs_keys = GA_GRID_OBSERVATIONS
 
         # Initiate solution object
-        self.sol = genrom.Solution()
+        self.sol = iam_gen.Solution()
 
         debug_msg = 'GenericAquifer component created with name {}'.format(name)
         logging.debug(debug_msg)
@@ -350,19 +350,19 @@ class GenericAquifer(ComponentModel):
                 'brine_mass', adapter.linkobs['mass_brine_{aquifer_name}'.format(
                     aquifer_name=aq_name)])
         # End Connection if statement
-        
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter top_depth (to the top of the aquifer)
         strata = name2obj_dict['strata']
-        
+
         aq_index = int(aq_name[7:])  # index of aquifer of interest
         # depth to bottom of shale layer above the aquifer of interest
         above_shale_name = 'shale{}Depth'.format(aq_index+1)
-        
+
         if name2obj_dict['strata_type'] in types_strata_pars:
             if 'top_depth' not in self.pars and \
                     'top_depth' not in self.deterministic_pars:
@@ -373,47 +373,47 @@ class GenericAquifer(ComponentModel):
             if 'aqu_thick' not in self.pars and \
                     'aqu_thick' not in self.deterministic_pars:
                 sparam = '{aq}Thickness'.format(aq=aq_name)
-                
+
                 connect = get_strat_param_dict_for_link(sparam, strata)
-                
+
                 if not connect:
                     sparam = 'aquiferThickness'
-                    
+
                     connect = get_strat_param_dict_for_link(sparam, strata)
-                    
+
                     if not connect:
                         print('Unable to find parameter ' + sparam)
 
                 self.add_par_linked_to_par('aqu_thick', connect[sparam])
-            
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             if 'top_depth' in self.pars or 'top_depth' in self.deterministic_pars:
                 warning_msg = strata.parameter_assignment_warning_msg().format(
                     'top_depth', above_shale_name)
-                
+
                 logging.warning(warning_msg)
-                    
+
                 if 'top_depth' in self.pars:
                     del self.pars['top_depth']
-                
+
                 elif 'top_depth' in self.deterministic_pars:
                     del self.deterministic_pars['top_depth']
-            
+
             self.add_par_linked_to_obs(
                 'top_depth', strata.linkobs[above_shale_name])
-            
+
             if 'aqu_thick' in self.pars or 'aqu_thick' in self.deterministic_pars:
                 warning_msg = strata.parameter_assignment_warning_msg().format(
                     'aqu_thick', '{aq}Thickness'.format(aq=aq_name))
-                
+
                 logging.warning(warning_msg)
-                    
+
                 if 'aqu_thick' in self.pars:
                     del self.pars['aqu_thick']
-                
+
                 elif 'aqu_thick' in self.deterministic_pars:
                     del self.deterministic_pars['aqu_thick']
-            
+
             self.add_par_linked_to_obs(
                 'aqu_thick', strata.linkobs['{aq}Thickness'.format(aq=aq_name)])
 
@@ -520,7 +520,7 @@ class GenericAquifer(ComponentModel):
         and placed to the right place.
         """
         model_data_dir = os.sep.join([
-            IAM_DIR, 'source', 'components', 'aquifer', 'generic'])
+            iam_bc.IAM_DIR, 'src', 'openiam', 'components', 'models', 'aquifer', 'generic'])
 
         subfolders = ['{}-{}m'.format(100*ind, 100*(ind+4)-1) \
                       for ind in range(1, 38, 4)]
@@ -545,7 +545,7 @@ def test_generic_aquifer_component():
     time = 1
     time_array = 365.25*np.arange(0, time+1)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add FutureGen aquifer model object and define parameters
     ga = sm.add_component_model_object(GenericAquifer(name='ga', parent=sm))

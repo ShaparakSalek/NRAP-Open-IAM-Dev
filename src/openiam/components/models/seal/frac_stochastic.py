@@ -39,11 +39,11 @@ import numpy as np                  # For arrays
 import matplotlib.pyplot as plt     # For graphics
 from matplotlib import collections as mcol   # For multiple-line plots
 
-import seal_config as scfg           # IO directory and file names
-import frac_model as fmod           # Class definitions
-import frac_random as fran          # Random value generators
-import seal_units as sun            # For unit conversion
-import seal_file as sfile           # Error in file operations
+from . import seal_config as scfg           # IO directory and file names
+from . import frac_model as fmod           # Class definitions
+from . import frac_random as fran          # Random value generators
+from . import seal_units as sun            # For unit conversion
+from . import seal_file as sfile           # Error in file operations
 
 # Fonts for plotting
 LEGEND_FONT = 16                    # Font size for figure title (pt)

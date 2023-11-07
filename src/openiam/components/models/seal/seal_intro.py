@@ -32,10 +32,10 @@ import sys                          # For buffer flush
 import math                         # For Tanh + other functions
 import logging                      # For reporting errors
 
-import seal_file as sfile           # For file operations
-import seal_model as mod            # For Class definitions
-import seal_upload as sup           # Input file data
-import seal_config as scfg           # IO directory and file names
+from . import seal_file as sfile           # For file operations
+from . import seal_model as mod            # For Class definitions
+from . import seal_upload as sup           # Input file data
+from . import seal_config as scfg           # IO directory and file names
 
 # Other constants
 ECHO = False                        # Control to print for debugging

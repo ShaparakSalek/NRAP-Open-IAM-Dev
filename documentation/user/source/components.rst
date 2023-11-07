@@ -11,7 +11,7 @@ Components Description
 
 This section of the document will describe each of the component models
 available for use in NRAP-Open-IAM. For each component model, all parameters
-that can be specified are described along with the parameters' units and 
+that can be specified are described along with the parameters' units and
 acceptable ranges. Descriptions of the outputs that can be returned by each
 component are also provided.
 
@@ -20,109 +20,109 @@ component are also provided.
 Stratigraphy Component
 ======================
 
-.. automodule:: openiam.Stratigraphy
+.. automodule:: openiam.base.Stratigraphy
 
 Dipping Stratigraphy Component
 ==============================
 
-.. automodule:: openiam.DippingStratigraphy
+.. automodule:: openiam.base.DippingStratigraphy
 
 LookupTableStratigraphy Component
 =================================
 
-.. automodule:: openiam.LookupTableStratigraphy
+.. automodule:: openiam.base.LookupTableStratigraphy
 
 Analytical Reservoir Component
 ==============================
 
-.. automodule:: openiam.AnalyticalReservoir
+.. automodule:: openiam.base.AnalyticalReservoir
 
 Lookup Table Reservoir Component
 ================================
 
-.. automodule:: openiam.LookupTableReservoir
+.. automodule:: openiam.base.LookupTableReservoir
 
 Theis Reservoir Component
 ==============================
 
-.. automodule:: openiam.TheisReservoir
+.. automodule:: openiam.base.TheisReservoir
 
 Multisegmented Wellbore Component
 =================================
 
-.. automodule:: openiam.MultisegmentedWellbore
+.. automodule:: openiam.base.MultisegmentedWellbore
 
 Cemented Wellbore Component
 ===========================
 
-.. automodule:: openiam.CementedWellbore
+.. automodule:: openiam.base.CementedWellbore
 
 Open Wellbore Component
 =======================
 
-.. automodule:: openiam.OpenWellbore
+.. automodule:: openiam.base.OpenWellbore
 
 Generalized Flow Rate Component
 ===============================
 
-.. automodule:: openiam.GeneralizedFlowRate
+.. automodule:: openiam.base.GeneralizedFlowRate
 
 Hydrocarbon Leakage Component
 =============================
 
-.. automodule:: openiam.HydrocarbonLeakage
+.. automodule:: openiam.base.HydrocarbonLeakage
 
 Seal Horizon Component
 ======================
 
-.. automodule:: openiam.SealHorizon
+.. automodule:: openiam.base.SealHorizon
 
 Fault Flow Component
 ====================
 
-.. automodule:: openiam.FaultFlow
+.. automodule:: openiam.base.FaultFlow
 
 Fault Leakage Component
 =======================
 
-.. automodule:: openiam.FaultLeakage
+.. automodule:: openiam.base.FaultLeakage
 
 Carbonate Aquifer Component
 ===========================
 
-.. automodule:: openiam.CarbonateAquifer
+.. automodule:: openiam.base.CarbonateAquifer
 
 Deep Alluvium Aquifer Component
 ===============================
 
-.. automodule:: openiam.DeepAlluviumAquifer
+.. automodule:: openiam.base.DeepAlluviumAquifer
 
 FutureGen2 Aquifer Component
 ============================
 
-.. automodule:: openiam.FutureGen2Aquifer
+.. automodule:: openiam.base.FutureGen2Aquifer
 
 FutureGen2 AZMI Component
 =========================
 
-.. automodule:: openiam.FutureGen2AZMI
+.. automodule:: openiam.base.FutureGen2AZMI
 
 Generic Aquifer Component
 =========================
 
-.. automodule:: openiam.GenericAquifer
+.. automodule:: openiam.base.GenericAquifer
 
 Atmospheric Model Component
 ===========================
 
-.. automodule:: openiam.AtmosphericROM
+.. automodule:: openiam.base.AtmosphericROM
 
 Plume Stability Component
 =========================
 
-.. automodule:: openiam.PlumeStability
+.. automodule:: openiam.base.PlumeStability
 
 Chemical Well Sealing Component
 ===============================
 
-.. automodule:: openiam.ChemicalWellSealing
+.. automodule:: openiam.base.ChemicalWellSealing

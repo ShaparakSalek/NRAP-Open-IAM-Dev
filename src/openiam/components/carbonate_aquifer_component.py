@@ -7,19 +7,18 @@ from sys import platform
 
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 try:
-    from openiam import IAM_DIR, SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
-                                get_strat_param_dict_for_link)
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.strata import (get_comp_types_strata_pars,
+                                         get_comp_types_strata_obs,
+                                         get_strat_param_dict_for_link)
 
 try:
-    import components.aquifer as aqmodel
+    import openiam.components.models.aquifer as aqmodel
 except ImportError:
     print('\nERROR: Unable to load ROM for Carbonate Aquifer component\n')
     sys.exit()
@@ -29,7 +28,7 @@ EDX_WINDOWS_CAAQ_LIB_HTTP = 'https://edx.netl.doe.gov/resource/fc330991-7a17-46b
 GITLAB_WINDOWS_CAAQ_LIB_HTTP = 'https://gitlab.com/NRAP/OpenIAM/-/blob/master/source/components/aquifer/carbonate/carbonate.dll'
 
 
-class CarbonateAquifer(ComponentModel):
+class CarbonateAquifer(iam_bc.ComponentModel):
     """
     The Carbonate Aquifer component model is a reduced-order model that can be
     used to predict the impact that carbon dioxide (|CO2|) and brine leaks from a
@@ -582,8 +581,8 @@ class CarbonateAquifer(ComponentModel):
                     self.add_kwarg_linked_to_collection(
                         sinput, collectors[sinput][self.name]['data'])
         # End Connection if statement
-        
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
@@ -591,16 +590,16 @@ class CarbonateAquifer(ComponentModel):
         # Take care of parameter aqu_thick (possibly) defined by stratigraphy component
         sparam = '{aq}Thickness'.format(aq=component_data['AquiferName'])
         strata = name2obj_dict['strata']
-        
+
         if name2obj_dict['strata_type'] in types_strata_pars:
             connect = get_strat_param_dict_for_link(sparam, strata)
-            
+
             if not connect:
                 sparam = 'aquiferThickness'
                 connect = get_strat_param_dict_for_link(sparam, strata)
 
             self.add_par_linked_to_par('aqu_thick', connect[sparam])
-            
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             self.add_par_linked_to_obs('aqu_thick', strata.linkobs[sparam])
 
@@ -625,8 +624,8 @@ class CarbonateAquifer(ComponentModel):
             # Windows
             library_name = "carbonate.dll"
 
-        library = os.sep.join([
-            IAM_DIR, 'source', 'components', 'aquifer', 'carbonate', library_name])
+        library = os.sep.join([iam_bc.IAM_DIR, 'src', 'openiam', 'components',
+                               'models', 'aquifer', 'carbonate', library_name])
 
         if not os.path.isfile(library):
             check_flag = check_flag + 1
@@ -638,7 +637,7 @@ def test_carbonate_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add carbonate aquifer model object and define parameters
     ca = sm.add_component_model_object(CarbonateAquifer(name='ca', parent=sm))

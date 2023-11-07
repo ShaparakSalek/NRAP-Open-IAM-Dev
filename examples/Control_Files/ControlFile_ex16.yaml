@@ -34,7 +34,7 @@
 #    source/components/reservoir/lookuptables/Kimb_54_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex16.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex16.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

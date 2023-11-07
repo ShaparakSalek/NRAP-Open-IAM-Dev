@@ -19,15 +19,14 @@ from collections.abc import Iterable
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))))
+from openiam.matk.sampleset import corr
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.simple_reservoir_component import SimpleReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
-from matk.sampleset import corr
-from openiam import SystemModel, SimpleReservoir, MultisegmentedWellbore
+from openiam.visualization.time_series import get_colors
 
-from openiam.visualize.time_series import get_colors
-
-from openiam.visualize.sensitivity_labels import (PAR_NAME_DICT, OUTPUT_DICT)
+from openiam.visualization.sensitivity_labels import (PAR_NAME_DICT, OUTPUT_DICT)
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

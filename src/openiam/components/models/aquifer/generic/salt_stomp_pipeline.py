@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import (StandardScaler, MinMaxScaler,
                                    PowerTransformer, QuantileTransformer)
-from plot_to_numpy import STOMP_Run
+
+from openiam.components.models.aquifer.generic.plot_to_numpy import STOMP_Run
+
 
 class Run(STOMP_Run):
 

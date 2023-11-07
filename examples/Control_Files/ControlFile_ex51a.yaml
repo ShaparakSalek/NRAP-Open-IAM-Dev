@@ -12,7 +12,7 @@
 # version of the CementedWellbore component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex51a.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex51a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

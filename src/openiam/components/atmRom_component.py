@@ -7,16 +7,15 @@ from sys import platform
 
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
-    from openiam import SystemModel, ComponentModel, IAM_DIR
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
 
 try:
-    import components.atmosphere as atmModel
+    import openiam.components.models.atmosphere as atmModel
 except ImportError:
     print('\nERROR: Unable to load ROM for Atmospheric ROM component\n')
     sys.exit()
@@ -26,7 +25,7 @@ EDX_WINDOWS_ATMROM_LIB_HTTP = 'https://edx.netl.doe.gov/resource/fc330991-7a17-4
 GITLAB_WINDOWS_ATMROM_LIB_HTTP = 'https://gitlab.com/NRAP/OpenIAM/-/blob/master/source/components/atmosphere/atmdisrom.dll'
 
 
-class AtmosphericROM(ComponentModel):
+class AtmosphericROM(iam_bc.ComponentModel):
     """
     The Atmospheric model is meant to be used for performing scoping studies for |CO2|
     dispersion after leakage out of the ground. The employed method is an
@@ -413,7 +412,7 @@ class AtmosphericROM(ComponentModel):
 
         if ('receptors' in component_data) and (component_data['receptors']):
             xy_data = np.genfromtxt(
-                os.sep.join([IAM_DIR, component_data['receptors']]),
+                os.sep.join([iam_bc.IAM_DIR, component_data['receptors']]),
                 delimiter=',')
             self.model_kwargs['x_receptor'] = xy_data[:, 0]
             self.model_kwargs['y_receptor'] = xy_data[:, 1]
@@ -473,8 +472,8 @@ class AtmosphericROM(ComponentModel):
             # Windows...
             library_name = "atmdisrom.dll"
 
-        library = os.sep.join([
-            IAM_DIR, 'source', 'components', 'atmosphere', library_name])
+        library = os.sep.join([iam_bc.IAM_DIR, 'src', 'openiam', 'components',
+                               'models', 'atmosphere', library_name])
 
         if not os.path.isfile(library):
             check_flag = check_flag + 1
@@ -486,7 +485,7 @@ def test_atmRom_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # input parameters by user
     satm = sm.add_component_model_object(AtmosphericROM(name='satm', parent=sm))

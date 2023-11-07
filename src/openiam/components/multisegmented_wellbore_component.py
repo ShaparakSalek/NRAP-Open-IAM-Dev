@@ -3,20 +3,20 @@ import logging
 import sys
 import os
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import openiam.components.wellbore.multisegmented.multisegmented_wellbore_ROM as mswrom
+    import openiam.components.models.wellbore.multisegmented.multisegmented_wellbore_ROM as mswrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Multisegmented Wellbore component\n')
     sys.exit()
 
-class MultisegmentedWellbore(ComponentModel):
+
+class MultisegmentedWellbore(iam_bc.ComponentModel):
     """
     The Multisegmented Wellbore component estimates the leakage rates of brine and
     |CO2| along wells in the presence of overlying aquifers or thief zones.
@@ -429,9 +429,10 @@ def read_data(filename):
 
 def test_multisegmented_wellbore_component():
     try:
-        from openiam.analytical_reservoir_component import AnalyticalReservoir
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: {}'.format(err))
+
     import matplotlib.pyplot as plt
     __spec__ = None
 
@@ -450,7 +451,7 @@ def test_multisegmented_wellbore_component():
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     res = sm.add_component_model_object(AnalyticalReservoir(

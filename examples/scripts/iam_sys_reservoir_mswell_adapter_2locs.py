@@ -11,10 +11,12 @@ import sys
 import os
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, AnalyticalReservoir,
-                     MultisegmentedWellbore, RateToMassAdapter)
-from matk import pyDOE
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.matk import pyDOE
 
 
 if __name__=='__main__':

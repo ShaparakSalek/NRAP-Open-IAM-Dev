@@ -38,14 +38,14 @@ import time                         # For calculating runtime
 from datetime import timedelta      # For calculating runtime
 import numpy as np                  # Array operations
 
-import frac_random as fran          # Random number generators
-import frac_stochastic as fsch      # Computations for random fractures
-import frac_user as fuse            # Matrix and fracture computations
-import frac_view as view            # Save fracture summary data
-import seal_config as scfg          # IO directory names
-import seal_file as sfile           # Error in file operations
-import seal_units as sun            # For unit conversion
-import frac_decipher as fde         # YAML parameters
+from . import frac_random as fran          # Random number generators
+from . import frac_stochastic as fsch      # Computations for random fractures
+from . import frac_user as fuse            # Matrix and fracture computations
+from . import frac_view as view            # Save fracture summary data
+from . import seal_config as scfg          # IO directory names
+from . import seal_file as sfile           # Error in file operations
+from . import seal_units as sun            # For unit conversion
+from . import frac_decipher as fde         # YAML parameters
 
 # Constants
 DEG_TO_KAPPA = 0.00875              # Conversion for 2-sigma deg. to Kappa

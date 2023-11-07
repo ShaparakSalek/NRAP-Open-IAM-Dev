@@ -7,17 +7,15 @@ import sys
 import logging
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters
+from openiam.cf_interface.commons import process_parameters
 
 
-class ChemicalWellSealing(ComponentModel):
+class ChemicalWellSealing(iam_bc.ComponentModel):
     """
     The Chemical Well Sealing component is based on the model described in
     :cite:`IyerEtAl2020`. It predicts whether a fracture
@@ -276,7 +274,7 @@ def test_chemical_well_sealing():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add chemical well sealing ROM and define parameters
     cws = sm.add_component_model_object(ChemicalWellSealing(name='cws', parent=sm))

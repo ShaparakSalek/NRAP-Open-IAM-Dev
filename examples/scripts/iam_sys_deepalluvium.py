@@ -10,13 +10,9 @@ Seth.King@NETL.DOE.GOV
 import os
 import sys
 import numpy as np
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-try:
-    from openiam import SystemModel, DeepAlluviumAquifer
-except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
-
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.deep_alluvium_aquifer_component import DeepAlluviumAquifer
 
 
 if __name__ == "__main__":

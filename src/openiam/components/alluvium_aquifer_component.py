@@ -8,22 +8,21 @@ import logging
 
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 try:
-    from openiam.iam_base_classes import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
 
 try:
-    import openiam.components.aquifer.alluvium.alluvium_aquifer_ROM as aarom
+    import openiam.components.models.aquifer.alluvium.alluvium_aquifer_ROM as aarom
 except ImportError:
     print('\nERROR: Unable to load ROM for Alluvium Aquifer component\n')
     sys.exit()
 
-class AlluviumAquifer(ComponentModel):
+
+class AlluviumAquifer(iam_bc.ComponentModel):
     """
     The Alluvium Aquifer component model is a reduced order model which can be used
     to predict the changes in diluted groundwater chemistry if |CO2| and brine were to
@@ -556,7 +555,7 @@ def test_alluvium_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add alluvium aquifer model object and define parameters
     aa = sm.add_component_model_object(AlluviumAquifer(name='aa', parent=sm))

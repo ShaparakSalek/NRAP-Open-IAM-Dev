@@ -7,15 +7,13 @@ from matplotlib import pyplot as plt
 from matplotlib import colors
 from matplotlib.backends.backend_pdf import PdfPages
 
-from model_input import generate_input
+from openiam.components.models.aquifer.generic.model_input import generate_input
 
-
-np.random.seed(1)
-tf.random.set_seed(2)
-
-current_directory = os.path.dirname(os.path.abspath(__file__))
 
 def model(inputArray):
+    np.random.seed(1)
+    tf.random.set_seed(2)
+    current_directory = os.path.dirname(os.path.abspath(__file__))
 
     input_images = generate_input(inputArray)
 

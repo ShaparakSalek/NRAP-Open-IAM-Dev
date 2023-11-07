@@ -15,9 +15,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, AnalyticalReservoir, ChemicalWellSealing)
-from matk import pyDOE
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.chemical_well_sealing import ChemicalWellSealing
+from openiam.matk import pyDOE
 
 
 if __name__ == '__main__':

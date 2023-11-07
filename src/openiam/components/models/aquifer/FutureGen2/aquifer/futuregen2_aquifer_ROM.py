@@ -77,12 +77,17 @@ in dissolved |CO2| concentration > 20%
 import os
 import sys
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from aquifer import (ph_log_dx, ph_log_dy, ph_log_dz, ph_log_vol,
-                     tds_log_dx, tds_log_dy, tds_log_dz, tds_log_vol,
-                     pres_log_dx, pres_log_dy, pres_log_dz, pres_log_vol,
-                     dis_log_dx, dis_log_dy, dis_log_dz, dis_log_vol)
+try:
+    from . import (ph_log_dx, ph_log_dy, ph_log_dz, ph_log_vol,
+                   tds_log_dx, tds_log_dy, tds_log_dz, tds_log_vol,
+                   pres_log_dx, pres_log_dy, pres_log_dz, pres_log_vol,
+                   dis_log_dx, dis_log_dy, dis_log_dz, dis_log_vol)
+except:
+    import ph_log_dx, ph_log_dy, ph_log_dz, ph_log_vol,\
+        tds_log_dx, tds_log_dy, tds_log_dz, tds_log_vol,\
+        pres_log_dx, pres_log_dy, pres_log_dz, pres_log_vol,\
+        dis_log_dx, dis_log_dy, dis_log_dz, dis_log_vol
 
 
 class Solution(object):

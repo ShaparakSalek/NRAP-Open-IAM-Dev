@@ -7,26 +7,15 @@ import logging
 import numpy as np
 import pandas as pd
 
-# Common command to create a new component based on ComponentModel class
-# so that it will be using its inherent basic methods and attributes
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Since this component is based on ComponentModel we need to import it
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-from openiam.cfi.commons import process_parameters
-
-# try:
-#     import components.fault.fault_leakage.fault_leakage_model as flmod
-# except ImportError:
-#     print('\nERROR: Unable to load models for Fault Leakage component\n')
-#     sys.exit()
+from openiam.cf_interface.commons import process_parameters
 
 
-class FaultLeakage(ComponentModel):
+class FaultLeakage(iam_bc.ComponentModel):
     """
     The Fault Leakage Model component uses deep neural networks to estimate
     the flow of brine carbon dioxide along a fault. The dynamics of multiphase flow
@@ -338,7 +327,12 @@ class FaultLeakage(ComponentModel):
                                          'injection_time', 'geothermal_gradient',
                                          'time'])
             # Run the model.
-            import components.fault.fault_leakage.fault_leakage_model as flmod
+            try:
+                import openiam.components.models.fault.fault_leakage.fault_leakage_model as flmod
+            except ImportError:
+                print('\nERROR: Unable to load models for Fault Leakage component\n')
+                sys.exit()
+
             X_scaled_brine = flmod.fl_scaler('brine').transform(X)
             X_scaled_CO2 = flmod.fl_scaler('CO2').transform(X)
             # t/yr, multiplied by 2.0 to account for the FULL aquifer
@@ -383,12 +377,11 @@ class FaultLeakage(ComponentModel):
 
 def test_fault_leakage_component():
     # Define keyword arguments of the system model.
-
     times = np.linspace(0.0, 30.0, num=20)*365.25 # time in days
     sm_model_kwargs = {'time_array': times} # time must be given in days
 
     # Create the system model.
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # well_index is the well location index (not to be confused with Peaceman's well index)
     params = {'damage_zone_perm': -13.0, 'damage_zone_por': 0.05,

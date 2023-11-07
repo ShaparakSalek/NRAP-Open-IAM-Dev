@@ -1,33 +1,34 @@
+import os
+import warnings
 import numpy as np
 import tensorflow as tf
 import joblib
 from matplotlib import pyplot as plt
 from matplotlib import colors
 from matplotlib.backends.backend_pdf import PdfPages
-import os
-from model_input import generate_input
-import warnings
 
-np.random.seed(1)
-tf.random.set_seed(2)
+from openiam.components.models.aquifer.generic.model_input import generate_input
 
-current_directory = os.path.dirname(os.path.abspath(__file__))
 
 def model(inputArray):
+    np.random.seed(1)
+    tf.random.set_seed(2)
+    current_directory = os.path.dirname(os.path.abspath(__file__))
 
     input_images = generate_input(inputArray)
 
-    # load correct model and data data transformers based on depth
+    # load correct model and data transformers based on depth
     depth = int(inputArray[1])
     depths = {'100-499m': (100, 500), '500-899m': (500, 900),
               '900-1299m': (900, 1300), '1300-1699m': (1300, 1700),
               '1700-2099m': (1700, 2100), '2100-2499m': (2100, 2500),
               '2500-2899m': (2500, 2900), '2900-3299m': (2900, 3300),
-              '3300-3699m':(3300, 3700), '3700-4099m':(3700, 4100)}
+              '3300-3699m': (3300, 3700), '3700-4099m':(3700, 4100)}
     for interval, depth_lst in depths.items():
         if depth_lst[0] <= depth < depth_lst[1]: # updated to allow for real and integer values
             ddir = current_directory+os.path.sep+str(interval)+os.path.sep
-            generator = tf.keras.models.load_model(ddir+'co2_generator.h5', compile=False)
+            generator = tf.keras.models.load_model(
+                ddir+'co2_generator.h5', compile=False)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 input_transformer = joblib.load(ddir+'co2_input_transformer.pkl')
@@ -48,6 +49,7 @@ def model(inputArray):
         prediction[0, :, :, :, :]))-1.0e-30
     # return input_images, transformed_prediction
     return transformed_prediction
+
 
 if __name__ == '__main__':
 

@@ -30,12 +30,12 @@ Copyright(c) 2019-2022 by Ernest N. Lindner - All Rights Reserved
 import numpy as np
 from scipy import interpolate
 
-import data_arrays as sdata         # Data arrays indices
-import seal_config as scfg           # IO directory and file names
-import seal_file as sfile           # Error in file operations.
-import seal_model as mod            # Functions for Class definitions
-import seal_units as sun            # For unit conversion
-import seal_upload as sup           # Input file data
+from . import data_arrays as sdata         # Data arrays indices
+from . import seal_config as scfg          # IO directory and file names
+from . import seal_file as sfile           # Error in file operations.
+from . import seal_model as mod            # Functions for Class definitions
+from . import seal_units as sun            # For unit conversion
+from . import seal_upload as sup           # Input file data
 
 # Other constants
 ECHO = False                        # DEBUG Print variables

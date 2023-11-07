@@ -9,8 +9,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel, SimpleReservoir
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.simple_reservoir_component import SimpleReservoir
+
 
 def robustness(Pc, Ps, kus):
     '''

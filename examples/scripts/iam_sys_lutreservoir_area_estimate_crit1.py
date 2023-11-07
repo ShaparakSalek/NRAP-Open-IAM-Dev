@@ -8,25 +8,27 @@ FutureGen 2.0 data set can be downloaded from the following source:
 https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+    data/reservoir/lookuptables/FutureGen2/1008_sims
 """
 import os
 import sys
 import logging
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 import numpy as np
 import matplotlib.pyplot as plt
-from openiam import (SystemModel, ReservoirDataInterpolator,
-                     LookupTableReservoir, AreaEstimate)
-from openiam.reservoir_data_interpolator import data_scatter_plot
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import (
+    data_scatter_plot, ReservoirDataInterpolator)
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.components.area_estimate_component import AreaEstimate
 
 
 if __name__ == "__main__":
 
     __spec__ = None
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'FutureGen2', '1008_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'fg1.csv'])):

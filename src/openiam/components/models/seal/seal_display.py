@@ -42,9 +42,9 @@ import csv                          # For saving a list of lists
 import copy                         # For array adjustment
 import numpy as np                  # For array operations
 
-import seal_config as scfg           # IO directory and file names
-import seal_file as sfile           # For paths and error reports
-import seal_units as sun            # For unit conversion
+from . import seal_config as scfg           # IO directory and file names
+from . import seal_file as sfile           # For paths and error reports
+from . import seal_units as sun            # For unit conversion
 
 # Lead-in characters for text - for uniformity
 BLK_IN = "\n  > "                   # Block start

@@ -19,8 +19,8 @@ from matplotlib import cm
 from matplotlib import ticker
 
 from .label_setup import Y_LABEL_DICT
-from openiam.visualize import time_series
-import openiam.cfi.commons as iam_commons
+from openiam.visualization import time_series
+import openiam.cf_interface.commons as iam_commons
 
 
 RC_FONT = {'family': 'Arial', 'weight': 'normal', 'size': None}

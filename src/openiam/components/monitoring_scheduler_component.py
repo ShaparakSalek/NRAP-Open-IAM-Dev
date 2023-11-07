@@ -11,16 +11,15 @@ import os
 import logging
 import numpy as np
 
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
-    from openiam import ComponentModel
-    from openiam.parameter_setup_component import generate_seq
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
+
+from openiam.components.parameter_setup_component import generate_seq
 
 
-class MonitoringScheduler1(ComponentModel):
+class MonitoringScheduler1(iam_bc.ComponentModel):
     """
     Monitoring Scheduler 1 component produces indices of the components to be
     monitored based on a prescribed schedule and whether the wellbores have
@@ -192,7 +191,7 @@ class MonitoringScheduler1(ComponentModel):
         return out
 
 
-class MonitoringScheduler2(ComponentModel):
+class MonitoringScheduler2(iam_bc.ComponentModel):
     """
     Monitoring Scheduler 2 component produces indices of the components to be
     monitored based on a prescribed schedule. In selection of the next wellbore
@@ -342,7 +341,7 @@ class MonitoringScheduler2(ComponentModel):
         return out
 
 
-class MonitoringScheduler3(ComponentModel):
+class MonitoringScheduler3(iam_bc.ComponentModel):
     """
     Monitoring Scheduler 3 component produces indices of the components to be
     monitored based on a prescribed schedule. The wellbores to be monitored

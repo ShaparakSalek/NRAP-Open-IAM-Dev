@@ -8,7 +8,7 @@ to read any type of data (not just pressure, CO2saturation, and temperature).
 This example uses a modified version of the file Reservoir_data_sim01.csv from the
 Kimberlina data set (https://gitlab.com/NRAP/Kimberlina_data). The file should be located
 in the following location:
-    source/components/reservoir/lookuptables/Test_metrics
+    data/reservoir/lookuptables/Test_metrics
 The file from the Kimberlina data set was modified to include columns
 for the fields genericMetric_1 through genericMetric_10 (corresponding
 to the times in columns 1 through 10 of the time_points.csv file in the same
@@ -35,15 +35,17 @@ import sys
 import os
 import logging
 import numpy as np
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, ReservoirDataInterpolator,
-                     LookupTableReservoir, MultisegmentedWellbore)
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Test_metrics'])
 
     if not os.path.exists(os.sep.join([

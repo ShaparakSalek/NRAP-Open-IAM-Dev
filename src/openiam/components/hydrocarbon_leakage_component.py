@@ -10,20 +10,19 @@ import sys
 import logging
 import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 try:
-    from openiam import ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to import ComponentModel class:', err)
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
-import components.wellbore.hydrocarbon_leakage.hydrocarbon_leakage_ROM as hydrcarbrom
-from openiam.cfi.commons import process_parameters
-from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
-                                get_strat_param_dict_for_link)
+from openiam.components.models.wellbore.hydrocarbon_leakage import hydrocarbon_leakage_ROM as hydrcarbrom
+from openiam.cf_interface.commons import process_parameters
+from openiam.cf_interface.strata import (get_comp_types_strata_pars,
+                                         get_comp_types_strata_obs,
+                                         get_strat_param_dict_for_link)
 
 
-class HydrocarbonLeakage(ComponentModel):
+class HydrocarbonLeakage(iam_bc.ComponentModel):
     """
     The HydrocarbonLeakage component model is a reduced order model predicting
     liquid and gas leakage to the shallow aquifer between 100 to 410 years
@@ -232,22 +231,22 @@ class HydrocarbonLeakage(ComponentModel):
                 self.add_obs(obs_nm)
 
             component_data['Outputs'] = new_comp_outputs
-        
-        # These lists indicate the stratigraphy component types that offer thicknesses 
+
+        # These lists indicate the stratigraphy component types that offer thicknesses
         # and depths as parameters or as observations.
         types_strata_pars = get_comp_types_strata_pars()
         types_strata_obs = get_comp_types_strata_obs()
 
         # Determine number of shale layers in the stratigraphy
         strata = name2obj_dict['strata']
-        
+
         if name2obj_dict['strata_type'] in types_strata_pars:
             sparam = 'shale1Depth'
-            
+
             connect = get_strat_param_dict_for_link(sparam, strata)
-            
+
             self.add_par_linked_to_par('reservoirDepth', connect[sparam])
-            
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             self.add_par_linked_to_obs('reservoirDepth', strata.linkobs['shale1Depth'])
 
@@ -302,7 +301,6 @@ class HydrocarbonLeakage(ComponentModel):
 
 
 def test_hydrocarbon_leakage_component():
-    from openiam import SystemModel
     import matplotlib.pyplot as plt
 
     __spec__ = None
@@ -316,7 +314,7 @@ def test_hydrocarbon_leakage_component():
     time_array = 365.25*np.arange(t0, t0+num_years+10, 10)
 
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add hydrocarbon leakage component
     hcl_comp = sm.add_component_model_object(HydrocarbonLeakage(

@@ -12,10 +12,10 @@ import logging
 import numpy as np
 from matplotlib.colors import is_color_like
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(SOURCE_DIR)
-
-import openiam as iam
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.dipping_stratigraphy_component import DippingStratigraphy
+from openiam.components.lookup_table_stratigraphy_component import LookupTableStratigraphy
+import openiam.cf_interface.commons as cfi_commons
 
 # Functions in this file are used to generate the colors, alpha values, and
 # labels for different units.
@@ -76,23 +76,23 @@ CHECK_CONDITIONS_MSG = ''.join([
 
 def get_comp_types_strata_pars():
     """
-    Returns a list of the stratigraphy component types that offer thickness and 
+    Returns a list of the stratigraphy component types that offer thickness and
     depth values as parameters (including composite parameters).
     """
     comp_types = ['Stratigraphy']
-    
+
     return comp_types
-    
-    
+
+
 def get_comp_types_strata_obs():
     """
-    Returns a list of the stratigraphy component types that offer thickness and 
+    Returns a list of the stratigraphy component types that offer thickness and
     depth values as observations.
     """
     comp_types = ['LookupTableStratigraphy', 'DippingStratigraphy']
-    
+
     return comp_types
-    
+
 
 def initialize_strata(yaml_data, sm):
     """
@@ -116,22 +116,22 @@ def initialize_strata(yaml_data, sm):
 
     if strata_type in types_strata_pars:
         # Add Stratigraphy component
-        strata = sm.add_component_model_object(iam.Stratigraphy(
+        strata = sm.add_component_model_object(Stratigraphy(
             name='strata', parent=sm))
-        
+
         comp_data = yaml_data['Stratigraphy']
-        
+
         if 'Parameters' in comp_data:
             strat_params = comp_data['Parameters']
         else:
             strat_params = comp_data
-        
+
         # Add the parameters
         for parameter in strat_params:
             if not isinstance(strat_params[parameter], dict):
                 strat_params[parameter] = {
                     'value': strat_params[parameter], 'vary': False}
-            
+
             strata.add_par(parameter, **(strat_params[parameter]))
 
     return strata, sm, strata_type
@@ -163,16 +163,16 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
 
     :param sm: system model object
     :type sm: openiam.iam_base_classes.SystemModel
-    
-    :param strata_type: indicates whether the stratigraphy component is a 
-        'Stratigraphy', 'LookupTableStratigraphy', or 'DippingStratigraphy' 
+
+    :param strata_type: indicates whether the stratigraphy component is a
+        'Stratigraphy', 'LookupTableStratigraphy', or 'DippingStratigraphy'
         component
     :type strata_type: str
 
     :returns: strata, sm
     """
     types_strata_obs = get_comp_types_strata_obs()
-    
+
     comp_data = yaml_data[strata_type]
 
     # First, find the base name of the component (e.g., excluding '_001') and
@@ -196,39 +196,39 @@ def process_spatially_variable_strata(strata, component_name, yaml_data,
         # Get the coordinates from the component model connected to this one
         comp_x_val = locations[yaml_data[base_name]['Connection']]['coordx'][comp_number]
         comp_y_val = locations[yaml_data[base_name]['Connection']]['coordy'][comp_number]
-    
+
     if strata_type in types_strata_obs:
         comp_x_val = np.asarray(comp_x_val).flatten()
         comp_y_val = np.asarray(comp_y_val).flatten()
-        
+
         if strata_type == 'LookupTableStratigraphy':
             # file_directory and file_name are handled in the connect_with_system() method
-            strata.append(sm.add_component_model_object(iam.LookupTableStratigraphy(
-                name='strata' + component_name, parent=sm, intr_family='stratigraphy', 
+            strata.append(sm.add_component_model_object(LookupTableStratigraphy(
+                name='strata' + component_name, parent=sm, intr_family='stratigraphy',
                 locX=comp_x_val, locY=comp_y_val)))
         elif strata_type == 'DippingStratigraphy':
-            strata.append(sm.add_component_model_object(iam.DippingStratigraphy(
+            strata.append(sm.add_component_model_object(DippingStratigraphy(
                 name='strata' + component_name, parent=sm,
                 locX=comp_x_val, locY=comp_y_val)))
-            
+
             # This method sets the locXRef and locYRef from comp_data
             strata[-1].check_data_for_ref_loc(comp_data)
-    
+
         if len(comp_x_val) == 1:
             strata[-1].grid_obs_keys = []
-        
+
         if 'Parameters' in comp_data:
             strat_params = comp_data['Parameters']
         else:
             strat_params = comp_data
-            
+
         for parameter in strat_params:
-            if not parameter in ['ReferenceLocation', 'Controls', 'FileDirectory', 
+            if not parameter in ['ReferenceLocation', 'Controls', 'FileDirectory',
                                  'FileName']:
                 if not isinstance(strat_params[parameter], dict):
                     strat_params[parameter] = {
                         'value': strat_params[parameter], 'vary': False}
-                
+
                 strata[-1].add_par(parameter, **(strat_params[parameter]))
 
     return strata, sm
@@ -245,25 +245,25 @@ def get_strata_type_from_yaml(yaml_data):
     """
     if 'Stratigraphy' in yaml_data:
         comp_type = 'Stratigraphy'
-        
+
     elif 'LookupTableStratigraphy' in yaml_data:
         comp_type = 'LookupTableStratigraphy'
-        
+
     elif 'DippingStratigraphy' in yaml_data:
         comp_type = 'DippingStratigraphy'
-        
+
     else:
         err_msg = ''.join([
-            'The code attempted to find the type of stratigraphy component being ', 
-            'used by checking the yaml_data dictionary. No applicable stratigraphy ', 
-            'component type was found, however. For the input dictionary to be ', 
-            'set up correctly, it needs to include one of the following keys: ', 
-            'Stratigraphy, DippingStratigraphy, or LookupTableStratigraphy. ', 
-            'Because no applicable component type was found, the code will proceed ', 
-            'with the Stratigraphy type. These conditions may lead to errors, ', 
+            'The code attempted to find the type of stratigraphy component being ',
+            'used by checking the yaml_data dictionary. No applicable stratigraphy ',
+            'component type was found, however. For the input dictionary to be ',
+            'set up correctly, it needs to include one of the following keys: ',
+            'Stratigraphy, DippingStratigraphy, or LookupTableStratigraphy. ',
+            'Because no applicable component type was found, the code will proceed ',
+            'with the Stratigraphy type. These conditions may lead to errors, ',
             'however. Check your input.'])
         logging.error(err_msg)
-        
+
         comp_type = 'Stratigraphy'
 
     return comp_type
@@ -278,9 +278,9 @@ def get_strata_info_from_component(strata_comp):
     each value are also obtained, although those values are zero if the
     stratigraphy component does not have minimum and mazimum values.
 
-    Note that this function deals with stratigraphy components that provide unit 
-    thicknesses and depths as parameters (e.g., Stratigraphy compomnent). This 
-    function is not appropriate for components that provide unit thicknesses and 
+    Note that this function deals with stratigraphy components that provide unit
+    thicknesses and depths as parameters (e.g., Stratigraphy compomnent). This
+    function is not appropriate for components that provide unit thicknesses and
     depths as observations (e.g., LookupTableStratigraphy).
 
     :param strata_comp: Stratigraphy component used to obtain information
@@ -289,7 +289,7 @@ def get_strata_info_from_component(strata_comp):
     """
     # Initialize output dictionary
     strata_dict = dict()
-    
+
     # Defaults for parameter numberOfShaleLayers
     strata_dict['numberOfShaleLayers_min'] = 0
     strata_dict['numberOfShaleLayers_max'] = 0
@@ -309,9 +309,9 @@ def get_strata_info_from_component(strata_comp):
         strata_dict['numberOfShaleLayers_vary'] = True
 
     # Initialize additional keys
-    for key in ['shaleThicknesses', 'aquiferThicknesses', 
-                'shaleDepths', 'aquiferDepths', 
-                'shaleMidDepths', 'aquiferMidDepths', 
+    for key in ['shaleThicknesses', 'aquiferThicknesses',
+                'shaleDepths', 'aquiferDepths',
+                'shaleMidDepths', 'aquiferMidDepths',
                 'shaleTopDepths', 'aquiferTopDepths']:
         strata_dict[key] = []
 
@@ -327,7 +327,7 @@ def get_strata_info_from_component(strata_comp):
     for shaleRef in range(numShaleLayers):
         shale_par_nm = 'shale{}Thickness'.format(shaleRef + 1)
         strata_dict['shaleThicknesses'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, shale_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, shale_par_nm))
 
         # The min and max are not used currently, but they are kept for potential
         # updates in the future.
@@ -340,22 +340,22 @@ def get_strata_info_from_component(strata_comp):
 
         shale_par_nm = 'shale{}Depth'.format(shaleRef + 1)
         strata_dict['shaleDepths'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, shale_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, shale_par_nm))
 
         shale_par_nm = 'shale{}MidDepth'.format(shaleRef + 1)
         strata_dict['shaleMidDepths'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, shale_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, shale_par_nm))
 
         shale_par_nm = 'shale{}TopDepth'.format(shaleRef + 1)
         strata_dict['shaleTopDepths'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, shale_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, shale_par_nm))
 
     # Aquifer layers
     for shaleRef in range(numShaleLayers-1):
         aq_par_nm = 'aquifer{}Thickness'.format(shaleRef + 1)
 
         strata_dict['aquiferThicknesses'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, aq_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, aq_par_nm))
 
         if aq_par_nm in strata_comp.pars:
             strata_dict['aquiferThicknesses_min'][shaleRef] = \
@@ -366,15 +366,15 @@ def get_strata_info_from_component(strata_comp):
 
         aq_par_nm = 'aquifer{}Depth'.format(shaleRef + 1)
         strata_dict['aquiferDepths'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, aq_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, aq_par_nm))
 
         aq_par_nm = 'aquifer{}MidDepth'.format(shaleRef + 1)
         strata_dict['aquiferMidDepths'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, aq_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, aq_par_nm))
 
         aq_par_nm = 'aquifer{}TopDepth'.format(shaleRef + 1)
         strata_dict['aquiferTopDepths'].append(
-            iam.cfi.commons.get_parameter_val(strata_comp, aq_par_nm))
+            cfi_commons.get_parameter_val(strata_comp, aq_par_nm))
 
     # Add additional keys
     strata_dict['depth_default'] = False
@@ -385,7 +385,7 @@ def get_strata_info_from_component(strata_comp):
 
         strata_dict[par_name+'_vary'] = False   # e.g. 'reservoirThickness_vary'
 
-        strata_dict[par_name] = iam.cfi.commons.get_parameter_val(
+        strata_dict[par_name] = cfi_commons.get_parameter_val(
             strata_comp, par_name)
 
         # The min and max vlaues are not used currently, but they are kept for
@@ -396,14 +396,14 @@ def get_strata_info_from_component(strata_comp):
             strata_dict[par_name+'_vary'] = True
         elif par_name in strata_comp.default_pars and par_name == 'depth':
             strata_dict['depth_default'] = True
-    
-    strata_dict['reservoirDepth'] = iam.cfi.commons.get_parameter_val(
+
+    strata_dict['reservoirDepth'] = cfi_commons.get_parameter_val(
         strata_comp, 'reservoirDepth')
-    
-    strata_dict['reservoirMidDepth'] = iam.cfi.commons.get_parameter_val(
+
+    strata_dict['reservoirMidDepth'] = cfi_commons.get_parameter_val(
         strata_comp, 'reservoirMidDepth')
-    
-    strata_dict['reservoirTopDepth'] = iam.cfi.commons.get_parameter_val(
+
+    strata_dict['reservoirTopDepth'] = cfi_commons.get_parameter_val(
         strata_comp, 'reservoirTopDepth')
 
     return strata_dict
@@ -428,7 +428,7 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
     :param numShaleLayers: Number of shale layers
     :type numShaleLayers: int
 
-    :param stratigraphyComponent: Stratigraphy or LookupTableStratigraphy component 
+    :param stratigraphyComponent: Stratigraphy or LookupTableStratigraphy component
         used to obtain information
     :type stratigraphyComponent: instance of Stratigraphy or LookupTableStratigraphy
         component class
@@ -440,18 +440,18 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
         or 'reservoir.'
     :type unitType: str
 
-    :param top_mid_bottom: Option to obtain the 'top', 'mid', or 'bottom' depth 
+    :param top_mid_bottom: Option to obtain the 'top', 'mid', or 'bottom' depth
         of a unit
     :type top_mid_bottom: str
-    
-    :param depth_obs: Option specifying whether the type of stratigraphy component 
-        used produces unit depths as an observation. This is True for a 
+
+    :param depth_obs: Option specifying whether the type of stratigraphy component
+        used produces unit depths as an observation. This is True for a
         LookupTableStratigraphy component.
     :type depth_obs: bool
-    
+
     :param sm: system model object or None (default is None)
     :type sm: openiam.iam_base_classes.SystemModel or None
-    
+
     :returns: unitDepth
     """
     if depth_obs:
@@ -496,7 +496,7 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
         # First, handle the shallowest shale
         shale_par_nm = 'shale{}Thickness'.format(numShaleLayers)
 
-        shaleThickness = iam.cfi.commons.get_parameter_val(
+        shaleThickness = cfi_commons.get_parameter_val(
             stratigraphyComponent, shale_par_nm)
 
         if unitNumber < numShaleLayers:
@@ -512,15 +512,15 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
                 aq_par_nm = 'aquifer{}Thickness'.format(shaleRef)
                 shale_par_nm = 'shale{}Thickness'.format(shaleRef)
 
-                aquiferThickness = iam.cfi.commons.get_parameter_val(
+                aquiferThickness = cfi_commons.get_parameter_val(
                     stratigraphyComponent, aq_par_nm)
 
-                shaleThickness = iam.cfi.commons.get_parameter_val(
+                shaleThickness = cfi_commons.get_parameter_val(
                     stratigraphyComponent, shale_par_nm)
 
                 if shaleRef > unitNumber:
                     unitDepth += (aquiferThickness + shaleThickness)
-                    
+
                 elif shaleRef == unitNumber and unitType == 'shale':
                     unitDepth += aquiferThickness
                     if top_mid_bottom == 'mid':
@@ -536,7 +536,7 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
         if res_bottom_check or res_mid_check:
             par_name = 'reservoirThickness'
 
-            reservoirThickness = iam.cfi.commons.get_parameter_val(
+            reservoirThickness = cfi_commons.get_parameter_val(
                 stratigraphyComponent, par_name)
 
             if res_mid_check:
@@ -552,13 +552,13 @@ def get_unit_depth_from_component(numShaleLayers, stratigraphyComponent,
 
 def get_strat_param_dict_for_link(sparam, strat_comp):
     """
-    Checks for a given parameter name (sparam) in the composite, stochastic, 
-    deterministic, and default parameters of a stratigraphy type component. If 
-    the parameter name is found in one type of parameter, that parameter 
+    Checks for a given parameter name (sparam) in the composite, stochastic,
+    deterministic, and default parameters of a stratigraphy type component. If
+    the parameter name is found in one type of parameter, that parameter
     dictionary type is returned.
     """
     connect = None
-    
+
     if sparam in strat_comp.composite_pars:
         connect = strat_comp.composite_pars
     elif sparam in strat_comp.pars:
@@ -571,7 +571,7 @@ def get_strat_param_dict_for_link(sparam, strat_comp):
         info_msg = 'Unable to find parameter {} for component {}.'.format(
             sparam, strat_comp.name)
         logging.info(info_msg)
-    
+
     return connect
 
 

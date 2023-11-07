@@ -5,7 +5,7 @@
 # are set up as stochastic (i.e., varying between minimum and maximum values).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex44b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex44b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

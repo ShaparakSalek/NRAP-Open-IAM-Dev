@@ -2,14 +2,12 @@ import os
 import sys
 import logging
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 try:
-    import openiam as iam
-    import openiam.visualize as iam_vis
-    from openiam import IAM_DIR
+    from openiam.components.atmRom_component import AtmosphericROM
+    import openiam.visualization as iam_vis
+    from openiam.components.iam_base_classes import IAM_DIR
 except ImportError as err:
-    print('Unable to load openiam module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM module: {}'.format(err))
 
 
 STRAT_COL_FIG_SIZE = (6, 10)
@@ -152,7 +150,7 @@ def find_atm_comp(components):
     """ Return AtmosphericROM component if it was added to the system model."""
 
     for comp in components[::-1]:
-        if isinstance(comp, iam.AtmosphericROM):
+        if isinstance(comp, AtmosphericROM):
             atm_comp = comp
             break
     else:

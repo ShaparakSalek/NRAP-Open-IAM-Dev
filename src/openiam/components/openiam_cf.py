@@ -22,30 +22,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(SOURCE_DIR)
 
 # import matk.ordereddict
 import openiam as iam
-from openiam import IAM_DIR
+import openiam.base as iam_base
+from openiam.components.iam_base_classes import IAM_DIR
 
-from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.locations import (save_locations_data, process_cell_centers, 
-                                   process_fault_segment_centers,
-                                   process_reservoir_locations,
-                                   process_wellbore_locations)
-from openiam.cfi.analysis import process_analysis
-from openiam.cfi.plots import process_plots
-from openiam.cfi.output import process_output
-from openiam.cfi.text import system_model_to_text, component_models_to_text
-from openiam.cfi.strata import (get_comp_types_strata_pars, 
-                                get_comp_types_strata_obs, initialize_strata,
-                                process_spatially_variable_strata, 
-                                get_strat_param_dict_for_link)
+from openiam.cf_interface.commons import process_parameters, process_dynamic_inputs
+from openiam.cf_interface.locations import (save_locations_data,
+                                            process_cell_centers,
+                                            process_fault_segment_centers,
+                                            process_reservoir_locations,
+                                            process_wellbore_locations)
+from openiam.cf_interface.analysis import process_analysis
+from openiam.cf_interface.plots import process_plots
+from openiam.cf_interface.output import process_output
+from openiam.cf_interface.text import system_model_to_text, component_models_to_text
+from openiam.cf_interface.strata import (get_comp_types_strata_pars,
+                                          get_comp_types_strata_obs,
+                                          initialize_strata,
+                                          process_spatially_variable_strata,
+                                          get_strat_param_dict_for_link)
 
-from openiam.cfi.examples_data import GUI_EXAMPLES, CFI_EXAMPLES
-
-from openiam.cfi import workflow
+from openiam.cf_interface.examples_data import GUI_EXAMPLES, CFI_EXAMPLES
+from openiam.cf_interface import workflow
 
 # The following line creates a parser to parse arguments from the command line to the code.
 parser = argparse.ArgumentParser(description='YAML control file IAM reader')
@@ -76,8 +78,8 @@ parser.add_argument('--file', type=str, dest='yaml_cf_name',
                     # default='test_CFI',  # to test all control files examples
                     # default='test_GUI',  # to test all GUI examples
                     # default='../../test/test_control_file.yaml',
-                    default='../../examples/Control_Files/ControlFile_ex32b.yaml',
-                    # default='../../examples/GUI_Files/14_Forward_HCL.OpenIAM',
+                    default='../../../examples/Control_Files/ControlFile_ex1a.yaml',
+                    # default='../../../examples/GUI_Files/14_Forward_HCL.OpenIAM',
                     help='NRAP-Open-IAM Control File Name')
 parser.add_argument('--binary', type=bool, dest='binary_file',
                     default=False, help='Set to true for binary control file')
@@ -253,17 +255,17 @@ def main(yaml_filename, binary_file=False):
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
 
     # Create system model
-    sm = iam.SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_base.SystemModel(model_kwargs=sm_model_kwargs)
 
     strata, sm, strata_type = initialize_strata(yaml_data, sm)
-    
-    # These lists indicate the stratigraphy component types that offer thicknesses 
+
+    # These lists indicate the stratigraphy component types that offer thicknesses
     # and depths as parameters or as observations.
     types_strata_pars = get_comp_types_strata_pars()
     types_strata_obs = get_comp_types_strata_obs()
 
-    # Perform extra needed actions to connect it to the system model. If spatially 
-    # variable stratigraphy is being used (types_strata_obs), multiple components 
+    # Perform extra needed actions to connect it to the system model. If spatially
+    # variable stratigraphy is being used (types_strata_obs), multiple components
     # are made and connected further below.
     if strata_type in types_strata_pars:
         strata.connect_with_system()
@@ -415,7 +417,7 @@ def main(yaml_filename, binary_file=False):
             locations = process_fault_segment_centers(
                 comp_data, comp_model, locations)
 
-        comp_type = getattr(iam, comp_data['Type'])
+        comp_type = getattr(iam_base, comp_data['Type'])
         if hasattr(comp_type, 'adapters') and comp_type.adapters:
             path_list.append('adapter')
 
@@ -504,14 +506,14 @@ def main(yaml_filename, binary_file=False):
 
     debug_msg = "Updated component list {}".format(comp_list)
     logging.debug(debug_msg)
-    
+
     if strata_type in types_strata_pars:
         name2obj_dict = {'strata': strata, 'strata_type': strata_type}
     elif strata_type in types_strata_obs:
         name2obj_dict = {'strata': '', 'strata_type': strata_type}
-    
+
     strata_data = yaml_data[strata_type]
-    
+
     # Create dictionary of component models with outputs and lists of output names
     output_list = {}
     # Create list of component models
@@ -519,23 +521,23 @@ def main(yaml_filename, binary_file=False):
 
     for component_name in comp_list:
         component_data = yaml_data[component_name]
-        comp_type = getattr(iam, component_data['Type'])
+        comp_type = getattr(iam_base, component_data['Type'])
 
         if strata_type in types_strata_obs and not (
-                comp_type is iam.RateToMassAdapter):
-            # Add the stratigraphy component before the component itself. If the  
-            # stratigraphy component type produces thicknesses as observations 
+                comp_type is iam_base.RateToMassAdapter):
+            # Add the stratigraphy component before the component itself. If the
+            # stratigraphy component type produces thicknesses as observations
             # (e.g., LookupTableStratigraphy), then it needs to run first.
             strata, sm = process_spatially_variable_strata(
                 strata, component_name, yaml_data, locations, sm, strata_type)
-            
+
             if strata_type in types_strata_pars:
                 strata[-1].connect_with_system()
             elif strata_type in types_strata_obs:
                 strata[-1].connect_with_system(strata_data)
-            
+
             name2obj_dict['strata'] = strata[-1]
-        
+
         components.append(sm.add_component_model_object(
             comp_type(name=component_name, parent=sm)))
 
@@ -666,7 +668,7 @@ def main(yaml_filename, binary_file=False):
         # End of "if Connection in ..." statement
 
         if hasattr(components[-1], 'system_params'):
-            components[-1] = set_system_params(yaml_data, components[-1], 
+            components[-1] = set_system_params(yaml_data, components[-1],
                                                component_name, name2obj_dict)
     # End of component model loop
 
@@ -690,7 +692,7 @@ def main(yaml_filename, binary_file=False):
     setup_time = calc_start_time - start_time
     debug_msg = 'Model setup time: {}'.format(setup_time)
     logging.debug(debug_msg)
-    
+
     # Run Analysis
     if analysis == 'forward':
         results = sm.forward()
@@ -728,7 +730,7 @@ def main(yaml_filename, binary_file=False):
         clean_components(yaml_data)
         process_output(yaml_data, model_data, output_list, out_dir, sm, s,
                        analysis, time_array, csv_files_dir)
-        
+
         process_location_data(locations, model_data, csv_files_dir)
 
     if 'Analysis' in yaml_data:
@@ -768,13 +770,13 @@ def main(yaml_filename, binary_file=False):
 
 def process_location_data(locations, model_data, csv_files_dir):
     """
-    Determine whether to save the locations data to .csv files. If so, save the 
-    file. One file is made for each component entry in a .yaml file (each component 
-    that is also in the locaitons dictionary). The default approach is to save 
+    Determine whether to save the locations data to .csv files. If so, save the
+    file. One file is made for each component entry in a .yaml file (each component
+    that is also in the locaitons dictionary). The default approach is to save
     the files.
     """
     save_locations = model_data.get('GenerateLocationsFiles', True)
-    
+
     if save_locations:
         # Create files containing the locations data
         save_locations_data(locations, model_data, csv_files_dir)
@@ -1108,10 +1110,10 @@ def set_system_params(yaml_data, component, component_name, name2obj_dict):
     Sets the system parameters for any component that has system parameters.
     """
     strat_comp = name2obj_dict['strata']
-    
+
     types_strata_pars = get_comp_types_strata_pars()
     types_strata_obs = get_comp_types_strata_obs()
-    
+
     if yaml_data[component_name]['Type'] in [
             'SimpleReservoir', 'AnalyticalReservoir', 'MultisegmentedWellbore']:
         if 'numberOfShaleLayers' in strat_comp.pars:
@@ -1131,7 +1133,7 @@ def set_system_params(yaml_data, component, component_name, name2obj_dict):
             + ['reservoirThickness', 'datumPressure']
 
     if yaml_data[component_name]['Type'] == 'GenericReservoir':
-        component.system_params = ['reservoirThickness', 
+        component.system_params = ['reservoirThickness',
                                    'reservoirDepth']
 
     for sparam in component.system_params:
@@ -1139,17 +1141,17 @@ def set_system_params(yaml_data, component, component_name, name2obj_dict):
                 (name2obj_dict['strata_type'] in types_strata_obs) and \
                     sparam in ['numberOfShaleLayers', 'datumPressure']):
             connect = get_strat_param_dict_for_link(sparam, strat_comp)
-        
+
         if name2obj_dict['strata_type'] in types_strata_pars:
             component.add_par_linked_to_par(sparam, connect[sparam])
-            
+
         elif name2obj_dict['strata_type'] in types_strata_obs:
             if sparam in ['datumPressure']:
                 component.add_par_linked_to_par(sparam, connect[sparam])
-                
+
             else:
                 component.add_par_linked_to_obs(sparam, strat_comp.linkobs[sparam])
-    
+
     return component
 
 
@@ -1190,7 +1192,7 @@ if __name__ == "__main__":
             print('Testing file ControlFile_ex{}.yaml:'.format(key))
             print('Example features: {}'.format(example_feature))
             try:
-                main('../../examples/Control_Files/ControlFile_ex{}.yaml'.format(key), False)
+                main('../../../examples/Control_Files/ControlFile_ex{}.yaml'.format(key), False)
                 plt.close('all')
             except:
                 print('An exception was raised during run.')
@@ -1203,7 +1205,7 @@ if __name__ == "__main__":
 
         for key in examples_description:
             print('Testing file {}:'.format(key))
-            main('../../examples/GUI_Files/{}'.format(key), True)
+            main('../../../examples/GUI_Files/{}'.format(key), True)
             plt.close('all')
 
         print('Test of all GUI examples is done.')

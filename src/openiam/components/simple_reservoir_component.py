@@ -6,21 +6,20 @@ import logging
 from warnings import warn
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import components.reservoir.simple.simple_reservoir_ROM as sresrom
+    import openiam.components.models.reservoir.simple.simple_reservoir_ROM as sresrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Simple Reservoir component\n')
     sys.exit()
 
 
-class SimpleReservoir(ComponentModel):
+class SimpleReservoir(iam_bc.ComponentModel):
     """
     Note: Simple Reservoir component will be deprecated in the future versions
     of NRAP-Open-IAM. We recommend using Analytical Reservoir component instead.
@@ -391,12 +390,13 @@ class SimpleReservoir(ComponentModel):
 
 def test_simple_reservoir_component():
     __spec__ = None
+
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model
     num_years = 50
     time_array = 365.25*np.arange(0.0, num_years+1)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))

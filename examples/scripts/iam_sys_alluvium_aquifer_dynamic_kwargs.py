@@ -10,8 +10,8 @@ import sys
 import os
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel, AlluviumAquifer
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.alluvium_aquifer_component import AlluviumAquifer
 
 if __name__ == '__main__':
     time_array = 365.25*np.arange(0.0, 3.0)

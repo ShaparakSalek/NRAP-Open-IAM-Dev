@@ -5,20 +5,20 @@ import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from openiam import SystemModel, ComponentModel
+    import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
-    print('Unable to load IAM class module: {}'.format(err))
+    print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 try:
-    import components.reservoir.analytical.analytical_reservoir_ROM as resrom
+    import openiam.components.models.reservoir.analytical.analytical_reservoir_ROM as resrom
 except ImportError:
     print('\nERROR: Unable to load ROM for Analytical Reservoir component\n')
     sys.exit()
 
-class AnalyticalReservoir(ComponentModel):
+
+class AnalyticalReservoir(iam_bc.ComponentModel):
     """
     The Analytical Reservoir component model is a semi-analytical model for the
     reservoir. It is focused on flow across relatively large distances
@@ -36,10 +36,10 @@ class AnalyticalReservoir(ComponentModel):
     * **reservoirPorosity** [-] (0.1 to 0.3) - porosity of reservoir (default: 0.15)
 
     * **reservoirRadius** [|m|] (500 to 100,000) - distance between injection well
-      and outer reservoir boundary (default: 100,000). The reservoirRadius should 
-      not be smaller than the distance between the injection well and any leakage 
-      pathway components connected to the ``AnalyticalReservoir`` (e.g., wellbores 
-      or faults). If the radius is too small, the simulation will print a warning 
+      and outer reservoir boundary (default: 100,000). The reservoirRadius should
+      not be smaller than the distance between the injection well and any leakage
+      pathway components connected to the ``AnalyticalReservoir`` (e.g., wellbores
+      or faults). If the radius is too small, the simulation will print a warning
       message.
 
     * **brineDensity** [|kg/m^3|] (965 to 1195) - density of brine phase
@@ -427,7 +427,7 @@ def test_analytical_reservoir_component():
     # time_array = np.arange(0,365.25*num_years,delta_time)
 
     sm_model_kwargs = {'time_array': time_array} # time is given in days
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     res = sm.add_component_model_object(AnalyticalReservoir(

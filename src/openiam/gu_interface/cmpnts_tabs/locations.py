@@ -12,15 +12,11 @@ from tkinter import ttk
 from tkinter import StringVar, IntVar, DoubleVar
 from tkinter import messagebox
 
-# Save location of GUI folder
-GUI_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(GUI_DIR)
-
-from dictionarydata import componentVars
-from dictionarydata import (PARAMETER_LABEL_WIDTH, MODEL_TAB_LABEL_WIDTH1,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            SETUP_ENTRY_WIDTH, BUTTON_WIDTH,
-                            FILE_ENTRY_WIDTH)
+from openiam.gu_interface.dictionarydata import componentVars
+from openiam.gu_interface.dictionarydata import (
+    PARAMETER_LABEL_WIDTH, MODEL_TAB_LABEL_WIDTH1,
+    DISTRIBUTION_ARG_TEXTFIELD_WIDTH, SETUP_ENTRY_WIDTH, BUTTON_WIDTH,
+    FILE_ENTRY_WIDTH)
 
 LABEL_WIDTH = 17
 LABEL_WIDTH_THEIS = 37
