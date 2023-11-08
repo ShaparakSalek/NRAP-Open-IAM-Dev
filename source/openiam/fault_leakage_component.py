@@ -380,8 +380,8 @@ class FaultLeakage(ComponentModel):
 
             return out
 
-# Add test information here.
-if __name__ == "__main__":
+
+def test_fault_leakage_component():
     # Define keyword arguments of the system model.
 
     times = np.linspace(0.0, 30.0, num=20)*365.25 # time in days

@@ -203,7 +203,7 @@ class Stratigraphy(ComponentModel):
         self.add_composite_par('reservoirDepth', par_expr)
 
 
-if __name__ == "__main__":
+def test_stratigraphy_component():
     try:
         from openiam import SimpleReservoir
     except ImportError as err:

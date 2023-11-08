@@ -555,26 +555,24 @@ class MonitoringScheduler3(ComponentModel):
         return out
 
 
-def test_case_monitoring_scheduler1():
+def test_monitoring_scheduler1():
     pass
 
 
-def test_case_monitoring_scheduler2():
+def test_monitoring_scheduler2():
     pass
 
 
-def test_case_monitoring_scheduler3():
+def test_monitoring_scheduler3():
     pass
 
 
-if __name__ == "__main__":
+def test_monitoring_scheduler_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
 
-    test_case = 3
-
-    test_to_run = {1: test_case_monitoring_scheduler1,
-                   2: test_case_monitoring_scheduler2,
-                   3: test_case_monitoring_scheduler3}
+    test_to_run = {1: test_monitoring_scheduler1,
+                   2: test_monitoring_scheduler2,
+                   3: test_monitoring_scheduler3}
 
     # Run corresponding test example
     test_to_run[test_case]()

@@ -183,7 +183,7 @@ class LocationGenerator(SamplerModel):
         return out
 
 
-def test_case1():
+def test_location_generator():
     # For multiprocessing in Spyder
     __spec__ = None
 
@@ -310,7 +310,3 @@ def test_case1():
     plt.xlim([0, 50])
     plt.ylim([0.0, 1.0])
     ax.get_yaxis().set_label_coords(-0.10, 0.5)
-
-if __name__ == "__main__":
-
-    test_case1()

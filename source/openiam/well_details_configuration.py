@@ -362,7 +362,7 @@ def leakage_risk_configuration(num_wells, num_leak_types, leak_prob, well_data=N
     return details
 
 
-if __name__ == "__main__":
+def test_well_details_configuration():
     # Check detection probabilities
     prob1 = detection_prob(option='always')
     print(prob1())

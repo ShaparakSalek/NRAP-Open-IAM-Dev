@@ -21,6 +21,7 @@ import components.wellbore.hydrocarbon_leakage.hydrocarbon_leakage_ROM as hydrca
 from openiam.cfi.commons import process_parameters
 import openiam.cfi.strata as iam_strata
 
+
 class HydrocarbonLeakage(ComponentModel):
     """
     The HydrocarbonLeakage component model is a reduced order model predicting
@@ -298,7 +299,7 @@ class HydrocarbonLeakage(ComponentModel):
         return out
 
 
-if __name__ == "__main__":
+def test_hydrocarbon_leakage_component():
     from openiam import SystemModel
     import matplotlib.pyplot as plt
 

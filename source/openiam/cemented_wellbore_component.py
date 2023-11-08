@@ -568,7 +568,7 @@ class CementedWellbore(ComponentModel):
         '+ {strata}.aquifer2Thickness + {strata}.aquifer1Thickness/2)/{selfm}.wellDepth')
 
 
-if __name__ == "__main__":
+def test_cemented_wellbore_component():
     try:
         from openiam import SimpleReservoir
     except ImportError as err:

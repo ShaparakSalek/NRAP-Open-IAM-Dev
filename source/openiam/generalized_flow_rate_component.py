@@ -13,6 +13,7 @@ except ImportError as err:
 
 from openiam.cfi.commons import process_parameters
 
+
 class GeneralizedFlowRate(ComponentModel):
     """
     The Generalized Flow Rate component model is a model representing wide range of
@@ -311,7 +312,7 @@ class GeneralizedFlowRate(ComponentModel):
     system_params = ['numberOfShaleLayers']
 
 
-if __name__ == "__main__":
+def test_generalized_flow_rate_component():
     __spec__ = None
 
     example = 1

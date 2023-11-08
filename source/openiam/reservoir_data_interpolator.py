@@ -970,10 +970,7 @@ def test_case2():
     #  [[0.5 0.  0.  0.5]]
 
 
-if __name__ == "__main__":
-
-    # Setup test
-    test = 1
+def test_reservoir_data_interpolator(test=1):
 
     if test == 1:
         test_case1()

@@ -146,7 +146,7 @@ class RateToMassAdapter(ComponentModel):
             [well.linkobs['brine_aquifer{0}'.format(il)], well.linkobs['brine_atm']])
 
 
-if __name__ == "__main__":
+def test_rate_to_mass_adapter():
     # Define logging level
     logging.basicConfig(level=logging.WARNING)
 

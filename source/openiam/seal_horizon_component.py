@@ -1638,11 +1638,9 @@ def test_scenario2():
     # Cumulative brine mass: [0.         2.29072213]
 
 
-if __name__ == "__main__":
-
+def test_seal_horizon_component(test_case=1):
     # Setup logging and constants.
     logging.basicConfig(level=logging.DEBUG)
-    test_case = 1  # 2 is a maximum number of test cases
 
     if test_case == 1:
         test_scenario1()

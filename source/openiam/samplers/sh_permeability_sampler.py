@@ -570,9 +570,8 @@ def test_scenario4():
     ax12.set_title('With heterogeneity')
 
 
-if __name__ == "__main__":
+def test_sh_permeability_sampler(test=1):
 
-    test = 4
     if test == 1:
         test_scenario1()
     elif test == 2:

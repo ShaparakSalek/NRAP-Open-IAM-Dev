@@ -25,7 +25,7 @@ except ImportError:
 
 class AlluviumAquifer(ComponentModel):
     """
-    The Alluvium Aquifer component modelis a reduced order model which can be used
+    The Alluvium Aquifer component model is a reduced order model which can be used
     to predict the changes in diluted groundwater chemistry if |CO2| and brine were to
     leak into an overlying alluvium aquifer similar to the High Plains aquifer,
     Haskel County, Kansas, USA. The protocol allows uncertainty and variability in
@@ -552,7 +552,7 @@ class AlluviumAquifer(ComponentModel):
                     aquifer_name=aq_name)])
 
 
-if __name__ == "__main__":
+def test_alluvium_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

@@ -399,7 +399,8 @@ class AnalyticalReservoir(ComponentModel):
     def reset(self):
         pass
 
-if __name__ == "__main__":
+
+def test_analytical_reservoir_component():
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model

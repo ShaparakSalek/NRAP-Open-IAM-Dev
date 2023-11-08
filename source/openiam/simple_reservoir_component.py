@@ -19,6 +19,7 @@ except ImportError:
     print('\nERROR: Unable to load ROM for Simple Reservoir component\n')
     sys.exit()
 
+
 class SimpleReservoir(ComponentModel):
     """
     Note: Simple Reservoir component will be deprecated in the future versions
@@ -388,7 +389,7 @@ class SimpleReservoir(ComponentModel):
         pass
 
 
-if __name__ == "__main__":
+def test_simple_reservoir_component():
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model

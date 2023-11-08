@@ -464,7 +464,7 @@ class GenericAquifer(ComponentModel):
         return (check_flag == 0)
 
 
-if __name__ == "__main__":
+def test_generic_aquifer_component():
     # Create system model
     time = 1
     time_array = 365.25*np.arange(0, time+1)

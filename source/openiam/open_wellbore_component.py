@@ -20,11 +20,13 @@ except ImportError:
     print('\nERROR: Unable to load ROM for Open Wellbore component\n')
     sys.exit()
 
+
 # Assumed gravitational acceleration for critical pressure calculation, m/(s^2)
 GRAV_ACCEL = 9.8
 
 # Assumed density of water for critical pressure calculation, kg/(m^3).
 WATER_DENSITY = 1000
+
 
 class OpenWellbore(ComponentModel):
     """
@@ -62,11 +64,11 @@ class OpenWellbore(ComponentModel):
         Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)),
 
     where rho_w and rho_br are the densities of water (1000 |kg/m^3|) and brine
-    (the brineDensity parameter), respectively, g is gravitational acceleration 
-    (9.8 |m/s^2|), d_aq is the depth to the bottom of the aquifer impacted by 
-    leakage (m) (defined by the wellTop parameter value; if wellTop is 0 m, 
-    then the atmosphere receives leakage), and d_res is the depth to the top of 
-    the reservoir (m). Higher brine densities generally produce lower leakage 
+    (the brineDensity parameter), respectively, g is gravitational acceleration
+    (9.8 |m/s^2|), d_aq is the depth to the bottom of the aquifer impacted by
+    leakage (m) (defined by the wellTop parameter value; if wellTop is 0 m,
+    then the atmosphere receives leakage), and d_res is the depth to the top of
+    the reservoir (m). Higher brine densities generally produce lower leakage
     rates.
 
     Instead of calculating critical pressure in this manner, one can enforce a
@@ -415,7 +417,7 @@ class OpenWellbore(ComponentModel):
             self.default_out['brine_' + aq] = 0.0
 
 
-if __name__ == "__main__":
+def test_open_wellbore_component():
     try:
         from openiam import SimpleReservoir
     except ImportError as err:

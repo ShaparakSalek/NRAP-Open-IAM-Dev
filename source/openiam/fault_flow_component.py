@@ -1462,11 +1462,10 @@ def test_case2():
     ax.set_title('FaultFlow Component Test 2')
 
 
-if __name__ == "__main__":
+def test_fault_flow_component(test_case=1):
 
     # Setup logging and constants.
     logging.basicConfig(level=logging.WARN)
-    test_case = 1  # test case
 
     if test_case == 1:
         test_case1()

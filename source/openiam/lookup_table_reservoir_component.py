@@ -1019,8 +1019,7 @@ class LinkError(Exception):
     table reservoir component is not linked to any interpolator family.
     """
 
-if __name__ == "__main__":
-
+def test_lookup_table_reservoir_component():
     logging.basicConfig(level=logging.WARNING)
     test_case = 1
     if test_case == 1:

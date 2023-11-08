@@ -233,7 +233,8 @@ def leak_scorer(wells, deviation=None, scvf_gm=None, suspension_status=None,
 
     return np.array(wells['leak_score']), np.array(wells['normalized_leak_score'])
 
-if __name__ == "__main__":
+
+def test_well_classifier():
     pass
     # # Example of methods application
     # # Read file with wells data

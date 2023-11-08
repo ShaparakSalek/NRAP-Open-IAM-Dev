@@ -392,7 +392,7 @@ class DeepAlluviumAquiferML(ComponentModel):
                     aquifer_name=aq_name)])
 
 
-if __name__ == "__main__":
+def test_deep_alluvium_ml_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 4.0)
 

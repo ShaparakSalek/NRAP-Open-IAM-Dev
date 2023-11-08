@@ -270,7 +270,7 @@ def run_coupled_model(aperture, length, overpressure):
     return outputDict
 
 
-if __name__ == "__main__":
+def test_chemical_well_sealing():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

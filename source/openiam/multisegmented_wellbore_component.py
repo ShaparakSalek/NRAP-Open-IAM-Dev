@@ -422,7 +422,7 @@ def read_data(filename):
     return None
 
 
-if __name__ == "__main__":
+def test_multisegmented_wellbore_component():
     try:
         from openiam import AnalyticalReservoir
     except ImportError as err:

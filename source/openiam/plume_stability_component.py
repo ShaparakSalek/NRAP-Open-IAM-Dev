@@ -543,7 +543,8 @@ class PlumeStability(ComponentModel):
     def reset(self):
         pass
 
-if __name__ == "__main__":
+
+def test_plume_stability_component():
     # For multiprocessing in Spyder
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)

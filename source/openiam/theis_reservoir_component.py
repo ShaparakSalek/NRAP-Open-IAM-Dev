@@ -582,7 +582,7 @@ class TheisReservoir(ComponentModel):
     system_params = ['reservoirThickness']
 
 
-if __name__ == "__main__":
+def test_theis_reservoir_component():
     __spec__ = None
 
     logging.basicConfig(level=logging.WARNING)

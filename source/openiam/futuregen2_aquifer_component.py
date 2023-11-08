@@ -417,7 +417,7 @@ class FutureGen2Aquifer(ComponentModel):
             self.add_par_linked_to_par('aqu_thick', connect[sparam])
 
 
-if __name__ == "__main__":
+def test_futuregen2_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0, 2)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

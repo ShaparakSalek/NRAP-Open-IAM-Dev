@@ -1910,7 +1910,7 @@ class SamplerModel(ComponentModel):
         pass
 
 
-if __name__ == "__main__":
+def test_base_classes():
     sm = SystemModel()
     cmpnt = ComponentModel('cmpnt', sm)
 

@@ -364,9 +364,8 @@ def test_scenario3():
     plt.ylabel('h [m]')
 
 
-if __name__ == "__main__":
+def test_sh_thickness_sampler(test=1):
 
-    test = 1
     if test == 1:
         test_scenario1()
     elif test == 2:
