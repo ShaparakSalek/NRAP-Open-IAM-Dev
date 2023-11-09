@@ -1019,9 +1019,9 @@ class LinkError(Exception):
     table reservoir component is not linked to any interpolator family.
     """
 
-def test_lookup_table_reservoir_component():
+def test_lookup_table_reservoir_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
-    test_case = 1
+
     if test_case == 1:
         data_set_fldr = 'Kimb_54_sims'
         loc_x = 37478.0

@@ -544,7 +544,7 @@ class PlumeStability(ComponentModel):
         pass
 
 
-def test_plume_stability_component():
+def test_plume_stability_component(option=2):
     # For multiprocessing in Spyder
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
@@ -558,7 +558,6 @@ def test_plume_stability_component():
                        '2. https://gitlab.com/NRAP/Kimberlina_data \n'])
         logging.error(msg)
 
-    option = 2
     if option == 1:
         num_years = 200
         # Time array different from time points provided in the data set

@@ -9,8 +9,7 @@ from shutil import copyfile
 import matplotlib.pyplot as plt
 
 try:
-    from openiam import (SystemModel, Stratigraphy,
-                         SimpleReservoir, AnalyticalReservoir,
+    from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
                          GenericReservoir, TheisReservoir,
                          MultisegmentedWellbore, CementedWellbore,
                          CementedWellboreWR, OpenWellbore, KimberlinaWellbore,
@@ -27,8 +26,7 @@ try:
 except ModuleNotFoundError:
     try:
         sys.path.append(os.sep.join(['..', 'source']))
-        from openiam import (SystemModel, Stratigraphy,
-                             SimpleReservoir, AnalyticalReservoir,
+        from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
                              GenericReservoir, TheisReservoir,
                              MultisegmentedWellbore, CementedWellbore,
                              CementedWellboreWR, OpenWellbore, KimberlinaWellbore,
@@ -570,11 +568,11 @@ class Tests(unittest.TestCase):
                     'Observation {} at t={} days is {} kg/s but should be {} kg/s'\
                                 .format(key, t, col_v, true_v))
 
-    def test_chemical_sealing_coupled_simple_reservoir(self):
+    def test_chemical_sealing_coupled_analytical_reservoir(self):
         """Tests the chemical sealing component.
 
-        Tests the system model with a chemical well sealing component coupled to a
-        simple reservoir component.
+        Tests the system model with a chemical well sealing component coupled to an
+        analytical reservoir component.
         """
         # Create system model
         # Define keyword arguments of the system model
@@ -591,26 +589,27 @@ class Tests(unittest.TestCase):
         sm2 = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Add reservoir component
-        sres = sm.add_component_model_object(
-            SimpleReservoir(name='sres', parent=sm, injX=0., injY=0.,
-                            locX=50., locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, injX=0., injY=0.,
+                                locX=50., locY=50.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('injRate', value=0.04, vary=False)
-        sres.add_par('shale1Thickness', min=30.0, max=50., value=40.0)
-        sres.add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
-        sres.add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
-        sres.add_par('logResPerm', min=-13., max=-11., value=-12.5)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('injRate', value=0.1, vary=False)
+        ares.add_par('shale1Thickness', min=30.0, max=50., value=40.0)
+        ares.add_par('aquifer1Thickness', min=50.0, max=70., value=60.0)
+        ares.add_par('aquifer2Thickness', min=50.0, max=70., value=55.0)
+        ares.add_par('logResPerm', min=-13., max=-11., value=-12.9)
+        ares.add_par('reservoirRadius', value=10000, vary=False)
 
         # Add pressure observation of reservoir component model
-        sres.add_obs('pressure')
+        ares.add_obs('pressure')
 
         # Run the reservoir model
         sm.forward()
 
         # Collect pressure data from the reservoir component
-        pressure = sm.collect_observations_as_time_series(sres, 'pressure')
+        pressure = sm.collect_observations_as_time_series(ares, 'pressure')
         # maxOverpressure = maximum increase in pressure experienced by the well
         maxOverpressure_value = np.amax(pressure)-pressure[0]
 
@@ -633,14 +632,17 @@ class Tests(unittest.TestCase):
 
         # True values: simulation results
         true_results = [0, 0]
+        # Simulated results
+        seal_flag = sm2.obs['cws.seal_flag_0'].sim
+        seal_time = sm2.obs['cws.seal_time_0'].sim
 
         # Test with helpful message
-        self.assertTrue(abs((true_results[0]-sm2.obs['cws.seal_flag_0'].sim)) < 0.01,
+        self.assertTrue(abs((true_results[0]-seal_flag)) < 0.01,
                         'Sealing flag is {} but should be {}'.format(
-                            true_results[0], sm2.obs['cws.seal_flag_0'].sim))
-        self.assertTrue(abs((true_results[1]-sm2.obs['cws.seal_time_0'].sim)) < 0.01,
+                            seal_flag, true_results[0]))
+        self.assertTrue(abs((true_results[1]-seal_time)) < 0.01,
                         'Sealing time is {} but should be {}'.format(
-                            true_results[1], sm2.obs['cws.seal_time_0'].sim))
+                            seal_time, true_results[1]))
 
     def test_chemical_sealing_not_seal_forward(self):
         """Tests the chemical sealing component.
@@ -978,7 +980,7 @@ class Tests(unittest.TestCase):
     def test_coupled_reservoir_cemented_wellbore_forward(self):
         """Tests coupling of reservoir and cemented wellbore components.
 
-        Verifies flow rates for a system model with a simple reservoir
+        Verifies flow rates for a system model with an analytical reservoir
         component coupled to a cemented wellbore component against 5 years
         of data.
 
@@ -994,29 +996,31 @@ class Tests(unittest.TestCase):
         sm = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Add reservoir component
-        sres = sm.add_component_model_object(SimpleReservoir(name='sres',
-                                                             parent=sm,
-                                                             locX=550.,
-                                                             locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, locX=550., locY=100.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
-        sres.add_par('shale2Thickness', min=450.0, max=500., value=475.0)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
+        ares.add_par('shale2Thickness', min=450.0, max=500., value=475.0)
         # Shale 3 has a fixed thickness of 11.2 m
-        sres.add_par('shale3Thickness', value=11.2, vary=False)
+        ares.add_par('shale3Thickness', value=11.2, vary=False)
         # Aquifer 1 (thief zone has a fixed thickness of 22.4)
-        sres.add_par('aquifer1Thickness', value=22.4, vary=False)
+        ares.add_par('aquifer1Thickness', value=22.4, vary=False)
         # Aquifer 2 (shallow aquifer) has a fixed thickness of 19.2
-        sres.add_par('aquifer2Thickness', value=19.2, vary=False)
+        ares.add_par('aquifer2Thickness', value=19.2, vary=False)
         # Reservoir has a fixed thickness of 51.2
-        sres.add_par('reservoirThickness', value=51.2, vary=False)
+        ares.add_par('reservoirThickness', value=51.2, vary=False)
+        # Setup reservoir radius
+        ares.add_par('reservoirRadius', value=10000, vary=False)
+        # Setup injection rate
+        ares.add_par('injRate', value=0.05, vary=False)
 
         # Add observations of reservoir component model
-        sres.add_obs('pressure')
-        sres.add_obs('CO2saturation')
-        sres.add_obs_to_be_linked('pressure')
-        sres.add_obs_to_be_linked('CO2saturation')
+        ares.add_obs('pressure')
+        ares.add_obs('CO2saturation')
+        ares.add_obs_to_be_linked('pressure')
+        ares.add_obs_to_be_linked('CO2saturation')
 
         # Add cemented wellbore component
         cw = sm.add_component_model_object(CementedWellbore(name='cw', parent=sm))
@@ -1026,17 +1030,17 @@ class Tests(unittest.TestCase):
         cw.add_par('logThiefPerm', value=-12.00035, vary=False)
 
         # Add keyword arguments of the cemented wellbore component model
-        cw.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-        cw.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+        cw.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+        cw.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
-        cw.add_composite_par('wellDepth', expr='sres.shale1Thickness' +
-                             '+sres.shale2Thickness + sres.shale3Thickness' +
-                             '+sres.aquifer1Thickness+ sres.aquifer2Thickness')
+        cw.add_composite_par('wellDepth', expr='ares.shale1Thickness' +
+                             '+ares.shale2Thickness + ares.shale3Thickness' +
+                             '+ares.aquifer1Thickness+ ares.aquifer2Thickness')
         cw.add_composite_par('depthRatio',
-                             expr='(sres.shale2Thickness+sres.shale3Thickness' +
-                             '+ sres.aquifer2Thickness + sres.aquifer1Thickness/2)/cw.wellDepth')
+                             expr='(ares.shale2Thickness+ares.shale3Thickness' +
+                             '+ ares.aquifer2Thickness + ares.aquifer1Thickness/2)/cw.wellDepth')
         cw.add_composite_par('initPressure',
-                             expr='sres.datumPressure + cw.wellDepth*cw.g*sres.brineDensity')
+                             expr='ares.datumPressure + cw.wellDepth*cw.g*ares.brineDensity')
 
         # Add observations of the cemented wellbore component
         cw.add_obs('CO2_aquifer1')
@@ -1047,19 +1051,22 @@ class Tests(unittest.TestCase):
         sm.forward()
 
         # True values: simulation results for the last time point
-        true_flowrates = [0.0007111896900558063, 0.0006156910515266846,
-                          0.0001732564889916223, 0.011944097940789211,
-                          2.6686475096907638e-05]
+        true_flowrates = [0.002252154115760973, 0.0018735872601886839,
+                          0.0003627363165954751, 0.01588310895020758,
+                          2.416774955217654e-05]
 
-        # Test with helpful message!
-        labels = ['CO2_aquifer1', 'CO2_aquifer2', 'CO2_atm', 'brine_aquifer1', 'brine_aquifer2']
+        # Labels for outputs
+        labels = ['CO2_aquifer1', 'CO2_aquifer2', 'CO2_atm',
+                  'brine_aquifer1', 'brine_aquifer2']
+
         # Collect results as dictionary of lists for every observation in labels list
         results = dict()
         for label in labels:
             results[label] = sm.collect_observations_as_time_series(cw, label)
 
-        # Create plot for documentation
         sim_flowrates = [res[num_years-1] for res in results.values()]
+
+        # Create plot for documentation
         f, ax = plt.subplots(1, figsize=(8, 6))
         ax.plot(true_flowrates, sim_flowrates, "o")
         ax.plot([0, max(max(sim_flowrates, true_flowrates))],
@@ -1081,7 +1088,7 @@ class Tests(unittest.TestCase):
     def test_coupled_reservoir_ms_wellbore_forward(self):
         """Tests coupling of reservoir and multisegmented wellbore components.
 
-        Tests the system model with a simple reservoir component
+        Tests the system model with an analytical reservoir component
         coupled with a multi-segmented wellbore component against 5 years of data.
         """
         num_years = 5
@@ -1092,20 +1099,22 @@ class Tests(unittest.TestCase):
         sm = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Add reservoir component
-        sres = sm.add_component_model_object(SimpleReservoir(name='sres',
-                                                             parent=sm,
-                                                             locX=550.,
-                                                             locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, locX=550., locY=100.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('shale1Thickness', min=30.0, max=150., value=45.0)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('shale1Thickness', min=30.0, max=150., value=45.0)
+        # Setup reservoir radius
+        ares.add_par('reservoirRadius', value=10000, vary=False)
+        # Setup injection rate
+        ares.add_par('injRate', value=0.05, vary=False)
 
         # Add observations of reservoir component model
-        sres.add_obs_to_be_linked('pressure')
-        sres.add_obs_to_be_linked('CO2saturation')
-        sres.add_obs('pressure')
-        sres.add_obs('CO2saturation')
+        ares.add_obs_to_be_linked('pressure')
+        ares.add_obs_to_be_linked('CO2saturation')
+        ares.add_obs('pressure')
+        ares.add_obs('CO2saturation')
 
         # Add multisegmented wellbore component
         ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms', parent=sm))
@@ -1113,24 +1122,24 @@ class Tests(unittest.TestCase):
 
         # Add linked parameters: common to both components
         ms.add_par_linked_to_par('numberOfShaleLayers',
-                                 sres.deterministic_pars['numberOfShaleLayers'])
-        ms.add_par_linked_to_par('shale1Thickness', sres.pars['shale1Thickness'])
+                                 ares.deterministic_pars['numberOfShaleLayers'])
+        ms.add_par_linked_to_par('shale1Thickness', ares.pars['shale1Thickness'])
         ms.add_par_linked_to_par('shale2Thickness',
-                                 sres.default_pars['shaleThickness'])
+                                 ares.default_pars['shaleThickness'])
         ms.add_par_linked_to_par('shale3Thickness',
-                                 sres.default_pars['shaleThickness'])
+                                 ares.default_pars['shaleThickness'])
         ms.add_par_linked_to_par('aquifer1Thickness',
-                                 sres.default_pars['aquiferThickness'])
+                                 ares.default_pars['aquiferThickness'])
         ms.add_par_linked_to_par('aquifer2Thickness',
-                                 sres.default_pars['aquiferThickness'])
+                                 ares.default_pars['aquiferThickness'])
         ms.add_par_linked_to_par('reservoirThickness',
-                                 sres.default_pars['reservoirThickness'])
+                                 ares.default_pars['reservoirThickness'])
         ms.add_par_linked_to_par('datumPressure',
-                                 sres.default_pars['datumPressure'])
+                                 ares.default_pars['datumPressure'])
 
         # Add keyword arguments linked to the output provided by reservoir model
-        ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-        ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+        ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+        ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
         # Add observations of multisegmented wellbore component model
         ms.add_obs('CO2_aquifer1')
@@ -1142,29 +1151,32 @@ class Tests(unittest.TestCase):
         sm.forward()
 
         # True values
-        true_flowrates = [8.32098502e-06, 1.90750350e-07,
-                          1.91397466e-07, 2.26169428e-06,
-                          1.86168527e-09]
+        true_flowrates = [2.7076637427612558e-05, 4.296074247761427e-07,
+                          2.996755667926497e-07, 2.5588997573237682e-06,
+                          4.046305616727493e-09]
 
-        # Test with helpful message!
-        labels = ['CO2_aquifer1', 'CO2_aquifer2', 'CO2_atm', 'brine_aquifer1', 'brine_aquifer2']
+        # Labels of outputs
+        labels = ['CO2_aquifer1', 'CO2_aquifer2', 'CO2_atm',
+                  'brine_aquifer1', 'brine_aquifer2']
+
         # Collect results as dictionary of lists for every observation in labels list
         results = dict()
         for label in labels:
             results[label] = sm.collect_observations_as_time_series(ms, label)
+        sim_flowrates = [res[num_years-1] for res in results.values()]
 
-        for tf, l in zip(true_flowrates, labels):
-            self.assertTrue((tf-results[l][num_years-1] == 0.0) or
-                            abs((tf-results[l][num_years-1])/tf) < 0.01,
+        for ind, (tf, l) in enumerate(zip(true_flowrates, labels)):
+            self.assertTrue((tf-sim_flowrates[ind] == 0.0) or
+                            abs((tf-sim_flowrates[ind])/tf) < 0.01,
                             'Flow rate {} is {} but should be {}'
-                            .format(l, str(results[l][num_years-1]), str(tf)))
+                            .format(l, sim_flowrates[ind], tf))
 
     @unittest.skipIf(CarbonateAquifer.model_data_check() == False,
                      "Carbonate Aquifer component library file is not present.")
     def test_coupled_reservoir_open_carbonate_forward(self):
         """Tests coupling of reservoir, wellbore and aquifer components.
 
-        Tests the system model with coupled simple reservoir, open wellbore,
+        Tests the system model with coupled analytical reservoir, open wellbore,
         adapter and carbonate aquifer components against the expected input.
         """
         # Define keyword arguments of the system model
@@ -1176,27 +1188,27 @@ class Tests(unittest.TestCase):
         sm = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Add reservoir component
-        sres = sm.add_component_model_object(SimpleReservoir(name='sres',
-                                                             parent=sm,
-                                                             locX=225.,
-                                                             locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, locX=165., locY=50.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('shale1Thickness', value=620.0, vary=False)
-        sres.add_par('shale2Thickness', value=510.0, vary=False)
-        sres.add_par('shale3Thickness', value=400., vary=False)
-        sres.add_par('aquifer1Thickness', value=10., vary=False)
-        sres.add_par('aquifer2Thickness', value=80, vary=False)
-        sres.add_par('reservoirThickness', value=55.0, vary=False)
-        sres.add_par('injRate', value=0.0045, vary=False)
-        sres.add_par('CO2Density', value=550, vary=False)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('shale1Thickness', value=620.0, vary=False)
+        ares.add_par('shale2Thickness', value=510.0, vary=False)
+        ares.add_par('shale3Thickness', value=400., vary=False)
+        ares.add_par('aquifer1Thickness', value=10., vary=False)
+        ares.add_par('aquifer2Thickness', value=80, vary=False)
+        ares.add_par('reservoirThickness', value=55.0, vary=False)
+        ares.add_par('injRate', value=0.0024, vary=False)
+        ares.add_par('CO2Density', value=550, vary=False)
+        ares.add_par('reservoirRadius', value=10000, vary=False)
+        ares.add_par('logResPerm', value=-12.85, vary=False)
 
         # Add observations of reservoir component model
-        sres.add_obs('pressure')
-        sres.add_obs('CO2saturation')
-        sres.add_obs_to_be_linked('pressure')
-        sres.add_obs_to_be_linked('CO2saturation')
+        ares.add_obs('pressure')
+        ares.add_obs('CO2saturation')
+        ares.add_obs_to_be_linked('pressure')
+        ares.add_obs_to_be_linked('CO2saturation')
 
         # Add open wellbore component
         ow = sm.add_component_model_object(OpenWellbore(name='ow', parent=sm))
@@ -1208,20 +1220,20 @@ class Tests(unittest.TestCase):
         ow.add_par('brineSalinity', value=0.004, vary=False)
 
         # Add keyword arguments of the open wellbore component model
-        ow.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-        ow.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+        ow.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+        ow.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
         # Add composite parameter of open wellbore component
         ow.add_composite_par('reservoirDepth',
-                             expr='+'.join(['sres.shale1Thickness',
-                                            'sres.shale2Thickness',
-                                            'sres.shale3Thickness',
-                                            'sres.aquifer1Thickness',
-                                            'sres.aquifer2Thickness']))
+                             expr='+'.join(['ares.shale1Thickness',
+                                            'ares.shale2Thickness',
+                                            'ares.shale3Thickness',
+                                            'ares.aquifer1Thickness',
+                                            'ares.aquifer2Thickness']))
 
         ow.add_composite_par(
-            'wellTop', expr='+'.join(['sres.shale3Thickness',
-                                      'sres.aquifer2Thickness']))
+            'wellTop', expr='+'.join(['ares.shale3Thickness',
+                                      'ares.aquifer2Thickness']))
 
         # Add observations of multisegmented wellbore component model
         ow.add_obs_to_be_linked('CO2_aquifer')
@@ -1292,11 +1304,11 @@ class Tests(unittest.TestCase):
         ph = sm.collect_observations_as_time_series(ca, 'pH_volume')
 
         # True values
-        true_tds = [0., 0., 0., 0., 284241.39903277, 2278197.61547477]
-        true_ph = [0., 0., 0., 0., 0., 946552.25898049]
+        true_tds = [0., 0., 0., 0., 0, 526780.21571865]
+        true_ph = [0., 0., 0., 0., 0., 6295.28294006]
 
         # Suppress Numpy FutureWarning
-        warnings.simplefilter(action='ignore', category=FutureWarning)
+        # warnings.simplefilter(action='ignore', category=FutureWarning)
 
         # Test with helpful message
         for ts, s, t in zip(true_tds, tds, time_array):
@@ -1312,7 +1324,7 @@ class Tests(unittest.TestCase):
     def test_coupled_reservoir_open_wellbore_forward(self):
         """Tests coupling of reservoir and open wellbore components.
 
-        Tests the system model with a simple reservoir component coupled
+        Tests the system model with an analytical reservoir component coupled
         to an open wellbore component against 5 years of data.
         """
         # Create system model
@@ -1322,25 +1334,26 @@ class Tests(unittest.TestCase):
         sm = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Add reservoir component
-        sres = sm.add_component_model_object(SimpleReservoir(name='sres',
-                                                             parent=sm,
-                                                             locX=550.,
-                                                             locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, locX=150., locY=100.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
-        sres.add_par('shale2Thickness', min=510.0, max=550., value=525.0)
-        sres.add_par('shale3Thickness', min=10.0, max=2.0, value=1.5)
-        sres.add_par('aquifer1Thickness', value=25.0, vary=False)
-        sres.add_par('aquifer2Thickness', value=200.0, vary=False)
-        sres.add_par('reservoirThickness', value=60.0, vary=False)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
+        ares.add_par('shale2Thickness', min=510.0, max=550., value=525.0)
+        ares.add_par('shale3Thickness', min=10.0, max=2.0, value=1.5)
+        ares.add_par('aquifer1Thickness', value=25.0, vary=False)
+        ares.add_par('aquifer2Thickness', value=200.0, vary=False)
+        ares.add_par('reservoirThickness', value=60.0, vary=False)
+        ares.add_par('injRate', value=0.01, vary=False)
+        ares.add_par('reservoirRadius', value=10000, vary=False)
+        ares.add_par('logResPerm', value=-12.85, vary=False)
 
         # Add observations of reservoir component model
-        sres.add_obs('pressure')
-        sres.add_obs('CO2saturation')
-        sres.add_obs_to_be_linked('pressure')
-        sres.add_obs_to_be_linked('CO2saturation')
+        ares.add_obs('pressure')
+        ares.add_obs('CO2saturation')
+        ares.add_obs_to_be_linked('pressure')
+        ares.add_obs_to_be_linked('CO2saturation')
 
         # Add open wellbore component
         ow = sm.add_component_model_object(OpenWellbore(name='ow', parent=sm))
@@ -1351,18 +1364,18 @@ class Tests(unittest.TestCase):
         ow.add_par('brineSalinity', value=0.0, vary=False)
 
         # Add keyword arguments of the open wellbore component model
-        ow.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-        ow.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+        ow.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+        ow.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
         # Add composite parameter of open wellbore component
         ow.add_composite_par(
-            'reservoirDepth', expr='+'.join(['sres.shale1Thickness',
-                                             'sres.shale2Thickness',
-                                             'sres.shale3Thickness',
-                                             'sres.aquifer1Thickness',
-                                             'sres.aquifer2Thickness']))
+            'reservoirDepth', expr='+'.join(['ares.shale1Thickness',
+                                             'ares.shale2Thickness',
+                                             'ares.shale3Thickness',
+                                             'ares.aquifer1Thickness',
+                                             'ares.aquifer2Thickness']))
         ow.add_composite_par(
-            'wellTop', expr='sres.shale3Thickness + sres.aquifer2Thickness')
+            'wellTop', expr='ares.shale3Thickness + ares.aquifer2Thickness')
 
         # Add observations of the open wellbore component
         ow.add_obs('CO2_aquifer')
@@ -1371,22 +1384,25 @@ class Tests(unittest.TestCase):
         sm.forward()
 
         # True values: simulation results for the last time point
-        true_flowrates = [0.47971159914465, 3.0733673108455997]
+        true_flowrates = [0.15983248409715095, 2.5677606843574847]
 
-        # Test with helpful message!
+        # Labels of outputs
         labels = ['CO2_aquifer', 'brine_aquifer']
-        for tf, l in zip(true_flowrates, labels):
+        sim_flowrates = [ow.obs[l+'_'+str(num_years)].sim for l in labels]
+
+        # Test with helpful message
+        for ind, (tf, l) in enumerate(zip(true_flowrates, labels)):
             # The observations at the last time point can be accessed directly,
             # e.g. as ow.obs['CO2_aquifer_5'].sim (ow.obs[l+'_'+str(num_years)].sim) or
             # as sm.collect_observations_as_time_series(ow,'CO2_aquifer')[num_years]
-            self.assertTrue(abs((tf-ow.obs[l+'_'+str(num_years)].sim)/tf) < 0.01,
+            self.assertTrue(abs((tf-sim_flowrates[ind])/tf) < 0.01,
                             'Flow rate {} is {} but should be {}'
-                            .format(l, str(ow.obs[l+'_'+str(num_years)].sim), str(tf)))
+                            .format(l, sim_flowrates[ind], tf))
 
     def test_deep_alluvium_aquifer(self):
         """Tests basic deep alluvium aquifer.
 
-        Tests a simple deep alluvium aquifer component in a
+        Tests a deep alluvium aquifer component in a
         forward model against expected output for 2 years of data.
         """
 
@@ -2173,7 +2189,7 @@ class Tests(unittest.TestCase):
     def test_lhs(self):
         """Tests Latin Hypercube sampling method of system model class.
 
-        Tests the system model latin hypercube sampling with a simple reservoir
+        Tests the system model latin hypercube sampling with an analytical reservoir
         component coupled to a cemented wellbore component. Tests
         the simulated mean and standard deviation against expected values.
 
@@ -2190,27 +2206,29 @@ class Tests(unittest.TestCase):
         sm = SystemModel()
 
         # Add reservoir component
-        sres = sm.add_component_model_object(SimpleReservoir(name='sres',
-                                                             parent=sm,
-                                                             locX=550.,
-                                                             locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, locX=100., locY=100.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('shale1Thickness', value=525.0, vary=False)
-        sres.add_par('shale2Thickness', value=475.0, vary=False)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('shale1Thickness', value=525.0, vary=False)
+        ares.add_par('shale2Thickness', value=475.0, vary=False)
         # Shale 3 has a fixed thickness of 11.2 m
-        sres.add_par('shale3Thickness', value=11.2, vary=False)
+        ares.add_par('shale3Thickness', value=11.2, vary=False)
         # Aquifer 1 (thief zone has a fixed thickness of 22.4)
-        sres.add_par('aquifer1Thickness', value=22.4, vary=False)
+        ares.add_par('aquifer1Thickness', value=22.4, vary=False)
         # Aquifer 2 (shallow aquifer) has a fixed thickness of 19.2
-        sres.add_par('aquifer2Thickness', value=19.2, vary=False)
+        ares.add_par('aquifer2Thickness', value=19.2, vary=False)
         # Reservoir has a fixed thickness of 51.2
-        sres.add_par('reservoirThickness', value=51.2, vary=False)
+        ares.add_par('reservoirThickness', value=51.2, vary=False)
+        # Setup reservoir radius
+        ares.add_par('reservoirRadius', value=10000, vary=False)
+        # Setup injection rate
+        ares.add_par('injRate', value=0.01, vary=False)
 
         # Add observations of reservoir component model
-        sres.add_obs_to_be_linked('pressure')
-        sres.add_obs_to_be_linked('CO2saturation')
+        ares.add_obs_to_be_linked('pressure')
+        ares.add_obs_to_be_linked('CO2saturation')
 
         # Add cemented wellbore component
         cw = sm.add_component_model_object(CementedWellbore(name='cw', parent=sm))
@@ -2220,17 +2238,17 @@ class Tests(unittest.TestCase):
         cw.add_par('logThiefPerm', min=-13.9, max=-12.1, value=-12.2)
 
         # Add keyword arguments of the cemented wellbore component model
-        cw.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-        cw.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+        cw.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+        cw.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
-        cw.add_composite_par('wellDepth', expr='sres.shale1Thickness' +
-                             '+sres.shale2Thickness + sres.shale3Thickness' +
-                             '+sres.aquifer1Thickness+ sres.aquifer2Thickness')
+        cw.add_composite_par('wellDepth', expr='ares.shale1Thickness' +
+                             '+ares.shale2Thickness + ares.shale3Thickness' +
+                             '+ares.aquifer1Thickness+ ares.aquifer2Thickness')
         cw.add_composite_par('depthRatio',
-                             expr='(sres.shale2Thickness+sres.shale3Thickness' +
-                             '+ sres.aquifer2Thickness + sres.aquifer1Thickness/2)/cw.wellDepth')
+                             expr='(ares.shale2Thickness+ares.shale3Thickness' +
+                             '+ ares.aquifer2Thickness + ares.aquifer1Thickness/2)/cw.wellDepth')
         cw.add_composite_par('initPressure',
-                             expr='sres.datumPressure + cw.wellDepth*cw.g*sres.brineDensity')
+                             expr='ares.datumPressure + cw.wellDepth*cw.g*ares.brineDensity')
 
         cw.add_obs('CO2_aquifer1')
         cw.add_obs('CO2_aquifer2')
@@ -2244,22 +2262,22 @@ class Tests(unittest.TestCase):
 
         # True values of means and standard deviations obtained by averaging
         # over 100000 simulations
-        true_means = [2.849026600358214e-05, 1.4710877772422628e-05,
-                      9.722353566396697e-06, 0.00018406411834396143,
-                      2.6032908047605337e-06]
-        true_stds = [6.523818950580592e-05, 1.6530682199456962e-05,
-                     1.6664940620365873e-05, 0.00029734016947531854,
-                     8.116163380809236e-07]
+        true_means = [2.21549210e-05, 2.41316753e-05, 3.63368741e-05,
+                      9.01534668e-05, 1.73778878e-06]
+        true_stds = [7.72037477e-05, 2.19520732e-05, 5.31330567e-05,
+                     1.43097345e-04, 7.37835046e-07]
 
         # Add tolerance appropriate for each observation
         # Tolerance calculations are based on probability theory:
         # true_st_dev/sampleSize^0.5/true_means
-        tols = [0.03651502, 0.38714553, 0.29447871, 0.07299162, 0.00643125]
+        tols = [0.1101966, 0.02876657, 0.04623994, 0.05019369, 0.01342648]
 
         # Test with helpful message!
         labels = s.recarray.dtype.names
         sim_means = np.mean(s.recarray[list(labels[2:])].tolist(), axis=0)
         sim_stds = np.std(s.recarray[list(labels[2:])].tolist(), axis=0)
+        sim_tols = sim_stds/1000**0.5/sim_means  # just in case
+
         for l, tm, sim, tol in zip(labels[2:], true_means, sim_means, tols):
             self.assertTrue(
                 abs((tm-sim)/tm) < tol,
@@ -2273,6 +2291,7 @@ class Tests(unittest.TestCase):
         if not os.path.exists('test_output'):
             os.mkdir('test_output')
         base_outfile = os.path.join('test_output', 'sens_test_{n}.{fmt}')
+
         # Run RBD_fast sensitivity analysis on CO2 leaked into aquifer
         CO2_aq1 = s.rbd_fast(obsname='cw.CO2_aquifer1', print_to_console=False)
         CO2_aq1_ssens = iam_vis.simple_sensitivities_barplot(
@@ -2280,7 +2299,8 @@ class Tests(unittest.TestCase):
             title='RBD-Fast Sensitivity\nfor Leakage Rates of $CO_2$ into the Aquifer 1',
             savefig=base_outfile.format(n=1, fmt='png'),
             outfile=base_outfile.format(n=1, fmt='csv'))
-        true_CO2aq1_logWell = 0.930413351316639
+
+        true_CO2aq1_logWell = 0.9772719493181238
         self.assertTrue(os.path.exists(base_outfile.format(n=1, fmt='png')),
                         'Output image not created')
         self.assertTrue(os.path.exists(base_outfile.format(n=1, fmt='csv')),
@@ -2294,7 +2314,8 @@ class Tests(unittest.TestCase):
             title='Sensitivity Coefficients',
             savefig=base_outfile.format(n=2, fmt='png'),
             outfile=base_outfile.format(n=2, fmt='csv'))
-        true_brine_aq1_logWell = 0.99
+
+        true_brine_aq1_logWell = 0.98944789
 
         # Copy files to documentation folder
         copyfile(base_outfile.format(n=1, fmt='png'),
@@ -2308,11 +2329,13 @@ class Tests(unittest.TestCase):
                         'Output image not created')
         self.assertTrue(os.path.exists(base_outfile.format(n=2, fmt='csv')),
                         'Output data file not created')
+
         ov = ms['cw.CO2_aquifer1'][0]
         self.assertTrue(abs(true_CO2aq1_logWell - ov) < 0.01,
                         'CO2_aq1-logWellPerm is {ov} but should be {tv}'
                         .format(ov=ov, tv=true_CO2aq1_logWell))
         ov = ms['cw.brine_aquifer1'][0]
+
         self.assertTrue(abs(true_brine_aq1_logWell - ov) < 0.01,
                         'brine_aq1-logWellPerm is {ov} but should be {tv}'
                         .format(ov=ov, tv=true_brine_aq1_logWell))
@@ -2918,7 +2941,7 @@ class Tests(unittest.TestCase):
     def test_openiam_cf(self):
         """Tests Control File functionality of the NRAP-Open-IAM.
 
-        Tests the NRAP-Open-IAM run from a control file with a simple reservoir
+        Tests the NRAP-Open-IAM run from a control file with an analytical reservoir
         component in a forward model.
         """
         import pickle
@@ -2929,8 +2952,8 @@ class Tests(unittest.TestCase):
         test_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(test_dir)
 
-        outfiles = ['SimpleReservoir1_000.pressure.txt',
-                    'SimpleReservoir1_000.CO2saturation.txt']
+        outfiles = ['AnalyticalReservoir1_000.pressure.txt',
+                    'AnalyticalReservoir1_000.CO2saturation.txt']
 
         for ofile in outfiles:
             odfile = os.path.join('test_output', ofile)
@@ -2952,10 +2975,10 @@ class Tests(unittest.TestCase):
         # Read output pressure and saturation files
         out_vals = {}
         out_vals['pressure'] = np.loadtxt(os.sep.join(
-            ['test_output', 'csv_files', 'SimpleReservoir1_000.pressure.csv']),
+            ['test_output', 'csv_files', 'AnalyticalReservoir1_000.pressure.csv']),
             skiprows=1, delimiter=',')[:, 1]
         out_vals['saturation'] = np.loadtxt(os.sep.join(
-            ['test_output', 'csv_files', 'SimpleReservoir1_000.CO2saturation.csv']),
+            ['test_output', 'csv_files', 'AnalyticalReservoir1_000.CO2saturation.csv']),
             skiprows=1, delimiter=',')[:, 1]
         out_vals['co2aq1'] = np.loadtxt(os.sep.join(
             ['test_output', 'csv_files', 'CementedWellbore1_000.CO2_aquifer1.csv']),
@@ -3014,37 +3037,27 @@ class Tests(unittest.TestCase):
 
         # Test pressure and saturation values
         true_vals = {}
-        true_vals['pressure'] = [10418765., 14919301.38843215, 15192401.37235173,
-                                 15352154.92651543, 15465501.96157327, 15553420.7877774]
-        true_vals['saturation'] = [
-            0., 0.21384356, 0.30898839, 0.38199558, 0.44354349, 0.49776829]
-        true_vals['co2aq1'] = [
-            0.000000000000000000e+00, 4.009259450441665808e-05, 3.328369138093752655e-05,
-            2.693611103739417147e-05, 2.107207114594151191e-05, 1.560442836007955292e-05]
-        true_vals['co2aq2'] = [
-            0.000000000000000000e+00, 1.858034134482971605e-06, 7.995150506733141689e-06,
-            1.277841678447248961e-05, 1.684263101312697962e-05, 2.044104130297448487e-05]
-        true_vals['co2atm'] = [
-            0.000000000000000000e+00, -1.030710967084584508e-08, -2.143717012310900791e-07,
-            1.353328298553025458e-06, 2.674960534125898739e-06, 3.268333388857705667e-06]
-        true_vals['brine_aq1'] = [
-            0.000000000000000000e+00, 1.174587248555037712e-05, 1.181246277069288336e-05,
-            1.185186206817051792e-05, 1.187983716205768980e-05, 1.190154380165251380e-05]
-        true_vals['brine_aq2'] = [
-            0.000000000000000000e+00, 1.029048012603127806e-06, 1.076541008069456788e-06,
-            1.104337101947985265e-06, 1.124060054107538356e-06, 1.139358847736474137e-06]
-        true_vals['TDS_volume'] = [
-            0.00000000000e+00, 4953997.530131221, 4959028.588699669,
-            4965434.020670503, 4972596.912364215, 4980559.7430431545]
-        true_vals['msw_co2'] = [
-            0.000000000000000000e+00, 1.685779384170747642e-06, 2.332231253976781943e-06,
-            2.439835615310001397e-06, 2.501344676892450799e-06, 2.555921287545392011e-06]
-        true_vals['msw_brine'] = [
-            0.000000000000000000e+00, 7.625411632876481455e-06, 7.970275967325878469e-06,
-            7.988670590201842547e-06, 7.958216246107291283e-06, 7.914684507949380389e-06]
-        true_vals['crit_dist'] = [
-            1.290765821949e+02, 2.067820300959e+02, 2.273035260713e+02,
-            2.273035260713e+02, 2.350109081766e+02, 2.387713214789e+02]
+        true_vals['pressure'] = [10883049.8, 15672777.14715, 15211683.21715,
+                                 14941960.55878, 14750589.28714, 14602150.19669]
+        true_vals['saturation'] = [0., 1., 1., 1., 1., 1.]
+        true_vals['co2aq1'] = [0.00000000e+00, 1.09173858e-04, 1.03327536e-04,
+                               9.89308510e-05, 9.58113533e-05, 9.33916830e-05]
+        true_vals['co2aq2'] = [0.00000000e+00, 2.11830718e-05, 2.13600590e-05,
+                               2.14635900e-05, 2.15370463e-05, 2.15814048e-05]
+        true_vals['co2atm'] = [0.00000000e+00, 3.12827836e-06, 3.12827836e-06,
+                               3.12827836e-06, 3.12827836e-06, 3.12827836e-06]
+        true_vals['brine_aq1'] = [0.00000000e+00, 7.80853344e-06, 7.43502779e-06,
+                                  7.21649397e-06, 7.06144104e-06, 6.94117241e-06]
+        true_vals['brine_aq2'] = [0.00000000e+00, 2.56520270e-06, 2.58664971e-06,
+                                  2.59919540e-06, 2.60809672e-06, 2.61500111e-06]
+        true_vals['TDS_volume'] = [0., 4946025.789533, 4972249.655896,
+                                   4996665.995109, 5019717.57458, 5041809.627618]
+        true_vals['msw_co2'] = [.00000000e+00, 6.33215891e-05, 8.70102924e-05,
+                                9.09890085e-05, 9.33305521e-05, 9.54389130e-05]
+        true_vals['msw_brine'] = [0.00000000e+00, 3.61504041e-06, 3.12683995e-06,
+                                  3.02091308e-06, 2.93403905e-06, 2.84628599e-06]
+        true_vals['crit_dist'] = [129.07658219, 206.7820301 , 227.30352607,
+                                  227.30352607, 235.01090818, 238.77132148]
 
         for key, vals in true_vals.items():
             for tv, ov in zip(vals, out_vals[key]):
@@ -3056,32 +3069,36 @@ class Tests(unittest.TestCase):
     def test_parstudy(self):
         """Test parameter study method of system model class.
 
-        Tests the system model parameter study method with a simple reservoir
+        Tests the system model parameter study method with an analytical reservoir
         component coupled to a cemented wellbore component.
         """
         # Create system model
         sm = SystemModel()
 
         # Add reservoir component
-        sres = sm.add_component_model_object(
-            SimpleReservoir(name='sres', parent=sm, locX=550., locY=100.))
+        ares = sm.add_component_model_object(
+            AnalyticalReservoir(name='ares', parent=sm, locX=100., locY=100.))
 
         # Add parameters of reservoir component model
-        sres.add_par('numberOfShaleLayers', value=3, vary=False)
-        sres.add_par('shale1Thickness', value=525.0, vary=False)
-        sres.add_par('shale2Thickness', value=475.0, vary=False)
+        ares.add_par('numberOfShaleLayers', value=3, vary=False)
+        ares.add_par('shale1Thickness', value=525.0, vary=False)
+        ares.add_par('shale2Thickness', value=475.0, vary=False)
         # Shale 3 has a fixed thickness of 11.2 m
-        sres.add_par('shale3Thickness', value=11.2, vary=False)
+        ares.add_par('shale3Thickness', value=11.2, vary=False)
         # Aquifer 1 (thief zone has a fixed thickness of 22.4)
-        sres.add_par('aquifer1Thickness', value=22.4, vary=False)
+        ares.add_par('aquifer1Thickness', value=22.4, vary=False)
         # Aquifer 2 (shallow aquifer) has a fixed thickness of 19.2
-        sres.add_par('aquifer2Thickness', value=19.2, vary=False)
+        ares.add_par('aquifer2Thickness', value=19.2, vary=False)
         # Reservoir has a fixed thickness of 51.2
-        sres.add_par('reservoirThickness', value=51.2, vary=False)
+        ares.add_par('reservoirThickness', value=51.2, vary=False)
+        # Setup reservoir radius
+        ares.add_par('reservoirRadius', value=10000, vary=False)
+        # Setup injection rate
+        ares.add_par('injRate', value=0.01, vary=False)
 
         # Add observations of reservoir component model
-        sres.add_obs_to_be_linked('pressure')
-        sres.add_obs_to_be_linked('CO2saturation')
+        ares.add_obs_to_be_linked('pressure')
+        ares.add_obs_to_be_linked('CO2saturation')
 
         # Add cemented wellbore component
         cw = sm.add_component_model_object(CementedWellbore(name='cw', parent=sm))
@@ -3091,19 +3108,19 @@ class Tests(unittest.TestCase):
         cw.add_par('logThiefPerm', min=-13.9, max=-12.1, value=-12.2)
 
         # Add keyword arguments of the cemented wellbore component model
-        cw.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-        cw.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+        cw.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+        cw.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
-        cw.add_composite_par('wellDepth', expr='sres.shale1Thickness' +
-                             '+sres.shale2Thickness + sres.shale3Thickness' +
-                             '+sres.aquifer1Thickness+ sres.aquifer2Thickness')
+        cw.add_composite_par('wellDepth', expr='ares.shale1Thickness' +
+                             '+ares.shale2Thickness + ares.shale3Thickness' +
+                             '+ares.aquifer1Thickness+ ares.aquifer2Thickness')
         cw.add_composite_par(
             'depthRatio',
-            expr='(sres.shale2Thickness+sres.shale3Thickness' +
-            '+ sres.aquifer2Thickness + sres.aquifer1Thickness/2)/cw.wellDepth')
+            expr='(ares.shale2Thickness+ares.shale3Thickness' +
+            '+ ares.aquifer2Thickness + ares.aquifer1Thickness/2)/cw.wellDepth')
         cw.add_composite_par(
             'initPressure',
-            expr='sres.datumPressure + cw.wellDepth*cw.g*sres.brineDensity')
+            expr='ares.datumPressure + cw.wellDepth*cw.g*ares.brineDensity')
 
         cw.add_obs('CO2_aquifer1')
         cw.add_obs('CO2_aquifer2')
@@ -3115,37 +3132,29 @@ class Tests(unittest.TestCase):
 
         # True values
         truth = np.array([
-            [-1.39000000e+01, -1.39000000e+01, -0.00010903861900342573,
-             -8.779162134229658e-06, -3.6713236636101406e-07,
-             6.8195568862251325e-06, 1.0755547742394922e-06],
-            [-1.39000000e+01, -1.30000000e+01, -0.00010903861900342573,
-             -8.779162134229658e-06, -3.6713236636101406e-07,
-             6.8195568862251325e-06, 1.0755547742394922e-06],
-            [-1.39000000e+01, -1.21000000e+01, -0.0001090386190034257,
-             -8.779162134229658e-06, -3.6713236636101406e-07,
-             6.8195568862251325e-06, 1.0755547742394922e-06],
-            [-1.24500000e+01, -1.39000000e+01, 3.779689757666963e-05,
-             1.7609250171761864e-05, -1.9731563542096083e-07,
-             2.884248876918178e-05, 3.503127221225778e-06],
-            [-1.24500000e+01, -1.30000000e+01, 3.779689757666963e-05,
-             1.7609250171761864e-05, -1.9731563542096083e-07,
-             2.884248876918178e-05, 3.503127221225778e-06],
-            [-1.24500000e+01, -1.21000000e+01, 3.779689757666963e-05,
-             1.7609250171761864e-05, -1.9731563542096083e-07,
-             2.884248876918178e-05, 3.503127221225778e-06],
-            [-1.10000000e+01, -1.39000000e+01, 0.00013106710530757463,
-             5.909689485163282e-05, 6.061493326793466e-05,
-             0.0013189921053484584, 4.008159997299794e-06],
-            [-1.10000000e+01, -1.30000000e+01, 0.00013106710530757463,
-             5.909689485163282e-05, 6.061493326793466e-05,
-             0.0013189921053484584, 4.008159997299794e-06],
-            [-1.10000000e+01, -1.21000000e+01, 0.00013106710530757463,
-             5.909689485163282e-05, 6.061493326793466e-05,
-             0.0013189921053484584, 4.008159997299794e-06]])
+            [-1.39000000e+01, -1.39000000e+01, -6.61430591e-05, -7.30230534e-06,
+             -3.67132366e-07, 2.67707906e-06, 4.20991183e-07],
+            [-1.39000000e+01, -1.30000000e+01, -6.61430591e-05, -7.30230534e-06,
+             -3.67132366e-07, 2.67707906e-06, 4.20991183e-07],
+            [-1.39000000e+01, -1.21000000e+01, -6.61430591e-05, -7.30230534e-06,
+             -3.67132366e-07, 2.67707906e-06, 4.20991183e-07],
+            [-1.24500000e+01, -1.39000000e+01, -5.79797962e-05, 2.47560728e-05,
+             4.12036084e-06, 1.64106086e-05, 1.60757851e-06],
+            [-1.24500000e+01, -1.30000000e+01, -5.79797962e-05, 2.47560728e-05,
+             4.12036084e-06, 1.64106086e-05, 1.60757851e-06],
+            [-1.24500000e+01, -1.21000000e+01, -5.79797962e-05, 2.47560728e-05,
+             4.12036084e-06, 1.64106086e-05, 1.60757851e-06],
+            [-1.10000000e+01, -1.39000000e+01, 2.01431789e-04, 9.47922492e-05,
+             1.85140545e-04, 6.24311341e-04, 3.69380701e-06],
+            [-1.10000000e+01, -1.30000000e+01, 2.01431789e-04, 9.47922492e-05,
+             1.85140545e-04, 6.24311341e-04, 3.69380701e-06],
+            [-1.10000000e+01, -1.21000000e+01, 2.01431789e-04, 9.47922492e-05,
+             1.85140545e-04, 6.24311341e-04, 3.69380701e-06]])
 
-        # Test with helpful message!
+        # Parameters and observations names
         labels = s.recarray.dtype.names
-       # Test that parameter values are exactly correct
+
+        # Test that parameter values are exactly correct
         for i, l in enumerate(labels[:2]):
             for j, t, sim in zip(list(range(truth.shape[0])), truth[:, i], s.recarray[l]):
                 self.assertEqual(
@@ -3555,46 +3564,6 @@ class Tests(unittest.TestCase):
             ''.join(['The maximum value of permeability array is {} but ',
                      'should be less than {}']).format(max_val, t_max))
 
-    def test_simple_reservoir_forward(self):
-        """Tests simple reservoir component.
-
-        Tests the system model with a simple reservoir component in a
-        forward model against expected output for 4 years of data.
-        """
-        # Create system model
-        time_array = 365.25*np.arange(0, 5)
-        model_kwargs = {'time_array': time_array}  # time is given in days
-        sm = SystemModel(model_kwargs=model_kwargs)
-
-        # Add simple reservoir component
-        sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
-        # Add observations of simple reservoir component model
-        sres.add_obs('pressure')
-        sres.add_obs('CO2saturation')
-
-        # Run system model using current values of its parameters
-        sm.forward()
-
-        # Assign observations of the model to pressure and CO2saturation variables
-        # Obtain pressure and CO2 saturation as lists
-        pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-        CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
-
-        # True values
-        true_pressure = [9411325., 14019874.26175452, 14299528.64528817,
-                         14463116.2847518, 14579183.64865103]
-        true_saturation = [0., 0.21658361, 0.31286341, 0.3867415, 0.4490236]
-
-        # Test with helpful message!
-        for tp, p, t in zip(true_pressure, pressure, time_array):
-            self.assertTrue(abs((tp-p)/tp) < 0.01,
-                            'Pressure at time t={} days is {} Pa but should be {} Pa'
-                            .format(str(t), str(p), str(tp)))
-        for ts, s, t in zip(true_saturation[1:], CO2saturation[1:], time_array[1:]):
-            self.assertTrue(abs((ts-s)/ts) < 0.01,
-                            'Saturation at time t={} days is {} but should be {}'
-                            .format(str(t), str(s), str(ts)))
-
     def test_stratigraphy(self):
         """Tests stratigraphy component.
 
@@ -3602,17 +3571,20 @@ class Tests(unittest.TestCase):
         to the subsequent components.
         """
         # Create system model 1 with both stratigraphy and reservoir component
-        time_array = np.arange(0, 5)
+        time_array = np.arange(0, 1201, step=300)
         model_kwargs = {'time_array': time_array}  # time is given in days
         sm1 = SystemModel(model_kwargs=model_kwargs)
 
         # Add stratigraphy component
-        strata = sm1.add_component_model_object(Stratigraphy(name='strata', parent=sm1))
+        strata = sm1.add_component_model_object(
+            Stratigraphy(name='strata', parent=sm1))
 
         # Define parameters values
         num_shale_layers = 3
         true_shale_thickness = [100.0, 120.0, 140.0]
         true_aq_thickness = [50.0, 75.0]
+        inj_rate = 0.025
+        res_radius = 10000
 
         # Add parameters of stratigraphy component model: some of the parameters
         # are stochastic, some are deterministic
@@ -3629,77 +3601,86 @@ class Tests(unittest.TestCase):
                            value=true_aq_thickness[ind])
 
         # Add reservoir component
-        sres1 = sm1.add_component_model_object(
-            SimpleReservoir(name='sres1', parent=sm1))
+        ares1 = sm1.add_component_model_object(
+            AnalyticalReservoir(name='ares1', parent=sm1))
+        # Setup reservoir radius
+        ares1.add_par('reservoirRadius', value=res_radius, vary=False)
+        # Setup injection rate
+        ares1.add_par('injRate', value=inj_rate, vary=False)
 
         # Add deterministic parameters of reservoir component model
         # linked to the stratigraphy parameters
-        sres1.add_par_linked_to_par(
+        ares1.add_par_linked_to_par(
             'numberOfShaleLayers',
             strata.deterministic_pars['numberOfShaleLayers'])
         for ind in range(num_shale_layers):
             par_name = 'shale{}Thickness'.format(ind+1)
-            sres1.add_par_linked_to_par(par_name,
+            ares1.add_par_linked_to_par(par_name,
                                         strata.deterministic_pars[par_name])
 
         # Add stochastic parameters of reservoir component model
         # linked to the stratigraphy parameters
         for ind in range(num_shale_layers-1):
             par_name = 'aquifer{}Thickness'.format(ind+1)
-            sres1.add_par_linked_to_par(par_name,
+            ares1.add_par_linked_to_par(par_name,
                                         strata.pars[par_name])
 
         # Add observations of reservoir component model
-        sres1.add_obs('pressure')
-        sres1.add_obs('CO2saturation')
+        ares1.add_obs('pressure')
+        ares1.add_obs('CO2saturation')
 
         # Run system model 1 deterministically
         sm1.forward()
 
         # Collect pressure and saturation from system model 1
         pressure1 = sm1.collect_observations_as_time_series(
-            sres1, 'pressure')
+            ares1, 'pressure')
         CO2saturation1 = sm1.collect_observations_as_time_series(
-            sres1, 'CO2saturation')
+            ares1, 'CO2saturation')
 
         # Create system model 2 with reservoir component only
         sm2 = SystemModel(model_kwargs=model_kwargs)
 
         # Add reservoir component
-        sres2 = sm2.add_component_model_object(SimpleReservoir(name='sres2', parent=sm2))
+        ares2 = sm2.add_component_model_object(
+            AnalyticalReservoir(name='ares2', parent=sm2))
+        # Setup reservoir radius
+        ares2.add_par('reservoirRadius', value=res_radius, vary=False)
+        # Setup injection rate
+        ares2.add_par('injRate', value=inj_rate, vary=False)
 
         # Add deterministic parameters of reservoir component model
         # linked to the stratigraphy parameters
-        sres2.add_par('numberOfShaleLayers', value=num_shale_layers, vary=False)
+        ares2.add_par('numberOfShaleLayers', value=num_shale_layers, vary=False)
         for ind in range(num_shale_layers):
-            sres2.add_par('shale{}Thickness'.format(ind+1),
+            ares2.add_par('shale{}Thickness'.format(ind+1),
                           value=true_shale_thickness[ind], vary=False)
 
         # Add stochastic parameters of reservoir component model
         # linked to the stratigraphy parameters
         for ind in range(num_shale_layers-1):
-            sres2.add_par('aquifer{}Thickness'.format(ind+1),
+            ares2.add_par('aquifer{}Thickness'.format(ind+1),
                           # min and max differ from value by 10
                           min=true_aq_thickness[ind]-10.0,
                           max=true_aq_thickness[ind]+10.0,
                           value=true_aq_thickness[ind])
 
         # Add observations of reservoir component model
-        sres2.add_obs('pressure')
-        sres2.add_obs('CO2saturation')
+        ares2.add_obs('pressure')
+        ares2.add_obs('CO2saturation')
 
         # Run system model 2 deterministically
         sm2.forward()
 
         # Collect pressure and saturation from system model 1
         pressure2 = sm2.collect_observations_as_time_series(
-            sres2, 'pressure')
+            ares2, 'pressure')
         CO2saturation2 = sm2.collect_observations_as_time_series(
-            sres2, 'CO2saturation')
+            ares2, 'CO2saturation')
 
-        true_pressure = [4854325., 7083141.10892644, 7362344.32621009,
-                         7525781.52051495, 7641773.6512542]
-        true_saturation = [0., 0., 0.00134371, 0.00520934, 0.00846822]
+        true_pressure = [5068210., 8834747.53715952, 8473497.06646231,
+                         8279984.4170428, 8157506.80441438]
+        true_saturation = [0., 0.59087394, 0.91207724, 1., 1.]
 
         # Compare observations of the second system model 2 to the true values
         for p2, tp, t in zip(pressure2, true_pressure, time_array):
@@ -3786,7 +3767,7 @@ BASE_TESTS = [
     'test_carb_aquifer',
     'test_cemented_wellbore_forward',
     'test_cemented_wellbore_wr_forward',
-    'test_chemical_sealing_coupled_simple_reservoir',
+    'test_chemical_sealing_coupled_analytical_reservoir',
     'test_chemical_sealing_not_seal_forward',
     'test_chemical_sealing_seal_forward',
     'test_coupled_analytical_reservoir_ms_wellbore_forward',
@@ -3819,7 +3800,6 @@ BASE_TESTS = [
     'test_seal_horizon',
     'test_sh_thickness_sampler',
     'test_sh_permeability_sampler',
-    'test_simple_reservoir_forward',
     'test_stratigraphy',
     'test_theis_reservoir_forward',
     ]
