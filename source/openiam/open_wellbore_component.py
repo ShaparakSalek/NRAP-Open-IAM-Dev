@@ -417,13 +417,12 @@ class OpenWellbore(ComponentModel):
             self.default_out['brine_' + aq] = 0.0
 
 
-def test_open_wellbore_component():
+def test_open_wellbore_component(test_case=1):
     try:
-        from openiam import SimpleReservoir
+        from openiam import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
-    test_case = 1
     if test_case == 1:
         crit_pressure_approach = False
     else:
@@ -437,33 +436,35 @@ def test_open_wellbore_component():
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
-    sres.add_par('shale2Thickness', min=510.0, max=550., value=525.0)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
+    ares.add_par('shale2Thickness', min=510.0, max=550., value=525.0)
     # Shale 3 has a fixed thickness of 1.0 m
-    sres.add_par('shale3Thickness', min=1.0, max=2.0, value=1.5)
+    ares.add_par('shale3Thickness', min=1.0, max=2.0, value=1.5)
     # Aquifer 1 (thief zone has a fixed thickness of 1.0)
-    sres.add_par('aquifer1Thickness', value=1.0, vary=False)
+    ares.add_par('aquifer1Thickness', value=1.0, vary=False)
     # Aquifer 2 (shallow aquifer) has a fixed thickness of 200
-    sres.add_par('aquifer2Thickness', value=200.0, vary=False)
+    ares.add_par('aquifer2Thickness', value=200.0, vary=False)
     # Reservoir has a fixed thickness of 51.2
-    sres.add_par('reservoirThickness', value=51.2, vary=False)
-    # Injection Rate
-    sres.add_par('injRate', value=0.0025, vary=False)
+    ares.add_par('reservoirThickness', value=51.2, vary=False)
+    # Injection rate
+    ares.add_par('injRate', value=0.0025, vary=False)
+    # Reservoir radius
+    ares.add_par('reservoirRadius', value=5000, vary=False)
 
     # Add observations of reservoir component model
     # When add_obs method is called, system model automatically
     # (if no other options of the method is used) adds a list of observations
-    # with name sres.obsnm_0, sres.obsnm_1,.... The final index is determined by the
+    # with name ares.obsnm_0, ares.obsnm_1,.... The final index is determined by the
     # number of time points in system model time_array attribute.
     # For more information, see the docstring of add_obs of ComponentModel class.
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
 
     # Add open wellbore component
     ow = sm.add_component_model_object(
@@ -478,18 +479,18 @@ def test_open_wellbore_component():
     ow.add_par('brineDensity', value=1020, vary=False)
 
     # Add keyword arguments of the open wellbore component model
-    ow.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ow.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ow.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ow.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add composite parameter of open wellbore component
     ow.add_composite_par('reservoirDepth',
-                         expr='+'.join(['sres.shale1Thickness',
-                                        'sres.shale2Thickness',
-                                        'sres.shale3Thickness',
-                                        'sres.aquifer1Thickness',
-                                        'sres.aquifer2Thickness']))
+                         expr='+'.join(['ares.shale1Thickness',
+                                        'ares.shale2Thickness',
+                                        'ares.shale3Thickness',
+                                        'ares.aquifer1Thickness',
+                                        'ares.aquifer2Thickness']))
     ow.add_composite_par(
-        'wellTop', expr='sres.shale3Thickness + sres.aquifer2Thickness')
+        'wellTop', expr='ares.shale3Thickness + ares.aquifer2Thickness')
 
     # Add observations of the open wellbore component
     ow.add_obs('CO2_aquifer')
@@ -504,8 +505,8 @@ def test_open_wellbore_component():
     # common name (e.g. 'CO2_aquifer1', etc) but differing in indices.
     # More details are given in the docstring and documentation to the method
     # collect_observations_as_time_series of SystemModel class.
-    pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-    CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
+    pressure = sm.collect_observations_as_time_series(ares, 'pressure')
+    CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
     print('------------------------------------------------------------------')
     print('Pressure', pressure, sep='\n')
     print('------------------------------------------------------------------')
@@ -526,14 +527,14 @@ def test_open_wellbore_component():
     print('Brine leakage rates to atmosphere', brine_leakrates_atm, sep='\n')
     print('------------------------------------------------------------------')
 
-    reservoirDepth = (sres.pars['shale1Thickness'].value \
-                      + sres.pars['shale2Thickness'].value \
-                      + sres.pars['shale3Thickness'].value \
-                      + sres.deterministic_pars['aquifer1Thickness'].value \
-                      + sres.deterministic_pars['aquifer2Thickness'].value)
+    reservoirDepth = (ares.pars['shale1Thickness'].value \
+                      + ares.pars['shale2Thickness'].value \
+                      + ares.pars['shale3Thickness'].value \
+                      + ares.deterministic_pars['aquifer1Thickness'].value \
+                      + ares.deterministic_pars['aquifer2Thickness'].value)
 
-    wellTop =  sres.pars['shale3Thickness'].value \
-        + sres.deterministic_pars['aquifer2Thickness'].value
+    wellTop =  ares.pars['shale3Thickness'].value \
+        + ares.deterministic_pars['aquifer2Thickness'].value
     brineDensity = ow.deterministic_pars['brineDensity'].value
 
     # Calculate the critical pressure and add to plot

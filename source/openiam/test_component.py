@@ -66,7 +66,7 @@ TEST_FUNCTIONS = {
     'MSC': [test_monitoring_scheduler_component, [1, 2, 3]], # on a TODO list
     'MTC': [test_monitoring_tool_component, [1, 2, 3]],
     'MSWC': [test_multisegmented_wellbore_component, None],
-    'OWC': [test_open_wellbore_component, None],
+    'OWC': [test_open_wellbore_component, [1, 2]],
     'PASC': [test_parameter_setup_component, [1, 2, 3, 4, 5]], # on a TODO list
     'PSC': [test_plume_stability_component, [1, 2, 3]],
     'RTMA': [test_rate_to_mass_adapter, None],
@@ -78,15 +78,17 @@ TEST_FUNCTIONS = {
     }
 
 
-def run_test(test_case='AAC'):
+def run_test(test_case='AAC', spec_val=None):
     # Get test function and argument list
     test_function = TEST_FUNCTIONS[test_case][0]
     arg_list = TEST_FUNCTIONS[test_case][1]
 
     # Check whether test function was provided with arguments
     if isinstance(arg_list, list):
+        if spec_val in arg_list:
+            arg_list = [spec_val]
         for val in arg_list:
-            print('Running {}... with input {}'.format(test_function.__name__, val))
+            print('Running {} with input {}'.format(test_function.__name__, val))
             print(80*'-')
             test_function(val)
     else:
@@ -97,4 +99,4 @@ def run_test(test_case='AAC'):
 
 if __name__ == '__main__':
 
-    run_test('OWC')
+    run_test('AAC')

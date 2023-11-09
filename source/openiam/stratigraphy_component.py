@@ -205,7 +205,7 @@ class Stratigraphy(ComponentModel):
 
 def test_stratigraphy_component():
     try:
-        from openiam import SimpleReservoir
+        from openiam import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
@@ -224,31 +224,32 @@ def test_stratigraphy_component():
     strata.add_par('shale2Thickness', min=40.0, max=60., value=50.0)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par_linked_to_par('numberOfShaleLayers',
+    ares.add_par('injRate', min=0.4, max=0.6, value=0.5)
+    ares.add_par('reservoirRadius', value=10000, vary=False)
+    ares.add_par_linked_to_par('numberOfShaleLayers',
                                strata.deterministic_pars['numberOfShaleLayers'])
-    sres.add_par('injRate', min=0.4, max=0.6, value=0.5)
-    sres.add_par_linked_to_par('shale1Thickness', strata.pars['shale1Thickness'])
-    sres.add_par_linked_to_par('shale2Thickness', strata.pars['shale2Thickness'])
-    sres.add_par_linked_to_par('shale3Thickness',
+    ares.add_par_linked_to_par('shale1Thickness', strata.pars['shale1Thickness'])
+    ares.add_par_linked_to_par('shale2Thickness', strata.pars['shale2Thickness'])
+    ares.add_par_linked_to_par('shale3Thickness',
                                strata.default_pars['shaleThickness'])
 
-    sres.add_par_linked_to_par('aquifer1Thickness',
+    ares.add_par_linked_to_par('aquifer1Thickness',
                                strata.default_pars['aquiferThickness'])
-    sres.add_par_linked_to_par('aquifer2Thickness',
+    ares.add_par_linked_to_par('aquifer2Thickness',
                                strata.default_pars['aquiferThickness'])
-    sres.add_par_linked_to_par('aquifer3Thickness',
+    ares.add_par_linked_to_par('aquifer3Thickness',
                                strata.default_pars['aquiferThickness'])
 
-    sres.add_par_linked_to_par('reservoirThickness',
+    ares.add_par_linked_to_par('reservoirThickness',
                                strata.default_pars['reservoirThickness'])
 
-    sres.add_par_linked_to_par('datumPressure',
+    ares.add_par_linked_to_par('datumPressure',
                                strata.default_pars['datumPressure'])
 
-    sres.add_obs('pressure')
+    ares.add_obs('pressure')
 
     # Run system model using current values of its parameters
     sm.forward()
@@ -258,5 +259,5 @@ def test_stratigraphy_component():
     print('------------------------------------------------------------------')
 
     # Print pressure
-    print('Pressure', sm.collect_observations_as_time_series(sres, 'pressure'),
+    print('Pressure', sm.collect_observations_as_time_series(ares, 'pressure'),
           sep='\n')

@@ -1,8 +1,8 @@
 """
 This module contains RateToMassAdapter class.
 
-Created in September 2017
-Last modified in November 2019
+Created in September, 2017
+Last modified in November, 2023
 
 @author: Veronika Vasylkivska, Seth King
 
@@ -151,7 +151,7 @@ def test_rate_to_mass_adapter():
     logging.basicConfig(level=logging.WARNING)
 
     try:
-        from openiam import SimpleReservoir, MultisegmentedWellbore
+        from openiam import AnalyticalReservoir, MultisegmentedWellbore
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
@@ -164,23 +164,25 @@ def test_rate_to_mass_adapter():
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=30.0, max=150., value=45.0)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', min=30.0, max=150., value=45.0)
+    ares.add_par('injRate', value=0.1, vary=False)
+    ares.add_par('reservoirRadius', value=5000, vary=False)
 
     # Add observations of reservoir component model
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
     # When add_obs method is called, system model automatically
     # (if no other options of the method is used) adds a list of observations
-    # with name sres.obsnm_0, sres.obsnm_1,.... The final index is determined by the
+    # with name ares.obsnm_0, ares.obsnm_1,.... The final index is determined by the
     # number of time points in system model time_array attribute.
     # For more information, see the docstring of add_obs of ComponentModel class.
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs('mass_CO2_reservoir')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs('mass_CO2_reservoir')
 
     # Add multisegmented wellbore component
     ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms', parent=sm))
@@ -188,24 +190,24 @@ def test_rate_to_mass_adapter():
 
     # Add linked parameters: common to both components
     ms.add_par_linked_to_par('numberOfShaleLayers',
-                             sres.deterministic_pars['numberOfShaleLayers'])
-    ms.add_par_linked_to_par('shale1Thickness', sres.pars['shale1Thickness'])
+                             ares.deterministic_pars['numberOfShaleLayers'])
+    ms.add_par_linked_to_par('shale1Thickness', ares.pars['shale1Thickness'])
     ms.add_par_linked_to_par('shale2Thickness',
-                             sres.default_pars['shaleThickness'])
+                             ares.default_pars['shaleThickness'])
     ms.add_par_linked_to_par('shale3Thickness',
-                             sres.default_pars['shaleThickness'])
+                             ares.default_pars['shaleThickness'])
     ms.add_par_linked_to_par('aquifer1Thickness',
-                             sres.default_pars['aquiferThickness'])
+                             ares.default_pars['aquiferThickness'])
     ms.add_par_linked_to_par('aquifer2Thickness',
-                             sres.default_pars['aquiferThickness'])
+                             ares.default_pars['aquiferThickness'])
     ms.add_par_linked_to_par('reservoirThickness',
-                             sres.default_pars['reservoirThickness'])
+                             ares.default_pars['reservoirThickness'])
     ms.add_par_linked_to_par('datumPressure',
-                             sres.default_pars['datumPressure'])
+                             ares.default_pars['datumPressure'])
 
     # Add keyword arguments linked to the output provided by reservoir model
-    ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add observations of multisegmented wellbore component model
     ms.add_obs_to_be_linked('CO2_aquifer1')
@@ -245,8 +247,8 @@ def test_rate_to_mass_adapter():
     # common name (e.g. 'CO2_aquifer1', etc) but differing in indices.
     # More details are given in the docstring and documentation to the method
     # collect_observations_as_time_series of SystemModel class.
-    pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-    CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
+    pressure = sm.collect_observations_as_time_series(ares, 'pressure')
+    CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
     print('------------------------------------------------------------------')
     print('Pressure', pressure, sep='\n')
     print('------------------------------------------------------------------')

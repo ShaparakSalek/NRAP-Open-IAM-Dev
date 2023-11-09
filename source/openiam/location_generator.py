@@ -1,6 +1,6 @@
 """
-Created on Fri Sep 20 12:54:26 2019
-
+Created in September, 2019
+Last modified in November, 2023
 """
 from math import ceil
 import sys
@@ -187,7 +187,7 @@ def test_location_generator():
     # For multiprocessing in Spyder
     __spec__ = None
 
-    from openiam import SimpleReservoir
+    from openiam import AnalyticalReservoir
 
     # Define keyword arguments of the system model
     num_years = 50
@@ -223,32 +223,34 @@ def test_location_generator():
     # can only be obtained by adding them using add_obs method and
     # then reading the files with data after simulation is complete
 
-    # Add simple reservoir component
+    # Add analytical reservoir component
     # We don't specify the location for the reservoir component, although
     # there is a default reservoir setup with locX=100, locY=100
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
     # Add parameters of reservoir component model
     # All parameters of the reservoir component are deterministic
     # so all uncertainty in the simulation comes from the uncertainty
     # of the well location
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('injRate', value=0.5, vary=False)
-    sres.add_par('shale1Thickness', value=40.0, vary=False)
-    sres.add_par('shale2Thickness', value=50.0, vary=False)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('injRate', value=0.5, vary=False)
+    ares.add_par('shale1Thickness', value=40.0, vary=False)
+    ares.add_par('shale2Thickness', value=50.0, vary=False)
+    ares.add_par('injRate', value=0.1, vary=False)
+    ares.add_par('reservoirRadius', value=10000, vary=False)
 
-    # Simple reservoir component has keyword arguments of the model method:
+    # Analytical reservoir component has keyword arguments of the model method:
     # locX and locY which we would link to the output of the generator component
     # Generator component outputs 5 random locations according to the setup above.
     # We can link reservoir component locX and locY to any of these produced locations
     # using arguments constr_type='array' and loc_ind=[2]; 2 is chosen arbitrarily
-    sres.add_kwarg_linked_to_obs('locX', gen.linkobs['locX'],
+    ares.add_kwarg_linked_to_obs('locX', gen.linkobs['locX'],
                                  obs_type='grid', constr_type='array', loc_ind=[2])
-    sres.add_kwarg_linked_to_obs('locY', gen.linkobs['locY'],
+    ares.add_kwarg_linked_to_obs('locY', gen.linkobs['locY'],
                                  obs_type='grid', constr_type='array', loc_ind=[2])
 
     # Add observations of reservoir component model
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
 
     # Run forward simulation
     sm.forward()
@@ -257,9 +259,9 @@ def test_location_generator():
     # Print pressure and saturation which should be different every time the code is run
     # if attribute reproducible is False
     print('Pressure',
-          sm.collect_observations_as_time_series(sres, 'pressure'), sep='\n')
+          sm.collect_observations_as_time_series(ares, 'pressure'), sep='\n')
     print('CO2 saturation',
-          sm.collect_observations_as_time_series(sres, 'CO2saturation'), sep='\n')
+          sm.collect_observations_as_time_series(ares, 'CO2saturation'), sep='\n')
 
     num_samples = 100
     ncpus = 5
@@ -276,8 +278,8 @@ def test_location_generator():
     CO2_saturation = np.ones((num_samples, len(time_array)))
 
     for ind in range(len(time_array)):
-        pressure[:, ind] = s.recarray['sres.pressure_{}'.format(ind)]
-        CO2_saturation[:, ind] = s.recarray['sres.CO2saturation_{}'.format(ind)]
+        pressure[:, ind] = s.recarray['ares.pressure_{}'.format(ind)]
+        CO2_saturation[:, ind] = s.recarray['ares.CO2saturation_{}'.format(ind)]
 
     print('Average pressure', np.mean(pressure, axis=0), sep='\n')
     print('Standard deviation of pressure', np.std(pressure, axis=0), sep='\n')
@@ -296,7 +298,7 @@ def test_location_generator():
     plt.tight_layout()
     plt.tick_params(labelsize=fontsize-4)
     plt.xlim([0, 50])
-    plt.ylim([20, 45])
+    plt.ylim([0, 20])
     ax.get_yaxis().set_label_coords(-0.10, 0.5)
 
     ax = fig.add_subplot(122)
@@ -308,5 +310,5 @@ def test_location_generator():
     plt.tight_layout()
     plt.tick_params(labelsize=fontsize-4)
     plt.xlim([0, 50])
-    plt.ylim([0.0, 1.0])
+    plt.ylim([0.0, 1.02])
     ax.get_yaxis().set_label_coords(-0.10, 0.5)
