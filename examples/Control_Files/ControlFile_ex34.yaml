@@ -23,7 +23,7 @@ ModelParams:
     EndTime: 50
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1, GenericAquifer1]
+    Components: [AnalyticalReservoir1, OpenWellbore1, GenericAquifer1]
     OutputDirectory: output/output_ex34_{datetime}
     Logging: Debug
 #-------------------------------------------------
@@ -57,21 +57,27 @@ Stratigraphy:
         vary: False
         value: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 1
             vary: False
         logResPerm:
-            value: -10.15
+            value: -12.15
+            vary: False
+        reservoirRadius:
+            value: 10000
+            vary: False
+        brineResSaturation:
+            value: 0
             vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Locations:
         coordx: [1000, 2000]
         coordy: [1000, 2000]

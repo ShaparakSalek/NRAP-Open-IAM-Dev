@@ -19,7 +19,7 @@
 # within the ModelParams section will prevent the creation of individual output
 # and combined outputs files. The combined outputs files can be large
 # due to the number of components used. In this example there is one
-# SimpleReservoir, OpenWellbore, and FutureGen2Aquifer created for each
+# AnalyticalReservoir, OpenWellbore, and FutureGen2Aquifer created for each
 # x and y value specified with the 'grid' option, and an output file
 # would be created for each conmponent. Additionally, the AoR plot type creates
 # a csv file with the data used for the plot, and this csv file is much smaller
@@ -81,7 +81,7 @@ ModelParams:
     EndTime: 10
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    Components: [AnalyticalReservoir1, OpenWellbore1, FutureGen2Aquifer1]
     OutputDirectory: 'output/output_ex31a_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
@@ -110,21 +110,27 @@ Stratigraphy:
         vary: False
         value: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 0.33
             vary: False
         logResPerm:
-            value: -10.15
+            value: -12.15
+            vary: False
+        reservoirRadius:
+            value: 15000
+            vary: False
+        brineResSaturation:
+            value: 0.15
             vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 196   # 14*14
     LeakTo: aquifer2
     Locations:
@@ -152,7 +158,7 @@ OpenWellbore1:
             value: 0.2
             vary: False
         brineDensity:
-            value: 1050
+            value: 1075
             vary: False
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)

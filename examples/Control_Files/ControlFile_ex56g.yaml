@@ -54,13 +54,15 @@ Workflow:
     Type: AoR
     Options:
         PlotInjectionSites: True
-        BrineDensity: 1250
-        ReservoirComponentType: SimpleReservoir
+        BrineDensity: 1250          # the BrineDensity entry will influence the map-view figure of pressure, but not the behavior of the CementedWellbore component
+        ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             Parameters:
                 injRate: 0.05
-                logResPerm: -13.95
-        WellboreComponentType: CementedWellboreWR
+                logResPerm: -12.85
+                reservoirRadius: 75000
+                brineResSaturation: 0.2
+        WellboreComponentType: CementedWellbore
         WellboreOptions:
             Parameters:
                 logWellPerm: -13.85

@@ -27,7 +27,7 @@ ModelParams:
     # TimePoints: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] # 2nd option to enter time
     # TimePoints: 'examples/Control_Files/input_data/ex1/time_points.csv' # 3rd option to enter time
     Analysis: forward
-    Components: [SimpleReservoir1,
+    Components: [AnalyticalReservoir1,
                  CementedWellbore1]
     OutputDirectory: output/output_ex1b_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
@@ -57,18 +57,21 @@ Stratigraphy:
         vary: False
         value: 51.2
 # All coordinates are in meters.
-# With the SimpleReservoir the default injection location is at (0, 0)
+# With the AnalyticalReservoir the default injection location is at (0, 0)
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     InjectionWell:
         coordx: 10
         coordy: 20
     Parameters:
         injRate: 0.1
+        reservoirRadius: 5000
+        brineResSaturation: 0.15
+        logResPerm: -13.75
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
@@ -78,7 +81,7 @@ SimpleReservoir1:
 #-------------------------------------------------
 CementedWellbore1:
     Type: CementedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 4
     Locations:
         coordx: [100, 540]

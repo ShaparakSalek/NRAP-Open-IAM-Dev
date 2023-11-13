@@ -2,7 +2,7 @@
 #
 # This example computes the aquifer impact (CarbonateAquifer component)
 # from 2 leaky wellbores (MultisegmentedWellbore component) connected
-# to a SimpleReservoir component. The aquifer impact is quantified with
+# to a AnalyticalReservoir component. The aquifer impact is quantified with
 # the pH and TDS plume volumes resulting from CO2 and brine leakage,
 # respectively.
 #
@@ -28,7 +28,7 @@ ModelParams:
     Analysis:
         type: lhs
         siz: 30
-    Components: [SimpleReservoir1,
+    Components: [AnalyticalReservoir1,
                  msw1,
                  CarbonateAquifer1]
     OutputDirectory: output/output_ex3_{datetime}
@@ -59,20 +59,23 @@ Stratigraphy:
         vary: False
         value: 51.2
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             min: 6.5
             max: 10.0
-    Outputs: [pressure]
+        reservoirRadius: 10000
+        brineResSaturation: 0.15
+        logResPerm: -13.75
+    Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
 msw1:
     Type: MultisegmentedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 5
     RandomLocDomain:
         xmin: 0

@@ -55,11 +55,13 @@ Workflow:
     Options:
         PlotInjectionSites: True
         CriticalPressureMPa: Calculated
-        ReservoirComponentType: SimpleReservoir
+        ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             Parameters:
                 injRate: 0.05
                 logResPerm: -13.5
+                reservoirRadius: 75000
+                brineResSaturation: 0.01
         WellboreComponentType: MultisegmentedWellbore
         WellboreOptions:
             Parameters:

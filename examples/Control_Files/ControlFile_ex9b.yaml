@@ -20,7 +20,7 @@ ModelParams:
     EndTime: 5
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1,
+    Components: [AnalyticalReservoir1,
                  OpenWellbore1,
                  atmRom1]
     OutputDirectory: output/output_ex9b_{datetime}
@@ -51,11 +51,11 @@ Stratigraphy:
         vary: False
         value: 51.2
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         logResPerm:
             min: -11.5
@@ -66,11 +66,13 @@ SimpleReservoir1:
         injRate:
             min: 0.1
             max: 0.4
+        reservoirRadius: 1000
+        brineResSaturation: 0.2
     Outputs: [pressure]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 2
     Locations:
         coordx: [100, 105]

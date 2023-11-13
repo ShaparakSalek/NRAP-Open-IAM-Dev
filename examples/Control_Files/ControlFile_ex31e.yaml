@@ -29,7 +29,7 @@ ModelParams:
     EndTime: 20
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, CementedWellbore1, FutureGen2Aquifer1]
+    Components: [AnalyticalReservoir1, CementedWellbore1, FutureGen2Aquifer1]
     OutputDirectory: 'output/output_ex31e_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
@@ -58,8 +58,8 @@ Stratigraphy:
         vary: False
         value: 51.2
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             vary: False
@@ -67,11 +67,17 @@ SimpleReservoir1:
         logResPerm:
             vary: False
             value: -12.0
+        reservoirRadius:
+            value: 75000
+            vary: False
+        brineResSaturation:
+            value: 0.175
+            vary: False
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
 CementedWellbore1:
     Type: CementedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 100   # 10*10
     Locations:
         grid:

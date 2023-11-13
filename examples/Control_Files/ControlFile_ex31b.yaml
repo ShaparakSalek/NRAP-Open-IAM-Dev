@@ -46,7 +46,7 @@ ModelParams:
     EndTime: 10
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1,
+    Components: [AnalyticalReservoir1, OpenWellbore1,
                  GenericAquifer1]
     OutputDirectory: 'output/output_ex31b_{datetime}'
     GenerateOutputFiles: False
@@ -76,21 +76,27 @@ Stratigraphy:
         vary: False
         value: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 0.33
             vary: False
         logResPerm:
-            value: -10.15
+            value: -12.15
+            vary: False
+        reservoirRadius:
+            value: 15000
+            vary: False
+        brineResSaturation:
+            value: 0.15
             vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 49   # (7*7)
     LeakTo: aquifer2
     Locations:
@@ -117,8 +123,8 @@ OpenWellbore1:
         brineSalinity:
             value: 0.2
             vary: False
-        critPressure: 2.207e+07       # Because the critPressure parameter is specified, 
-        # brineDensity: 1015          # the brineDensity parameter is not used here
+        critPressure: 2.31e+07        # Because the critPressure parameter is specified, 
+        # brineDensity: 1075          # the brineDensity parameter is not used here
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
         # and don't need to be set explicitly unless different values
@@ -151,7 +157,7 @@ Plots:
         PlotInjectionSites: True
         FigureDPI: 200
         SaveCSVFiles: True
-        CriticalPressureMPa: 22.07
+        CriticalPressureMPa: 23.1      # Set as 23.1 MPa to be consistent with the OpenWellbore component's critPressure parameter
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

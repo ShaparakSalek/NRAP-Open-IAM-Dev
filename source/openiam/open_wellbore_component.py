@@ -100,7 +100,7 @@ class OpenWellbore(ComponentModel):
 
     * **brineSalinity** [-] (0 to 0.2) - brine salinity (mass fraction) (default: 0.1)
 
-    * **brineDensity** [|kg/m^3|] (900 to 1200) - brine density (default: 1012)
+    * **brineDensity** [|kg/m^3|] (900 to 1200) - brine density (default: 1045)
 
     * **wellRadius** [|m|] (0.025 to 0.25) - radius of the wellbore (default: 0.05)
 
@@ -190,7 +190,7 @@ class OpenWellbore(ComponentModel):
         self.add_default_par('logReservoirTransmissivity', value=-9.83)
         self.add_default_par('logAquiferTransmissivity', value=-9.83)
         self.add_default_par('brineSalinity', value=0.1)
-        self.add_default_par('brineDensity', value=1012.0)
+        self.add_default_par('brineDensity', value=1045.0)
 
         # Define dictionary of model parameters boundaries
         # Boundaries of some parameters are defined by the ROM

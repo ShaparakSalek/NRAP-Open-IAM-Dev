@@ -33,7 +33,7 @@
 # set up with PlotInjectionSites: True, both InjectionCoordx and InjectionCoordy
 # must be included for the injection site to be plotted. InjectionCoordx
 # and InjectionCoordy are not required for AoR plots when using another type
-# of reservoir component (e.g., SimpleReservoir) because those components
+# of reservoir component (e.g., AnalyticalReservoir) because those components
 # have injX and injY values tied to them.
 #
 # This example requires additional FutureGen 2.0 data set.

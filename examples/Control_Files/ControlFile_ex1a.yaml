@@ -1,7 +1,7 @@
 # OpenIAM Control File Example 1a
 #
-# This example links a SimpleReservoir component to a CementedWellbore component.
-# Based on the pressures and CO2 saturations provided by the SimpleReservoir,
+# This example links a AnalyticalReservoir component to a CementedWellbore component.
+# Based on the pressures and CO2 saturations provided by the AnalyticalReservoir,
 # the CementedWellbore component calculates the leakage rates from 4 leaky wellbores.
 # The leakage enters aquifers 1 and 2 as well as the atmosphere.
 #
@@ -17,9 +17,9 @@
 # In the plot Pressure_plot, the subplot titles are specified through the inclusion
 # of 'COMPONENTNAME.OUTPUTNAME: SUBPLOT TITLE' under the 'Subplot' entry. In the
 # control file interface, the component name is a combination of what the user
-# provides ('SimpleReservoir1') and a location index preceeded by an underscore
+# provides ('AnalyticalReservoir1') and a location index preceeded by an underscore
 # and containing three digits ('_000'). For example, the formatting of
-# 'COMPONENTNAME.OUTPUTNAME' here leads to 'SimpleReservoir1_000.pressure' for the
+# 'COMPONENTNAME.OUTPUTNAME' here leads to 'AnalyticalReservoir1_000.pressure' for the
 # pressure at location 0 (the indexing starts at 0). If subplot titles are not
 # specified, they are generated based on the data shown.
 #
@@ -35,7 +35,7 @@ ModelParams:
     # TimePoints: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] # 2nd option to enter time
     # TimePoints: 'examples/Control_Files/input_data/ex1/time_points.csv' # 3rd option to enter time
     Analysis: forward
-    Components: [SimpleReservoir1,
+    Components: [AnalyticalReservoir1,
                  CementedWellbore1]
     OutputDirectory: output/output_ex1a_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
@@ -65,18 +65,21 @@ Stratigraphy:
         vary: False
         value: 51.2
 # All coordinates are in meters.
-# With the SimpleReservoir the default injection location is at (0, 0)
+# With the AnalyticalReservoir the default injection location is at (0, 0)
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     InjectionWell:
         coordx: 10
         coordy: 20
     Parameters:
         injRate: 0.1
+        reservoirRadius: 5000
+        brineResSaturation: 0.15
+        logResPerm: -13.75
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
@@ -86,7 +89,7 @@ SimpleReservoir1:
 #-------------------------------------------------
 CementedWellbore1:
     Type: CementedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 4
     Locations:
         coordx: [100, 540]
@@ -136,8 +139,8 @@ Plots:
         Subplot:
             NumCols: 2
             Use: True
-            SimpleReservoir1_000.pressure: 'Pressure at well #1'   # the '' are required because the number
-            SimpleReservoir1_001.pressure: 'Pressure at well #2'   # would be silenced by the # and excluded
-            SimpleReservoir1_002.pressure: 'Pressure at well #3'
-            SimpleReservoir1_003.pressure: 'Pressure at well #4'
+            AnalyticalReservoir1_000.pressure: 'Pressure at well #1'   # the '' are required because the number
+            AnalyticalReservoir1_001.pressure: 'Pressure at well #2'   # would be silenced by the # and excluded
+            AnalyticalReservoir1_002.pressure: 'Pressure at well #3'
+            AnalyticalReservoir1_003.pressure: 'Pressure at well #4'
         Title: Reservoir Pressure at Wellbore Location

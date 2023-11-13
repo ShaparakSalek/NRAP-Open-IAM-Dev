@@ -36,7 +36,11 @@ class AnalyticalReservoir(ComponentModel):
     * **reservoirPorosity** [-] (0.1 to 0.3) - porosity of reservoir (default: 0.15)
 
     * **reservoirRadius** [|m|] (500 to 100,000) - distance between injection well
-      and outer reservoir boundary (default: 500)
+      and outer reservoir boundary (default: 100,000). The reservoirRadius should 
+      not be smaller than the distance between the injection well and any leakage 
+      pathway components connected to the ``AnalyticalReservoir`` (e.g., wellbores 
+      or faults). If the radius is too small, the simulation will print a warning 
+      message.
 
     * **brineDensity** [|kg/m^3|] (965 to 1195) - density of brine phase
       (default: 1045)
@@ -139,7 +143,7 @@ class AnalyticalReservoir(ComponentModel):
         self.add_default_par('CO2Viscosity', value=3.95e-5)
         self.add_default_par('brineResSaturation', value=0.0)
         self.add_default_par('brineCompressibility', value=4.5e-12)
-        self.add_default_par('reservoirRadius', value=500)
+        self.add_default_par('reservoirRadius', value=100000)
         self.add_default_par('reservoirThickness', value=50.0)
         self.add_default_par('numberOfShaleLayers', value=3)
         self.add_default_par('shaleThickness', value=250.0)

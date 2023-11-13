@@ -177,7 +177,7 @@ WATER_DENSITY = 1000
 # value is only used if the wellbore component does not have a brine density parameter 
 # (e.g., brineDensity for OpenWellbore or MultisegmentedWellbore) and the 
 # 'CriticalPressureMPa' input is given as 'Calculated'.
-DEFAULT_BRINE_DENSITY = 1012
+DEFAULT_BRINE_DENSITY = 1045
 
 def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                         output_list, locations, name='AoR_Figure1', analysis='forward',

@@ -669,9 +669,7 @@ def stacked_sensitivities_barplot(sensitivities, names, system_model,
     for i, param in enumerate(par_names):
         colorValReal, _, used_colors, _, _ = get_colors(
             color_index, stats_index, used_colors, subplots_data)
-        # print('param: ', param)
-        # print('    colorValReal: ', colorValReal)
-        # print('    used_colors: ', used_colors)
+        
         _, labels, time_indices, _ = get_labels(
             [param], PAR_NAME_DICT, use_formatted_labels=use_formatted_labels,
             remove_time_index=False, include_comp_in_label=True,

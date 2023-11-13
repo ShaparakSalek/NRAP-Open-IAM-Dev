@@ -17,7 +17,7 @@ ModelParams:
     Analysis:
         type: lhs
         siz: 30
-    Components: [SimpleReservoir1, MultisegmentedWellbore1, CarbonateAquifer1]
+    Components: [AnalyticalReservoir1, MultisegmentedWellbore1, CarbonateAquifer1]
     OutputDirectory: output/output_ex42_{datetime}
     Logging: Info
 #-------------------------------------------------
@@ -44,17 +44,26 @@ Stratigraphy:
         vary: False
         value: 50
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 1
+            vary: False
+        logResPerm:
+            value: -13.0
+            vary: False
+        reservoirRadius:
+            value: 5000
+            vary: False
+        brineResSaturation:
+            value: 0.075
             vary: False
     Outputs: [pressure, CO2saturation, mass_CO2_reservoir]
 #-------------------------------------------------
 MultisegmentedWellbore1:
     Type: MultisegmentedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 2
     Locations:
         coordx: [500, 750]

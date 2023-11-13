@@ -28,7 +28,7 @@ ModelParams:
     EndTime: 1
     TimeStep: 0.05
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1, OpenWellbore2]
+    Components: [AnalyticalReservoir1, OpenWellbore1, OpenWellbore2]
     OutputDirectory: output/output_ex4b_{datetime}
     Logging: Error
 #-------------------------------------------------
@@ -43,22 +43,25 @@ Stratigraphy:
     aquifer2Thickness: 80.0
     reservoirThickness: 40.0
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     InjectionWell:
         coordx: 100
         coordy: 200
     Parameters:
         injRate: 0.005
+        reservoirRadius: 1000
+        brineResSaturation: 0.2
+        logResPerm: -14
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 2
     Locations:
         coordx: [200, 20]
@@ -77,7 +80,7 @@ OpenWellbore1:
 #-------------------------------------------------
 OpenWellbore2:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 2
     Locations:
         coordx: [200, 20]

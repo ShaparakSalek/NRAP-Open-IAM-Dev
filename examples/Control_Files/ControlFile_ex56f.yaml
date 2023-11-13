@@ -3,7 +3,10 @@
 # This example demonstrates the use of the AoR Workflow in a simulation
 # using a MultisegmentedWellbore (WellboreComponentType: MultisegmentedWellbore).
 #
-# Here, the critical pressure is specified as 15 MPa (CriticalPressureMPa: 15.0).
+# Here, the critical pressure is specified as 15 MPa (CriticalPressureMPa: 15.0). 
+# This critical pressure will be used in the map-view figures examining reservoir 
+# pressures, but it will not impact the behavior of the MultisegmentedWellbore 
+# components (which do not use a critical pressure).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56f.yaml
@@ -48,11 +51,13 @@ Workflow:
     Options:
         PlotInjectionSites: True
         CriticalPressureMPa: 15.0
-        ReservoirComponentType: SimpleReservoir
+        ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             Parameters:
-                injRate: 0.05
-                logResPerm: -13.5
+                injRate: 0.1
+                logResPerm: -14.5
+                reservoirRadius: 75000
+                brineResSaturation: 0.01
         WellboreComponentType: MultisegmentedWellbore
         WellboreOptions:
             Parameters:

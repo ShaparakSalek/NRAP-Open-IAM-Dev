@@ -1,11 +1,7 @@
 # OpenIAM Control File Example 56c
 #
 # This example is similar to examples 31a and 56b, but it specifies a critical
-# pressure value (22.07 MPa). This critical pressure is lower than the critical
-# pressure calculated for example 31a (22.78 MPa), given the brineDensity value
-# used in that example (1050 kg/(m^3)). The lower critical pressure will allow
-# for higher CO2 and brine leakage rates, potentially making the area of
-# review (AoR) larger.
+# pressure value (24.0 MPa).
 #
 # When using the AoR workflow with an OpenWellbore component, entering a specific 
 # critical pressure with CriticalPressureMPa under 'Workflow: Options' (i.e., not 
@@ -68,18 +64,20 @@ Workflow:
     Options:
         PlotInjectionSites: True
         FigureDPI: 300
-        CriticalPressureMPa: 22.07            # This sets the critical pressure for the AoR pressure plot AND the OpenWellbore
-        ReservoirComponentType: SimpleReservoir
+        CriticalPressureMPa: 24.0            # This sets the critical pressure for the AoR pressure plot AND the OpenWellbore
+        ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             InjectionWell:
                 coordx: 0
                 coordy: 0
             Parameters:
                 injRate: 0.33
-                logResPerm: -10.15
+                logResPerm: -13.0
+                reservoirRadius: 15000
+                brineResSaturation: 0.05
         AquiferName: aquifer2                 # the wellbores will leak to this aquifer
-        WellboreOptions:                      # you do not have to include the 'Controls' section (containing 
-            Locations:                        # 'critPressureApproach' and 'enforceCritPressure') under 'WellboreOptions'
+        WellboreOptions:                      # You do not have to include the 'Controls' section (containing 'critPressureApproach' and 'enforceCritPressure')
+            Locations:                        # under 'WellboreOptions'. Those entries are set automatically because of the CriticalPressureMPa entry.
                 grid:
                     xmin: -7500
                     xmax: 7500
@@ -87,7 +85,7 @@ Workflow:
                     ymin: -7500
                     ymax: 7500
                     ysize: 14
-            Parameters:                      # you do not have to include 'critPressure: 2.207e+7' under Parameters
+            Parameters:                      # you do not have to include 'critPressure: 2.40e+7' under Parameters, it is set automatically with the CriticalPressureMPa entry
                 wellRadius: 0.05
                 logReservoirTransmissivity: -10.97
                 logAquiferTransmissivity: -10.0

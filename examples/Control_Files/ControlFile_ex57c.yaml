@@ -54,7 +54,7 @@ Workflow:
         FigureName: Name.tiff         # Because the TTFD workflow produces multiple figures, only the .tiff extension from this input will be used
         PlumeType: Dissolved_salt
         PlotInjectionSites: True
-        ReservoirComponentType: SimpleReservoir
+        ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             InjectionWell:
                 coordx: 500
@@ -62,6 +62,8 @@ Workflow:
             Parameters:
                 injRate: 0.1
                 logResPerm: -13
+                reservoirRadius: 3000
+                brineResSaturation: 0.075
         WellboreComponentType: OpenWellbore
         WellboreOptions:
             Locations:
