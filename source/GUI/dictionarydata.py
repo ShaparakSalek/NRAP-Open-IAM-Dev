@@ -161,7 +161,7 @@ WORKFLOW_TYPES = [
     'Area of Review',
     ]
 
-WORKFLOW_COMPONENTS = {'Area of Review': ['reservoir','wellbore','aquifer']}
+WORKFLOW_COMPONENTS = {'Area of Review': ['reservoir', 'wellbore', 'aquifer']}
 
 # Types of processing/plotting analysis and/or capabilities available for a given simulation
 # Plotting is default and available for all simulations

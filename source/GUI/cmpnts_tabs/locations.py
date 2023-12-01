@@ -308,14 +308,14 @@ def add_obs_locs_frame_widgets(controller, cmpnt_nm, frame, tool_tip):
 def add_inj_well_frame_widgets(controller, cmpnt_nm, cmpnt_type, frame, tool_tip):
 
     if cmpnt_type in ['SimpleReservoir', 'AnalyticalReservoir', 'GenericReservoir']:
-       inj_well_label_text = "Injection well location:"
-       arg_labels = ['x-coordinate [m]:', 'y-coordinate [m]:']
-       tool_tip_text =  'Enter {}-coordinate of injection well.'
+        inj_well_label_text = "Injection well location:"
+        arg_labels = ['x-coordinate [m]:', 'y-coordinate [m]:']
+        tool_tip_text =  'Enter {}-coordinate of injection well.'
 
     elif cmpnt_type =='TheisReservoir':
-       inj_well_label_text = "Injection well location(s):"
-       arg_labels = ['x-coordinate(s) [m]:', 'y-coordinate(s) [m]:']
-       tool_tip_text = ''.join([
+        inj_well_label_text = "Injection well location(s):"
+        arg_labels = ['x-coordinate(s) [m]:', 'y-coordinate(s) [m]:']
+        tool_tip_text = ''.join([
           'Enter {}-coordinate of each injection well, separated by commas.\n',
           'The number of the provided x- and y-coordinates must be the same.'])
 

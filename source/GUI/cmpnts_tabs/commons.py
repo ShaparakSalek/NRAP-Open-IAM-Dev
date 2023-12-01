@@ -20,7 +20,10 @@ def commons_read_tab_vars(cmpnt_nm, cmpnt_type, parameter_names=None,
     """
     d = {}
     d['type'] = cmpnt_type
-    d['connection'] = componentVars[cmpnt_nm]['connection'].get()
+    try:
+        d['connection'] = componentVars[cmpnt_nm]['connection'].get()
+    except:
+        pass
     if add_aquifer:
         d['AquiferName'] = componentVars[cmpnt_nm]['aquiferName'].get()
     if add_number:

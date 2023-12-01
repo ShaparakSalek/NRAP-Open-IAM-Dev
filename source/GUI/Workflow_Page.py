@@ -118,24 +118,24 @@ def setup_dyn_pars_widgets(
     """
 
     num_of_variables = len(texts.keys())
-    labels = []
-    entry_fields = []
-    buttons = []
 
     # Create widgets
-    labels = [ttk.Label(
-        frame, width=SETUP_LABEL_WIDTH,
-        text=texts[ind][0]) for ind in range(num_of_variables)]
+    labels = [ttk.Label(frame,
+                        width=SETUP_LABEL_WIDTH,
+                        text=texts[ind][0],
+                        name=str('label_'+str(row_ind + ind))) for ind in range(num_of_variables)]
 
-    entry_fields = [tk.Entry(
-        frame, width=SETUP_ENTRY_WIDTH,
-        textvariable=variables[ind]) for ind in range(num_of_variables)]
+    entry_fields = [tk.Entry(frame,
+                             width=SETUP_ENTRY_WIDTH,
+                             textvariable=variables[ind],
+                             name='entry_'+str(row_ind + ind)) for ind in range(num_of_variables)]
 
-    buttons = [ttk.Button(
-        frame, text="Browse",
-        command=lambda ind=ind: controller.choose_file(
-            variables[ind], dialog_title),
-        width=BUTTON_WIDTH) for ind in range(num_of_variables)]
+    buttons = [ttk.Button(frame,
+                          text="Browse",
+                          name='browse_button',
+                          command=lambda ind=ind: controller.choose_file(variables[ind],
+                                                                         dialog_title),
+                          width=BUTTON_WIDTH) for ind in range(num_of_variables)]
 
     for ind in range(num_of_variables):
         # Place widgets
@@ -175,7 +175,7 @@ def disable_time_frame_widgets(frame):
 class Workflow_Page(tk.Frame):
     def __init__(self, parent, controller):
         """
-        Constructor method for OpenIAMPage.
+        Constructor method for WorkflowPage.
         """
         tk.Frame.__init__(self, parent)
         self.toolTip = Pmw.Balloon(parent)
@@ -243,12 +243,11 @@ class Workflow_Page(tk.Frame):
                 else:
                     texts = {0: AQUIFER_DYN_INPUT_SETUP_TEXTS[2],
                              1: AQUIFER_DYN_INPUT_SETUP_TEXTS[3]}
-
             else:  # atmospheric impact component
                 texts = ATM_DYN_INPUT_SETUP_TEXTS
 
             curr_ind = setup_dyn_pars_widgets(
-                controller, row_ind, tabControl.workflowSetupFrame,
+                controller, row_ind, workflowSetupFrame,
                 texts, self.dyn_data_vars, self.toolTip,
                 dialog_title="Choose file with data for dynamic parameter")
 
@@ -268,17 +267,25 @@ class Workflow_Page(tk.Frame):
             component_list = {}
 
             if 'reservoir' in workflow_components:
+                reservoirName.set((reservoirCompName.get()+'1').replace(" ", ""))
                 component_list['reservoir'] = [reservoirName,
                                                reservoirCompName]
 
             if 'wellbore' in workflow_components:
+                wellboreName.set((wellboreCompName.get()+'1').replace(" ", ""))
                 component_list['wellbore'] = [wellboreName, wellboreCompName]
 
             if 'aquifer' in workflow_components:
+                aquiferName.set((aquiferCompName.get()+'1').replace(" ", ""))
                 component_list['aquifer'] = [aquiferName, aquiferCompName]
 
+            wf_type = workflowType.get()
+            if wf_type == 'Area of Review':
+                workflowType.set('AoR')
+
+            component_list[workflowType.get()] = [workflowName, workflowType]
+
             self.controller.add_workflow(conn, aqName, tabControl,
-                                         workflowName, workflowType,
                                          connection_menu, workflowSetupFrame,
                                          controller, dyn_data, controls,
                                          component_list)
@@ -338,6 +345,16 @@ class Workflow_Page(tk.Frame):
                 self.toolTip.unbind(widget)
                 widget.destroy()
 
+            # If not already set, set automation to False except for plots
+            if 'reservoirAuto' not in workflowVars.keys():
+                workflowVars['reservoirAuto'] = False
+            if 'wellboreAuto' not in workflowVars.keys():
+                workflowVars['wellboreAuto'] = False
+            if 'aquiferAuto' not in workflowVars.keys():
+                workflowVars['aquiferAuto'] = False
+            if 'plotAuto' not in workflowVars.keys():
+                workflowVars['plotAuto'] = True
+
             # Format aquifers list
             aquifers = ['aquifer{}'.format(ind) for ind in range(
                 1, componentVars['strata']['Params']['numberOfShaleLayers'].get())]
@@ -349,123 +366,87 @@ class Workflow_Page(tk.Frame):
                 reservoirCompNames = [n for n in COMPONENT_TYPES if n.find('Reservoir') != -1]
                 wellboreCompNames = [n for n in COMPONENT_TYPES if n.find('Wellbore') != -1]
                 aquiferCompNames = [n for n in COMPONENT_TYPES if n.find('Aquifer') != -1]
+                # Add FutureGen2 AZMI to aquifer components
+                aquiferCompNames.append('FutureGen2 AZMI')
 
                 # Set default reservoir, wellbore, and aquifer
                 reservoirCompName.set(reservoirCompNames[1])
                 wellboreCompName.set(wellboreCompNames[3])
                 aquiferCompName.set(aquiferCompNames[2])
-                aquiferName.set(aquifers[0])
+                aquiferLayer.set(aquifers[-1])
 
-                # If not already set, then set automated checkboxes to true
-                if 'reservoirAuto' not in workflowVars.keys():
-                    workflowVars['reservoirAuto'] = tk.BooleanVar()
-                if 'wellboreAuto' not in workflowVars.keys():
-                    workflowVars['wellboreAuto'] = tk.BooleanVar()
-                if 'aquiferAuto' not in workflowVars.keys():
-                    workflowVars['aquiferAuto'] = tk.BooleanVar()
-                if 'plotAuto' not in workflowVars.keys():
-                    workflowVars['plotAuto'] = tk.BooleanVar()
+                # Set component names
+                reservoirName.set((reservoirCompName.get()+'1').replace(" ", ""))
+                wellboreName.set((wellboreCompName.get()+'1').replace(" ", ""))
+                aquiferName.set((aquiferCompName.get()+'1').replace(" ", ""))
 
                 # Create labels and drop-down menus for each component
 
                 # Reservoir
-                reservoirLabel = ttk.Label(workflowSetupFrame, width=SETUP_LABEL_WIDTH, text="Reservoir Type:")
-                reservoirMenu = tk.OptionMenu(workflowSetupFrame, reservoirCompName, *reservoirCompNames)
+                reservoirLabel = ttk.Label(workflowSetupFrame,
+                                           width=SETUP_LABEL_WIDTH,
+                                           text="Reservoir Type:",
+                                           name='reservoir_label')
+                reservoirMenu = tk.OptionMenu(workflowSetupFrame,
+                                              reservoirCompName,
+                                              *reservoirCompNames)
                 reservoirMenu.config(width=SETUP_MENU_WIDTH)
-                reservoirAutoLabel = ttk.Label(workflowSetupFrame, width=24,
-                                               text="Automate Reservoir Setup:")
-                reservoirAuto = ttk.Checkbutton(workflowSetupFrame, variable=workflowVars['reservoirAuto'],
-                                                command=lambda: change_workflow_type_setup(workflowType))
                 self.toolTip.bind(reservoirMenu,
                                   ''.join(['Select which reservoir component ',
                                            'to use in this workflow.']))
-                self.toolTip.bind(reservoirAuto,
-                                  ''.join(['Skip reservoir component setup ',
-                                           'and use default values.']))
                 reservoirLabel.grid(row=1, column=0, pady=5, padx=5, sticky='w')
                 reservoirMenu.grid(row=1, column=1, pady=5, padx=5, sticky='w')
-                reservoirAutoLabel.grid(row=1, column=2, pady=5, padx=5, sticky='w')
-                reservoirAuto.grid(row=1, column=3, pady=5, padx=5, sticky='w')
-
-                reservoirNameLabel = ttk.Label(workflowSetupFrame, width=SETUP_LABEL_WIDTH, text="Reservoir Name:")
-                reservoirName_textField = tk.Entry(
-                    workflowSetupFrame, textvariable=reservoirName,
-                    width=SETUP_ENTRY_WIDTH, validate="key")
-                reservoirName_textField['validatecommand'] = (
-                    reservoirName_textField.register(test_val), '%P', '%d')
-
-                reservoirNameLabel.grid(row=2, column=0, pady=5, padx=5, sticky='w')
-                reservoirName_textField.grid(
-                    row=2, column=1, pady=5, padx=5, sticky='w')
-                self.toolTip.bind(reservoirName_textField,
-                                  'Assure that the reservoir has a unique name.')
 
                 # Wellbore
-                wellboreLabel = ttk.Label(workflowSetupFrame, width=SETUP_LABEL_WIDTH, text="Wellbore Type:")
-                wellboreMenu = tk.OptionMenu(workflowSetupFrame, wellboreCompName, *wellboreCompNames)
+                wellboreLabel = ttk.Label(workflowSetupFrame,
+                                          width=SETUP_LABEL_WIDTH+5,
+                                          text="Wellbore Type:",
+                                          name="wellbore_label")
+                wellboreMenu = tk.OptionMenu(workflowSetupFrame,
+                                             wellboreCompName,
+                                             *wellboreCompNames)
                 wellboreMenu.config(width=SETUP_MENU_WIDTH)
-                wellboreAutoLabel = ttk.Label(workflowSetupFrame, width=24,
-                                              text="Automate Wellbore Setup:")
-                wellboreAuto = ttk.Checkbutton(workflowSetupFrame, variable=workflowVars['wellboreAuto'],
-                                               command=lambda: change_workflow_type_setup(workflowType))
                 self.toolTip.bind(wellboreMenu,
                                   ''.join(['Select which wellbore component ',
                                            'to use in this workflow.']))
-                self.toolTip.bind(wellboreAuto,
-                                  ''.join(['Skip wellbore component setup ',
-                                           'and use default values.']))
-                wellboreLabel.grid(row=3, column=0, pady=5, padx=5, sticky='w')
-                wellboreMenu.grid(row=3, column=1, pady=5, padx=5, sticky='w')
-                wellboreAutoLabel.grid(row=3, column=2, pady=5, padx=5, sticky='w')
-                wellboreAuto.grid(row=3, column=3, pady=5, padx=5, sticky='w')
-
-                wellboreNameLabel = ttk.Label(workflowSetupFrame, width=SETUP_LABEL_WIDTH, text="Wellbore Name:")
-                wellboreName_textField = tk.Entry(
-                    workflowSetupFrame, textvariable=wellboreName,
-                    width=SETUP_ENTRY_WIDTH, validate="key")
-                wellboreName_textField['validatecommand'] = (
-                    wellboreName_textField.register(test_val), '%P', '%d')
-
-                wellboreNameLabel.grid(row=4, column=0, pady=5, padx=5, sticky='w')
-                wellboreName_textField.grid(
-                    row=4, column=1, pady=5, padx=5, sticky='w')
-                self.toolTip.bind(wellboreName_textField,
-                                  'Assure that the wellbore has a unique name.')
+                wellboreLabel.grid(row=2, column=0, pady=5, padx=5, sticky='w')
+                wellboreMenu.grid(row=2, column=1, pady=5, padx=5, sticky='w')
                 self.dyn_data_vars = [StringVar() for val in range(2)]
                 for ind in range(2):
                     self.dyn_data_vars[ind].set(WELL_DYN_INPUT_DEFAULTS[ind])
 
-                curr_ind = add_widgets_for_dyn_pars('well_fault_seal', 5)
+                curr_ind = add_widgets_for_dyn_pars('well_fault_seal', 3)
 
                 # Aquifer
-                aquiferLabel = ttk.Label(workflowSetupFrame, width=SETUP_LABEL_WIDTH, text="Aquifer Type:")
-                aquiferMenu = tk.OptionMenu(workflowSetupFrame, aquiferCompName, *aquiferCompNames)
+                aquiferLabel = ttk.Label(workflowSetupFrame,
+                                         width=SETUP_LABEL_WIDTH,
+                                         text="Aquifer Type:",
+                                         name="aquifer_label")
+                aquiferMenu = tk.OptionMenu(workflowSetupFrame,
+                                            aquiferCompName,
+                                            *aquiferCompNames)
                 aquiferMenu.config(width=SETUP_MENU_WIDTH)
-                aquiferAutoLabel = ttk.Label(workflowSetupFrame, width=24,
-                                             text="Automate Aquifer Setup:")
-                aquiferAuto = ttk.Checkbutton(workflowSetupFrame, variable=workflowVars['aquiferAuto'],
-                                              command=lambda: change_workflow_type_setup(workflowType))
                 self.toolTip.bind(aquiferMenu,
                                   ''.join(['Select which aquifer component ',
                                            'to use in this workflow.']))
-                self.toolTip.bind(aquiferAuto,
-                                  ''.join(['Skip aquifer component setup ',
-                                           'and use default values.']))
                 curr_ind += 1
                 aquiferLabel.grid(row=curr_ind, column=0, pady=5, padx=5, sticky='w')
                 aquiferMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
-                aquiferAutoLabel.grid(row=curr_ind, column=2, pady=5, padx=5, sticky='w')
-                aquiferAuto.grid(row=curr_ind, column=3, pady=5, padx=5, sticky='w')
 
-                aquiferNameLabel = ttk.Label(workflowSetupFrame, width=SETUP_LABEL_WIDTH, text="Aquifer Name:")
-                aquiferNameMenu = tk.OptionMenu(workflowSetupFrame, aquiferName, *aquifers)
-                aquiferNameMenu.config(width=SETUP_MENU_WIDTH)
-                self.toolTip.bind(aquiferNameMenu,
-                                  ''.join(['Select the aquifer name ',
+                aquiferLayerLabel = ttk.Label(workflowSetupFrame,
+                                              width=SETUP_LABEL_WIDTH,
+                                              text="Aquifer Layer:",
+                                              name="aquifer_name_label")
+                aquiferLayerMenu = tk.OptionMenu(workflowSetupFrame,
+                                                 aquiferLayer,
+                                                 *aquifers)
+                aquiferLayerMenu.config(width=SETUP_MENU_WIDTH)
+                self.toolTip.bind(aquiferLayerMenu,
+                                  ''.join(['Select the aquifer layer ',
                                            'to use in this workflow.']))
                 curr_ind += 1
-                aquiferNameLabel.grid(row=curr_ind, column=0, pady=5, padx=15, sticky='w')
-                aquiferNameMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
+                aquiferLayerLabel.grid(row=curr_ind, column=0, pady=5, padx=15, sticky='w')
+                aquiferLayerMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
 
                 if aquiferCompName.get().find('Generic Aquifer') != -1:
                     self.dyn_data_vars.append([StringVar() for val in range(2)])
@@ -477,15 +458,6 @@ class Workflow_Page(tk.Frame):
                         self.dyn_data_vars[ind].set(AQUIFER_DYN_INPUT_DEFAULTS[ind])
 
                 curr_ind = add_widgets_for_dyn_pars('aquifer', curr_ind + 1, num_of_variables=len(self.dyn_data_vars))
-
-                plotAutoLabel = ttk.Label(workflowSetupFrame, width=24, text="Automate Plot Setup:")
-                plotAuto = ttk.Checkbutton(workflowSetupFrame, variable=workflowVars['plotAuto'],
-                                           command=lambda: change_workflow_type_setup(workflowType))
-                self.toolTip.bind(plotAuto,
-                                  ''.join(['Skip plot setup ',
-                                           'and use default values.']))
-                plotAutoLabel.grid(row=curr_ind + 1, column=0, pady=5, padx=5, sticky='w')
-                plotAuto.grid(row=curr_ind + 1, column=1, pady=5, padx=5, sticky='w')
 
                 if workflowType.find('Review') != -1:
                     return
@@ -500,7 +472,7 @@ class Workflow_Page(tk.Frame):
         '''
 
         # Create the notebook to handle all tabs in the Workflow page
-        tabControl = ttk.Notebook(self, width=APP_SIZE[0] - 70)
+        tabControl = ttk.Notebook(self, width=APP_SIZE[0] - 70, name='workflow_notebook')
 
         # # TODO Commented out for now as it's not working quite as needed
         # tabControl = Autoresized_Notebook(self)
@@ -514,8 +486,8 @@ class Workflow_Page(tk.Frame):
 
         # SET UP MODEL TAB AND CONTENT OF SYSTEM MODEL 
 
-        modelTab = ttk.Frame(tabControl, padding=10)
-        modelFrame = ttk.Frame(modelTab, padding=10)
+        modelTab = ttk.Frame(tabControl, padding=10, name='modelTab')
+        modelFrame = ttk.Frame(modelTab, padding=10, name='model_frame')
         tabControl.add(modelTab, text="Model")
         tabControl.pack(expand=1, fill="both", padx=10, pady=5)
 
@@ -525,15 +497,20 @@ class Workflow_Page(tk.Frame):
         modelFrame.grid(row=0, column=0, columnspan=4)
 
         # Simulation name
-        nameFrame = ttk.Frame(modelFrame)
+        nameFrame = ttk.Frame(modelFrame, name='nameFrame')
         nameFrame.grid(row=0, column=0, columnspan=6, sticky='w')
 
-        simName_label = ttk.Label(nameFrame, text='Simulation name:',
-                                  width=MODEL_TAB_LABEL_WIDTH2)
+        simName_label = ttk.Label(nameFrame,
+                                  text='Simulation name:',
+                                  width=MODEL_TAB_LABEL_WIDTH2,
+                                  name='simulationName_label')
         simName_label.grid(row=0, column=0, padx=5, pady=(5, 10), sticky='w')
 
-        simName_txtField = tk.Entry(nameFrame, textvariable=componentVars['simName'],
-                                    validate="key", width=FILE_ENTRY_WIDTH)
+        simName_txtField = tk.Entry(nameFrame,
+                                    textvariable=componentVars['simName'],
+                                    validate="key",
+                                    width=FILE_ENTRY_WIDTH,
+                                    name='simulationName_text')
         simName_txtField.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         simName_txtField['validatecommand'] = (
             simName_txtField.register(test_val), '%P', '%d')
@@ -541,22 +518,28 @@ class Workflow_Page(tk.Frame):
                           'Enter a unique name for the simulation.')
 
         # Model parameters
-        modelParams_label = ttk.Label(
-            modelFrame, text="Model Parameters", font=LABEL_FONT,
-            width=MODEL_TAB_LARGE_LABEL_WIDTH)
+        modelParams_label = ttk.Label(modelFrame,
+                                      text="Model Parameters",
+                                      font=LABEL_FONT,
+                                      width=MODEL_TAB_LARGE_LABEL_WIDTH,
+                                      name='modelParams_label')
         modelParams_label.grid(row=1, column=0, columnspan=2, sticky='w')
 
         # Time for simulation
-        timeFrame = ttk.Frame(modelFrame)
+        timeFrame = ttk.Frame(modelFrame, name='time_frame')
         timeFrame.grid(row=2, column=0, columnspan=6, sticky='w')
 
         # Use end time point and time step
         componentVars['endTime'] = DoubleVar()
         componentVars['endTime'].set(50.0)
-        endTime_label = ttk.Label(timeFrame, text="End time [years]:",
-                                  width=MODEL_TAB_LABEL_WIDTH2)
-        endTime_txtField = tk.Entry(timeFrame, width=MODEL_TAB_ENTRY_WIDTH,
-                                    textvariable=componentVars['endTime'])
+        endTime_label = ttk.Label(timeFrame,
+                                  text="End time [years]:",
+                                  width=MODEL_TAB_LABEL_WIDTH2,
+                                  name='endTime_label')
+        endTime_txtField = tk.Entry(timeFrame,
+                                    width=MODEL_TAB_ENTRY_WIDTH,
+                                    textvariable=componentVars['endTime'],
+                                    name='endTime_text')
         endTime_label.grid(row=0, column=0, pady=5, padx=5, sticky='w')
         endTime_txtField.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         self.toolTip.bind(endTime_txtField, "Enter simulation time.")
@@ -565,10 +548,14 @@ class Workflow_Page(tk.Frame):
 
         componentVars['timeStep'] = DoubleVar()
         componentVars['timeStep'].set(1.0)
-        timeStep_label = ttk.Label(timeFrame, text="Time step [years]:",
-                                   width=MODEL_TAB_LABEL_WIDTH2)
-        timeStep_txtField = tk.Entry(timeFrame, width=MODEL_TAB_ENTRY_WIDTH,
-                                     textvariable=componentVars['timeStep'])
+        timeStep_label = ttk.Label(timeFrame,
+                                   text="Time step [years]:",
+                                   width=MODEL_TAB_LABEL_WIDTH2,
+                                   name='timestep_label')
+        timeStep_txtField = tk.Entry(timeFrame,
+                                     width=MODEL_TAB_ENTRY_WIDTH,
+                                     textvariable=componentVars['timeStep'],
+                                     name='timestep_text')
         timeStep_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
         timeStep_txtField.grid(row=1, column=1, padx=5, pady=5, sticky='w')
         self.toolTip.bind(timeStep_txtField, "Enter time step.")
@@ -578,27 +565,27 @@ class Workflow_Page(tk.Frame):
         # Use manual input or file for time points
         componentVars['timePointsInput'] = BooleanVar()
         componentVars['timePointsInput'].set(0)
-        file_input_label = ttk.Label(
-            timeFrame, text="Use manual or file input for time points:",
-            width=PARAMETER_LABEL_WIDTH + 10)
-        file_input_checkbox = tk.Checkbutton(
-            timeFrame, variable=componentVars['timePointsInput'],
-            command=lambda: disable_time_frame_widgets(timeFrame))
-        file_input_label.grid(
-            row=2, column=0, columnspan=2, pady=5, padx=5, sticky='w')
-        file_input_checkbox.grid(
-            row=2, column=2, pady=5, padx=5, sticky='w')
-        self.toolTip.bind(
-            file_input_checkbox,
-            'Check to use manual or file input for time points.')
+        file_input_label = ttk.Label(timeFrame,
+                                     text="Use manual or file input for time points:",
+                                     width=PARAMETER_LABEL_WIDTH + 10,
+                                     name="fileinput_label")
+        file_input_checkbox = tk.Checkbutton(timeFrame,
+                                             variable=componentVars['timePointsInput'],
+                                             command=lambda: disable_time_frame_widgets(timeFrame),
+                                             name="file_input_check")
+        file_input_label.grid(row=2, column=0, columnspan=2, pady=5, padx=5, sticky='w')
+        file_input_checkbox.grid(row=2, column=2, pady=5, padx=5, sticky='w')
+        self.toolTip.bind(file_input_checkbox, 'Check to use manual or file input for time points.')
         timeFrame.fileinput_label = file_input_label
         timeFrame.fileinput_checkbox = file_input_checkbox
         timeFrame.checkbox_variable = componentVars['timePointsInput']
 
         componentVars['timePoints'] = StringVar()
         componentVars['timePoints'].set('')
-        timePoints_label = ttk.Label(timeFrame, text="Time points [years]:",
-                                     width=MODEL_TAB_LABEL_WIDTH2)
+        timePoints_label = ttk.Label(timeFrame,
+                                     text="Time points [years]:",
+                                     width=MODEL_TAB_LABEL_WIDTH2,
+                                     name="timePoints_label")
         timePoints_label.grid(row=3, column=0, pady=5, padx=5, sticky='w')
         timeFrame.timepoints_label = timePoints_label
         add_file_input_widgets(
@@ -612,18 +599,20 @@ class Workflow_Page(tk.Frame):
         self.controller.timeFrame = timeFrame
 
         # Set type of analysis
-        self.controller.analysisFrame = tk.Frame(modelFrame)
+        self.controller.analysisFrame = tk.Frame(modelFrame, name="analysis_frame")
         self.controller.analysisFrame.grid(row=3, column=0, columnspan=6, sticky='we')
 
         componentVars['analysis']['type'] = StringVar()
         componentVars['analysis']['type'].set(ANALYSIS_TYPES[0])
-        analysis_label = ttk.Label(
-            self.controller.analysisFrame, text="Analysis:", width=MODEL_TAB_LABEL_WIDTH2)
-        analysis_menu = tk.OptionMenu(
-            self.controller.analysisFrame,
-            componentVars['analysis']['type'], *ANALYSIS_TYPES,
-            command=lambda _: self.controller.set_analysis_type(
-                componentVars['analysis']['type'].get()))
+        analysis_label = ttk.Label(self.controller.analysisFrame,
+                                   text="Analysis:",
+                                   width=MODEL_TAB_LABEL_WIDTH2,
+                                   name="analysis_label")
+        analysis_menu = tk.OptionMenu(self.controller.analysisFrame,
+                                      componentVars['analysis']['type'],
+                                      *ANALYSIS_TYPES,
+                                      command=lambda _: self.controller.set_analysis_type(
+                                          componentVars['analysis']['type'].get()))
         analysis_menu.config(width=MODEL_TAB_MENU_WIDTH)
         analysis_label.grid(row=0, column=0, pady=5, padx=5, sticky='w')
         analysis_menu.grid(row=0, column=1, pady=5, padx=5, sticky='w')
@@ -631,15 +620,18 @@ class Workflow_Page(tk.Frame):
                           'Select type of analysis to be used for simulation.')
 
         # Set type of logging for simulation
-        loggingFrame = ttk.Frame(modelFrame)
+        loggingFrame = ttk.Frame(modelFrame, name='logging_frame')
         loggingFrame.grid(row=4, column=0, columnspan=6, sticky='w')
 
         componentVars['logging'] = StringVar()
         componentVars['logging'].set(LOGGING_TYPES[1])
-        logging_label = ttk.Label(
-            loggingFrame, text="Logging:", width=MODEL_TAB_LABEL_WIDTH2)
-        logging_Menu = tk.OptionMenu(
-            loggingFrame, componentVars['logging'], *LOGGING_TYPES)
+        logging_label = ttk.Label(loggingFrame,
+                                  text="Logging:",
+                                  width=MODEL_TAB_LABEL_WIDTH2,
+                                  name='logging_label')
+        logging_Menu = tk.OptionMenu(loggingFrame,
+                                     componentVars['logging'],
+                                     *LOGGING_TYPES)
         logging_Menu.config(width=MODEL_TAB_MENU_WIDTH)
         logging_label.grid(row=0, column=0, pady=5, padx=5, sticky='w')
         logging_Menu.grid(row=0, column=1, pady=5, padx=5, sticky='w')
@@ -655,17 +647,21 @@ class Workflow_Page(tk.Frame):
         except:
             componentVars['outputDirectory'].set('~Documents')
 
-        outputFrame1 = ttk.Frame(modelFrame)
+        outputFrame1 = ttk.Frame(modelFrame, name='output_dir')
         outputFrame1.grid(row=5, column=0, columnspan=6, sticky='w')
 
         outputDirectory_label = ttk.Label(
             outputFrame1, text="Output directory:", width=MODEL_TAB_LABEL_WIDTH2)
-        outputDirectory_txtField = tk.Entry(outputFrame1, width=FILE_ENTRY_WIDTH,
-                                            textvariable=componentVars['outputDirectory'])
-        outputDirectory_browse = ttk.Button(
-            outputFrame1, width=BUTTON_WIDTH, text="Browse",
-            command=lambda: self.controller.choose_output_dir(
-                componentVars['outputDirectory']))
+        outputDirectory_txtField = tk.Entry(outputFrame1,
+                                            width=FILE_ENTRY_WIDTH,
+                                            textvariable=componentVars['outputDirectory'],
+                                            name="outputdir_text")
+        outputDirectory_browse = ttk.Button(outputFrame1,
+                                            width=BUTTON_WIDTH,
+                                            text="Browse",
+                                            command=lambda: self.controller.choose_output_dir(
+                                                componentVars['outputDirectory']),
+                                            name='outputdir_button')
         outputDirectory_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
         outputDirectory_txtField.grid(
             row=1, column=1, columnspan=3, pady=5, padx=5, sticky='w')
@@ -677,21 +673,21 @@ class Workflow_Page(tk.Frame):
                           'Open file browser and select output directory.')
 
         # Create frame containing setup of output files
-        outputFrame2 = ttk.Frame(modelFrame)
+        outputFrame2 = ttk.Frame(modelFrame, name='output_files')
         outputFrame2.grid(row=6, column=0, columnspan=6, sticky='w')
 
         # Create variables and widgets relevant to generating output files
         componentVars['outputDirectoryGenerate'] = BooleanVar()
         componentVars['outputDirectoryGenerate'].set(0)
-        outputDirectoryGenerate_label = ttk.Label(
-            outputFrame2, text="Generate output directory:",
-            width=MODEL_TAB_LABEL_WIDTH1)
-        outputDirectoryGenerate_checkbox = tk.Checkbutton(
-            outputFrame2, variable=componentVars['outputDirectoryGenerate'])
-        outputDirectoryGenerate_label.grid(
-            row=2, column=0, pady=5, padx=5, sticky='w')
-        outputDirectoryGenerate_checkbox.grid(
-            row=2, column=1, pady=5, padx=5, sticky='w')
+        outputDirectoryGenerate_label = ttk.Label(outputFrame2,
+                                                  text="Generate output directory:",
+                                                  width=MODEL_TAB_LABEL_WIDTH1,
+                                                  name='make_outputdir_label')
+        outputDirectoryGenerate_checkbox = tk.Checkbutton(outputFrame2,
+                                                          variable=componentVars['outputDirectoryGenerate'],
+                                                          name="make_outputdir_check")
+        outputDirectoryGenerate_label.grid(row=2, column=0, pady=5, padx=5, sticky='w')
+        outputDirectoryGenerate_checkbox.grid(row=2, column=1, pady=5, padx=5, sticky='w')
         self.toolTip.bind(outputDirectoryGenerate_checkbox,
                           ''.join(['Check to generate a directory name augmented with ',
                                    'timestamp for outputs to be saved.']))
@@ -699,14 +695,19 @@ class Workflow_Page(tk.Frame):
         # Set orientation for output (column-wise or row-wise)
         self.controller.OutputType = BooleanVar()
         self.controller.OutputType.set(True)
-        outputType_label = ttk.Label(
-            outputFrame2, text="Output orientation:")
-        outputType_Selection1 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.OutputType,
-            text="Column-wise", value=True)
-        outputType_Selection2 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.OutputType,
-            text="Row-wise", value=False)
+        outputType_label = ttk.Label(outputFrame2,
+                                     text="Output orientation:",
+                                     name='orientation_label')
+        outputType_Selection1 = tk.Radiobutton(outputFrame2,
+                                               variable=self.controller.OutputType,
+                                               text="Column-wise",
+                                               value=True,
+                                               name='column_orientation_check')
+        outputType_Selection2 = tk.Radiobutton(outputFrame2,
+                                               variable=self.controller.OutputType,
+                                               text="Row-wise",
+                                               value=False,
+                                               name='row_orientation_check')
         self.toolTip.bind(outputType_Selection1, 'Select format of output files.')
         self.toolTip.bind(outputType_Selection2, 'Select format of output files.')
 
@@ -717,14 +718,21 @@ class Workflow_Page(tk.Frame):
         # Determine whether or not to output files from simulation
         self.controller.GenerateOutputFiles = BooleanVar()
         self.controller.GenerateOutputFiles.set(True)
-        GenerateOutputFiles_label = ttk.Label(
-            outputFrame2, text="Generate Output Files?")
-        GenerateOutputFiles_Selection1 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.GenerateOutputFiles,
-            text="Yes", value=True, command=buttons_state)
-        GenerateOutputFiles_Selection2 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.GenerateOutputFiles,
-            text="No", value=False, command=buttons_state)
+        GenerateOutputFiles_label = ttk.Label(outputFrame2,
+                                              text="Generate Output Files?",
+                                              name="gen_outputfiles_label")
+        GenerateOutputFiles_Selection1 = tk.Radiobutton(outputFrame2,
+                                                        variable=self.controller.GenerateOutputFiles,
+                                                        text="Yes",
+                                                        value=True,
+                                                        command=buttons_state,
+                                                        name="gen_outputfiles_yes_check")
+        GenerateOutputFiles_Selection2 = tk.Radiobutton(outputFrame2,
+                                                        variable=self.controller.GenerateOutputFiles,
+                                                        text="No",
+                                                        value=False,
+                                                        command=buttons_state,
+                                                        name="gen_outputfile_no_check")
         self.toolTip.bind(GenerateOutputFiles_Selection1, 'Generate output files.')
         self.toolTip.bind(GenerateOutputFiles_Selection2, 'Do not generate output files.')
 
@@ -735,14 +743,21 @@ class Workflow_Page(tk.Frame):
         # Determine whether to output a combined output file (all data from sim in one file)
         self.controller.GenerateCombOutputFile = BooleanVar()
         self.controller.GenerateCombOutputFile.set(True)
-        GenerateCombOutputFile_label = ttk.Label(
-            outputFrame2, text="Generate a Combined Output File?")
-        GenerateCombOutputFile_Selection1 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.GenerateCombOutputFile,
-            text="Yes", value=True, state='active')
-        GenerateCombOutputFile_Selection2 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.GenerateCombOutputFile,
-            text="No", value=False, state='active')
+        GenerateCombOutputFile_label = ttk.Label(outputFrame2,
+                                                 text="Generate a Combined Output File?",
+                                                 name="gen_combofile_label")
+        GenerateCombOutputFile_Selection1 = tk.Radiobutton(outputFrame2,
+                                                           variable=self.controller.GenerateCombOutputFile,
+                                                           text="Yes",
+                                                           value=True,
+                                                           state='active',
+                                                           name="gen_combofile_yes_check")
+        GenerateCombOutputFile_Selection2 = tk.Radiobutton(outputFrame2,
+                                                           variable=self.controller.GenerateCombOutputFile,
+                                                           text="No",
+                                                           value=False,
+                                                           state='active',
+                                                           name="gen_combofile_no_check")
         self.toolTip.bind(GenerateCombOutputFile_Selection1,
                           'Generate a combined output file.')
         self.toolTip.bind(GenerateCombOutputFile_Selection2,
@@ -755,14 +770,21 @@ class Workflow_Page(tk.Frame):
         # Determine whether to generate a statistics file from simulation
         self.controller.GenerateStatFiles = BooleanVar()
         self.controller.GenerateStatFiles.set(True)
-        GenerateStatFiles_label = ttk.Label(
-            outputFrame2, text="Generate a Statistics File?")
-        GenerateStatFiles_Selection1 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.GenerateStatFiles,
-            text="Yes", value=True, state='active')
-        GenerateStatFiles_Selection2 = tk.Radiobutton(
-            outputFrame2, variable=self.controller.GenerateStatFiles,
-            text="No", value=False, state='active')
+        GenerateStatFiles_label = ttk.Label(outputFrame2,
+                                            text="Generate a Statistics File?",
+                                            name="gen_statsfile_label")
+        GenerateStatFiles_Selection1 = tk.Radiobutton(outputFrame2,
+                                                      variable=self.controller.GenerateStatFiles,
+                                                      text="Yes",
+                                                      value=True,
+                                                      state='active',
+                                                      name="gen_statsfile_yes_radio")
+        GenerateStatFiles_Selection2 = tk.Radiobutton(outputFrame2,
+                                                      variable=self.controller.GenerateStatFiles,
+                                                      text="No",
+                                                      value=False,
+                                                      state='active',
+                                                      name="gen_statsfile_no_radio")
         self.toolTip.bind(GenerateStatFiles_Selection1, 'Generate a statistics file.')
         self.toolTip.bind(GenerateStatFiles_Selection2, 'Do not generate a statistics file.')
 
@@ -776,44 +798,46 @@ class Workflow_Page(tk.Frame):
                            GenerateStatFiles_Selection2]
 
         # Provide instructions on where to go after system setup
-        descriptionFrame = ttk.Frame(modelFrame)
+        descriptionFrame = ttk.Frame(modelFrame, name='nextpage1_frame')
         descriptionFrame.grid(row=7, column=0, columnspan=7,
                               sticky='w', pady=(20, 5))
 
-        descriptionLabel = ttk.Label(
-            descriptionFrame,
-            text=''.join(['After entering system model parameters',
-                          ' proceed to Stratigraphy.']),
-            font=INSTRUCTIONS_FONT)
+        descriptionLabel = ttk.Label(descriptionFrame,
+                                     text=''.join(['After entering system model parameters',
+                                                   ' proceed to Stratigraphy.']),
+                                     font=INSTRUCTIONS_FONT,
+                                     name='nextpage1_label')
         descriptionLabel.grid(row=0, column=0, columnspan=6,
                               padx=5, pady=15, sticky='w')
 
         # Set next button to go to Stratigraphy
-        nextButton = ttk.Button(
-            descriptionFrame, text='Stratigraphy',
-            width=BUTTON_WIDTH, command=lambda: tabControl.select(
-                '.!frame.!openiam_page.!notebook.!frame2'))
+        nextButton = ttk.Button(descriptionFrame,
+                                text='Stratigraphy',
+                                width=BUTTON_WIDTH,
+                                command=lambda: tabControl.select(
+                                    '.!frame.!workflow_page.workflow_notebook.stratigraphy_frame'),
+                                name="nextpage1_button")
         nextButton.grid(row=0, column=6, padx=5, pady=15, sticky='w')
         self.toolTip.bind(
             nextButton,
             'Switch to the Stratigraphy tab, the second step of the setup.')
 
         # SET UP STRATIGRAPHY TAB
-        new_tab = ttk.Frame(tabControl, padding=10)
+        new_tab = ttk.Frame(tabControl, padding=10, name='stratigraphy_tab')
 
-        self.controller.strata_scanv = tk.Canvas(new_tab, relief=tk.SUNKEN)
+        self.controller.strata_scanv = tk.Canvas(new_tab, relief=tk.SUNKEN, name="strata_canvas")
         self.controller.strata_scanv.config(width=TAB_SIZE[0], height=TAB_SIZE[1])
         self.controller.strata_scanv.config(scrollregion=(0, 0, 0, 0))
         self.controller.strata_scanv.config(highlightthickness=0)
 
-        sybar = tk.Scrollbar(new_tab, orient='vertical')
+        sybar = tk.Scrollbar(new_tab, orient='vertical', name="strata_scrollbar")
         sybar.config(command=self.controller.strata_scanv.yview)
 
         self.controller.strata_scanv.config(yscrollcommand=sybar.set)
         sybar.pack(side=tk.RIGHT, fill=tk.Y)
         self.controller.strata_scanv.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-        stratigraphyTab = tk.Frame(self.controller.strata_scanv)
+        stratigraphyTab = tk.Frame(self.controller.strata_scanv, name="stratigraphy_tab")
         stratigraphyTab.grid(row=0, column=0, columnspan=10)
 
         self.controller.strata_scanv.create_window((10, 0), window=stratigraphyTab, anchor='nw')
@@ -824,15 +848,41 @@ class Workflow_Page(tk.Frame):
         # Add all widgets for stratigraphy setup
         strata_tab.add_widgets(self.controller, stratigraphyTab, self.toolTip)
 
+        # # Go to Workflow tab
+        # descriptionFrame2 = ttk.Frame(stratigraphyTab, name="nextpage2_frame")
+        # descriptionFrame2.grid(row=1, column=0, columnspan=10,
+        #                       sticky='w', pady=(20, 5))
+        #
+        # descriptionLabel2 = ttk.Label(descriptionFrame2,
+        #                               text=''.join(['After entering stratigraphy parameters',
+        #                                             ' proceed to Add Workflows.']),
+        #                               font=INSTRUCTIONS_FONT,
+        #                               name="nextpage2_label")
+        # descriptionLabel2.grid(row=0, column=0, columnspan=6,
+        #                       padx=5, pady=15, sticky='w')
+        #
+        # nextButton2 = ttk.Button(descriptionFrame2,
+        #                          text='Add Workflow',
+        #                          width=BUTTON_WIDTH,
+        #                          command=lambda: tabControl.select(
+        #                              '.!frame.!workflow_page.workflow_notebook.workflow_frame'),
+        #                          name='nextpage2_button')
+        # nextButton2.grid(row=0, column=6, padx=5, pady=15, sticky='w')
+        # self.toolTip.bind(
+        #     nextButton2,
+        #     'Switch to the Add Workflow tab, the third step of the setup.')
+
         # SET UP WORKFLOW TAB
-        addWorkflowTab = ttk.Frame(tabControl, padding=10)
+        addWorkflowTab = ttk.Frame(tabControl, padding=10, name='workflow_tab')
         tabControl.add(addWorkflowTab, text="Add Workflow")
         tabControl.pack(expand=1, fill="both")
-        addWorkflowFrame = ttk.Frame(addWorkflowTab, padding=10)
+        addWorkflowFrame = ttk.Frame(addWorkflowTab, padding=10, name='addWorkflow_frame')
         addWorkflowFrame.pack(expand=1, fill="both", anchor=tk.NW)
 
-        addWorkflow_label = ttk.Label(
-            addWorkflowFrame, text="Add Workflow", font=LABEL_FONT)
+        addWorkflow_label = ttk.Label(addWorkflowFrame,
+                                      text="Add Workflow",
+                                      font=LABEL_FONT,
+                                      name="addWorkflow_label")
         addWorkflow_label.grid(row=0, column=0, sticky='w')
 
         # Set up variables necessary to capture workflow design
@@ -843,82 +893,74 @@ class Workflow_Page(tk.Frame):
         reservoirName = StringVar()
         wellboreName = StringVar()
         aquiferName = StringVar()
-        workflowName.set('')
-
-        # Set workflow name
-        workflowNameFrame = ttk.Frame(addWorkflowFrame)
-        workflowNameFrame.grid(row=1, column=0, columnspan=2, sticky='w')
-        workflowName_label = ttk.Label(
-            workflowNameFrame, width=SETUP_LABEL_WIDTH, text="Workflow name:")
-        self.controller.workflowName_textField = tk.Entry(
-            workflowNameFrame, textvariable=workflowName,
-            width=SETUP_ENTRY_WIDTH, validate="key")
-        self.controller.workflowName_textField['validatecommand'] = (
-            self.controller.workflowName_textField.register(test_val), '%P', '%d')
-
-        workflowName_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
-        self.controller.workflowName_textField.grid(
-            row=1, column=1, pady=5, padx=5, sticky='w')
-        self.toolTip.bind(self.controller.workflowName_textField,
-                          'Assure that the workflow has a unique name.')
+        aquiferLayer = StringVar()
+        workflowName.set('Workflow')
 
         # Provide list of options for workflow selection
         self.controller.workflowType = StringVar()
         self.controller.workflowType.set(WORKFLOW_TYPES[0])
-        workflowType_label = ttk.Label(
-            workflowNameFrame, width=SETUP_LABEL_WIDTH, text="Workflow type:")
-        workflowType_Menu = tk.OptionMenu(
-            workflowNameFrame, self.controller.workflowType,
-            *WORKFLOW_TYPES, command=change_workflow_type_setup)
+        workflowType_label = ttk.Label(addWorkflowFrame,
+                                       width=SETUP_LABEL_WIDTH,
+                                       text="Workflow type:",
+                                       name="workflowType_label")
+        workflowType_Menu = tk.OptionMenu(addWorkflowFrame,
+                                          self.controller.workflowType,
+                                          *WORKFLOW_TYPES,
+                                          command=change_workflow_type_setup)
 
         workflowType_Menu.config(width=SETUP_MENU_WIDTH)
-        self.toolTip.bind(
-            workflowType_Menu,
-            'Select the type of workflow you would like to use.')
-        workflowType_label.grid(row=2, column=0, pady=5, padx=5, sticky='w')
-        workflowType_Menu.grid(row=2, column=1, pady=5, padx=5, sticky='w')
+        self.toolTip.bind(workflowType_Menu,
+                          'Select the type of workflow you would like to use.')
+        workflowType_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
+        workflowType_Menu.grid(row=1, column=1, pady=5, padx=5, sticky='w')
 
         # Try adding dummy setup for connection menu for legacy purposes
         # and ease of code integration with existing menus
-        connection_menu = tk.OptionMenu(
-            addWorkflowFrame, self.controller.connection, 'Auto')
+        connection_menu = tk.OptionMenu(addWorkflowFrame,
+                                        self.controller.connection,
+                                        'Auto')
         tabControl.connection_menu = connection_menu
         tabControl.connection_menu.connection = self.controller.connection
 
         # Set up frame to hold workflow-specific widgets
-        workflowSetupFrame = ttk.Frame(addWorkflowFrame)
+        workflowSetupFrame = ttk.Frame(addWorkflowFrame, name='workflowSetup_frame')
         tabControl.workflowSetupFrame = workflowSetupFrame
         workflowSetupFrame.grid(
-            row=3, column=0, columnspan=3, sticky='w')
+            row=2, column=0, columnspan=3, sticky='w')
 
         # Add button to confirm workflow and set up widgets
-        addWorkflowButton = ttk.Button(
-            addWorkflowFrame, text="Add Workflow", width=BUTTON_WIDTH,
-            command=lambda: [evaluate_workflow(
-                self.controller.connection, aquiferName, tabControl,
-                workflowName, self.controller.workflowType, connection_menu,
-                workflowSetupFrame, self.controller, self.dyn_data_vars, {}), addWorkflowButton.state(["disabled"])])
-        addWorkflowButton.grid(row=1, column=2, pady=2, padx=25, sticky='nw')
+        addWorkflowButton = ttk.Button(addWorkflowFrame,
+                                       text="Add Workflow",
+                                       width=BUTTON_WIDTH,
+                                       command=lambda: [evaluate_workflow(
+                                           self.controller.connection, aquiferLayer, tabControl,
+                                           workflowName, self.controller.workflowType, connection_menu,
+                                           workflowSetupFrame, self.controller, self.dyn_data_vars, {}),
+                                           addWorkflowButton.state(["disabled"])],
+                                       name="addWorkflow_button")
+        addWorkflowButton.grid(row=1, column=2, pady=5, padx=5, sticky='nw')
         self.toolTip.bind(
             addWorkflowButton,
-            ''.join(['After workflow is selected click Add Workflow',
+            ''.join(['After workflow is selected, click Add Workflow',
                      ' and switch to the component tabs for  setup.']))
 
-        textDescription = ttk.Label(
-            addWorkflowTab, font=INSTRUCTIONS_FONT,
-            text=''.join([
-                'Add and set up the workflow to be simulated, then ',
-                'save the model \n and return to Dashboard to run',
-                'the simulation. ']))
+        textDescription = ttk.Label(addWorkflowTab,
+                                    font=INSTRUCTIONS_FONT,
+                                    text=''.join([
+                                        'Add and set up the workflow to be simulated, then ',
+                                        'save the model \n and return to Dashboard to run',
+                                        'the simulation. ']),
+                                    name="addWorkflow_instructions")
         textDescription.pack(anchor=tk.SW, pady=10, padx=5)
 
-        saveButton = ttk.Button(
-            self, text="Save", width=BUTTON_WIDTH,
-            command=lambda: self.controller.populate_dictionary())
+        saveButton = ttk.Button(self, text="Save", width=BUTTON_WIDTH,
+                                command=lambda: self.controller.populate_dictionary(),
+                                name="save_button")
         saveButton.pack(side='left', padx=10, pady=5)
 
         cancelButton = ttk.Button(self, text="Return to Dashboard",
-                                  command=show_dashboard, width=BUTTON_WIDTH)
+                                  command=show_dashboard, width=BUTTON_WIDTH,
+                                  name="cancel_button")
         cancelButton.pack(side='right', padx=10, pady=5)
 
         for key in componentVars:

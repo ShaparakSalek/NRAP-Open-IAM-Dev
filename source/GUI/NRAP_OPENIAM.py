@@ -192,6 +192,28 @@ class NRAPOpenIAM(tk.Tk):
         d['ModelParams']['GenerateCombOutputFile'] = self.GenerateCombOutputFile.get()
         d['ModelParams']['GenerateStatFiles'] = self.GenerateStatFiles.get()
 
+        if 'Workflow' in componentChoices:
+            # Remove Workflow from components
+            d['ModelParams']['Components'] = d['ModelParams']['Components'][:-1]
+
+            # Convert workflow parameters to options
+            d['Workflow']['Options'] = d['Workflow'].pop('Parameters')
+
+            # Disable automation of component setup
+            d['Workflow']['Options']['AutomateResCompSetup'] = False
+            d['Workflow']['Options']['AutomateWellCompSetup'] = False
+            d['Workflow']['Options']['AutomateAqCompSetup'] = False
+
+            # Enable automatic plot setup
+            d['Workflow']['Options']['AutomatePlotsSetup'] = True
+
+            if d['Workflow']['type'].get() == 'AoR':
+                d['Workflow']['Options']['ReservoirComponentType'] = componentChoices[0]
+                d['Workflow']['Options']['WellboreComponentType'] = componentChoices[1]
+                d['Workflow']['Options']['AquiferComponentType'] = componentChoices[2]
+
+
+
         try:
             with open(fileName, 'wb') as outPutFile:
                 pickle.dump(d, outPutFile, pickle.HIGHEST_PROTOCOL)
@@ -1042,10 +1064,13 @@ class NRAPOpenIAM(tk.Tk):
             "Click Yes to confirm removal or No to keep workflow.")
 
         if MsgBox == 'yes':
-            tabControl.select('.!frame.!workflow_page.!notebook.!frame3')
+            tabControl.select('.!frame.!workflow_page.workflow_notebook.workflow_tab')
             self.connection.set(connections[0])
             self.workflowType.set(WORKFLOW_TYPES[0])
-            tabControl.nametowidget('.!frame.!workflow_page.!notebook.!frame3.!frame').winfo_children()[-1].state(["!disabled"])
+            self.component_list={}
+            tabControl.nametowidget(
+                '.!frame.!workflow_page.workflow_notebook.workflow_tab.addWorkflow_frame') \
+                .winfo_children()[-1].state(["!disabled"])
 
             for tab in self.workflow_tabs:
                 self.remove_component(tab, tabControl, connection_menu, menu_type='workflow')
@@ -1075,8 +1100,11 @@ class NRAPOpenIAM(tk.Tk):
 
             cmpnt_to_be_removed = componentChoices.pop(index)
             componentTypeDictionary.pop(index)
-            connectionsDictionary.pop(index)
-            connections.pop(index+1)
+            if menu_type == 'workflow' and len(connectionsDictionary)==0:
+                pass
+            else:
+                connectionsDictionary.pop(index)
+                connections.pop(index+1)
 
             # Remove component data from dictionary d if data is present
             d.pop(cmpnt_to_be_removed, 'No component found')
@@ -1100,12 +1128,7 @@ class NRAPOpenIAM(tk.Tk):
 
                 tabControl.forget(tab)
             elif menu_type == 'workflow':
-                for widget in tabControl.nametowidget(
-                        '.!frame.!workflow_page.!notebook.!frame3.!frame.!frame2').winfo_children():
-                    widget.destroy()
-
                 tabControl.forget(tab)
-
         else:
             return
 
@@ -1167,17 +1190,25 @@ class NRAPOpenIAM(tk.Tk):
         """
 
         toolTip = Pmw.Balloon(self)
-        newTab = ttk.Frame(tabControl, padding=10)
-        if menu_type == 'workflow':
-            self.workflow_tabs.append(newTab)
         componentName = StringVar()
         componentType = StringVar()
         aquiferName = StringVar()
 
         try:
+            componentName.set(compName.get())
+        except:
+            componentName.set(compName)
+
+        newTab = ttk.Frame(tabControl,
+                           padding=10,
+                           name=componentName.get().lower())
+
+        if menu_type == 'workflow':
+            self.workflow_tabs.append(newTab)
+
+        try:
             dyn_data_vars = []
             tabControl.add(newTab, text=compName.get())
-            componentName.set(compName.get())
             componentType.set(compType.get())
             connection_menu.connection.set(conn.get())
 
@@ -1187,8 +1218,6 @@ class NRAPOpenIAM(tk.Tk):
             aquiferName.set(aqName.get())
         except:
             dyn_data_vars = []
-            tabControl.add(newTab, text=compName)
-            componentName.set(compName)
             componentType.set(compType)
             connection_menu.connection.set(conn)
 
@@ -1202,12 +1231,12 @@ class NRAPOpenIAM(tk.Tk):
                     dyn_data_vars[-1].set(dyn_data_el[:-2])
             aquiferName.set(aqName)
 
-        scanv = tk.Canvas(newTab, relief=tk.SUNKEN)
+        scanv = tk.Canvas(newTab, relief=tk.SUNKEN, name=componentName.get().lower()+'_canvas')
         scanv.config(width=TAB_SIZE[0], height=TAB_SIZE[1])
         scanv.config(scrollregion=self.get_scroll_region(componentType.get()))
         scanv.config(highlightthickness=0)
 
-        sybar = tk.Scrollbar(newTab, orient='vertical')
+        sybar = tk.Scrollbar(newTab, orient='vertical', name=componentName.get().lower()+'_scrollbar')
 
         sybar.config(command=scanv.yview)
 
@@ -1215,7 +1244,7 @@ class NRAPOpenIAM(tk.Tk):
         sybar.pack(side=tk.RIGHT, fill=tk.Y)
         scanv.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-        tabType = tk.Frame(scanv)
+        tabType = tk.Frame(scanv, name=componentName.get().lower()+'_tabType')
         tabControl.pack(expand=1, fill="both")
         tabType.grid(row=0, column=0, columnspan=10)
 
@@ -1226,33 +1255,34 @@ class NRAPOpenIAM(tk.Tk):
         # all of them
         last_row = 60
 
-        buttonsFrame = tk.Frame(tabType)
+        buttonsFrame = tk.Frame(tabType, name=componentName.get().lower()+'_buttonsFrame')
         buttonsFrame.grid(row=last_row, column=0, columnspan=4, pady=20, sticky='w')
 
         if menu_type == 'comp':
-            removeComponentButton = ttk.Button(
-                buttonsFrame, text='Remove this Component',
-                command=lambda: controller.remove_component(
-                    newTab, tabControl, connection_menu))
+            removeComponentButton = ttk.Button(buttonsFrame, text='Remove this Component',
+                                               command=lambda: controller.remove_component(newTab,
+                                                                                           tabControl,
+                                                                                           connection_menu),
+                                               name=componentName.get().lower()+'_remove_button')
             removeComponentButton.grid(row=last_row, column=0)
             toolTip.bind(
                 removeComponentButton,
                 'Remove current component model and return to Add Components tab.')
         elif menu_type == 'workflow':
-            removeWorkflowButton = ttk.Button(
-                buttonsFrame, text='Remove Workflow',
-                command=lambda: controller.remove_workflow(
-                    tabControl, connection_menu))
+            removeWorkflowButton = ttk.Button(buttonsFrame, text='Remove Workflow',
+                                              command=lambda: controller.remove_workflow(tabControl,
+                                                                                         connection_menu),
+                                              name=componentName.get().lower()+'_remove_workflow_button')
             removeWorkflowButton.grid(row=last_row, column=0)
             toolTip.bind(
                 removeWorkflowButton,
                 'Remove all components of workflow and return to Add Workflow tab.')
 
         if menu_type == 'comp':
-            addNextComponentButton = ttk.Button(
-                buttonsFrame, text='Add another Component',
-                command=lambda: tabControl.select(
-                    '.!frame.!openiam_page.!notebook.!frame3'))
+            addNextComponentButton = ttk.Button(buttonsFrame, text='Add another Component',
+                                                command=lambda: tabControl.select(
+                                                    '.!frame.!openiam_page.!notebook.!frame3'),
+                                                name=componentName.get().lower()+'_add_component_button')
             addNextComponentButton.grid(row=last_row, column=2, padx=30)
             toolTip.bind(addNextComponentButton, 'Return to Add Components tab.')
 
@@ -1293,6 +1323,10 @@ class NRAPOpenIAM(tk.Tk):
             self.connection.set(connections[0])
             self.componentType.set(COMPONENT_TYPES[0])
             self.componentName_textField.delete(0, tk.END)
+
+            if menu_type == 'workflow':
+                tabControl = self.disable_workflow_options(tabControl, componentName)
+
             tabControl.select(newTab)
         else:
             # If there is a component with the same name, show error message
@@ -1302,10 +1336,10 @@ class NRAPOpenIAM(tk.Tk):
                 "Error", "You must enter a unique name for each component model.")
             return
 
-    def add_workflow(self, conn, aqName, tabControl, workflowName,
-                      workflowType, connection_menu,
-                      workflowSetupFrame, controller, dyn_data,
-                      controls, component_list):
+    def add_workflow(self, conn, aqName, tabControl,
+                     connection_menu, workflowSetupFrame,
+                     controller, dyn_data,
+                     controls, component_list):
         """
         Add component models from workflow.
 
@@ -1315,9 +1349,11 @@ class NRAPOpenIAM(tk.Tk):
 
         #add workflow list to track tabs
         self.workflow_tabs=[]
+        self.get_connection_labels = []
+        self.component_list = component_list
 
         #create tabs for workflow based on needed components
-        if 'reservoir' in component_list.keys() and workflowVars['reservoirAuto'].get() != True:
+        if 'reservoir' in component_list.keys():
             compName = component_list['reservoir'][0]
             compType = component_list['reservoir'][1]
             self.add_component(conn, aqName, tabControl, compName, compType,
@@ -1325,7 +1361,34 @@ class NRAPOpenIAM(tk.Tk):
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-        if 'wellbore' in component_list.keys() and workflowVars['wellboreAuto'].get() != True:
+            if 'AoR' in component_list.keys():
+                get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                                                      + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
+                                                      + '.' + compName.get().lower() + '_tabType').winfo_children()[-1].winfo_children()
+
+                if compName.get() == 'LookupTableReservoir1':
+                    res_xy_framenum = 2
+                elif compName.get() == 'AnalyticalReservoir1':
+                    res_xy_framenum = 12
+                elif compName.get() == 'GenericReservoir1':
+                    res_xy_framenum = 7
+                elif compName.get() == 'TheisReservoir1':
+                    res_xy_framenum = 10
+
+                for each in tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
+                                              + compName.get().lower() + '_canvas' + '.' + compName.get().lower()
+                                              + '_tabType' + '.!frame' + str(res_xy_framenum)
+                                              + '.!frame').winfo_children():
+                    if type(each) is tk.Entry:
+                        each.configure(state='disabled')
+
+                componentVars[compName.get()]['pressure'].set(1)
+                componentVars[compName.get()]['CO2saturation'].set(1)
+                for each in get_widgets:
+                    if type(each) is tk.Checkbutton:
+                        each.configure(state='disabled')
+
+        if 'wellbore' in component_list.keys():
             compName = component_list['wellbore'][0]
             compType = component_list['wellbore'][1]
             self.add_component(conn, aqName, tabControl, compName, compType,
@@ -1333,7 +1396,34 @@ class NRAPOpenIAM(tk.Tk):
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-        if 'aquifer' in component_list.keys() and workflowVars['aquiferAuto'].get() != True:
+            if 'AoR' in component_list.keys():
+                componentVars[compName.get()]['connection'].set(component_list['reservoir'][0].get())
+
+                get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                                                      + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
+                                                      + '.' + compName.get().lower() + '_tabType').winfo_children()
+                if compType.get() == 'Open Wellbore':
+                    get_widgets[10].winfo_children()[1].configure(state='disabled')
+                    componentVars[compName.get()]['CO2_aquifer'].set(1)
+                    componentVars[compName.get()]['brine_aquifer'].set(1)
+                    for each in get_widgets[-1].winfo_children():
+                        if type(each) is tk.Checkbutton:
+                            each.configure(state='disabled')
+                else:
+                    co2_aq = 'CO2_aquifer' + str(aqName.get()[-1])
+                    brine_aq = 'brine_aquifer' + str(aqName.get()[-1])
+                    if compType.get() == 'Multisegmented Wellbore':
+                        componentVars[compName.get()]['outputs'][co2_aq].set(1)
+                        componentVars[compName.get()]['outputs'][brine_aq].set(1)
+                    else:
+                        componentVars[compName.get()][co2_aq].set(1)
+                        componentVars[compName.get()][brine_aq].set(1)
+                    for each in get_widgets[-1].winfo_children():
+                        if type(each) is tk.Checkbutton:
+                            each.configure(state='disabled')
+
+
+        if 'aquifer' in component_list.keys():
             compName = component_list['aquifer'][0]
             compType = component_list['aquifer'][1]
             self.add_component(conn, aqName, tabControl, compName, compType,
@@ -1341,7 +1431,34 @@ class NRAPOpenIAM(tk.Tk):
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
+            if 'AoR' in component_list.keys():
+                componentVars[compName.get()]['connection'].set(component_list['wellbore'][0].get())
 
+                get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                                                      + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
+                                                      + '.' + compName.get().lower() + '_tabType').winfo_children()
+
+                # disable aquifer selection menu and output options
+                get_widgets[-3].winfo_children()[-1].configure(state='disabled')
+
+                if compName.get() == 'GenericAquifer1':
+                    componentVars[compName.get()]['Dissolved_salt_volume'].set(1)
+                    componentVars[compName.get()]['Dissolved_CO2_volume'].set(1)
+                else:
+                    componentVars[compName.get()]['TDS_volume'].set(1)
+                    componentVars[compName.get()]['pH_volume'].set(1)
+
+                for each in get_widgets[-1].winfo_children():
+                    if type(each) is tk.Checkbutton:
+                        each.configure(state='disabled')
+
+        if 'AoR' in component_list.keys():
+            compName = component_list['AoR'][0]
+            compType = component_list['AoR'][1]
+            self.add_component(conn, aqName, tabControl, compName, compType,
+                               connection_menu, workflowSetupFrame,
+                               controller, dyn_data, controls,
+                               menu_type='workflow')
 
     @staticmethod
     def get_scroll_region(cmpnt_type):
@@ -1372,7 +1489,7 @@ class NRAPOpenIAM(tk.Tk):
             'AtmosphericROM': (0, 0, 0, 800),
             'PlumeStability': (0, 0, 0, 1300),
             'ChemicalWellSealing': (0, 0, 0, 800),
-            'AORWorkflow': (0, 0, 0, 800),
+            'AoR': (0, 0, 0, 800),
             }
 
         # The component type can contain spaces and parentheses so we remove
@@ -1410,6 +1527,7 @@ class NRAPOpenIAM(tk.Tk):
             'AtmosphericROM': atm_tab.read_tab_vars,
             'PlumeStability': psa_tab.read_tab_vars,
             'ChemicalWellSealing': cws_tab.read_tab_vars,
+            'AoR': AOR_wf_tab.read_tab_vars,
             }
 
         # The component type can contain spaces and parentheses so we remove
@@ -1448,10 +1566,10 @@ class NRAPOpenIAM(tk.Tk):
             'AtmosphericROM': atm_tab.add_widgets,
             'PlumeStability': psa_tab.add_widgets,
             'ChemicalWellSealing': cws_tab.add_widgets,
-            'AORWorkflow': AOR_workflow_tab.add_widgets,
+            'AoR': AOR_wf_tab.add_widgets,
             }
 
-        # The component type can contain spaces and parentheses so we remove
+        # The component type can contain spaces and parentheses, so we remove
         # those if any are present
         return method_dict[
             cmpnt_type.replace(' ', '').replace('(', '').replace(')', '')]
@@ -1652,6 +1770,29 @@ class NRAPOpenIAM(tk.Tk):
 
         # Save frame
         self.setvar(name='.'.join([cmpnt_nm, par_name, 'frame']), value=frame)
+
+    def disable_workflow_options(self, tabControl, componentName):
+        comp_name = componentName.get().lower()
+        get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                                              + comp_name + '.' + comp_name.lower() + '_canvas'
+                                              + '.' + comp_name.lower() + '_tabType').winfo_children()
+        get_frames = [widg for widg in get_widgets if type(widg) == tk.Frame][1:]
+        for f in get_frames:
+            frame_labels = f.winfo_children()
+            tmp_labels = [(str(frm), frm.cget("text")) for frm in frame_labels if type(frm) == tk.ttk.Label]
+            tmp_labels = [a for a, b in tmp_labels if b == "Connection:"]
+            if len(tmp_labels) != 0:
+                conn_label_address = tmp_labels[0]
+                try:
+                    conn_int = int(conn_label_address[-1])
+                    conn_menu_address = conn_label_address[:conn_label_address.rfind('!') + 1] \
+                                        + 'optionmenu' + str(conn_int)
+                except:
+                    conn_menu_address = conn_label_address[:conn_label_address.rfind('!') + 1] + 'optionmenu'
+                tabControl.nametowidget(conn_menu_address).configure(state="disabled")
+                self.get_connection_labels.append(conn_menu_address)
+
+        return tabControl
 
 
 def ask_exit():
