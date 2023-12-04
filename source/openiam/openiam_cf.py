@@ -141,6 +141,7 @@ def main(yaml_filename, binary_file=False):
     """
     start_time = datetime.now()
     now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
+
     # Load yaml file data
     if binary_file:
         with open(yaml_filename, 'rb') as cf:

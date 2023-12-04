@@ -164,11 +164,18 @@ def iam_workflow_setup(yaml_data, strata):
     user, so this function is designed to handle much of that effort.
     """
 
-    if 'Type' in yaml_data['Workflow']:
-        if yaml_data['Workflow']['Type'] not in WORKFLOW_OPTIONS:
+    #change case of workflow type in case of captialization difference
+    try:
+        yaml_data['Workflow']['type'] = yaml_data['Workflow']['Type']
+        del yaml_data['Workflow']['Type']
+    except:
+        pass
+
+    if 'type' in yaml_data['Workflow']:
+        if yaml_data['Workflow']['type'] not in WORKFLOW_OPTIONS:
             warning_msg = ''.join([
                 'A Workflow section was included in the .yaml file, but the Workflow ',
-                'Type provided (', yaml_data['Workflow']['Type'], ') was not ',
+                'Type provided (', yaml_data['Workflow']['type'], ') was not ',
                 'recognized as one of the available options (', str(WORKFLOW_OPTIONS),
                 '). Therefore, the input in the Workflow section will not be used.'])
             logging.warning(warning_msg)
@@ -196,8 +203,9 @@ def workflow_setup(yaml_data, strata):
     """
     Sets up the components and plots required for the Workflow.
     """
+
     workflow_type = yaml_data['Workflow']['type']
-    
+
     automation_input = get_automation_input(yaml_data)
 
     res_component_type = yaml_data['Workflow']['Options'].get(
@@ -296,7 +304,7 @@ def workflow_analysis(yaml_data, sm, analysis):
     """
     if 'Type' in yaml_data['Workflow']:
         # Add future cases for NEW_WORKFLOWS here.
-        if yaml_data['Workflow']['Type'] == 'AoR':
+        if yaml_data['Workflow']['type'] == 'AoR':
             aor_workflow_analysis(yaml_data, sm, analysis)
 
 

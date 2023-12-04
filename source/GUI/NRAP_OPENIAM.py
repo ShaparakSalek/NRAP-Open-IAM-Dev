@@ -207,12 +207,10 @@ class NRAPOpenIAM(tk.Tk):
             # Enable automatic plot setup
             d['Workflow']['Options']['AutomatePlotsSetup'] = True
 
-            if d['Workflow']['type'].get() == 'AoR':
-                d['Workflow']['Options']['ReservoirComponentType'] = componentChoices[0]
-                d['Workflow']['Options']['WellboreComponentType'] = componentChoices[1]
-                d['Workflow']['Options']['AquiferComponentType'] = componentChoices[2]
-
-
+            if d['Workflow']['type'] == 'AoR':
+                d['Workflow']['Options']['ReservoirComponentType'] = componentTypeDictionary[0]
+                d['Workflow']['Options']['WellboreComponentType'] = componentTypeDictionary[1]
+                d['Workflow']['Options']['AquiferComponentType'] = componentTypeDictionary[2]
 
         try:
             with open(fileName, 'wb') as outPutFile:
@@ -1366,6 +1364,13 @@ class NRAPOpenIAM(tk.Tk):
                                                       + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
                                                       + '.' + compName.get().lower() + '_tabType').winfo_children()[-1].winfo_children()
 
+                componentVars[compName.get()]['pressure'].set(1)
+                componentVars[compName.get()]['CO2saturation'].set(1)
+
+                for each in get_widgets:
+                    if type(each) is tk.Checkbutton:
+                        each.configure(state='disabled')
+
                 if compName.get() == 'LookupTableReservoir1':
                     res_xy_framenum = 2
                 elif compName.get() == 'AnalyticalReservoir1':
@@ -1380,12 +1385,6 @@ class NRAPOpenIAM(tk.Tk):
                                               + '_tabType' + '.!frame' + str(res_xy_framenum)
                                               + '.!frame').winfo_children():
                     if type(each) is tk.Entry:
-                        each.configure(state='disabled')
-
-                componentVars[compName.get()]['pressure'].set(1)
-                componentVars[compName.get()]['CO2saturation'].set(1)
-                for each in get_widgets:
-                    if type(each) is tk.Checkbutton:
                         each.configure(state='disabled')
 
         if 'wellbore' in component_list.keys():
