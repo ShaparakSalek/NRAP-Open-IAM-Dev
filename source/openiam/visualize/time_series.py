@@ -525,7 +525,7 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
             ax.legend(handle_list, label_list, fancybox=False,
                       fontsize=fig_setup['legend_font_size'],
                       framealpha=fig_setup['legend_framealpha'],
-                      ncol=fig_setup['legend_columns'])
+                      ncols=fig_setup['legend_columns'])
 
     elif analysis in ['lhs', 'parstudy']:
         ax_list = fig.axes
@@ -546,7 +546,7 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
             ax.legend(handle_list, label_list, fancybox=False,
                       fontsize=fig_setup['legend_font_size'],
                       framealpha=fig_setup['legend_framealpha'],
-                      ncol=fig_setup['legend_columns'])
+                      ncols=fig_setup['legend_columns'])
     else:
         pass
 

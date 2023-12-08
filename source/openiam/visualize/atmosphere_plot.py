@@ -292,7 +292,7 @@ def make_plume_plots(plumes, time=None, alpha=0.2, sample=0, extent=None,
     ax.set_position([box.x0, box.y0 + box.height * 0.05,
                      box.width, box.height * 0.95])
 
-    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncol=ncol_number,
+    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncols=ncol_number,
               edgecolor=[0, 0, 0], loc='best', bbox_to_anchor=(0.75, -0.1),
               framealpha=0.67)
 
@@ -789,7 +789,7 @@ def plot_grid_plumes(xy, plumes_grid, extent, savefig=None, time=None,
     ax.set_position([box.x0, box.y0 + box.height * 0.05,
                      box.width, box.height * 0.95])
 
-    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncol=ncol_number,
+    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncols=ncol_number,
               edgecolor=[0, 0, 0], loc='best', bbox_to_anchor=(0.75, -0.1),
               framealpha=0.67)
 

@@ -302,7 +302,7 @@ def time_series_sensitivities(obs_base_name, sm, lhs_sample, time_array,
 
     ncol, legend_fontsize = get_lgnd_setup(num_items)
 
-    plt.legend(fontsize=legend_fontsize, ncol=ncol,
+    plt.legend(fontsize=legend_fontsize, ncols=ncol,
                loc='upper center', bbox_to_anchor=(0.5, -0.125))
 
     plt.grid(alpha=0.15)
@@ -475,7 +475,7 @@ def multi_sensitivities_barplot(obs_names, system_model, lhs_sample, title=None,
     ncol, legend_fontsize = get_lgnd_setup(num_items)
 
     handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, fontsize=legend_fontsize, ncol=ncol)
+    fig.legend(handles, labels, fontsize=legend_fontsize, ncols=ncol)
 
     plt.grid(axis='y', linestyle='--', linewidth=1, alpha=0.3)
 
@@ -703,7 +703,7 @@ def stacked_sensitivities_barplot(sensitivities, names, system_model,
     ncol, legend_fontsize = get_lgnd_setup(num_items)
 
     handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, fontsize=legend_fontsize, ncol=ncol)
+    fig.legend(handles, labels, fontsize=legend_fontsize, ncols=ncol)
                # loc='upper center', bbox_to_anchor=(0.5, 0.99))
 
     if title is None:

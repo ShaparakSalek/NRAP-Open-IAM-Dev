@@ -480,7 +480,7 @@ if __name__ == "__main__":
 
         # Add Legend
         plt.gca().legend(mapview_fig_handle_list, mapview_fig_label_list,
-                         fancybox=False, fontsize=lgndfontsize-1, ncol=1,
+                         fancybox=False, fontsize=lgndfontsize-1, ncols=1,
                          edgecolor=[0, 0, 0], loc='upper center',
                          bbox_to_anchor=(1.55, 1), framealpha=0.67)
 

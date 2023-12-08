@@ -454,7 +454,7 @@ if __name__ == "__main__":
 
     # Add Legend
     plt.gca().legend(fig1_handle_list, fig1_label_list, fancybox=False,
-                     fontsize=lgndfontsize, ncol=1,
+                     fontsize=lgndfontsize, ncols=1,
                      edgecolor=[0, 0, 0], loc='upper center',
                      bbox_to_anchor=(1.55, 1), framealpha=0.67)
 

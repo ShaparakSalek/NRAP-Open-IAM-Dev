@@ -1074,7 +1074,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
         bbox_val = (0.6, -0.1)
 
     ax.legend(handle_list, label_list, fancybox=False, fontsize=gen_font_size - 2,
-              ncol=ncol_number, edgecolor=[0, 0, 0], loc='upper center',
+              ncols=ncol_number, edgecolor=[0, 0, 0], loc='upper center',
               bbox_to_anchor=bbox_val, framealpha=0.67)
 
     # aq_number is used in the figure title
@@ -1684,7 +1684,7 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
     ax.set_ylabel('Northing (km)', fontsize=axis_label_font_size,
                   fontweight=selected_labelfontweight)
 
-    ax.legend(fancybox=False, fontsize=gen_font_size - 2, ncol=ncol_number,
+    ax.legend(fancybox=False, fontsize=gen_font_size - 2, ncols=ncol_number,
               edgecolor=[0, 0, 0], loc='upper center', bbox_to_anchor=(0.5, -0.1),
               framealpha=0.67)
 
