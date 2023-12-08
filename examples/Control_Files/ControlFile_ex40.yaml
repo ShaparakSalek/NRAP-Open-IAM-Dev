@@ -135,6 +135,8 @@ Plots:
         subplot:
             use: True
             ncols: 2
+    Strat_Col:
+        StratigraphicColumn:
     TTFD_Plot:
         TTFD:
             PlumeType: Dissolved_CO2
@@ -148,7 +150,7 @@ Plots:
                 # coordz: -1015
                 coordx: [236377.0, 236758.0, 236377.0, 236758.0]
                 coordy: [4409269.5, 4410107.6, 4409269.5, 4410107.6]
-                coordz: [-1015, -715, -1015, -715] # Near the tops of aquifers 1 and 3
+                coordz: [-980, -715, -980, -715] # Near the tops of aquifers 1 and 3
                 HorizontalWindow: 1
-                VerticalWindow: 5
+                VerticalWindow: 10
             ComponentNameList: [FutureGen2AZMI1, FutureGen2AZMI2]

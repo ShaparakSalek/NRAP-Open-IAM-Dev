@@ -11,8 +11,10 @@ try:
 except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
-import openiam as iam
-import openiam.cfi.strata as iam_strata
+from openiam.cfi.strata import (get_strata_info_from_component,
+                                get_unit_depth_from_component,
+                                get_comp_types_strata_pars,
+                                get_comp_types_strata_obs)
 
 
 def process_parameters(component, component_data, name2obj_dict=None):
@@ -32,6 +34,9 @@ def process_parameters(component, component_data, name2obj_dict=None):
     code obtains the stratigraphy component created for each component, so the
     depths can vary as needed.
     """
+    types_strata_pars = get_comp_types_strata_pars()
+    types_strata_obs = get_comp_types_strata_obs()
+
     if ('Parameters' in component_data) and (component_data['Parameters']):
         for key in component_data['Parameters']:
             # The case for "par_name: par_value"
@@ -40,20 +45,20 @@ def process_parameters(component, component_data, name2obj_dict=None):
                     'value': component_data['Parameters'][key], 'vary': False}
 
             if name2obj_dict is not None and 'value' in component_data['Parameters'][key]:
-                if isinstance(component_data['Parameters'][key]['value'], str):
-                    str_input = component_data['Parameters'][key]['value']
-
-                    # Get the stratigraphy component
-                    strata_comp = name2obj_dict['strata']
-
-                    strata_dict = iam_strata.get_strata_info_from_component(strata_comp)
+                value = component_data['Parameters'][key]['value']
+                
+                # Get the stratigraphy component
+                strata_comp = name2obj_dict['strata']
+                
+                if isinstance(value, str) and name2obj_dict['strata_type'] in types_strata_pars:
+                    strata_dict = get_strata_info_from_component(strata_comp)
 
                     numShaleLayers = strata_dict['numberOfShaleLayers']
                     shaleThicknesses = strata_dict['shaleThicknesses']
                     aquiferThicknesses = strata_dict['aquiferThicknesses']
 
                     unitType, unitNum, metricType = handle_str_input(
-                        numShaleLayers, str_input, component.name, key)
+                        numShaleLayers, value, component.name, key)
 
                     if metricType == 'Thickness':
                         if unitType == 'shale':
@@ -65,9 +70,16 @@ def process_parameters(component, component_data, name2obj_dict=None):
                         component_data['Parameters'][key]['value'] = thicknessValue
 
                     elif metricType == 'Depth':
-                        depthValue = iam_strata.get_unit_depth_from_component(
+                        if 'TopDepth' in value:
+                            top_mid_bottom = 'top'
+                        elif 'MidDepth' in value:
+                            top_mid_bottom = 'mid'
+                        else:
+                            top_mid_bottom = 'bottom'
+
+                        depthValue = get_unit_depth_from_component(
                             numShaleLayers, strata_comp, unitNumber=unitNum,
-                            unitType=unitType, top_or_bottom='bottom')
+                            unitType=unitType, top_mid_bottom=top_mid_bottom)
 
                         component_data['Parameters'][key]['value'] = depthValue
 
@@ -75,7 +87,11 @@ def process_parameters(component, component_data, name2obj_dict=None):
 
                     # Reset the value so that other locations for the same type
                     # of component will be handled properly.
-                    component_data['Parameters'][key]['value'] = str_input
+                    component_data['Parameters'][key]['value'] = value
+                    
+                elif isinstance(value, str) and name2obj_dict[
+                        'strata_type'] in types_strata_obs:
+                    component.add_par_linked_to_obs(key, strata_comp.linkobs[value])
 
                 else:
                     component.add_par(key, **component_data['Parameters'][key])
@@ -162,8 +178,8 @@ def handle_str_input(num_shale_layers, str_input, cmpnt_name, par_name):
     """
     This function takes string input provided for a parameter in a .yaml file
     and returns the corresponding unitType ('shale' or 'aquifer'), unitNum
-    (unit number, 1, 2, 3, etc.), and metricType ('Thickness' or 'Depth', where
-    'Depth' corresponds with the bottom depth of the unit).
+    (unit number, 1, 2, 3, etc.), and metricType ('Thickness', 'Depth', 'MidDepth', 
+    or 'TopDepth').
 
     :param num_shale_layers: number of shale layers
     :type num_shale_layers: int
@@ -179,29 +195,43 @@ def handle_str_input(num_shale_layers, str_input, cmpnt_name, par_name):
         provided
     :type par_name: str
     """
-    # Create a list of possible stratigraphy parameters
+    # Create a list of possible stratigraphy parameters or observations
     potential_str_references = [
         'shale{}Depth'.format(ind) for ind in range(1, num_shale_layers+1)]+[
-            'shale{}Thickness'.format(ind) for ind in range(1, num_shale_layers+1)]+[
-                'aquifer{}Depth'.format(ind) for ind in range(1, num_shale_layers)]+[
-                    'aquifer{}Thickness'.format(ind) for ind in range(1, num_shale_layers)]
-
+            'shale{}MidDepth'.format(ind) for ind in range(1, num_shale_layers+1)]+[
+                'shale{}TopDepth'.format(ind) for ind in range(1, num_shale_layers+1)]+[
+                    'shale{}Thickness'.format(ind) for ind in range(1, num_shale_layers+1)]
+                        
+    potential_str_references += [
+        'aquifer{}Depth'.format(ind) for ind in range(1, num_shale_layers+1)]+[
+            'aquifer{}MidDepth'.format(ind) for ind in range(1, num_shale_layers+1)]+[
+                'aquifer{}TopDepth'.format(ind) for ind in range(1, num_shale_layers+1)]+[
+                    'aquifer{}Thickness'.format(ind) for ind in range(1, num_shale_layers+1)]
+    
+    potential_str_references += [
+        'reservoirDepth', 'reservoirMidDepth', 'reservoirTopDepth', 'reservoirThickness']
+    
     # If string provided as parameter value is among possible stratigraphy parameters
     # determine whether it's for shale or aquifer and whether it's depth or thickness
     if str_input in potential_str_references:
-        # Match the str_input to the pattern
-        out = re.match(r"([a-zA-Z]+)([0-9]+)([a-zA-Z]+)", str_input)
-        unitType = out.group(1)
-        unitNum = int(out.group(2))
-        metricType = out.group(3)
+        if 'reservoir' in str_input:
+            unitType = 'reservoir'
+            unitNum = 0
+            metricType = str_input[9:]
+        else:
+            # Match the str_input to the pattern
+            out = re.match(r"([a-zA-Z]+)([0-9]+)([a-zA-Z]+)", str_input)
+            unitType = out.group(1)
+            unitNum = int(out.group(2))
+            metricType = out.group(3)
 
     else:
         err_msg = ''.join([
-            'A string was used as input for the parameter {} in the component {}. ',
+            'A string ({}) was used as input for the parameter {} in the component {}. ',
             'The string did not match any of the expected values, however. ',
-            'Expected values are the depths to the bottom of a unit (e.g., '
-            'shale1Depth or aquifer2Depth). Check the input ',
-            'in the .yaml file.']).format(par_name, cmpnt_name)
+            'Expected values are the depths to the bottom, middle, or top of a unit ', 
+            '(e.g., shale1Depth, aquifer2MidDepth, shale3TopDepth, or reservoirDepth). ', 
+            'Check the input in the .yaml file.']).format(str_input, par_name, cmpnt_name)
         raise KeyError(err_msg)
 
     return unitType, unitNum, metricType
@@ -222,7 +252,7 @@ def get_parameter_val(comp, par_name, sm=None, yaml_data=None):
     # the parameter value (e.g., getting 'aquifer2Depth' from a stratigraphy
     # component in lieu of 'wellTop').
     run_again_keys = [
-        'comp', 'par_name', 'numShaleLayers', 'unit_number', 'top_or_bottom']
+        'comp', 'par_name', 'unit_number', 'unit_type', 'top_mid_bottom']
 
     run_again_info = {key: None for key in run_again_keys}
 
@@ -247,6 +277,11 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
     provides the component and parameter name that will provide the correct value
     (e.g., 'aquifer2Depth' for the 'wellTop' parameter).
     """
+    # These lists indicate the stratigraphy component types that offer thicknesses 
+    # and depths as parameters or as observations.
+    types_strata_pars = get_comp_types_strata_pars()
+    types_strata_obs = get_comp_types_strata_obs()
+    
     run_again = False
 
     par_val = None
@@ -260,34 +295,62 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
 
     elif par_name in comp.deterministic_pars:
         par_val = comp.deterministic_pars[par_name].value
+        
+    elif par_name in comp.obslinked_pars:
+        par_connection = comp.obslinked_pars[par_name]
+
+        linked_comp_name = par_connection[0:par_connection.index('.')]
+
+        run_again_info['comp'] = sm.component_models[linked_comp_name]
+
+        run_again = True
+        
+        if par_name == 'wellTop':
+            LeakTo = yaml_data[comp.name]['LeakTo']
+            run_again_info['unit_number'] = int(LeakTo[7:])
+            run_again_info['top_mid_bottom'] = 'bottom'
+            run_again_info['par_name'] = LeakTo + 'Depth'
+
+        elif par_name in ['reservoirDepth', 'wellDepth']:
+            run_again_info['par_name'] = 'shale1Depth'
+            run_again_info['unit_number'] = 1
+            run_again_info['top_mid_bottom'] = 'bottom'
+        
+    elif 'Depth' in par_name and (comp.class_type in types_strata_obs):
+        run_again_info = get_strat_run_again_info(
+            par_name, run_again_info)
+        
+        par_val = get_unit_depth_from_component(
+            comp.get_num_shale_layers(), comp,
+            unitNumber=run_again_info['unit_number'], 
+            unitType=run_again_info['unit_type'],
+            top_mid_bottom=run_again_info['top_mid_bottom'], 
+            depth_obs=True, sm=sm)
 
     elif par_name in comp.composite_pars:
         # In cases where a parameter is set as a composite parameter (e.g.,
         # setting the wellTop or reservoirDepth parameter of an OpenWellore
         # only by having 'LeakTo: aquifer2') and the simulation uses lhs or
         # parstudy analysis types, the composite_pars value will be returned
-        # as zero. The 'if' statements below address such situations -
-        # additional cases may need to be added for new component parameters.
+        # as zero. The composite parameters are handled correctly during the 
+        # simulation, but attempting to access the value afterwards (i.e., while 
+        # processing the plots) returns a zero value. The 'if' statements below 
+        # address such situations - additional cases may need to be added for 
+        # new component parameters.
         par_val = comp.composite_pars[par_name].value
 
         if par_val == 0:
-            if 'Depth' in par_name and isinstance(comp, iam.Stratigraphy):
-                if 'aquifer' in par_name:
-                    unitType = 'aquifer'
-                elif 'shale' in par_name:
-                    unitType = 'shale'
-                elif 'reservoir' in par_name:
-                    unitType = 'reservoir'
-                    run_again_info['top_or_bottom'] = 'top'
-
-                par_val = iam_strata.get_unit_depth_from_component(
-                    run_again_info['numShaleLayers'], comp,
-                    unitNumber=run_again_info['unit_number'], unitType=unitType,
-                    top_or_bottom=run_again_info['top_or_bottom'])
+            if 'Depth' in par_name and (comp.class_type in types_strata_pars):
+                run_again_info = get_strat_run_again_info(
+                    par_name, run_again_info)
+                
+                par_val = get_unit_depth_from_component(
+                    comp.get_num_shale_layers(), comp,
+                    unitNumber=run_again_info['unit_number'], 
+                    unitType=run_again_info['unit_type'],
+                    top_mid_bottom=run_again_info['top_mid_bottom'])
 
             elif par_name in strat_related_pars and not yaml_data is None:
-                run_again_info['numShaleLayers'] = yaml_data['Stratigraphy'][
-                    'numberOfShaleLayers']['value']
 
                 try:
                     run_again_info['comp'] = sm.component_models['strata']
@@ -297,21 +360,14 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
 
                 if par_name == 'wellTop':
                     LeakTo = yaml_data[comp.name]['LeakTo']
-
-                    # If the unit number is less than 10, there will be 8 characters
-                    # (e.g., 'aquifer2'). If the unit number is >= 10, there will be
-                    # 9 characters (e.g., 'aquifer12').
                     run_again_info['unit_number'] = int(LeakTo[7:])
-
-                    run_again_info['top_or_bottom'] = 'bottom'
-
+                    run_again_info['top_mid_bottom'] = 'bottom'
                     run_again_info['par_name'] = LeakTo + 'Depth'
 
                 elif par_name in ['reservoirDepth', 'wellDepth']:
                     run_again_info['par_name'] = 'shale1Depth'
-
                     run_again_info['unit_number'] = 1
-                    run_again_info['top_or_bottom'] = 'bottom'
+                    run_again_info['top_mid_bottom'] = 'bottom'
 
                 run_again = True
 
@@ -330,6 +386,12 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
         run_again = True
 
     else:
+        err_msg = ''.join([
+            'The parameter {} was not found for the component {}. This issue ',
+            'can occur, for example, if the parameter was not added as a composite ', 
+            'parameter of the {} component being used. Check your input.'
+            ]).format(par_name, comp.name, comp.class_type)
+        
         if 'Thickness' in par_name and ('shale' in par_name or 'aquifer' in par_name):
             # Parameters like 'shale1Thickness' will not be in the default parameters,
             # but 'shaleThickness' will be.
@@ -337,7 +399,50 @@ def check_parameter_types(comp, par_name, run_again_info, sm=None, yaml_data=Non
                 par_name = 'shaleThickness'
             elif 'aquifer' in par_name:
                 par_name = 'aquiferThickness'
-
-        par_val = comp.default_pars[par_name].value
+        elif 'Depth' in par_name:
+            logging.error(err_msg)
+        
+        try:
+            par_val = comp.default_pars[par_name].value
+        except:
+            raise KeyError(err_msg)
 
     return par_val, run_again, run_again_info
+
+
+def get_strat_run_again_info(par_name, run_again_info):
+    """
+    Updates the run_again_info dictionary for check_parameter_types() in cases 
+    where a value is needed from a stratigraphy component (e.g., Stratigraphy, 
+    LookupTableStratigraphy, or DippingStratigraphy). The run_again_info 
+    dictionary is then used to obtain a value with the get_unit_depth_from_component() 
+    function.
+    """
+    if 'aquifer' in par_name:
+        run_again_info['unit_type'] = 'aquifer'
+        par_name_end = par_name[7:]
+    elif 'shale' in par_name:
+        run_again_info['unit_type'] = 'shale'
+        par_name_end = par_name[5:]
+    elif 'reservoir' in par_name:
+        run_again_info['unit_type'] = 'reservoir'
+        par_name_end = par_name[9:]
+        run_again_info['unit_number'] = 0
+    
+    if 'TopDepth' in par_name_end or 'MidDepth' in par_name_end:
+        if run_again_info['unit_type'] != 'reservoir':
+            run_again_info['unit_number'] = int(par_name_end[:-8])
+        
+        if 'TopDepth' in par_name_end:
+            run_again_info['top_mid_bottom'] = 'top'
+        elif 'MidDepth' in par_name_end:
+            run_again_info['top_mid_bottom'] = 'mid'
+        
+    elif 'Depth' in par_name_end:
+        if run_again_info['unit_type'] != 'reservoir':
+            run_again_info['unit_number'] = int(par_name_end[:-5])
+        
+        run_again_info['top_mid_bottom'] = 'bottom'
+    
+    return run_again_info
+

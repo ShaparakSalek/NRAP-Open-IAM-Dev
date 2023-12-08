@@ -10,7 +10,8 @@
 # top_depth parameters of the GenericAquifer component are also set as
 # aquifer2Thickness and shale4Thickness. Because shale 4 is the top shale
 # (closest to the surface), shale4Thickness is equal to shale4Depth, which also
-# represents the top of aquifer 3.
+# represents the top of aquifer 3. If these parameters are not set by the user, 
+# however, they will automatically be linked to the Stratigraphy component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex36.yaml

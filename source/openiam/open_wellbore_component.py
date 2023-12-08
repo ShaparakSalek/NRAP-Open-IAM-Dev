@@ -12,6 +12,7 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.strata import get_comp_types_strata_pars, get_comp_types_strata_obs
 
 try:
     import components.wellbore.open as owmodel
@@ -351,12 +352,8 @@ class OpenWellbore(ComponentModel):
 
         # Determine number of shale layers in the stratigraphy
         strata = name2obj_dict['strata']
-        if 'numberOfShaleLayers' in strata.deterministic_pars:
-            num_shale_layers = strata.deterministic_pars['numberOfShaleLayers'].value
-        elif 'numberOfShaleLayers' in strata.default_pars:
-            num_shale_layers = strata.default_pars['numberOfShaleLayers'].value
-        else:
-            num_shale_layers = 3
+        
+        num_shale_layers = strata.get_num_shale_layers()
 
         # Determine to which aquifer the leakage is simulated
         if 'LeakTo' not in component_data:
@@ -388,28 +385,65 @@ class OpenWellbore(ComponentModel):
                 connection.add_obs_to_be_linked(sinput)
                 self.add_kwarg_linked_to_obs(sinput, connection.linkobs[sinput])
 
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
+
         # Consider an option when reservoirDepth and wellTop are already added
         # as referring to spatially varying stratigraphy
-        if 'reservoirDepth' not in self.pars and \
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            if 'reservoirDepth' not in self.pars and \
                 'reservoirDepth' not in self.deterministic_pars:
-            res_depth_expr = ' + '.join(['{}.shale{}Thickness'.format(
-                strata.name, ind) for ind in range(1, num_shale_layers+1)])+' + '+\
-                    ' + '.join(['{}.aquifer{}Thickness'.format(
-                        strata.name, ind) for ind in range(1, num_shale_layers)])
+                    res_depth_expr = ' + '.join(['{}.shale{}Thickness'.format(
+                        strata.name, ind) for ind in range(1, num_shale_layers+1)])+' + '+\
+                            ' + '.join(['{}.aquifer{}Thickness'.format(
+                                strata.name, ind) for ind in range(1, num_shale_layers)])
 
-            # Depth to the top of reservoir (usually)
-            self.add_composite_par('reservoirDepth', res_depth_expr)
+                    # Depth to the top of reservoir (usually)
+                    self.add_composite_par('reservoirDepth', res_depth_expr)
+                    
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            if 'reservoirDepth' in self.pars or 'reservoirDepth' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'reservoirDepth', 'shale1Depth')
+                
+                logging.warning(warning_msg)
+                    
+                if 'reservoirDepth' in self.pars:
+                    del self.pars['reservoirDepth']
+                
+                elif 'reservoirDepth' in self.deterministic_pars:
+                    del self.deterministic_pars['reservoirDepth']
+                        
+            self.add_par_linked_to_obs('reservoirDepth', strata.linkobs['shale1Depth'])
 
         if leak_to == 'atmosphere':
             self.add_par('wellTop', value=0.0, vary=False)
         else:
-            if 'wellTop' not in self.pars and \
-                    'wellTop' not in self.deterministic_pars:
-                well_top_expr = ' + '.join([
-                    '{nm}.shale{ind1}Thickness + {nm}.aquifer{ind2}Thickness'.format(
-                        nm=strata.name, ind1=ind+1, ind2=ind) for ind in range(
-                            self.leak_layer, num_shale_layers)])
-                self.add_composite_par('wellTop', well_top_expr)
+            if name2obj_dict['strata_type'] in types_strata_pars:
+                if 'wellTop' not in self.pars and 'wellTop' not in self.deterministic_pars:
+                    well_top_expr = ' + '.join([
+                        '{nm}.shale{ind1}Thickness + {nm}.aquifer{ind2}Thickness'.format(
+                            nm=strata.name, ind1=ind+1, ind2=ind) for ind in range(
+                                self.leak_layer, num_shale_layers)])
+                    self.add_composite_par('wellTop', well_top_expr)
+                    
+            elif name2obj_dict['strata_type'] in types_strata_obs:
+                if 'wellTop' in self.pars or 'wellTop' in self.deterministic_pars:
+                    warning_msg = strata.parameter_assignment_warning_msg().format(
+                        'wellTop', 'aquifer{}Depth'.format(self.leak_layer))
+                    
+                    logging.warning(warning_msg)
+                    
+                    if 'wellTop' in self.pars:
+                        del self.pars['wellTop']
+                        
+                    elif 'wellTop' in self.deterministic_pars:
+                        del self.deterministic_pars['wellTop']
+                
+                self.add_par_linked_to_obs('wellTop', strata.linkobs[
+                    'aquifer{}Depth'.format(self.leak_layer)])
 
         for il in range(1, num_shale_layers):
             aq = 'aquifer{}'.format(il)

@@ -154,6 +154,12 @@ if __name__ == "__main__":
     strata[-1].add_par('reservoirThickness',
                        value=reservoirThickness, vary=False)
     strata[-1].add_par('datumPressure', value=datumPressure, vary=False)
+    
+    composite_depth_pars = strata[-1].get_composite_depth_names()
+    
+    for comp_depth in composite_depth_pars:
+        par_expr = strata[-1].get_depth_expr(comp_depth)
+        strata[-1].add_composite_par(comp_depth, par_expr)
 
     well_x_values = [100, 200, 300, 400, 500]
     well_y_values = [100, 200, 300, 400, 500]
@@ -293,7 +299,7 @@ if __name__ == "__main__":
         fgaq[-1].add_par('aqu_thick', value=aquiferThicknesses[0], vary=False)
         fgaq[-1].add_par('depth', value=aquiferTopDepths[0], vary=False)
         fgaq[-1].add_par('por', value=0.18, vary=False)
-        fgaq[-1].add_par('log_permh', value=-13.0, vary=False)
+        fgaq[-1].add_par('log_permh', value=-12.0, vary=False)
         fgaq[-1].add_par('log_aniso', value=0.3, vary=False)
         fgaq[-1].add_par('rel_vol_frac_calcite', value=0.1, vary=False)
 

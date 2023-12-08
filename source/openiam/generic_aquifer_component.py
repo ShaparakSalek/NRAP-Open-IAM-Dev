@@ -16,6 +16,8 @@ except ImportError as err:
 
 import components.aquifer.generic.generic_aquifer_ROM as genrom
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
 
 GA_SCALAR_OBSERVATIONS = [
     'Dissolved_salt_volume', 'Dissolved_salt_dr', 'Dissolved_salt_dz',
@@ -306,40 +308,72 @@ class GenericAquifer(ComponentModel):
                 'brine_mass', adapter.linkobs['mass_brine_{aquifer_name}'.format(
                     aquifer_name=aq_name)])
         # End Connection if statement
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter top_depth (to the top of the aquifer)
         strata = name2obj_dict['strata']
-        if 'top_depth' not in self.pars and \
-                'top_depth' not in self.deterministic_pars:
-            aq_index = int(aq_name[7:])  # index of aquifer of interest
-            # depth to bottom of shale layer above the aquifer of interest
-            above_shale_name = 'shale{}Depth'.format(aq_index+1)
-            self.add_par_linked_to_par(
-                'top_depth', strata.composite_pars[above_shale_name])
+        
+        aq_index = int(aq_name[7:])  # index of aquifer of interest
+        # depth to bottom of shale layer above the aquifer of interest
+        above_shale_name = 'shale{}Depth'.format(aq_index+1)
+        
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            if 'top_depth' not in self.pars and \
+                    'top_depth' not in self.deterministic_pars:
+                self.add_par_linked_to_par(
+                    'top_depth', strata.composite_pars[above_shale_name])
 
-        # Take care of parameter aqu_thick (possibly) defined by stratigraphy component
-        if 'aqu_thick' not in self.pars and \
-                'aqu_thick' not in self.deterministic_pars:
-            sparam = '{aq}Thickness'.format(aq=aq_name)
-            connect = None
-            if sparam in strata.pars:
-                connect = strata.pars
-            elif sparam in strata.deterministic_pars:
-                connect = strata.deterministic_pars
-            elif sparam in strata.default_pars:
-                connect = strata.default_pars
-            if not connect:
-                sparam = 'aquiferThickness'
-                if sparam in strata.pars:
-                    connect = strata.pars
-                elif sparam in strata.deterministic_pars:
-                    connect = strata.deterministic_pars
-                elif sparam in strata.default_pars:
-                    connect = strata.default_pars
-                else:
-                    print('Unable to find parameter ' + sparam)
+            # Take care of parameter aqu_thick (possibly) defined by stratigraphy component
+            if 'aqu_thick' not in self.pars and \
+                    'aqu_thick' not in self.deterministic_pars:
+                sparam = '{aq}Thickness'.format(aq=aq_name)
+                
+                connect = get_strat_param_dict_for_link(sparam, strata)
+                
+                if not connect:
+                    sparam = 'aquiferThickness'
+                    
+                    connect = get_strat_param_dict_for_link(sparam, strata)
+                    
+                    if not connect:
+                        print('Unable to find parameter ' + sparam)
 
-            self.add_par_linked_to_par('aqu_thick', connect[sparam])
+                self.add_par_linked_to_par('aqu_thick', connect[sparam])
+            
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            if 'top_depth' in self.pars or 'top_depth' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'top_depth', above_shale_name)
+                
+                logging.warning(warning_msg)
+                    
+                if 'top_depth' in self.pars:
+                    del self.pars['top_depth']
+                
+                elif 'top_depth' in self.deterministic_pars:
+                    del self.deterministic_pars['top_depth']
+            
+            self.add_par_linked_to_obs(
+                'top_depth', strata.linkobs[above_shale_name])
+            
+            if 'aqu_thick' in self.pars or 'aqu_thick' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'aqu_thick', '{aq}Thickness'.format(aq=aq_name))
+                
+                logging.warning(warning_msg)
+                    
+                if 'aqu_thick' in self.pars:
+                    del self.pars['aqu_thick']
+                
+                elif 'aqu_thick' in self.deterministic_pars:
+                    del self.deterministic_pars['aqu_thick']
+            
+            self.add_par_linked_to_obs(
+                'aqu_thick', strata.linkobs['{aq}Thickness'.format(aq=aq_name)])
 
         if 'Outputs' in component_data:
             comp_outputs = component_data['Outputs']

@@ -54,35 +54,22 @@ ModelParams:
     OutputDirectory: output/output_ex33b_{datetime}
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        strikeAndDip:
-            strike: 315
-            dip: 5
-            dipDirection: NE
-            coordxRefPoint: 1200
-            coordyRefPoint: 1200
-    numberOfShaleLayers:
-        vary: False
-        value: 3
-    shale1Thickness:
-        value: 750.0
-        vary: False
-    shale2Thickness:
-        value: 950.0
-        vary: False
-    shale3Thickness:
-        value: 200
-        vary: False
-    aquifer1Thickness:
-        vary: False
-        value: 200
-    aquifer2Thickness:
-        vary: False
-        value: 200
-    reservoirThickness:
-        vary: False
-        value: 150
+DippingStratigraphy:
+    ReferenceLocation:
+        coordx: 1200
+        coordy: 1200
+    Controls:
+        dipDirection: NE
+    Parameters:
+        strike: 315
+        dip: 5
+        numberOfShaleLayers: 3
+        shale1Thickness: 750.0
+        shale2Thickness: 950.0
+        shale3Thickness: 200
+        aquifer1Thickness: 200
+        aquifer2Thickness: 200
+        reservoirThickness: 150
 #-------------------------------------------------
 AnalyticalReservoir1:
     Type: AnalyticalReservoir

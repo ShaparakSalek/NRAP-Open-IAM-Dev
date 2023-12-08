@@ -26,12 +26,11 @@ ModelParams:
     GenerateCombOutputFile: False
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        LookupTableStratigraphy:
-            FileName: 'stratigraphy.csv'
-            FileDirectory: 'examples/Control_Files/input_data/ex32b'
-            MaxPointDistance: 100
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex32b'
+    Parameters:
+        numberOfShaleLayers: 5
 #-------------------------------------------------
 LookupTableReservoir1:
     Type: LookupTableReservoir
@@ -108,17 +107,16 @@ FutureGen2Aquifer1:
 Plots:
     Strat_Plot:
         Stratigraphy:
-            FigureDPI: 300
-            PlotWellbores: True
+            FigureDPI: 200
+            PlotWellbores: False
             PlotWellLabels: False
             PlotInjectionSites: True
             PlotInjectionSiteLabels: True
-            PlotStratComponents: True
             InjectionCoordx: 2.37e+5
             InjectionCoordy: 4.41e+6
             View:
-                ViewAngleElevation: [5, 5, 5, 5, 5]
-                ViewAngleAzimuth: [240, 255, 270, 285, 300]
+                ViewAngleElevation: [10, 10, 10]
+                ViewAngleAzimuth: [270, 300, 330]
     AoR_Pressure:
         AoR: [pressure]
         TimeList: [1, 5, 10, 15, 20]

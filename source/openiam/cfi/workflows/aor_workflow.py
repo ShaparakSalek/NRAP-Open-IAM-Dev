@@ -16,7 +16,10 @@ except ImportError as err:
 
 import openiam as iam
 
-import openiam.cfi.strata as iam_strata
+from openiam.cfi.strata import (get_strata_type_from_yaml, 
+                                get_comp_types_strata_pars,
+                                get_comp_types_strata_obs)
+
 from openiam.visualize.area_of_review import CSV_FILE_NAME_TAGS as AOR_CSV_FILE_NAME_TAGS
 from openiam.visualize.area_of_review import CSV_FILE_COLUMNS as AOR_CSV_FILE_COLUMNS
 import openiam.visualize.area_of_review as AoR
@@ -130,15 +133,19 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
     AoR that reflects all metrics considered. Pressure results are only considered
     if a critical pressure is provided.
     """
+    # These lists indicate the stratigraphy component types that offer thicknesses 
+    # and depths as parameters or as observations.
+    types_strata_pars = get_comp_types_strata_pars()
+    types_strata_obs = get_comp_types_strata_obs()
+    
     output_dir = yaml_data['ModelParams']['OutputDirectory']
 
     aquifer_component_type = yaml_data['Workflow']['Options'].get(
         'AquiferComponentType', DEFAULT_AQUIFER_COMP)
 
     # Get the stratigraphy information from the .yaml file
-    strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
-    var_type = strata_var_info['var_type']
-
+    strata_type = get_strata_type_from_yaml(yaml_data)
+    
     AoR_included_x_km = []
     AoR_included_y_km = []
 
@@ -162,9 +169,9 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
         pressure_vals_MPa = AoR_pressure_results[AOR_CSV_FILE_COLUMNS['pressure']].values
 
         try:
-            if var_type == 'noVariation':
+            if strata_type in types_strata_pars:
                 critPressureVal = np.min(AoR_pressure_results[AOR_CRIT_PRESSURE_COLUMN])
-            elif var_type in ['strikeAndDip', 'LookupTable']:
+            elif strata_type in types_strata_obs:
                 critPressureVal = AoR_pressure_results[AOR_CRIT_PRESSURE_COLUMN]
         except:
             if yaml_data['Workflow']['Options']['CriticalPressureMPa'] == 'Calculated':
@@ -174,7 +181,7 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
             else:
                 critPressureVal = float(yaml_data['Workflow']['Options']['CriticalPressureMPa'])
 
-        if var_type == 'noVariation':
+        if strata_type in types_strata_pars:
             pressure_x_km_AoR = pressure_x_km[pressure_vals_MPa >= critPressureVal]
             pressure_y_km_AoR = pressure_y_km[pressure_vals_MPa >= critPressureVal]
 
@@ -182,7 +189,7 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
                 AoR_included_x_km += pressure_x_km_AoR.tolist()
                 AoR_included_y_km += pressure_y_km_AoR.tolist()
 
-        elif var_type in ['strikeAndDip', 'LookupTable']:
+        elif strata_type in types_strata_obs:
             for loc_ref in range(len(pressure_x_km)):
                 if pressure_vals_MPa[loc_ref] >= critPressureVal[loc_ref]:
                     AoR_included_x_km.append(pressure_x_km[loc_ref])
@@ -381,13 +388,15 @@ def get_crit_pressure_aor_analysis(num_pressure_points, yaml_data, sm):
     are returned in an array where the value in each row corresponds with the
     pressure_x_km and pressure_y_km values in the same row.
     """
+    types_strata_pars = get_comp_types_strata_pars()
+    types_strata_obs = get_comp_types_strata_obs()
+    
     # Get the stratigrapy information from the .yaml file
-    strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
-    var_type = strata_var_info['var_type']
+    strata_type = get_strata_type_from_yaml(yaml_data)
 
-    if var_type == 'noVariation':
+    if strata_type in types_strata_pars:
         critPressure = None
-    elif var_type in ['strikeAndDip', 'LookupTable']:
+    elif strata_type in types_strata_obs:
         critPressure = np.zeros((num_pressure_points, 1))
 
     components = list(sm.component_models.values())
@@ -395,14 +404,14 @@ def get_crit_pressure_aor_analysis(num_pressure_points, yaml_data, sm):
     for output_component in components:
 
         if isinstance(output_component, iam.OpenWellbore):
-            if var_type == 'noVariation' and critPressure is None:
+            if strata_type in types_strata_pars and critPressure is None:
                 # If using uniform stratigraphy, only do this once
                 critPressureVal = AoR.get_crit_pressure(
                     output_component, sm=sm, yaml_data=yaml_data)
 
                 critPressure = critPressureVal / 1.0e+6
 
-            elif var_type in ['strikeAndDip', 'LookupTable']:
+            elif strata_type in types_strata_obs:
                 critPressureVal = AoR.get_crit_pressure(
                     output_component, sm=sm, yaml_data=yaml_data)
 

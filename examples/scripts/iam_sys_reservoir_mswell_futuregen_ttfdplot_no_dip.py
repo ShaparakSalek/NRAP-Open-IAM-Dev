@@ -49,7 +49,6 @@ if __name__ == "__main__":
 
     num_aquifers = 2
 
-    # These lists are required by stratigraphy_plot()
     shaleThicknesses = [shale1Thickness, shale2Thickness, shale3Thickness]
     aquiferThicknesses = [aquifer1Thickness, aquifer2Thickness]
 
@@ -157,6 +156,12 @@ if __name__ == "__main__":
     strata[-1].add_par('reservoirThickness',
                        value=reservoirThickness, vary=False)
     strata[-1].add_par('datumPressure', value=datumPressure, vary=False)
+    
+    composite_depth_pars = strata[-1].get_composite_depth_names()
+    
+    for comp_depth in composite_depth_pars:
+        par_expr = strata[-1].get_depth_expr(comp_depth)
+        strata[-1].add_composite_par(comp_depth, par_expr)
 
     numberOfWells = 6
     np.random.seed(random.randint(0, 1.0e6))
@@ -175,10 +180,9 @@ if __name__ == "__main__":
         adaptName = 'Adapter_{0:03}'.format(locRef)
 
         # Add reservoir component for the current well
-        ares.append(sm.add_component_model_object(
-            AnalyticalReservoir(name=aresName, parent=sm,
-                            locX=well_x_values[locRef], locY=well_y_values[locRef],
-                            injX=injectionX, injY=injectionY)))
+        ares.append(sm.add_component_model_object(AnalyticalReservoir(
+            name=aresName, parent=sm, locX=well_x_values[locRef], 
+            locY=well_y_values[locRef], injX=injectionX, injY=injectionY)))
 
         # Add parameters of reservoir component model
         ares[-1].add_par('injRate', value=3.7, vary=False)
@@ -298,7 +302,7 @@ if __name__ == "__main__":
         fgaq[-1].add_par('aqu_thick', value=aquiferThicknesses[0], vary=False)
         fgaq[-1].add_par('depth', value=aquiferTopDepths[0], vary=False)
         fgaq[-1].add_par('por', value=0.05, vary=False)
-        fgaq[-1].add_par('log_permh', value=-14.0, vary=False)
+        fgaq[-1].add_par('log_permh', value=-12.0, vary=False)
         fgaq[-1].add_par('log_aniso', value=0.3, vary=False)
         fgaq[-1].add_par('rel_vol_frac_calcite', value=0.1, vary=False)
 
@@ -358,6 +362,10 @@ if __name__ == "__main__":
 
     analysis = 'forward'
     s = None
-
+    
+    print('Making TTFD plots...')
+    
     iam_vis.ttfd_plot(yaml_data, model_data, sm, s, model_data['OutputDirectory'],
                       name=plotName, analysis=analysis)
+    
+    print('TTFD plots saved to {}.'.format(model_data['OutputDirectory']))

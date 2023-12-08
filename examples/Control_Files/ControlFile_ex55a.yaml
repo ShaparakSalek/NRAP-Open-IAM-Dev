@@ -132,12 +132,12 @@ Stratigraphy:
 Workflow:
     Type: AoR
     Options:
-        FigureName: Overall_AoR_Plot.tiff  # If not entered, the default name for the overall AoR plot is AoR_Workflow_Plot
+        FigureName: Overall_AoR_Plot.tiff     # If not entered, the default name for the overall AoR plot is AoR_Workflow_Plot
         FigureDPI: 300                        # This DPI applies to both the overall AoR figure and the AoR plots made for different metrics (default of 100)
         PlotInjectionSites: True
         InjectionCoordx: 2.37e+5
         InjectionCoordy: 4.41e+6
-        CriticalPressureMPa: Calculated # for this setup, the calculated pressure will be 1.16e+1 Mpa
+        CriticalPressureMPa: Calculated       # for this setup, the calculated pressure will be 1.16e+1 Mpa
         AutomateResCompSetup: True
         AutomateWellCompSetup: True
         AutomateAqCompSetup: True
@@ -147,14 +147,14 @@ Workflow:
             FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
-            Interpolation2D: False      # only set this to False if the wellbores are given z values
+            Interpolation2D: False            # only set this to False if the wellbores are given z values
             Parameters:
                 index: 1
         WellboreComponentType: OpenWellbore
         WellboreOptions:
             Locations:
                 file: source/components/reservoir/lookuptables/FutureGen2/1008_sims/fg1.csv
-                read_z_values: True     # If this is set to False, then Interpolation2D under ReservoirOptions needs to be set to True
+                read_z_values: True           # If this is set to False, then Interpolation2D under ReservoirOptions needs to be set to True
                 thin_point_density: True
                 min_x_spacing: 10000
                 min_y_spacing: 10000

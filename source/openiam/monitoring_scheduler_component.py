@@ -177,7 +177,6 @@ class MonitoringScheduler1(ComponentModel):
                         indices = generate_seq(max_num_cmpnts_to_monitor,
                                                array_to_be_returned=0)[0:num_indices]
                     indices = indices-1
-#                    print(common_indices)
                     cmpnts_indices = common_indices[indices]
 
                     # Update accumulator variable

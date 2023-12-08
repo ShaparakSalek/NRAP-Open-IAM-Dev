@@ -1115,14 +1115,14 @@ def get_comp_z_lists(sm, z_list, name, components_to_use):
         comp_z_lists.append([])
 
         for z_ref, z_val in enumerate(z_list):
-            if isinstance(z_list[z_ref], str) and 'Depth' in z_list[z_ref]:
+            if isinstance(z_val, str) and 'Depth' in z_val:
                 try:
-                    strat_comp_temp = sm.component_models['strata']
+                    strata_comp = sm.component_models['strata']
                 except KeyError:
                     # For simulations with spatially variable stratigraphy
-                    strat_comp_temp = sm.component_models['strata' + comp.name]
-
-                strata_info = iam_strata.get_strata_info_from_component(strat_comp_temp)
+                    strata_comp = sm.component_models['strata' + comp.name]
+                
+                strata_info = iam_strata.get_strata_info_from_component(strata_comp)
 
                 numShaleLayers = strata_info['numberOfShaleLayers']
 
@@ -1138,15 +1138,22 @@ def get_comp_z_lists(sm, z_list, name, components_to_use):
                     unitNumber = int(z_list[z_ref][5:-5])
 
                 try:
+                    if 'TopDepth' in z_val:
+                        top_mid_bottom = 'top'
+                    elif 'MidDepth' in z_val:
+                        top_mid_bottom = 'mid'
+                    elif 'Depth' in z_val:
+                        top_mid_bottom = 'bottom'
+                    
                     depth_val = iam_strata.get_unit_depth_from_component(
-                        numShaleLayers, strat_comp_temp, unitNumber=unitNumber,
-                        unitType=unitType, top_or_bottom='bottom')
+                        numShaleLayers, strata_comp, unitNumber=unitNumber,
+                        unitType=unitType, top_mid_bottom=top_mid_bottom)
                 except:
                     debug_msg = ''.join([
                         'For the GriddedRadialMetric plot ', name, ', the input ',
                         'provided for ZList (', z_list[z_ref], ') included a ',
                         'string input. The input does not correspond to any ',
-                        'unit depths available (e.g., aquifer1Depth ',
+                        'unit depths available (e.g., aquifer1MidDepth ',
                         'or shale2Depth). The ZList input will be set ',
                         'to a value of 500 m, and the depth closest to 500 m ',
                         'in the .npz z_coordinate files will be used.'])

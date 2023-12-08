@@ -14,6 +14,8 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
 
 try:
     import components.reservoir.theis.theis_reservoir_ROM as tresrom
@@ -315,25 +317,29 @@ class TheisReservoir(ComponentModel):
         # of injection wells
         self.process_injection_and_location_args(
             injX, injY, locX, locY, injTimes, injRates, setup=1)
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter reservoirThickness
         strata = name2obj_dict['strata']
         par_name = 'reservoirThickness'
         if (par_name not in self.pars) and (par_name not in self.deterministic_pars):
-            connect = None
-            if par_name in strata.pars:
-                connect = strata.pars
-            elif par_name in strata.deterministic_pars:
-                connect = strata.deterministic_pars
-            elif par_name in strata.default_pars:
-                connect = strata.default_pars
-            else:
-                err_msg = ''.join(['Unable to find "reservoirThickness" ',
-                                   'parameter. Please check setup of the stratigraphy.'])
-                logging.error(err_msg)
-                raise KeyError(err_msg)
+            if name2obj_dict['strata_type'] in types_strata_pars:
+                connect = get_strat_param_dict_for_link(par_name, strata)
+                
+                if connect is None:
+                    err_msg = ''.join(['Unable to find "reservoirThickness" ',
+                                       'parameter. Please check setup of the stratigraphy.'])
+                    logging.error(err_msg)
+                    raise KeyError(err_msg)
 
-            self.add_par_linked_to_par(par_name, connect[par_name])
+                self.add_par_linked_to_par(par_name, connect[par_name])
+                
+            elif name2obj_dict['strata_type'] in types_strata_obs:
+                self.add_par_linked_to_obs(par_name, strata.linkobs[par_name])
 
     @staticmethod
     def get_injection_data(comp_name, component_data, input_type):

@@ -1,5 +1,10 @@
 from .iam_base_classes import SystemModel, ComponentModel, SamplerModel, IAM_DIR
 from .stratigraphy_component import Stratigraphy
+from .dipping_stratigraphy_component import DippingStratigraphy
+# import of StratigraphyDataInterpolator should be placed before import 
+# of LookupTableStratigraphy
+from .stratigraphy_data_interpolator import StratigraphyDataInterpolator
+from .lookup_table_stratigraphy_component import LookupTableStratigraphy
 from .simple_reservoir_component import SimpleReservoir
 from .theis_reservoir_component import TheisReservoir
 from .analytical_reservoir_component import AnalyticalReservoir
@@ -55,6 +60,9 @@ __all__ = ['IAM_DIR',
            'ComponentModel',
            'SamplerModel',
            'Stratigraphy',
+           'DippingStratigraphy',
+           'StratigraphyDataInterpolator',
+           'LookupTableStratigraphy',
            'SimpleReservoir',
            'TheisReservoir',
            'AnalyticalReservoir',

@@ -287,8 +287,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
     brineDensityInput = yaml_input['BrineDensity']
 
     # Get the stratigraphy information from the .yaml file
-    strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
-    var_type = strata_var_info['var_type']
+    strata_type = iam_strata.get_strata_type_from_yaml(yaml_data)
 
     # This option specifies whether to evaluate the max. values over all times
     # (False) or evaluate the max. values for specific times (True).
@@ -440,7 +439,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
         results, critPressure = get_AoR_results(
             x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
             time_option=time_option, critPressureInput=critPressureInput,
-            calcCritPressureNoOW=calcCritPressureNoOW, var_type=var_type, 
+            calcCritPressureNoOW=calcCritPressureNoOW, strata_type=strata_type, 
             aq_number=aq_number, brineDensityInput=brineDensityInput)
 
         if pressure_critP_check:
@@ -469,7 +468,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                          InjectionCoordx=InjectionCoordx,
                          InjectionCoordy=InjectionCoordy,
                          grid_option=grid_option, critPressureInput=critPressureInput,
-                         var_type=var_type)
+                         strata_type=strata_type)
     else:
         # Get the min and max values over time, so the colorbar can use the
         # same limits in each figure.
@@ -486,7 +485,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                     analysis=analysis, time_option=time_option,
                     time_index=time_index, critPressureInput=critPressureInput, 
                     calcCritPressureNoOW=calcCritPressureNoOW, 
-                    var_type=var_type, aq_number=aq_number, 
+                    strata_type=strata_type, aq_number=aq_number, 
                     brineDensityInput=brineDensityInput)
 
                 if len(results[results > 0].tolist()) > 0:
@@ -510,7 +509,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
                 time_option=time_option, time_index=time_index,
                 critPressureInput=critPressureInput, calcCritPressureNoOW=calcCritPressureNoOW, 
-                var_type=var_type, aq_number=aq_number, brineDensityInput=brineDensityInput)
+                strata_type=strata_type, aq_number=aq_number, brineDensityInput=brineDensityInput)
 
             if pressure_critP_check:
                 if critPressureInput == 'Calculated':
@@ -540,13 +539,13 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                              InjectionCoordx=InjectionCoordx, InjectionCoordy=InjectionCoordy,
                              grid_option=grid_option, enforce_levels=enforce_levels,
                              min_value=min_value, max_value=max_value,
-                             critPressureInput=critPressureInput, var_type=var_type)
+                             critPressureInput=critPressureInput, strata_type=strata_type)
 
 
 def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                     analysis='forward',time_option=False, time_index=None,
                     critPressureInput=None, calcCritPressureNoOW=False, 
-                    var_type='noVariation', aq_number=None, brineDensityInput=None):
+                    strata_type='Stratigraphy', aq_number=None, brineDensityInput=None):
     """
     Evaluates and returns the maximum values of a metric for all locations.
     These maximum values are then used in a plot that is meant to inform the
@@ -554,14 +553,17 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
     results will only be evaluated at the time_index provided. Otherwise, the
     results returned are the maximum values across all times.
     """
+    types_strata_pars = iam_strata.get_comp_types_strata_pars()
+    types_strata_obs = iam_strata.get_comp_types_strata_obs()
+    
     time = sm.time_array / 365.25
 
     # This is used to store the maximum value of a metric at each location
     results = np.zeros((len(x_loc), 1))
 
-    if var_type == 'noVariation':
+    if strata_type in types_strata_pars:
         critPressure = None
-    elif var_type in ['strikeAndDip', 'LookupTable']:
+    elif strata_type in types_strata_obs:
         critPressure = np.zeros((len(x_loc), 1))
 
     for output_nm in output_names:
@@ -574,7 +576,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                     output_component, (iam.OpenWellbore, iam.MultisegmentedWellbore, 
                                        iam.CementedWellbore, iam.CementedWellboreWR, 
                                        iam.GeneralizedFlowRate)):
-                if var_type == 'noVariation' and critPressure is None:
+                if strata_type in types_strata_pars and critPressure is None:
                     # If using uniform stratigraphy, only do this once
                     critPressureVal = get_crit_pressure(
                         output_component, sm=sm, yaml_data=yaml_data, 
@@ -583,7 +585,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
                     critPressure = critPressureVal
 
-                elif var_type in ['strikeAndDip', 'LookupTable']:
+                elif strata_type in types_strata_obs:
                     critPressureVal = get_crit_pressure(
                         output_component, sm=sm, yaml_data=yaml_data, 
                         calcCritPressureNoOW=calcCritPressureNoOW, 
@@ -673,11 +675,14 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                      bold_labels=True, save_results=False, time_option=False,
                      time_index=None, InjectionCoordx=None, InjectionCoordy=None,
                      grid_option=True, enforce_levels=False, min_value=None,
-                     max_value=None, critPressureInput=None, var_type='noVariation'):
+                     max_value=None, critPressureInput=None, strata_type='Stratigraphy'):
     """
     Plots maximum results across all x and y values (x_loc and y_loc) for either
     all times (time_option is False) or a specific time (time option is True).
     """
+    types_strata_pars = iam_strata.get_comp_types_strata_pars()
+    types_strata_obs = iam_strata.get_comp_types_strata_obs()
+    
     time = sm.time_array / 365.25
 
     if bold_labels:
@@ -857,7 +862,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                          markersize=12, linestyle='none')
 
         if output_nm == 'pressure' and critPressureInput is not None:
-            if var_type == 'noVariation':
+            if strata_type in types_strata_pars:
                 pressure_levels = np.array([critPressureInput])
 
                 a, b = '{:.2e}'.format(critPressureInput).split('e')
@@ -884,7 +889,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                         results_temp[:, 0], pressure_levels, colors = 'r')
                     ncol_number += 1
 
-            elif var_type in ['strikeAndDip', 'LookupTable']:
+            elif strata_type in types_strata_obs:
                 # Gets rid of any nan values (from a wellbore being on the injection site)
                 x_loc_temp = x_loc[results[:, 0] > 0]
                 y_loc_temp = y_loc[results[:, 0] > 0]
@@ -1051,9 +1056,9 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
 
     # If the metric is pressure and a critical pressure was given, include it in the legend
     if Pcrit_Included:
-        if var_type == 'noVariation':
+        if strata_type in types_strata_pars:
             critPressureLabel = 'P$_{crit}$'
-        elif var_type in ['strikeAndDip', 'LookupTable']:
+        elif strata_type in types_strata_obs:
             critPressureLabel = 'P > Local P$_{crit}$'
         legend_element_critPressure = Line2D([0], [0], color='r',
                                              lw=2, label=critPressureLabel)
@@ -1182,21 +1187,21 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             if output_nm == 'pressure' and critPressureInput is not None:
                 results_formatted[0, 3] = 'Critical Pressure [MPa]'
 
-                if var_type == 'noVariation':
+                if strata_type in types_strata_pars:
                     results_formatted[1:None, 3] = np.ones(len(results)) * critPressureInput
 
-                elif var_type in ['strikeAndDip', 'LookupTable']:
+                elif strata_type in types_strata_obs:
                     results_formatted[1:None, 3] = critPressureInput[:, 0]
 
                 results_formatted[0, 4] = 'Critical Pressure Exceeded'
                 critPressureExceeded = np.zeros(len(results))
 
                 for locRef in range(len(results)):
-                    if var_type == 'noVariation':
+                    if strata_type in types_strata_pars:
                         if results[locRef, 0] >= critPressureInput:
                             critPressureExceeded[locRef] = 1
 
-                    elif var_type in ['stirkeAndDip', 'LookupTable']:
+                    elif strata_type in types_strata_obs:
                         if results[locRef, 0] >= critPressureInput[locRef, 0]:
                             critPressureExceeded[locRef] = 1
 
@@ -1407,7 +1412,7 @@ def get_t_indices(time_list, time_array):
 
 
 def get_crit_pressure(output_component, sm=None, yaml_data=None, 
-                      calcCritPressureNoOW=False, var_type='noVariation', 
+                      calcCritPressureNoOW=False, strata_type='Stratigraphy', 
                       aq_number=None, brineDensityInput=None):
     """
     This function calculates the critical pressure. If an OpenWellbore component 
@@ -1415,10 +1420,13 @@ def get_crit_pressure(output_component, sm=None, yaml_data=None,
     the function uses information from a stratigraphy component as well as a 
     brine density that can be provided under 
     """
+    types_strata_pars = iam_strata.get_comp_types_strata_pars()
+    types_strata_obs = iam_strata.get_comp_types_strata_obs()
+    
     if calcCritPressureNoOW:
-        if var_type == 'noVariation':
+        if strata_type in types_strata_pars:
             strat_comp = sm.component_models['strata']
-        else:
+        elif strata_type in types_strata_obs:
             strat_comp = sm.component_models['strata' + output_component.name]
         
         if aq_number is None:

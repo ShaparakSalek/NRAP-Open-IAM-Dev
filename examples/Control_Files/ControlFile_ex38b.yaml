@@ -1,0 +1,103 @@
+# OpenIAM Control File Example 38b
+#
+# This example is similar to control file example 38a, but it uses a 
+# different file for the LookupTableStratigraphy component and the well 
+# locations are randomly generated. The domain is shown with the 
+# Stratigraphy plot type.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex38b.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 5
+    TimeStep: 0.1
+    Analysis: forward
+    Components: [SimpleReservoir1, OpenWellbore1]
+    OutputDirectory: 'output/output_ex38b_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex38b'
+    Parameters:
+        numberOfShaleLayers: 3
+        datumPressure: 101325
+#-------------------------------------------------
+SimpleReservoir1:
+    Type: SimpleReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Parameters:
+        injRate:
+            value: 1
+            vary: False
+        logResPerm:
+            value: -11.0
+            vary: False
+    Outputs: [pressure, CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: SimpleReservoir1
+    Number: 6
+    RandomLocDomain:
+        xmin: -6000
+        xmax: 6000
+        ymin: -6000
+        ymax: 6000
+    LeakTo: aquifer2
+    Controls:
+        critPressureApproach: True
+    Parameters:
+        wellRadius:
+            value: 0.05
+            vary: False
+        logReservoirTransmissivity:
+            value: -10.0
+            vary: False
+        logAquiferTransmissivity:
+            value: -10.0
+            vary: False
+        brineSalinity:
+            value: 0.0475
+            vary: False
+        brineDensity:
+            value: 1025
+            vary: False
+    Outputs: [CO2_aquifer, brine_aquifer]
+#-------------------------------------------------
+Plots:
+    Pressure:
+        TimeSeries: [pressure]
+        Subplot:
+            Use: False
+    CO2_Saturation:
+        TimeSeries: [CO2saturation]
+        Subplot:
+            Use: False
+    CO2_Leakage:
+        TimeSeries: [CO2_aquifer]
+        Subplot:
+            Use: False
+    Brine_Leakage:
+        TimeSeries: [brine_aquifer]
+        Subplot:
+            Use: False
+    Strat_Plot:
+        Stratigraphy:
+            FigureDPI: 300
+            PlotWellbores: True
+            PlotWellLabels: False
+            PlotInjectionSites: True
+            PlotInjectionSiteLabels: True
+            SpecifyXandYGridLims:
+                gridXLims: [-6000, 6000]
+                gridYLims: [-6000, 6000]
+            View:
+                ViewAngleElevation: [5, 5, 5, 5]
+                ViewAngleAzimuth: [285, 300, 315, 330]

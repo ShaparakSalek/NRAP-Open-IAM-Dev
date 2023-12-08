@@ -1,0 +1,117 @@
+# OpenIAM Control File Example 8d
+#
+# This example demonstrates the use of the Analysis section of the control file.
+# This simulation only includes an AnalyticalReservoir component, and the Analysis 
+# section focuses on the impact of AnalyticalReservoir parameters on the outputs 
+# pressure and CO2saturation.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex8a.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 300
+    Components: [Reservoir1]
+    OutputDirectory: output/output_ex8d_{datetime}
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value: 625.0
+        vary: False
+    shale2Thickness:
+        value: 575.0
+        vary: False
+    shale3Thickness:
+        vary: False
+        value: 11.2
+    aquifer1Thickness:
+        value: 122.4
+        vary: False
+    aquifer2Thickness:
+        value: 119.2
+        vary: False
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+Reservoir1:
+    Type: AnalyticalReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Locations:
+        coordx: [282.84]     # The distance between the location and the injection site
+        coordy: [282.84]     # should not be smaller than the minimum reservoirRadius.
+    Parameters:
+        logResPerm:
+            min: -14
+            max: -12
+            value: -13
+        reservoirPorosity:
+            min: 0.1
+            max: 0.3
+            value: 0.2
+        reservoirRadius:
+            min: 500
+            max: 50000
+            value: 5000
+        injRate:
+            min: 0.01
+            max: 1
+            value: 0.1
+        brineResSaturation:
+            min: 0
+            max: 0.25
+            value: 0.125
+        brineCompressibility:
+            min: 3.63e-12
+            max: 2.31e-11
+            value: 1.0e-11
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+Analysis:
+    CorrelationCoeff:
+        CorrelationType: pearson
+        OutputTimeIndex: [10, 25, 50]
+        FigureDPI: 300
+        SaveCSVFiles: True
+    SensitivityCoeff:
+        Outputs: [pressure, CO2saturation]
+        FigureDPI: 300
+        SaveCSVFiles: True
+        OutputTimeIndex: [10, 25, 50]
+    StackedSensitivityBars:
+        Outputs: [pressure, CO2saturation]
+        FigureDPI: 300
+        SaveCSVFiles: True
+        OutputTimeIndex: [10, 25, 50]
+    MultiSensitivities:
+        Outputs: [pressure, CO2saturation]
+        OutputTimeIndex: [10, 25, 50]
+        FigureDPI: 300
+        SaveCSVFiles: True
+    TimeSeriesSensitivity:
+        Outputs: [pressure, CO2saturation]
+        FigureDPI: 300
+        SaveCSVFiles: True
+        NumberIncluded: 5
+#------------------------------------------------------
+Plots:
+    Reservoir_Conditions.tiff:
+        TimeSeriesStats: [pressure, CO2saturation]
+        Title: Reservoir Response
+        FigureDPI: 300
+        Subplot:
+            NumCols: 1
+            Reservoir1_000.pressure: 'Pressure at well #0'
+            Reservoir1_000.CO2saturation: '$CO_2$ Saturation at well #0'

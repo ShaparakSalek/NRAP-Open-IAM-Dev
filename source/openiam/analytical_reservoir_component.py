@@ -203,6 +203,7 @@ class AnalyticalReservoir(ComponentModel):
             warn_msg = ''.join([
                 'Parameter {} of AnalyticalReservoir component {} ',
                 'is out of boundaries.']).format(key, self.name)
+            
             if key.startswith('shale') and key.endswith('Thickness'):
                 if (val < self.pars_bounds['shaleThickness'][0]) or (
                         val > self.pars_bounds['shaleThickness'][1]):

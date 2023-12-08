@@ -29,7 +29,6 @@ from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
                      MultisegmentedWellbore)
 
 import openiam as iam
-import openiam.cfi.strata as iam_strata
 import openiam.visualize as iam_vis
 
 
@@ -52,15 +51,6 @@ if __name__ == "__main__":
     # These lists are required by stratigraphy_plot()
     shaleThicknessList = [shale1Thickness, shale2Thickness, shale3Thickness]
     aquiferThicknessList = [aquifer1Thickness, aquifer2Thickness]
-
-    strike = 315
-    dip = 5
-    dipDirection = 'NE'
-    coordxRefPoint = 0
-    coordyRefPoint = 0
-
-    dipDirectionDegrees = iam_strata.obtain_dip_direction_degrees(
-        strike, dipDirection)
 
     injectionX = 2500
     injectionY = 2500
@@ -139,9 +129,12 @@ if __name__ == "__main__":
     strata[-1].add_par('aquifer2Thickness', value=aquifer2Thickness, vary=False)
     strata[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
     strata[-1].add_par('datumPressure', value=datumPressure, vary=False)
-    # This is meant for the Control File interface, but it also calculates
-    # parameters like unit depths. Those unit depths are used in stratigraphy_plot().
-    strata[-1].connect_with_system()
+    
+    composite_depth_pars = strata[-1].get_composite_depth_names()
+    
+    for comp_depth in composite_depth_pars:
+        par_expr = strata[-1].get_depth_expr(comp_depth)
+        strata[-1].add_composite_par(comp_depth, par_expr)
 
     numberOfWells = 6
     np.random.seed(random.randint(0, 1.0e6))

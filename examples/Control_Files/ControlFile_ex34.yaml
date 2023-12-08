@@ -1,14 +1,16 @@
 # OpenIAM Control File Example 34
 #
-# This example is similar to the Control File Example 33a.
-# Please refer to the example description within that file. This example,
-# however, demonstrates the ability to set a variable with string inputs
-# representing a unit's thickness. Here, a GenericAquifer component is also
-# included. The aquifer's thickness (aqu_thick) is specified as
-# aquifer2Thickness and the aquifer's top_depth is specified as shale3Thickness.
-# Since shale 3 is the shale closests to the surface, shale3Thickness is equal
-# to shale3Depth (the bottom depth of shale 3, which is equal to the top depth
-# of aquifer 2).
+# This example is similar to the Control File Example 33a. Please refer to the 
+# example description within that file. This example, however, demonstrates the 
+# ability to set a variable with string inputs representing a unit's thickness. 
+# Here, a GenericAquifer component is also included. The aquifer's thickness 
+# (aqu_thick) is specified as aquifer2Thickness and the aquifer's top_depth is 
+# specified as shale3Thickness. Since shale 3 is the shale closests to the surface, 
+# shale3Thickness is equal to shale3Depth (the bottom depth of shale 3, which is 
+# equal to the top depth of aquifer 2). If these parameters (wellTop, reservoirDepth, 
+# aqu_thick, and topDepth) are not set by the user, however, they will automatically 
+# be linked to the DippingStratigraphy component. This example is used to demonstrate 
+# that one can use string inputs representing unit thicknesses or depths.
 #
 # This example also demonstrates the use of the Stratigraphy and StratigraphicColumn
 # plot types without any of the optional inputs provided. The default values will
@@ -27,35 +29,40 @@ ModelParams:
     OutputDirectory: output/output_ex34_{datetime}
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        strikeAndDip:
-            strike: 270
-            dip: 5
-            dipDirection: N
-            coordxRefPoint: 0
-            coordyRefPoint: 0
-    numberOfShaleLayers:
-        vary: False
-        value: 3
-    shale1Thickness:
-        value: 750.0
-        vary: False
-    shale2Thickness:
-        value: 950.0
-        vary: False
-    shale3Thickness:
-        value: 100
-        vary: False
-    aquifer1Thickness:
-        vary: False
-        value: 200
-    aquifer2Thickness:
-        vary: False
-        value: 150
-    reservoirThickness:
-        vary: False
-        value: 150
+DippingStratigraphy:
+    ReferenceLocation:
+        coordx: 0
+        coordy: 0
+    Controls:
+        dipDirection: N
+    Parameters:
+        strike:
+            value: 270
+            vary: False
+        dip:
+            value: 5
+            vary: False
+        numberOfShaleLayers:
+            vary: False
+            value: 3
+        shale1Thickness:
+            value: 750.0
+            vary: False
+        shale2Thickness:
+            value: 950.0
+            vary: False
+        shale3Thickness:
+            value: 100
+            vary: False
+        aquifer1Thickness:
+            vary: False
+            value: 200
+        aquifer2Thickness:
+            vary: False
+            value: 150
+        reservoirThickness:
+            vary: False
+            value: 150
 #-------------------------------------------------
 AnalyticalReservoir1:
     Type: AnalyticalReservoir

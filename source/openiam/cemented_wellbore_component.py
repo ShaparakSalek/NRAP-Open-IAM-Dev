@@ -14,6 +14,7 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.strata import get_comp_types_strata_pars, get_comp_types_strata_obs
 
 try:
     import components.wellbore.cemented as cwmodel
@@ -476,16 +477,17 @@ class CementedWellbore(ComponentModel):
 
         # Process dynamic inputs if any
         process_dynamic_inputs(self, component_data)
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Get strata component
         strata = name2obj_dict['strata']
+        
         # Determine number of shale layers
-        if 'numberOfShaleLayers' in strata.deterministic_pars:
-            num_shale_layers = strata.deterministic_pars['numberOfShaleLayers'].value
-        elif 'numberOfShaleLayers' in strata.default_pars:
-            num_shale_layers = strata.default_pars['numberOfShaleLayers'].value
-        else:
-            num_shale_layers = 3
+        num_shale_layers = strata.get_num_shale_layers()
 
         # Determine whether it's an unexpected scenario with more than 2 aquifers
         if 'LeakTo' in component_data:
@@ -508,14 +510,29 @@ class CementedWellbore(ComponentModel):
 
         # wellDepth can also come from table, so we need to add check for the
         # presence of the parameter among parameters of the component itself
-        strata = name2obj_dict['strata']
-        if 'wellDepth' not in self.pars and \
-                'wellDepth' not in self.deterministic_pars:
-            res_depth = '{}.shale1Thickness '.format(strata.name)
-            for il in range(1, num_shale_layers):
-                res_depth += ('+ {nm}.aquifer{il}Thickness + {nm}.shale{ilp1}Thickness '
-                              .format(nm=strata.name, il=il, ilp1=il+1))
-            self.add_composite_par('wellDepth', res_depth)
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            if 'wellDepth' not in self.pars and \
+                    'wellDepth' not in self.deterministic_pars:
+                res_depth = '{}.shale1Thickness '.format(strata.name)
+                for il in range(1, num_shale_layers):
+                    res_depth += ('+ {nm}.aquifer{il}Thickness + {nm}.shale{ilp1}Thickness '
+                                  .format(nm=strata.name, il=il, ilp1=il+1))
+                self.add_composite_par('wellDepth', res_depth)
+                
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            if 'wellDepth' in self.pars or 'wellDepth' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'wellDepth', 'shale1Depth')
+                
+                logging.warning(warning_msg)
+                    
+                if 'wellDepth' in self.pars:
+                    del self.pars['wellDepth']
+                
+                elif 'wellDepth' in self.deterministic_pars:
+                    del self.deterministic_pars['wellDepth']
+            
+            self.add_par_linked_to_obs('wellDepth', strata.linkobs['shale1Depth'])
 
         tz = self.thief_zone
         if 'depthRatio' in self.pars or 'depthRatio' in self.deterministic_pars:
@@ -525,14 +542,20 @@ class CementedWellbore(ComponentModel):
                                 'Please check your setup.'])
             logging.warning(warn_msg)
         else:
-            depth_ratio = '({nm}.aquifer{tz}Thickness/2'.format(nm=strata.name, tz=tz)
+            depth_ratio = '({nm}.aquifer{tz}Thickness/2'.format(
+                nm=strata.name, tz=tz)
             for il in range(tz+1, num_shale_layers):
                 depth_ratio += ' + {nm}.shale{il}Thickness + {nm}.aquifer{il}Thickness'.format(
                     nm=strata.name, il=il)
             depth_ratio += ' + {nm}.shale{nsl}Thickness)'.format(
                 nm=strata.name, nsl=num_shale_layers)
             depth_ratio += '/{selfm}.wellDepth'.format(selfm=self.name)
-            self.add_composite_par('depthRatio', depth_ratio)
+            
+            if name2obj_dict['strata_type'] in types_strata_pars:
+                self.add_composite_par('depthRatio', depth_ratio)
+                
+            elif name2obj_dict['strata_type'] in types_strata_obs:
+                self.add_par_linked_to_composite_obs('depthRatio', depth_ratio)
 
         # Make model connections
         if 'Connection' in component_data:

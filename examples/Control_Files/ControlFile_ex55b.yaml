@@ -27,12 +27,11 @@ ModelParams:
     GenerateCombOutputFile: False
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        LookupTableStratigraphy:
-            FileName: 'stratigraphy.csv'
-            FileDirectory: 'examples/Control_Files/input_data/ex32b'
-            MaxPointDistance: 100
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex32b'
+    Parameters:
+        numberOfShaleLayers: 5
 #-------------------------------------------------
 Workflow:
     Type: AoR

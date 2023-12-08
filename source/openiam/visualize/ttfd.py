@@ -35,6 +35,7 @@ sys.path.append(SOURCE_DIR)
 
 import openiam.cfi.commons as iamcommons
 import openiam.cfi.strata as strata
+from openiam.visualize.get_strat_obs import get_strat_comp_obs
 
 TTFD_RESERVOIR_COMPONENTS = ['LookupTableReservoir',
                              'SimpleReservoir',
@@ -125,9 +126,8 @@ INDICATOR = {'pH': 'absolute', 'Pressure': 'relative',
              'CarbonateAquifer': 'absolute'}
 
 
-def ttfd_plot(yaml_data, model_data, sm, s,
-              output_dir, name='TTFD_Figure1', analysis='lhs',
-              figsize=(10, 8), genfontsize=12,
+def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1', 
+              analysis='lhs', figsize=(10, 8), genfontsize=12,
               axislabelfontsize=14, titlefontsize=14, boldlabels=True):
     """
     Makes a map-view figure showing the estimated time to first detection (TTFD)
@@ -185,6 +185,9 @@ def ttfd_plot(yaml_data, model_data, sm, s,
 
     :return: None
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     plume_metric_abbrev = yaml_data['Plots'][name]['TTFD']['PlumeType']
     aq_name_list = yaml_data['Plots'][name]['TTFD']['ComponentNameList']
 
@@ -206,10 +209,10 @@ def ttfd_plot(yaml_data, model_data, sm, s,
             monitoringCoordZ = None
 
     if not monitoringTTFD:
-        monitoringCoordX = None
-        monitoringCoordY = None
-        monitoringCoordZ = None
-
+        monitoringCoordX = [None]
+        monitoringCoordY = [None]
+        monitoringCoordZ = [None]
+                
     numPointsInAq = TTFD_yaml_input_dict['numPointsInAq']
     numPointsInShales = TTFD_yaml_input_dict['numPointsInShales']
 
@@ -227,6 +230,51 @@ def ttfd_plot(yaml_data, model_data, sm, s,
         selected_labelfontweight = 'bold'
     else:
         selected_labelfontweight = 'normal'
+    
+    # Get the stratigraphy information
+    strata_type = strata.get_strata_type_from_yaml(yaml_data)
+
+    # Get a stratigraphy component
+    if strata_type in types_strata_pars:
+        strata_comp = sm.component_models['strata']
+        
+        strata_dict = strata.get_strata_info_from_component(strata_comp)
+
+        numShaleLayers = strata_dict['numberOfShaleLayers']
+        
+    elif strata_type in types_strata_obs:
+        strata_comp = None
+        
+        components = list(sm.component_models.values())
+        
+        for comp in components:
+            if comp.class_type in types_strata_obs:
+                numShaleLayers = comp.get_num_shale_layers()
+                break
+        
+        del components
+    
+    # Check if any of the monitoringCoordZ were entered as strings representing depths
+    if monitoringCoordZ:
+        for ind, coordz in enumerate(monitoringCoordZ):
+            if isinstance(coordz, str):
+                if strata_type in types_strata_pars:
+                    # The monitoringCoordZ values need to be negative
+                    monitoringCoordZ[ind] = -iamcommons.get_parameter_val(
+                        strata_comp, coordz)
+                    
+                elif strata_type in types_strata_obs:
+                    stratigraphy_by_loc = get_strat_comp_obs(
+                        float(monitoringCoordX[ind]), float(monitoringCoordY[ind]), 
+                        numShaleLayers, yaml_data)
+                    
+                    if stratigraphy_by_loc:
+                        try:
+                            monitoringCoordZ[ind] = -np.max(stratigraphy_by_loc[coordz])
+                        except:
+                            monitoringCoordZ[ind] = 0
+                    else:
+                        monitoringCoordZ[ind] = 0
 
     time_array = sm.time_array
 
@@ -235,55 +283,25 @@ def ttfd_plot(yaml_data, model_data, sm, s,
             res_comp_injX, res_comp_injY, x_range, y_range = \
                 get_aq_comp_lists_and_xy_grids(sm, yaml_data,
                                                name, aq_name_list)
-
+    
     x_grid, y_grid = make_xandy_grids(
         x_range, y_range, x_grid_spacing=x_grid_spacing,
         y_grid_spacing=y_grid_spacing, EnforceGridXandYLims=EnforceGridXandYLims,
-        gridXLims=gridXLims, gridYLims=gridYLims,
-        monitoringCoordX=monitoringCoordX, monitoringCoordY=monitoringCoordY)
-
-    strata_var_info = strata.get_strata_var_info_from_yaml(yaml_data)
-
-    var_type = strata_var_info['var_type']
-    strike = strata_var_info['strike']
-    dip = strata_var_info['dip']
-    dipDirection = strata_var_info['dipDirection']
-    coordxReferencePoint = strata_var_info['coordxReferencePoint']
-    coordyReferencePoint = strata_var_info['coordyReferencePoint']
-
-    # Get a stratigraphy component
-    if var_type == 'noVariation':
-        strata_comp = sm.component_models['strata']
-    elif var_type == 'strikeAndDip':
-        strata_comp = sm.component_models['strataRefPoint']
-
-    strata_dict = strata.get_strata_info_from_component(strata_comp)
-
-    numShaleLayers = strata_dict['numberOfShaleLayers']
-    shaleThicknesses = strata_dict['shaleThicknesses']
-    aquiferThicknesses = strata_dict['aquiferThicknesses']
-    reservoirThickness = strata_dict['reservoirThickness']
-
-    # If unit thicknesses change over space, these are updated within the loop
-    aquiferBottomDepths = get_aquifer_bottom_depths(
-        numShaleLayers, shaleThicknesses, aquiferThicknesses)
-
+        gridXLims=gridXLims, gridYLims=gridYLims, monitoringCoordX=monitoringCoordX, 
+        monitoringCoordY=monitoringCoordY)
+    
     z_grid = get_z_values(
-        numShaleLayers, shaleThicknesses, aquiferThicknesses, reservoirThickness,
-        aquiferBottomDepths, x_grid, y_grid, aq_component_types,
-        var_type=var_type, strike=strike, dip=dip, dipDirection=dipDirection,
-        coordxReferencePoint=coordxReferencePoint,
-        coordyReferencePoint=coordyReferencePoint,
-        stratigraphy_comp=strata_comp, numPointsInAq=numPointsInAq,
+        yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
+        strata_type=strata_type, stratigraphy_comp=strata_comp, numPointsInAq=numPointsInAq,
         numPointsInShales=numPointsInShales, monitoringCoordZ=monitoringCoordZ)
 
     if output_dir and write_DREAM_output:
-        write_dream_grid(x_grid, y_grid, z_grid, output_dir, var_type=var_type)
+        write_dream_grid(x_grid, y_grid, z_grid, output_dir, strata_type=strata_type)
 
     checkCarbAq = 'CarbonateAquifer' in aq_component_types
 
     if save_results:
-        save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type=var_type,
+        save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, strata_type=strata_type,
                          checkCarbAq=checkCarbAq)
 
     if analysis in ['lhs', 'parstudy']:
@@ -301,21 +319,17 @@ def ttfd_plot(yaml_data, model_data, sm, s,
 
         plotType = 'plumeTimings'
         plumeTimings = get_plume_timings(
-            sm, s, time_array, sample, plume_metric_abbrev,
+            yaml_data, sm, s, time_array, sample, plume_metric_abbrev,
             x_grid, y_grid, z_grid, aq_components, aq_component_types,
             aq_component_xvals, aq_component_yvals, aq_component_indices,
-            numShaleLayers, shaleThicknesses, aquiferThicknesses,
-            reservoirThickness, strata_comp, analysis=analysis,
-            strike=strike, dip=dip, dipDirection=dipDirection,
-            coordxReferencePoint=coordxReferencePoint,
-            coordyReferencePoint=coordyReferencePoint, var_type=var_type)
+            numShaleLayers, strata_comp, analysis=analysis, strata_type=strata_type)
 
         if save_results:
             save_results_to_csv(
                 plumeTimings, x_grid, y_grid, z_grid, output_dir, plume_metric_abbrev,
                 plotType, ttfd_list=None, ttfd_x_list=None, ttfd_y_list=None,
                 ttfd_z_list=None, analysis=analysis, realization=realization,
-                num_samples=num_samples, var_type=var_type,
+                num_samples=num_samples, strata_type=strata_type,
                 checkCarbAq=checkCarbAq)
 
         if analysis in ['lhs', 'parstudy']:
@@ -324,7 +338,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
         if write_DREAM_output:
             write_dream_output(
                 plumeTimings, x_grid, y_grid, z_grid, plume_metric_abbrev,
-                output_dir, realization=realization, var_type=var_type,
+                output_dir, realization=realization, strata_type=strata_type,
                 aq_component_ithresh=aq_component_ithresh, checkCarbAq=checkCarbAq)
 
         plot_plume_metric(
@@ -336,7 +350,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
             genfontsize=genfontsize, axislabelfontsize=axislabelfontsize,
             titlefontsize=titlefontsize, labelfontweight=selected_labelfontweight,
             colormap='viridis', figsize=figsize, res_comp_injX=res_comp_injX,
-            res_comp_injY=res_comp_injY, var_type=var_type)
+            res_comp_injY=res_comp_injY, strata_type=strata_type)
 
         if monitoringTTFD:
             monitoringXIndex, monitoringYIndex = get_xandy_monitoring_indices(
@@ -349,7 +363,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
                     monitoringCoordX, monitoringCoordY, monitoringCoordZ,
                     monitoringXIndex, monitoringYIndex,
                     monitorHorizontalWindow, monitorVerticalWindow,
-                    aq_component_types, var_type=var_type)
+                    aq_component_types, strata_type=strata_type)
 
             if save_results:
                 save_results_to_csv(
@@ -357,7 +371,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
                     plotType, ttfd_list=ttfd_list, ttfd_x_list=ttfd_x_list,
                     ttfd_y_list=ttfd_y_list, ttfd_z_list=ttfd_z_list,
                     analysis=analysis, realization=realization,
-                    num_samples=num_samples, var_type=var_type,
+                    num_samples=num_samples, strata_type=strata_type,
                     checkCarbAq=checkCarbAq)
 
             plot_plume_metric(
@@ -370,7 +384,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
                 genfontsize=genfontsize, axislabelfontsize=axislabelfontsize,
                 titlefontsize=titlefontsize, labelfontweight=selected_labelfontweight,
                 colormap='viridis', figsize=figsize, res_comp_injX=res_comp_injX,
-                res_comp_injY=res_comp_injY, var_type=var_type)
+                res_comp_injY=res_comp_injY, strata_type=strata_type)
     # End of loop through LHS samples (or a singular forward simulation)
 
     if analysis in ['lhs', 'parstudy']:
@@ -383,7 +397,7 @@ def ttfd_plot(yaml_data, model_data, sm, s,
                 plumeProb, x_grid, y_grid, z_grid, output_dir, plume_metric_abbrev,
                 plotType, ttfd_list=None, ttfd_x_list=None, ttfd_y_list=None, 
                 ttfd_z_list=None, analysis=analysis, realization=realization,
-                num_samples=num_samples, var_type=var_type, checkCarbAq=checkCarbAq)
+                num_samples=num_samples, strata_type=strata_type, checkCarbAq=checkCarbAq)
 
         plot_plume_metric(
             plumeProb, plotType, yaml_data, num_samples, time_array, x_grid,
@@ -394,89 +408,86 @@ def ttfd_plot(yaml_data, model_data, sm, s,
             genfontsize=genfontsize, axislabelfontsize=axislabelfontsize,
             titlefontsize=titlefontsize, labelfontweight=selected_labelfontweight,
             colormap='plasma', figsize=figsize, res_comp_injX=res_comp_injX,
-            res_comp_injY=res_comp_injY, var_type=var_type)
+            res_comp_injY=res_comp_injY, strata_type=strata_type)
 
 
-def get_aquifer_bottom_depths(numShaleLayers, shaleThicknesses, aquiferThicknesses):
-    """
-    This function is used to create aquifer bottom depths from unit thicknesses
-    """
-    aquiferBottomDepths = [None] * (numShaleLayers - 1)
-
-    for aquiferRef in range(numShaleLayers - 2, -1, -1):
-        aquiferBottomDepths[aquiferRef] = sum(shaleThicknesses[
-            aquiferRef + 1:None]) + sum(aquiferThicknesses[aquiferRef:None])
-
-    return aquiferBottomDepths
-
-
-def get_z_values(numShaleLayers, shaleThicknesses, aquiferThicknesses,
-                 reservoirThickness, aquiferBottomDepths, x_grid, y_grid,
-                 aq_component_types, var_type='noVariation', strike=None,
-                 dip=None, dipDirection=None, coordxReferencePoint=None,
-                 coordyReferencePoint=None, stratigraphy_comp=None,
-                 numPointsInAq=10, numPointsInShales=3,
-                 monitoringCoordZ=None, min_z_spacing=0.01, lowest_depth=0):
+def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types, 
+                 strata_type='Stratigraphy', stratigraphy_comp=None, 
+                 numPointsInAq=10, numPointsInShales=3, monitoringCoordZ=None, 
+                 min_z_spacing=0.01, lowest_depth=0):
     """
     This function is used to create the z values used in the calculation of TTFD.
     Any monitoringCoordZ values provided are included.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     # This is used to keep track of whether each monitoringCoordZ value
     # has been added (1 for unused, 0 for already inserted).
-    if isinstance(monitoringCoordZ, list):
-        monitoringCoordZCheck = np.ones(len(monitoringCoordZ))
-        # For 'strikeAndDip', the ZCheck needs to be reset within the loop
-        monitoringCoordZCheckOrig = monitoringCoordZCheck[:]
+    monitoringCoordZCheck = np.ones(len(monitoringCoordZ))
+    # For spatially variable depths, the ZCheck needs to be reset within the loop
+    monitoringCoordZCheckOrig = monitoringCoordZCheck[:]
 
-    elif isinstance(monitoringCoordZ, (int, float)):
-        monitoringCoordZCheck = 1
-        monitoringCoordZCheckOrig = 1
-
-    if var_type == 'strikeAndDip' and not 'CarbonateAquifer' in aq_component_types:
+    if strata_type in types_strata_obs and not 'CarbonateAquifer' in aq_component_types:
         z = None
 
         for xRef, xVal in enumerate(x_grid):
             for yRef, yVal in enumerate(y_grid[:, 0]):
                 # Reset monitoringCoordZCheck, if it is being used
-                if monitoringCoordZ is not None:
+                if not None in monitoringCoordZ:
                     monitoringCoordZCheck = monitoringCoordZCheckOrig[:]
+                
+                stratigraphy_by_loc = get_strat_comp_obs(
+                    float(xVal), float(yVal), numShaleLayers, yaml_data)
+                
+                shaleThicknessesUpdated = []
+                aquiferThicknessesUpdated = []
+                aquiferBottomDepths = []
+                if not stratigraphy_by_loc:
+                    shaleThicknessesUpdated.append(None)
+                    aquiferThicknessesUpdated.append(None)
+                    aquiferBottomDepths.append(None)
+                else:
+                    for shaleRef in range(numShaleLayers):
+                        shaleThickness = np.max(stratigraphy_by_loc[
+                            'shale{}Thickness'.format(shaleRef + 1)])
+                        if shaleThickness:
+                            shaleThicknessesUpdated.append(shaleThickness)
+                        else:
+                            shaleThicknessesUpdated.append(None)
+                        
+                        if (shaleRef + 1) < numShaleLayers:
+                            aquiferThickness = np.max(stratigraphy_by_loc[
+                                'aquifer{}Thickness'.format(shaleRef + 1)])
+                            
+                            if aquiferThickness:
+                                aquiferThicknessesUpdated.append(np.max(stratigraphy_by_loc[
+                                    'aquifer{}Thickness'.format(shaleRef + 1)]))
+                                
+                                aquiferBottomDepths.append(np.max(stratigraphy_by_loc[
+                                    'aquifer{}Depth'.format(shaleRef + 1)]))
+                            else:
+                                aquiferThicknessesUpdated.append(None)
+                                aquiferBottomDepths.append(None)
+                
+                if not None in aquiferBottomDepths:
+                    for shaleRef in range(numShaleLayers - 1):
+                        z_aq = np.linspace(-aquiferBottomDepths[shaleRef],
+                                           -aquiferBottomDepths[shaleRef]
+                                           + aquiferThicknessesUpdated[shaleRef],
+                                           numPointsInAq)
+                        z_sh = np.linspace(z_aq[-1], z_aq[-1]
+                                           + shaleThicknessesUpdated[shaleRef + 1],
+                                           numPointsInShales)
 
-                updatedStratigraphy = strata.update_stratigraphy_by_strike_and_dip(
-                    numberOfShaleLayers=numShaleLayers,
-                    shaleThicknessList=shaleThicknesses[:],
-                    aquiferThicknessList=aquiferThicknesses[:],
-                    reservoirThickness=reservoirThickness,
-                    strike=strike, dip=dip, dipDirection=dipDirection,
-                    coordxRefPoint=coordxReferencePoint,
-                    coordyRefPoint=coordyReferencePoint,
-                    location_x=float(xVal), location_y=float(yVal),
-                    strataRefPoint=stratigraphy_comp)
+                        if shaleRef == 0:
+                            z_sh_lowest = np.linspace(
+                                z_aq[0] - shaleThicknessesUpdated[shaleRef], z_aq[0],
+                                numPointsInShales)
 
-                shaleThicknessesUpdated = updatedStratigraphy['shaleThicknessList']
-                aquiferThicknessesUpdated = updatedStratigraphy['aquiferThicknessList']
-
-                aquiferBottomDepths = get_aquifer_bottom_depths(
-                    numShaleLayers, shaleThicknessesUpdated,
-                    aquiferThicknessesUpdated)
-
-                for shaleRef in range(numShaleLayers - 1):
-                    z_aq = np.linspace(-aquiferBottomDepths[shaleRef],
-                                       -aquiferBottomDepths[shaleRef]
-                                       + aquiferThicknessesUpdated[shaleRef],
-                                       numPointsInAq)
-                    z_sh = np.linspace(z_aq[-1], z_aq[-1]
-                                       + shaleThicknessesUpdated[shaleRef + 1],
-                                       numPointsInShales)
-
-                    if shaleRef == 0:
-                        z_sh_lowest = np.linspace(
-                            z_aq[0] - shaleThicknessesUpdated[shaleRef], z_aq[0],
-                            numPointsInShales)
-
-                    # Check if a monitoringCoordZ value fits within the current
-                    # aquifer or shale. If so, add it.
-                    if monitoringCoordZ is not None:
-                        if isinstance(monitoringCoordZ, list):
+                        # Check if a monitoringCoordZ value fits within the current
+                        # aquifer or shale. If so, add it.
+                        if not None in monitoringCoordZ:
                             for monitorRef, monitoringCoordZVal in enumerate(monitoringCoordZ):
                                 if monitoringCoordZCheck[monitorRef]:
                                     # Check if the point is within this aquifer or shale
@@ -503,64 +514,49 @@ def get_z_values(numShaleLayers, shaleThicknesses, aquiferThicknesses,
                                             z_sh = np.unique(z_sh_list)
                                         monitoringCoordZCheck[monitorRef] = 0
 
-                        else:
-                            # Only one monitoring location
-                            if monitoringCoordZCheck:
-                                if np.min(z_aq) <= monitoringCoordZ < np.max(z_aq):
-                                    min_diff = np.min(np.abs(
-                                        z_aq - monitoringCoordZ))
-                                    if min_diff > min_z_spacing:
-                                        z_aq_list = z_aq.tolist()
-                                        z_aq_list.append(monitoringCoordZ)
-                                        z_aq = np.unique(z_aq_list)
-                                    monitoringCoordZCheck = 0
+                        if shaleRef == 0:
+                            z_temp = np.concatenate(
+                                (z_sh_lowest[:-1], z_aq[:-1], z_sh[:-1]), axis=0)
 
-                                elif np.min(z_sh) <= monitoringCoordZ < np.max(z_sh):
-                                    min_diff = np.min(np.abs(
-                                        z_sh - monitoringCoordZ))
-                                    if min_diff > min_z_spacing:
-                                        z_sh_list = z_sh.tolist()
-                                        z_sh_list.append(monitoringCoordZ)
-                                        z_sh = np.unique(z_sh_list)
-                                    monitoringCoordZCheck = 0
+                        elif shaleRef not in [0, (numShaleLayers - 2)]:
+                            z_temp = np.concatenate((z_temp[:-1], z_aq[:-1],
+                                                     z_sh[:-1]), axis=0)
 
-                    if shaleRef == 0:
-                        z_temp = np.concatenate(
-                            (z_sh_lowest[:-1], z_aq[:-1], z_sh[:-1]), axis=0)
+                        elif shaleRef == (numShaleLayers - 2):
+                            z_temp = np.concatenate((z_temp[:-1], z_aq[:-1], 
+                                                     z_sh[:]), axis=0)
 
-                    elif shaleRef not in [0, (numShaleLayers - 2)]:
-                        z_temp = np.concatenate((z_temp[:-1], z_aq[:-1],
-                                                 z_sh[:-1]), axis=0)
+                            if z is None:
+                                z = np.zeros((len(z_temp), len(y_grid), len(x_grid)))
 
-                    elif shaleRef == (numShaleLayers - 2):
-                        z_temp = np.concatenate((z_temp[:-1], z_aq[:-1], z_sh[:]),
-                                           axis=0)
+                            if len(z_temp) == z.shape[0]:
+                                z[:, yRef, xRef] = z_temp[:]
+                            elif len(z_temp) > z.shape[0]:
+                                # If spatial changes in depths makethe number of 
+                                # z grid points higher than the number of points 
+                                # it had for the first x and y values considered, 
+                                # do not use the extra points.
+                                z[:, yRef, xRef] = z_temp[0:z.shape[0]]
+                            elif len(z_temp) < z.shape[0]:
+                                num_extra_points = z.shape[0] - len(z_temp)
+                                z_extra = np.linspace(z_temp[-1], lowest_depth,
+                                                   num_extra_points)
 
-                        if z is None:
-                            z = np.zeros((len(z_temp), len(y_grid), len(x_grid)))
+                                # If spatial changes in depths make the number of
+                                # z grid points lower than the number of points 
+                                # it had for the first x and y values considered, 
+                                # add extra points to compensate.
+                                z_temp = np.concatenate((z_temp[:], z_extra[:]), axis=0)
 
-                        if len(z_temp) == z.shape[0]:
-                            z[:, yRef, xRef] = z_temp[:]
-                        elif len(z_temp) > z.shape[0]:
-                            # If the changes in depth due to strike and dip make
-                            # the number of z grid points higher than the number
-                            # of points it had for the first x and y values
-                            # considered, do not use the extra points.
-                            z[:, yRef, xRef] = z_temp[0:z.shape[0]]
-                        elif len(z_temp) < z.shape[0]:
-                            num_extra_points = z.shape[0] - len(z_temp)
-                            z_extra = np.linspace(z_temp[-1], lowest_depth,
-                                               num_extra_points)
+                                z[:, yRef, xRef] = z_temp[:]
 
-                            # If the changes in depth due to strike and dip make
-                            # the number of z grid points lower than the number
-                            # of points it had for the first x and y values
-                            # considered, add extra points to compensate.
-                            z_temp = np.concatenate((z_temp[:], z_extra[:]), axis=0)
-
-                            z[:, yRef, xRef] = z_temp[:]
-
-    elif var_type == 'noVariation' and not 'CarbonateAquifer' in aq_component_types:
+    elif strata_type in types_strata_pars and not 'CarbonateAquifer' in aq_component_types:
+        strata_dict = strata.get_strata_info_from_component(stratigraphy_comp)
+        
+        shaleThicknesses = strata_dict['shaleThicknesses']
+        aquiferThicknesses = strata_dict['aquiferThicknesses']
+        aquiferBottomDepths = strata_dict['aquiferDepths']
+        
         for shaleRef in range(numShaleLayers - 1):
             z_aq = np.linspace(-aquiferBottomDepths[shaleRef],
                                -aquiferBottomDepths[shaleRef]
@@ -576,57 +572,36 @@ def get_z_values(numShaleLayers, shaleThicknesses, aquiferThicknesses,
 
             # Check if a monitoringCoordZ value fits within the current
             # aquifer or shale. If so, add it.
-            if monitoringCoordZ is not None:
-                if isinstance(monitoringCoordZ, list):
-                    for monitorRef, monitoringCoordZVal in enumerate(monitoringCoordZ):
-                        if monitoringCoordZCheck[monitorRef]:
-                            if np.min(z_aq) <= monitoringCoordZVal < np.max(z_aq):
-                                min_diff = np.min(
-                                    np.abs(z_aq - monitoringCoordZVal))
-                                if min_diff > min_z_spacing:
-                                    z_aq_list = z_aq.tolist()
-                                    z_aq_list.append(monitoringCoordZVal)
-                                    z_aq = np.unique(z_aq_list)
-                                monitoringCoordZCheck[monitorRef] = 0
-
-                            elif np.min(z_sh) <= monitoringCoordZVal < np.max(z_sh):
-                                min_diff = np.min(
-                                    np.abs(z_sh - monitoringCoordZVal))
-                                if min_diff > min_z_spacing:
-                                    z_sh_list = z_sh.tolist()
-                                    z_sh_list.append(monitoringCoordZVal)
-                                    z_sh = np.unique(z_sh_list)
-                                monitoringCoordZCheck[monitorRef] = 0
-
-                else:
-                    # Only one monitoring location
-                    if monitoringCoordZCheck:
-                        if np.min(z_aq) <= monitoringCoordZ < np.max(z_aq):
-                            min_diff = np.min(np.abs(z_aq - monitoringCoordZ))
+            if not None in monitoringCoordZ:
+                for monitorRef, monitoringCoordZVal in enumerate(monitoringCoordZ):
+                    if monitoringCoordZCheck[monitorRef]:
+                        if np.min(z_aq) <= monitoringCoordZVal < np.max(z_aq):
+                            min_diff = np.min(
+                                np.abs(z_aq - monitoringCoordZVal))
                             if min_diff > min_z_spacing:
                                 z_aq_list = z_aq.tolist()
-                                z_aq_list.append(monitoringCoordZ)
+                                z_aq_list.append(monitoringCoordZVal)
                                 z_aq = np.unique(z_aq_list)
-                            monitoringCoordZCheck = 0
+                            monitoringCoordZCheck[monitorRef] = 0
 
-                        elif np.min(z_sh) <= monitoringCoordZ < np.max(z_sh):
-                            min_diff = np.min(np.abs(
-                                z_sh_list - monitoringCoordZ))
+                        elif np.min(z_sh) <= monitoringCoordZVal < np.max(z_sh):
+                            min_diff = np.min(
+                                np.abs(z_sh - monitoringCoordZVal))
                             if min_diff > min_z_spacing:
                                 z_sh_list = z_sh.tolist()
-                                z_sh_list.append(monitoringCoordZ)
+                                z_sh_list.append(monitoringCoordZVal)
                                 z_sh = np.unique(z_sh_list)
-                            monitoringCoordZCheck = 0
+                            monitoringCoordZCheck[monitorRef] = 0
 
             if shaleRef == 0:
                 z = np.concatenate(
                     (z_sh_lowest[:-1], z_aq[:-1], z_sh[:-1]), axis=0)
 
             elif shaleRef not in [0, (numShaleLayers - 2)]:
-                z = np.concatenate((z[:-1], z_aq[:-1], z_sh[:-1]), axis=0)
+                z = np.concatenate((z, z_aq[:-1], z_sh[:-1]), axis=0)
 
             elif shaleRef == (numShaleLayers - 2):
-                z = np.concatenate((z[:-1], z_aq[:-1], z_sh[:]), axis=0)[:, None, None]
+                z = np.concatenate((z, z_aq[:-1], z_sh[:]), axis=0)[:, None, None]
 
     elif 'CarbonateAquifer' in aq_component_types:
         z = None
@@ -634,14 +609,11 @@ def get_z_values(numShaleLayers, shaleThicknesses, aquiferThicknesses,
     return z
 
 
-def get_plume_timings(sm, s, time_array, sample, plume_metric_abbrev,
+def get_plume_timings(yaml_data, sm, s, time_array, sample, plume_metric_abbrev,
                       x_grid, y_grid, z_grid, aq_components, aq_component_types,
                       aq_component_xvals, aq_component_yvals, aq_component_indices,
-                      numShaleLayers, shaleThicknesses, aquiferThicknesses,
-                      reservoirThickness, strata_comp, analysis='lhs',
-                      strike=None, dip=None, dipDirection=None,
-                      coordxReferencePoint=None, coordyReferencePoint=None,
-                      var_type='noVariation'):
+                      numShaleLayers, strata_comp, analysis='lhs',
+                      strata_type='Stratigraphy'):
     """
     Function to calculate earliest plume timings based on contaminant
     plume dimensions over time.
@@ -712,51 +684,12 @@ def get_plume_timings(sm, s, time_array, sample, plume_metric_abbrev,
     :param numShaleLayers: number of shale layers
     :type numShaleLayers: int
 
-    :param shaleThicknesses: List of the thickness for each shale layer, with
-        the first entry representing the lowest shale and the last entry
-        representing the highest shale
-    :type shaleThicknesses: list
-
-    :param aquiferThicknesses: List of the thickness [|m|] for each aquifer,
-        with the first entry representing the lowest aquifer and the last entry
-        representing the highest aquifer. These thicknesses are those at the
-        reference point located at (coordxRefPoint, coordyRefPoint).
-    :type aquiferThicknesses: list
-
-    :param reservoirThickness: thickness of the reservoir [|m|] at the
-        reference point.
-    :type reservoirThickness: int or float
-
-    :param strata_comp: stratigraphy component. If spatially variable
-        stratigraphy is being used, this is the component created for the
-        reference point.
+    :param strata_comp: stratigraphy component
     :type strata_comp: openiam.stratigraphy_component.Stratigraphy
 
-    :param strike: Unit strike in degrees, where 0 is north, 90 is east, 180 is
-        south, and 270 is west.
-    :type strike: int, float, or None
-
-    :param dip: Unit dip in degrees, where positive means dipping down in
-        the dipDirection provided
-    :type dip: int, float, or None
-
-    :param dipDirection: Direction of the units dip, expressed as N, E, S, W,
-        NE, SE, SW, or SW. Note that dipDirection must be compatible with the
-        strike provided.
-    :type dipDirection: str or None
-
-    :param coordxReferencePoint: x value for the reference point. Only used if
-    :type coordxReferencePoint: int, float, or None
-
-    :param coordyReferencePoint: y value for the reference point. Only used if
-        spatially variable stratigraphy is used.
-    :type coordyReferencePoint: int, float, or None
-
-    :param var_type: Option used for the domain stratigraphy. 'noVariation'
-        means the strata are flat and unchanging over space while
-        'strikeAndDip' means that unit thicknesses change according to strike,
-        dip, and dipDirection values.
-    :type var_type: str
+    :param strata_type: Component type used for the domain stratigraphy: 'Stratigraphy',
+      'DippingStratigraphy', or 'LookupTableStratigraphy'.
+    :type strata_type: str
 
     """
     # Go through the different types of aquifer components
@@ -766,51 +699,37 @@ def get_plume_timings(sm, s, time_array, sample, plume_metric_abbrev,
                                len(x_grid))) * MAX_TIME
 
         for well, (x0, y0) in enumerate(zip(aq_component_xvals, aq_component_yvals)):
-            z0 = get_z0(x0, y0, strata_comp, numShaleLayers, shaleThicknesses[:],
-                        aquiferThicknesses[:], reservoirThickness,
+                
+            z0 = get_z0(yaml_data, x0, y0, strata_comp, numShaleLayers, 
                         aquiferReference=aq_component_indices[well],
-                        var_type=var_type, strike=strike, dip=dip,
-                        dipDirection=dipDirection,
-                        coordxReferencePoint=coordxReferencePoint,
-                        coordyReferencePoint=coordyReferencePoint)
+                        strata_type=strata_type)
+            
+            # z0 will be None if get_z0() encounters an error with get_strat_comp_obs()
+            if z0:
+                # Get plume dimensions
+                for indd, tt in enumerate(time_array):
+                    if analysis == 'forward':
+                        r = sm.collect_observations_as_time_series(
+                            aq_components[well], plume_metric_abbrev+'_dr')[indd]
+                        h = sm.collect_observations_as_time_series(
+                            aq_components[well], plume_metric_abbrev+'_dz')[indd]
+                    elif analysis in ['lhs', 'parstudy']:
+                        r = s.recarray[aq_components[well].name + '.'
+                                       + plume_metric_abbrev
+                                       + '_dr_' + str(indd)][sample]
+                        h = s.recarray[aq_components[well].name + '.'
+                                       + plume_metric_abbrev
+                                       + '_dz_' + str(indd)][sample]
+                    # Plume diameter
+                    d = r * 2
 
-            # Get plume dimensions
-            for indd, tt in enumerate(time_array):
-                if analysis == 'forward':
-                    r = sm.collect_observations_as_time_series(
-                        aq_components[well], plume_metric_abbrev+'_dr')[indd]
-                    h = sm.collect_observations_as_time_series(
-                        aq_components[well], plume_metric_abbrev+'_dz')[indd]
-                elif analysis in ['lhs', 'parstudy']:
-                    r = s.recarray[aq_components[well].name + '.'
-                                   + plume_metric_abbrev
-                                   + '_dr_' + str(indd)][sample]
-                    h = s.recarray[aq_components[well].name + '.'
-                                   + plume_metric_abbrev
-                                   + '_dz_' + str(indd)][sample]
-                # Plume diameter
-                d = r * 2
-
-                # Calculate time to first detection
-                if (d > 0 and h > 0):
-                    if var_type == 'noVariation':
+                    # Calculate time to first detection
+                    if (d > 0 and h > 0):
                         ellipsoid = ((x_grid - x0) / (d * 0.5)) ** 2 + (
                             (y_grid - y0) / (d * 0.5)) ** 2 + (
                                 (z_grid - z0) / (h * 0.5)) ** 2 <= 1
                         in_aquifer = z_grid - z0 < 0
                         half_ellipsoid = np.logical_and(ellipsoid, in_aquifer)
-                        mask = np.logical_not(half_ellipsoid) * MAX_TIME
-                        plume = half_ellipsoid * tt
-                        plumeTiming = np.minimum(plumeTiming, mask + plume)
-
-                    elif var_type == 'strikeAndDip':
-                        ellipsoid = (
-                            (x_grid - x0) / (d * 0.5)) ** 2 + (
-                                (y_grid - y0) / (d * 0.5)) ** 2 + (
-                                    (z_grid- z0) / (h * 0.5)) ** 2 <= 1
-                        in_aquifer = z_grid - z0 < 0
-                        half_ellipsoid = np.logical_and(
-                            ellipsoid, in_aquifer)
                         mask = np.logical_not(half_ellipsoid) * MAX_TIME
                         plume = half_ellipsoid * tt
                         plumeTiming = np.minimum(plumeTiming, mask + plume)
@@ -858,54 +777,39 @@ def get_plume_timings(sm, s, time_array, sample, plume_metric_abbrev,
         plumeTiming = np.ones((z_grid.shape[0], len(y_grid), len(x_grid))) * MAX_TIME
 
         for well, (x0, y0) in enumerate(zip(aq_component_xvals, aq_component_yvals)):
-            z0 = get_z0(x0, y0, strata_comp, numShaleLayers, shaleThicknesses[:],
-                        aquiferThicknesses[:], reservoirThickness,
+            z0 = get_z0(yaml_data, x0, y0, strata_comp, numShaleLayers, 
                         aquiferReference=aq_component_indices[well],
-                        var_type=var_type, strike=strike,
-                        dip=dip, dipDirection=dipDirection,
-                        coordxReferencePoint=coordxReferencePoint,
-                        coordyReferencePoint=coordyReferencePoint)
+                        strata_type=strata_type)
 
-            # Get plume dimensions
-            for indd, tt in enumerate(time_array):
-                if analysis == 'forward':
-                    a = sm.collect_observations_as_time_series(
-                        aq_components[well], plume_metric_abbrev + '_dx')[indd]
-                    b = sm.collect_observations_as_time_series(
-                        aq_components[well], plume_metric_abbrev + '_dy')[indd]
-                    c = sm.collect_observations_as_time_series(
-                        aq_components[well], plume_metric_abbrev + '_dz')[indd]
-                elif analysis in ['lhs', 'parstudy']:
-                    a = s.recarray[aq_components[well].name + '.'
-                                   + plume_metric_abbrev
-                                   + '_dx_' + str(indd)][sample]
-                    b = s.recarray[aq_components[well].name + '.'
-                                   + plume_metric_abbrev
-                                   + '_dy_' + str(indd)][sample]
-                    c = s.recarray[aq_components[well].name + '.'
-                                   + plume_metric_abbrev
-                                   + '_dz_' + str(indd)][sample]
+            # z0 will be None if get_z0() encounters an error with get_strat_comp_obs()
+            if z0:
+                # Get plume dimensions
+                for indd, tt in enumerate(time_array):
+                    if analysis == 'forward':
+                        a = sm.collect_observations_as_time_series(
+                            aq_components[well], plume_metric_abbrev + '_dx')[indd]
+                        b = sm.collect_observations_as_time_series(
+                            aq_components[well], plume_metric_abbrev + '_dy')[indd]
+                        c = sm.collect_observations_as_time_series(
+                            aq_components[well], plume_metric_abbrev + '_dz')[indd]
+                    elif analysis in ['lhs', 'parstudy']:
+                        a = s.recarray[aq_components[well].name + '.'
+                                       + plume_metric_abbrev
+                                       + '_dx_' + str(indd)][sample]
+                        b = s.recarray[aq_components[well].name + '.'
+                                       + plume_metric_abbrev
+                                       + '_dy_' + str(indd)][sample]
+                        c = s.recarray[aq_components[well].name + '.'
+                                       + plume_metric_abbrev
+                                       + '_dz_' + str(indd)][sample]
 
-                # Calculate earliest plume timing
-                if (a > 0 and b > 0 and c > 0):
-                    if var_type == 'noVariation':
+                    # Calculate earliest plume timing
+                    if (a > 0 and b > 0 and c > 0):
                         ellipsoid = ((x_grid - x0) / (a * 0.5)) ** 2 + (
-                            (y_grid - y0)/(b * 0.5)) ** 2 + (
+                            (y_grid - y0) / (b * 0.5)) ** 2 + (
                                 (z_grid - z0) / (c * 0.5)) ** 2 <= 1
                         in_aquifer = z_grid - z0 < 0
                         half_ellipsoid = np.logical_and(ellipsoid, in_aquifer)
-                        mask = np.logical_not(half_ellipsoid) * MAX_TIME
-                        plume = half_ellipsoid * tt
-                        plumeTiming = np.minimum(plumeTiming, mask + plume)
-
-                    elif var_type == 'strikeAndDip':
-                        ellipsoid = (
-                            (x_grid - x0) / (a * 0.5)) ** 2 + (
-                                (y_grid - y0) / (b * 0.5)) ** 2 + (
-                                    (z_grid- z0) / (c * 0.5)) ** 2 <= 1
-                        in_aquifer = z_grid - z0 < 0
-                        half_ellipsoid = np.logical_and(
-                            ellipsoid, in_aquifer)
                         mask = np.logical_not(half_ellipsoid) * MAX_TIME
                         plume = half_ellipsoid * tt
                         plumeTiming = np.minimum(plumeTiming, mask + plume)
@@ -918,13 +822,16 @@ def get_monitoring_location_ttfd(plumeTimings, x_grid, y_grid, z_grid,
                                  monitoringCoordZ, monitoringXIndex,
                                  monitoringYIndex, monitorHorizontalWindow,
                                  monitorVerticalWindow, aq_component_types,
-                                 var_type='noVariation'):
+                                 strata_type='Stratigraphy'):
     """
     Function that takes plume timing results and monitoring location data and
     returns lists of time to first detection (ttfd) at each monitoring location.
     The lists returned contain the actual ttfd as well as the corresponding
     sensors' x, y, and z values.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     # List of TTFD values at or sufficiently close to monitoring location(s)
     ttfd_list = []
 
@@ -939,95 +846,46 @@ def get_monitoring_location_ttfd(plumeTimings, x_grid, y_grid, z_grid,
         checkCarbAq = False
         ttfd_z_list = []
 
-    if isinstance(monitoringCoordX, list) and isinstance(monitoringCoordY, list):
-        for monitorRef, monitoringXIndexVal in enumerate(monitoringXIndex):
-            if checkCarbAq:
-                # Find any TTFD within HorizontalWindow of the Monitoring Location
-                for xRef, xVal in enumerate(x_grid):
-                    for yRef, yVal in enumerate(y_grid[:, 0]):
-                        distance_temp = (
-                            ((monitoringCoordX[monitorRef] - xVal) ** 2) \
-                                + ((monitoringCoordY[monitorRef] - yVal) ** 2)) ** 0.5
-
-                        if distance_temp <= monitorHorizontalWindow:
-                            ttfdVal = plumeTimings[xRef, yRef]
-
-                            if ttfdVal < THRESHOLD_TIME:
-                                ttfd_x_list.append(xVal)
-                                ttfd_y_list.append(yVal)
-                                ttfd_list.append(ttfdVal)
-
-            else:
-                # Output from any aquifer components besides CarbonateAquifer
-                # Find any TTFD within HorizontalWindow and VerticalWindow
-                # of the monitoring location.
-                for xRef, xVal in enumerate(x_grid):
-                    for yRef, yVal in enumerate(y_grid[:, 0]):
-                        distance_temp = (
-                            ((monitoringCoordX[monitorRef] - xVal) ** 2) \
-                                + ((monitoringCoordY[monitorRef] - yVal) ** 2)) ** 0.5
-
-                        if distance_temp <= monitorHorizontalWindow:
-                            for zRef in range(z_grid.shape[0]):
-                                if var_type == 'noVariation':
-                                    z_grid_val = z_grid[zRef, 0, 0]
-                                elif var_type == 'strikeAndDip':
-                                    z_grid_val = z_grid[
-                                        zRef, monitoringYIndex[monitorRef],
-                                        monitoringXIndexVal]
-
-                                # These should both be negative, so take the abs()
-                                vertical_distance_temp = np.abs(
-                                    np.abs(z_grid_val)
-                                    - np.abs(monitoringCoordZ[monitorRef]))
-
-                                if vertical_distance_temp <= monitorVerticalWindow:
-                                    ttfdVal = plumeTimings[zRef, yRef, xRef]
-
-                                    if ttfdVal < THRESHOLD_TIME:
-                                        ttfd_list.append(ttfdVal)
-
-                                        ttfd_x_list.append(xVal)
-                                        ttfd_y_list.append(yVal)
-                                        ttfd_z_list.append(z_grid_val)
-    else:
-        # Single monitoring location, not a list
+    for monitorRef, monitoringXIndexVal in enumerate(monitoringXIndex):
         if checkCarbAq:
             # Find any TTFD within HorizontalWindow of the Monitoring Location
             for xRef, xVal in enumerate(x_grid):
                 for yRef, yVal in enumerate(y_grid[:, 0]):
                     distance_temp = (
-                        ((monitoringCoordX - xVal) ** 2) + (
-                            (monitoringCoordY - yVal) ** 2)) ** 0.5
+                        ((monitoringCoordX[monitorRef] - xVal) ** 2) \
+                            + ((monitoringCoordY[monitorRef] - yVal) ** 2)) ** 0.5
 
                     if distance_temp <= monitorHorizontalWindow:
                         ttfdVal = plumeTimings[xRef, yRef]
 
                         if ttfdVal < THRESHOLD_TIME:
+                            ttfd_x_list.append(xVal)
+                            ttfd_y_list.append(yVal)
                             ttfd_list.append(ttfdVal)
-                            ttfd_x_list.append(x_grid[monitoringXIndex])
-                            ttfd_y_list.append(y_grid[monitoringYIndex, 0])
+
         else:
-            # Output from any aquifer compoent besides CarbonateAquifer
+            # Output from any aquifer components besides CarbonateAquifer
             # Find any TTFD within HorizontalWindow and VerticalWindow
-            # of the Monitoring Location
+            # of the monitoring location.
             for xRef, xVal in enumerate(x_grid):
                 for yRef, yVal in enumerate(y_grid[:, 0]):
-                    distance_temp = np.abs(
-                        (((monitoringCoordX - xVal) ** 2) + (
-                            (monitoringCoordY - yVal) ** 2)) ** 0.5)
+                    distance_temp = (
+                        ((monitoringCoordX[monitorRef] - xVal) ** 2) \
+                            + ((monitoringCoordY[monitorRef] - yVal) ** 2)) ** 0.5
 
                     if distance_temp <= monitorHorizontalWindow:
                         for zRef in range(z_grid.shape[0]):
-                            if var_type == 'noVariation':
+                            if strata_type in types_strata_pars:
                                 z_grid_val = z_grid[zRef, 0, 0]
-                            elif var_type == 'strikeAndDip':
-                                z_grid_val = z_grid[zRef, monitoringYIndex,
-                                                    monitoringXIndex]
+                            elif strata_type in types_strata_obs:
+                                z_grid_val = z_grid[
+                                    zRef, monitoringYIndex[monitorRef],
+                                    monitoringXIndexVal]
 
                             # These should both be negative, so take the abs()
                             vertical_distance_temp = np.abs(
-                                np.abs(z_grid_val) - np.abs(monitoringCoordZ))
+                                np.abs(z_grid_val)
+                                - np.abs(monitoringCoordZ[monitorRef]))
 
                             if vertical_distance_temp <= monitorVerticalWindow:
                                 ttfdVal = plumeTimings[zRef, yRef, xRef]
@@ -1052,18 +910,11 @@ def get_monitors_within_z_range(monitoringCoordX, monitoringCoordY, monitoringCo
     monitoringCoordY_temp = []
     monitoringCoordZ_temp = []
 
-    if isinstance(monitoringCoordZ, (int, float)):
-        if min_z_subplot <= monitoringCoordZ < max_z_subplot:
-            monitoringCoordX_temp = [monitoringCoordX]
-            monitoringCoordY_temp = [monitoringCoordY]
-            monitoringCoordZ_temp = [monitoringCoordZ]
-
-    else:
-        for xVal, yVal, zVal in zip(monitoringCoordX, monitoringCoordY, monitoringCoordZ):
-            if min_z_subplot <= zVal < max_z_subplot:
-                monitoringCoordX_temp.append(xVal)
-                monitoringCoordY_temp.append(yVal)
-                monitoringCoordZ_temp.append(zVal)
+    for xVal, yVal, zVal in zip(monitoringCoordX, monitoringCoordY, monitoringCoordZ):
+        if min_z_subplot <= zVal < max_z_subplot:
+            monitoringCoordX_temp.append(xVal)
+            monitoringCoordY_temp.append(yVal)
+            monitoringCoordZ_temp.append(zVal)
 
     return  monitoringCoordX_temp, monitoringCoordY_temp, monitoringCoordZ_temp
 
@@ -1074,111 +925,97 @@ def get_xandy_monitoring_indices(monitoringCoordX, monitoringCoordY, x_grid,
     Function that returns the indices for the monitoring location(s) given the
     x_grid and y_grid values.
     """
-    if isinstance(monitoringCoordX, (int, float)):
+    monitoringXIndex = []
+    for monitoringCoordXVal in monitoringCoordX:
         xMinProximity = None
         for xRef, xVal in enumerate(x_grid):
-            xProximity_temp = np.abs(xVal - monitoringCoordX)
+            xProximity_temp = np.abs(xVal - monitoringCoordXVal)
 
             if xMinProximity is None:
                 xMinProximity = xProximity_temp
-                monitoringXIndex = xRef
+                monitoringXIndex_current = xRef
             elif xProximity_temp < xMinProximity:
                 xMinProximity = xProximity_temp
-                monitoringXIndex = xRef
+                monitoringXIndex_current = xRef
 
-    else:
-        monitoringXIndex = []
-        for monitoringCoordXVal in monitoringCoordX:
-            xMinProximity = None
-            for xRef, xVal in enumerate(x_grid):
-                xProximity_temp = np.abs(xVal - monitoringCoordXVal)
+        monitoringXIndex.append(monitoringXIndex_current)
 
-                if xMinProximity is None:
-                    xMinProximity = xProximity_temp
-                    monitoringXIndex_current = xRef
-                elif xProximity_temp < xMinProximity:
-                    xMinProximity = xProximity_temp
-                    monitoringXIndex_current = xRef
-
-            monitoringXIndex.append(monitoringXIndex_current)
-
-    if isinstance(monitoringCoordY, (int, float)):
+    monitoringYIndex = []
+    for _, monitoringCoordYVal in enumerate(monitoringCoordY):
         yMinProximity = None
         for yRef, yVal in enumerate(y_grid[:, 0]):
-            yProximity_temp = np.abs(yVal - monitoringCoordY)
+            yProximity_temp = np.abs(yVal - monitoringCoordYVal)
 
             if yMinProximity is None:
                 yMinProximity = yProximity_temp
-                monitoringYIndex = yRef
+                monitoringYIndex_current = yRef
             elif yProximity_temp < yMinProximity:
                 yMinProximity = yProximity_temp
-                monitoringYIndex = yRef
+                monitoringYIndex_current = yRef
 
-    else:
-        monitoringYIndex = []
-        for _, monitoringCoordYVal in enumerate(monitoringCoordY):
-            yMinProximity = None
-            for yRef, yVal in enumerate(y_grid[:, 0]):
-                yProximity_temp = np.abs(yVal - monitoringCoordYVal)
-
-                if yMinProximity is None:
-                    yMinProximity = yProximity_temp
-                    monitoringYIndex_current = yRef
-                elif yProximity_temp < yMinProximity:
-                    yMinProximity = yProximity_temp
-                    monitoringYIndex_current = yRef
-
-            monitoringYIndex.append(monitoringYIndex_current)
+        monitoringYIndex.append(monitoringYIndex_current)
 
     return monitoringXIndex, monitoringYIndex
 
 
-def get_z0(x_val, y_val, stratigraphy_comp, numShaleLayers,
-           shaleThicknessList, aquiferThicknessList, reservoirThickness,
-           aquiferReference=0, var_type='noVariation', strike=None, dip=None,
-           dipDirection=None, coordxReferencePoint=0,
-           coordyReferencePoint=0):
+def get_z0(yaml_data, x_val, y_val, stratigraphy_comp, numShaleLayers,
+           aquiferReference=0, strata_type='Stratigraphy'):
     """
     Function that returns the z0 value used in get_plume_timings().
     """
-    if var_type == 'noVariation':
-        aquiferBottomDepths = get_aquifer_bottom_depths(numShaleLayers,
-                                                        shaleThicknessList,
-                                                        aquiferThicknessList)
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+
+    if strata_type in types_strata_pars:
+        strata_dict = strata.get_strata_info_from_component(stratigraphy_comp)
+
+        aquiferBottomDepths = strata_dict['aquiferDepths']
+        aquiferThicknesses = strata_dict['aquiferThicknesses']
 
         z0 = -aquiferBottomDepths[aquiferReference] \
-            + aquiferThicknessList[aquiferReference]
+            + aquiferThicknesses[aquiferReference]
 
-    elif var_type == 'strikeAndDip':
-        updatedStratigraphy = strata.update_stratigraphy_by_strike_and_dip(
-            numberOfShaleLayers=numShaleLayers,
-            shaleThicknessList=shaleThicknessList[:],
-            aquiferThicknessList=aquiferThicknessList[:],
-            reservoirThickness=reservoirThickness,
-            strike=strike, dip=dip, dipDirection=dipDirection,
-            coordxRefPoint=coordxReferencePoint,
-            coordyRefPoint=coordyReferencePoint,
-            location_x=x_val, location_y=y_val,
-            strataRefPoint=stratigraphy_comp)
+    elif strata_type in types_strata_obs:
+        stratigraphy_by_loc = get_strat_comp_obs(
+            float(x_val), float(y_val), numShaleLayers, yaml_data)
+        
+        aquiferThicknessesUpdated = []
+        aquiferBottomDepths = []
+        for shaleRef in range(numShaleLayers - 1):
+            try:
+                aquiferThicknessesUpdated.append(np.max(stratigraphy_by_loc[
+                    'aquifer{}Thickness'.format(shaleRef + 1)]))
+                
+                aquiferBottomDepths.append(np.max(stratigraphy_by_loc[
+                    'aquifer{}Depth'.format(shaleRef + 1)]))
+            except:
+                aquiferThicknessesUpdated.append(None)
+                aquiferBottomDepths.append(None)
 
-        shaleThicknessesUpdated = updatedStratigraphy['shaleThicknessList']
-        aquiferThicknessesUpdated = updatedStratigraphy['aquiferThicknessList']
+        if None in aquiferBottomDepths:
+            stratigraphy_by_loc = None
 
-        aquiferBottomDepths = get_aquifer_bottom_depths(numShaleLayers,
-                                                        shaleThicknessesUpdated,
-                                                        aquiferThicknessesUpdated)
-
-        z0 = -aquiferBottomDepths[aquiferReference] \
-            + aquiferThicknessesUpdated[aquiferReference]
+        if stratigraphy_by_loc:
+            z0 = -aquiferBottomDepths[aquiferReference] \
+                + aquiferThicknessesUpdated[aquiferReference]
+        else:
+            # stratigraphy_by_loc will be returned as None if the simulation in 
+            # get_strat_comp_obs() fails. It can fail if the x and y coordintes 
+            # are outside of the domain contained in the file used for a 
+            # LookupTableStratigraphy component.
+            z0 = None
 
     return z0
 
 
-def write_dream_grid(x_grid, y_grid, z_grid, output_dir, var_type='noVariation'):
+def write_dream_grid(x_grid, y_grid, z_grid, output_dir, strata_type='Stratigraphy'):
     """
     Function that writes x_grid, y_grid, and z_grids for DREAM. Note that
     lengths are converted from meters to feet.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     # Write grid in feet for DREAM
     filename = os.sep.join([output_dir, 'iam.grid'])
 
@@ -1200,24 +1037,28 @@ def write_dream_grid(x_grid, y_grid, z_grid, output_dir, var_type='noVariation')
                 f.write('{},'.format(xVal / 0.3048))
                 for yRef, yVal in enumerate(y_grid[:, 0]):
                     for zRef in range(z_grid.shape[0]):
-                        if var_type == 'noVariation':
+                        if strata_type in types_strata_pars:
                             f.write('{},{},{},\n'.format(
                                 xVal / 0.3048, yVal / 0.3048,
                                 z_grid[zRef, 0, 0] / 0.3048))
-                        elif var_type == 'strikeAndDip':
+                            
+                        elif strata_type in types_strata_obs:
                             f.write('{},{},{},\n'.format(
                                 xVal / 0.3048, yVal / 0.3048,
                                 z_grid[zRef, yRef, xRef] / 0.3048))
 
 
 def write_dream_output(plumeTimings, x_grid, y_grid, z_grid, plume_metric_abbrev,
-                       output_dir, realization=0, var_type='noVariation',
+                       output_dir, realization=0, strata_type='Stratigraphy',
                        aq_component_ithresh=None, checkCarbAq=False):
     """
     Function to write output for DREAM. Note that lengths are assumed to
     initially be in meters. The output for DREAM then include lengths converted
     to feet.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     # Write output (in feet) for DREAM
     filename = os.sep.join([output_dir, 'ttfd_{}_{}.iam'.format(
         plume_metric_abbrev, realization)])
@@ -1255,10 +1096,10 @@ def write_dream_output(plumeTimings, x_grid, y_grid, z_grid, plume_metric_abbrev
                 realization, plume_metric_abbrev, INDICATOR[plume_metric_abbrev],
                 THRESHOLDS[plume_metric_abbrev]))
 
-            if var_type == 'noVariation':
+            if strata_type in types_strata_pars:
                 f.write('x_feet, y_feet, z_feet, ttfd_days,\n')
-            elif var_type == 'strikeAndDip':
-                f.write('x_feet, y_feet, z_feet, ttfd_days, Note: the strikeAndDip ',
+            elif strata_type in types_strata_obs:
+                f.write('x_feet, y_feet, z_feet, ttfd_days, Note: the {} '.format(strata_type),
                         'option was used for stratigraphy so z values vary with x and y,\n')
 
             for xRef, xVal in enumerate(x_grid):
@@ -1269,13 +1110,13 @@ def write_dream_output(plumeTimings, x_grid, y_grid, z_grid, plume_metric_abbrev
                             valType = 'single')
 
                         if checkValid:
-                            if var_type == 'noVariation':
+                            if strata_type in types_strata_pars:
                                 f.write('{},{},{},{}\n'.format(
                                     xVal / 0.3048, yVal / 0.3048,
                                     z_grid[zRef, 0, 0] / 0.3048,
                                     plumeTimings[zRef][yRef][xRef]))
 
-                            elif var_type == 'strikeAndDip':
+                            elif strata_type in types_strata_obs:
                                 f.write('{},{},{},{}\n'.format(
                                     xVal / 0.3048, yVal / 0.3048,
                                     z_grid[zRef, yRef, xRef] / 0.3048,
@@ -1358,9 +1199,9 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
 
     defaultMonitoringTTFD = False
     monitoringTTFD = defaultMonitoringTTFD
-    monitoringCoordX = None
-    monitoringCoordY = None
-    monitoringCoordZ = None
+    monitoringCoordX = [None]
+    monitoringCoordY = [None]
+    monitoringCoordZ = [None]
 
     defaultPlotInjectionSites = False
     plot_injection_sites = defaultPlotInjectionSites
@@ -1420,46 +1261,65 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
                     logging.debug(debug_msg)
                     VerticalWindow = defaultVerticalWindow
 
-        if not isinstance(monitoringCoordX, (float, int, list)):
+        if not isinstance(monitoringCoordX, (float, int, str, list)):
             debug_msg = gen_monitor_loc_type_warning_msg('coordx', name)
             logging.debug(debug_msg)
             monitoringTTFD = defaultMonitoringTTFD
 
-        if not isinstance(monitoringCoordY, (float, int, list)):
+        if not isinstance(monitoringCoordY, (float, int, str, list)):
             debug_msg = gen_monitor_loc_type_warning_msg('coordy', name)
             logging.debug(debug_msg)
             monitoringTTFD = defaultMonitoringTTFD
+        
+        # If the monitoring coordinates are not in lists, put them in lists
+        if not isinstance(monitoringCoordX, list):
+            monitoringCoordX = [monitoringCoordX]
+        
+        if not isinstance(monitoringCoordY, list):
+            monitoringCoordY = [monitoringCoordY]
 
         if plume_type != 'CarbonateAquifer':
-            if not isinstance(monitoringCoordZ, (float, int, list)):
+            if not isinstance(monitoringCoordZ, (float, int, str, list)):
                 debug_msg = gen_monitor_loc_type_warning_msg('coordz', name)
                 logging.debug(debug_msg)
                 monitoringTTFD = defaultMonitoringTTFD
-
-            if np.max(monitoringCoordZ) > 0:
+            
+            if not isinstance(monitoringCoordZ, list):
+                monitoringCoordZ = [monitoringCoordZ]
+            
+            reset_check = False
+            pos_vals = []
+            for coordz in monitoringCoordZ:
+                if not isinstance(coordz, str):
+                    if np.max(coordz) > 0:
+                        pos_vals.append(coordz)
+                        reset_check = True
+            
+            if reset_check:
                 debug_msg = ''.join([
-                    'The coordz values provided for MonitoringLocations in the ',
-                    'TTFD plot ', name, ' had (a) positive value(s). The depth ',
-                    'values represented by coordz are taken as negative when ',
-                    'beneath the surface. Check your input. The TTFD at the actual ',
+                    'The coordz values ({}) provided for '.format(monitoringCoordZ), 
+                    'MonitoringLocations in the TTFD plot ', name, ' had (a) ', 
+                    'positive value(s) ({}). The depth values '.format(pos_vals), 
+                    ' represented by coordz are taken as negative when beneath ', 
+                    'the surface. THey can also be entered as strings representing ', 
+                    'unit depths, like aquifer2Depth, aquifer3MidDepth, or ', 
+                    'aquifer4TopDepth. Check your input. The TTFD at the actual ', 
                     'monitoring locations will not be plotted.'])
                 logging.debug(debug_msg)
                 monitoringTTFD = defaultMonitoringTTFD
 
         if plume_type != 'CarbonateAquifer':
-            if isinstance(monitoringCoordX, list) and isinstance(monitoringCoordY, list) \
-                    and isinstance(monitoringCoordZ, list):
-                if len(monitoringCoordX) != len(monitoringCoordY) \
-                        or len(monitoringCoordX) != len(monitoringCoordZ):
-                    debug_msg = gen_monitoring_loc_len_warning(plume_type, name)
-                    logging.debug(debug_msg)
-                    monitoringTTFD = defaultMonitoringTTFD
+            len_check = (len(monitoringCoordX) != len(monitoringCoordY)) \
+                or (len(monitoringCoordX) != len(monitoringCoordZ))
         else:
-            if isinstance(monitoringCoordX, list) and isinstance(monitoringCoordY, list):
-                if len(monitoringCoordX) != len(monitoringCoordY):
-                    debug_msg = gen_monitoring_loc_len_warning(plume_type, name)
-                    logging.debug(debug_msg)
-                    monitoringTTFD = defaultMonitoringTTFD
+            len_check = len(monitoringCoordX) != len(monitoringCoordY)
+        
+        if len_check:
+            debug_msg = gen_monitoring_loc_len_warning(
+                monitoringCoordX, monitoringCoordY, monitoringCoordZ, 
+                plume_type, name)
+            logging.debug(debug_msg)
+            monitoringTTFD = defaultMonitoringTTFD
 
     if 'NumZPointsWithinAquifers' in yaml_data['Plots'][name]['TTFD']:
         numPointsInAq = yaml_data['Plots'][name]['TTFD']['NumZPointsWithinAquifers']
@@ -1681,28 +1541,30 @@ def gen_monitor_loc_type_warning_msg(loc_type, name):
     """
     debug_msg = ''.join([
         'The {} values provided for monitoring locations in ',
-        'the TTFD plot ', name, ' were not of type int, float, or list. ',
-        'Check your input in the .yaml file. The TTFD at the ',
-        'actual monitoring locations will not be plotted.']).format(loc_type)
+        'the TTFD plot ', name, ' were not of type int, float, string, or list. ',
+        'Only strings that represent a unit depth can be used, such as aquifer2Depth ', 
+        'aquifer2MidDepth, or aquifer2TopDepth. Check your input in the .yaml file. ', 
+        'The TTFD at the actual monitoring locations will not be plotted.']).format(loc_type)
 
     return debug_msg
 
 
-def gen_monitoring_loc_len_warning(plume_type, name):
+def gen_monitoring_loc_len_warning(coordx, coordy, coordz, plume_type, name):
     """
     Function generating the warning message used in get_ttfd_plot_yaml_input()
     for the lengths monitoring coordx, coordy, and coordz values.
     """
     if plume_type == 'CarbonateAquifer':
         debug_msg = ''.join([
-            'The coordx and coordy lists provided ',
+            'The coordx ({}) and coordy ({}) lists provided '.format(coordx, coordy),
             'for monitoring locations in the TTFD plot ', name,
             ' did not have the same length. Check your input in ',
             'the .yaml file. The TTFD at the actual monitoring ',
             'locations will not be plotted.'])
     else:
         debug_msg = ''.join([
-            'The coordx, coordy, and coordz lists provided ',
+            'The coordx ({}), coordy ({}), and coordz ({}) lists provided '.format(
+                coordx, coordy, coordz),
             'for monitoring locations in the TTFD plot ', name,
             ' did not have the same length. Check your input in ',
             'the .yaml file. The TTFD at the actual monitoring ',
@@ -1720,6 +1582,11 @@ def get_aq_comp_lists_and_xy_grids(sm, yaml_data, name, aq_name_list):
     simulation(s). These boundaries are then used to make the x_grid and y_grid
     values required for the function get_plume_timings().
     """
+    # These lists indicate the stratigraphy component types that offer thicknesses 
+    # and depths as parameters or as observations.
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     # Define grid coordinates. These are overwritten within the loop below
     min_x_val = 9e99
     max_x_val = 0
@@ -1740,7 +1607,8 @@ def get_aq_comp_lists_and_xy_grids(sm, yaml_data, name, aq_name_list):
 
     components = list(sm.component_models.values())
     for comp in components:
-        if comp.class_type != 'Stratigraphy':
+        if (not comp.class_type in types_strata_pars) and not (
+                comp.class_type in types_strata_obs):
             comp_data = yaml_data[comp.name]
         else:
             continue
@@ -1898,6 +1766,16 @@ def get_aq_comp_lists_and_xy_grids(sm, yaml_data, name, aq_name_list):
 
     x_range = [min_x_val, max_x_val]
     y_range = [min_y_val, max_y_val]
+    
+    if len(aq_component_types) == 0:
+        err_msg = ''.join([
+            'While making a TTFD plot, the code failed to collect information ', 
+            'for the aquifer component(s). This outcome can occur if the ', 
+            'ComponentNameList entry does not contain the names of any of the ', 
+            'aquifer components used. For example, a spelling error would ', 
+            'prevent the aquifer component name from being recognized correctly. ', 
+            'This TTFD plot will likely fail to show any results. Check your input.'])
+        logging.error(err_msg)
 
     return aq_components, aq_component_types, aq_component_indices, \
         aq_component_xvals, aq_component_yvals, aq_component_ithresh, \
@@ -1975,36 +1853,22 @@ def make_xandy_grids(x_range, y_range, x_grid_spacing=None,
             y_grid = np.linspace(min_y_val - y_buffer, max_y_val + y_buffer,
                                  101, endpoint=True)[:, None]
 
-    if monitoringCoordX is not None and monitoringCoordY is not None:
-        if isinstance(monitoringCoordX, list) and isinstance(monitoringCoordY, list):
-            for monitorCoord in monitoringCoordX:
-                # If there is already an x value there, or close enough, then
-                # do not add the monitoringCoordX.
-                min_diff = np.min(np.abs(x_grid - monitorCoord))
-                if min_diff > min_grid_spacing:
-                    x_grid_list = x_grid.tolist()
-                    x_grid_list.append(monitorCoord)
-                    # This puts it in the correct order
-                    x_grid = np.unique(x_grid_list)
-
-            for monitorCoord in monitoringCoordY:
-                min_diff = np.min(np.abs(y_grid - monitorCoord))
-                if min_diff > min_grid_spacing:
-                    y_grid_list = y_grid[:, 0].tolist()
-                    y_grid_list.append(monitorCoord)
-                    y_grid = np.unique(y_grid_list)[:, None]
-
-        else:
-            min_diff = np.min(np.abs(x_grid - monitoringCoordX))
+    if (not None in monitoringCoordX) and (not None and monitoringCoordY):
+        for monitorCoord in monitoringCoordX:
+            # If there is already an x value there, or close enough, then
+            # do not add the monitoringCoordX.
+            min_diff = np.min(np.abs(x_grid - monitorCoord))
             if min_diff > min_grid_spacing:
                 x_grid_list = x_grid.tolist()
-                x_grid_list.append(monitoringCoordX)
+                x_grid_list.append(monitorCoord)
+                # This puts it in the correct order
                 x_grid = np.unique(x_grid_list)
 
-            min_diff = np.min(np.abs(y_grid - monitoringCoordY))
+        for monitorCoord in monitoringCoordY:
+            min_diff = np.min(np.abs(y_grid - monitorCoord))
             if min_diff > min_grid_spacing:
                 y_grid_list = y_grid[:, 0].tolist()
-                y_grid_list.append(monitoringCoordY)
+                y_grid_list.append(monitorCoord)
                 y_grid = np.unique(y_grid_list)[:, None]
 
     return x_grid, y_grid
@@ -2018,7 +1882,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                       genfontsize=12, axislabelfontsize=14, titlefontsize=14,
                       labelfontweight='bold', colormap='plasma', figsize=(10, 8),
                       res_comp_injX=None, res_comp_injY=None, min_num_points=25,
-                      var_type='noVariation'):
+                      strata_type='Stratigraphy'):
     """
     Function that creates plots of different plume metrics: earliest plume
     timings over space, earliest plume timings at monitoring locations
@@ -2027,6 +1891,9 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
     calculated as the fraction of LHS realizations in which a plume occurred at
     each location within the domain.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     TTFD_yaml_input_dict = get_ttfd_plot_yaml_input(yaml_data, name)
 
     figureDPI = TTFD_yaml_input_dict['FigureDPI']
@@ -2321,12 +2188,13 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
             ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
             ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
-            if var_type == 'noVariation':
+            if strata_type in types_strata_pars:
                 zIndices = np.array(range(len(z_grid)))
                 zMask = np.ma.masked_inside(
                     z_grid[:, 0, 0], subplot_min_z_val, subplot_max_z_val)
                 zIndices = zIndices[zMask.mask]
-            elif var_type == 'strikeAndDip':
+                
+            elif strata_type in types_strata_obs:
                 zIndices = range(len(z_grid))
 
             # Loop through the z_grid values and plume metrics
@@ -2341,7 +2209,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                 # when spatially uniform stratigraphy is used, but each layer dips
                 # when dipping stratigraphy is used. This function excludes results
                 # that fall outside the current depth range.
-                if var_type == 'strikeAndDip':
+                if strata_type in types_strata_obs:
                     plumeMetric_temp = clip_results_outside_of_z_range(
                         plumeMetric_temp, z_temp, plotType,
                         subplot_min_z_val, subplot_max_z_val)
@@ -2601,61 +2469,40 @@ def plot_wells_inj_sites(ax, aq_component_xvals, aq_component_yvals, min_z,
                 min_z, max_z)
 
         if len(monitoringCoordZ_temp) > 0:
-            if isinstance(monitoringCoordX_temp, list):
-                for monitorRef, (mcoordX, mcoordY) in enumerate(
-                        zip(monitoringCoordX_temp, monitoringCoordY_temp)):
-                    if monitorRef == 0 and not sensor_lgnd_check:
-                        plt.plot(mcoordX / 1000, mcoordY / 1000,
-                                 marker='^', color='k',
-                                 linestyle='none', markeredgewidth=1.5,
-                                 markersize=10, markerfacecolor='none',
-                                 label='Sensor', zorder=1.5e7)
-                        change_sensor_lgnd_check = True
-                    else:
-                        plt.plot(mcoordX / 1000, mcoordY / 1000,
-                                 marker='^', color='k',
-                                 linestyle='none', markeredgewidth=1.5,
-                                 markersize=10,  markerfacecolor='none',
-                                 zorder=1.5e7)
-            elif not sensor_lgnd_check:
-                plt.plot(monitoringCoordX_temp / 1000,
-                         monitoringCoordY_temp / 1000,
-                         marker='^', color='k', linestyle='none',
-                         markeredgewidth=1.5, markersize=10,
-                         markerfacecolor='none',
-                         label='Sensor', zorder=1.5e7)
-                change_sensor_lgnd_check = True
-            else:
-                plt.plot(monitoringCoordX_temp / 1000,
-                         monitoringCoordY_temp / 1000,
-                         marker='^', color='k', linestyle='none',
-                         markeredgewidth=1.5, markersize=10,
-                         markerfacecolor='none', zorder=1.5e7)
-
-    elif monitoringTTFD and checkCarbAq:
-        if isinstance(monitoringCoordX, list):
-            for monitorRef, (mcoordX, mcoordY) in enumerate(zip(monitoringCoordX,
-                                                                monitoringCoordY)):
-                if monitorRef == 0:
+            for monitorRef, (mcoordX, mcoordY) in enumerate(
+                    zip(monitoringCoordX_temp, monitoringCoordY_temp)):
+                if monitorRef == 0 and not sensor_lgnd_check:
                     plt.plot(mcoordX / 1000, mcoordY / 1000,
                              marker='^', color='k',
-                             linestyle='none',
-                             markeredgewidth=1.5,
-                             markersize=12,
-                             markerfacecolor='none',
-                             label='Sensor', zorder=1e7)
+                             linestyle='none', markeredgewidth=1.5,
+                             markersize=10, markerfacecolor='none',
+                             label='Sensor', zorder=1.5e7)
+                    change_sensor_lgnd_check = True
                 else:
                     plt.plot(mcoordX / 1000, mcoordY / 1000,
                              marker='^', color='k',
-                             linestyle='none',
-                             markeredgewidth=1.5,
-                             markersize=12,
-                             markerfacecolor='none', zorder=1e7)
-        else:
-            plt.plot(monitoringCoordX / 1000, monitoringCoordY / 1000,
-                     marker='^', color='k', linestyle='none',
-                     markeredgewidth=1.5, markersize=12,
-                     markerfacecolor='none', label='Sensor', zorder=1e7)
+                             linestyle='none', markeredgewidth=1.5,
+                             markersize=10,  markerfacecolor='none',
+                             zorder=1.5e7)
+
+    elif monitoringTTFD and checkCarbAq:
+        for monitorRef, (mcoordX, mcoordY) in enumerate(zip(monitoringCoordX,
+                                                            monitoringCoordY)):
+            if monitorRef == 0:
+                plt.plot(mcoordX / 1000, mcoordY / 1000,
+                         marker='^', color='k',
+                         linestyle='none',
+                         markeredgewidth=1.5,
+                         markersize=12,
+                         markerfacecolor='none',
+                         label='Sensor', zorder=1e7)
+            else:
+                plt.plot(mcoordX / 1000, mcoordY / 1000,
+                         marker='^', color='k',
+                         linestyle='none',
+                         markeredgewidth=1.5,
+                         markersize=12,
+                         markerfacecolor='none', zorder=1e7)
 
     if labelWells:
         plt.plot(np.array(aq_component_xvals) / 1000,
@@ -2711,7 +2558,7 @@ def check_metric_validity(value, resultsType, valType='single'):
 def clip_results_outside_of_z_range(plumeMetric_temp, z_temp, plotType,
                                     subplot_min_z, subplot_max_z):
     """
-    When using a strike and dip, the z grid values depend on x and y. This function
+    When depths vary over space, the z grid values depend on x and y. This function
     examines z_temp (the current z_grid[zRef, :, :] within the z loop) - for
     z values outside the current subplot range, it sets the corresponding
     plumeMetric_temp to a value that will be excluded from the plot
@@ -2731,11 +2578,14 @@ def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
                         plume_metric_abbrev, resultsType, ttfd_list=None,
                         ttfd_x_list=None, ttfd_y_list=None, ttfd_z_list=None,
                         analysis='lhs', realization=0, num_samples=None,
-                        var_type='noVariation', checkCarbAq=False):
+                        strata_type='Stratigraphy', checkCarbAq=False):
     """
     Function that saves plume timing output to a series of .csv files. This
     function is used in cases where a CarbonateAquifer component is not used.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     checkValidResults = True
 
     if resultsType == 'plumeProbabilities':
@@ -2871,13 +2721,13 @@ def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
                                     valType = 'single')
 
                                 if checkValid:
-                                    if var_type == 'noVariation':
+                                    if strata_type in types_strata_pars:
                                         row_temp = [x_grid[xRef], y_grid[yRef, 0],
                                                     z_grid[zRef, 0, 0],
                                                     metric[zRef, yRef, xRef]
                                                     / resultsNormFactor]
 
-                                    elif var_type == 'strikeAndDip':
+                                    elif strata_type in types_strata_obs:
                                         row_temp = [x_grid[xRef], y_grid[yRef, 0],
                                                     z_grid[zRef, yRef, xRef],
                                                     metric[zRef, yRef, xRef]
@@ -2886,11 +2736,14 @@ def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
                                     writer.writerow(row_temp)
 
 
-def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type='noVariation',
+def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, strata_type='Stratigraphy',
                      checkCarbAq=False):
     """
     Saves the x, y, and z grid points to a .csv file.
     """
+    types_strata_pars = strata.get_comp_types_strata_pars()
+    types_strata_obs = strata.get_comp_types_strata_obs()
+    
     if not os.path.exists(os.path.join(output_dir, 'csv_files')):
         os.mkdir(os.path.join(output_dir, 'csv_files'))
 
@@ -2899,7 +2752,7 @@ def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type='noVariation',
     else:
         coordinates = ['x', 'y', 'z']
 
-    if var_type == 'noVariation' or checkCarbAq:
+    if strata_type in types_strata_pars or checkCarbAq:
         for coord in coordinates:
             filename = 'TTFD_{}_grid_points.csv'.format(coord)
             filename = os.path.join(output_dir, 'csv_files', filename)
@@ -2920,7 +2773,7 @@ def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, var_type='noVariation',
                 for coordRef in range(len(list(grid))):
                     writer.writerow([grid[coordRef]])
 
-    elif var_type == 'strikeAndDip':
+    elif strata_type in types_strata_obs:
         filename = 'TTFD_xyz_grid_points.csv'
         filename = os.path.join(output_dir, 'csv_files', filename)
 

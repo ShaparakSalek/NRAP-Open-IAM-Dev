@@ -70,7 +70,7 @@ LOC_INPUT_ERR_MSG = ''.join([
     '(contained in the Workflow: Options section of the .yaml file). ', 
     'The Workflow type was {}, however, and the {} Workflow ',
     'requires the user to provide Location data for the wellbores. ', 
-    ' This simulation cannot proceed.'])
+    'This simulation cannot proceed.'])
 
 DEFAULT_LUTR_FILE_DIRECTORY = os.path.join(IAM_DIR, 'source', 'components',
                                            'reservoir', 'lookuptables',
@@ -126,6 +126,9 @@ def workflow_setup(yaml_data, strata):
     """
     Sets up the components and plots required for the Workflow.
     """
+    types_strata_pars = iam_strata.get_comp_types_strata_pars()
+    types_strata_obs = iam_strata.get_comp_types_strata_obs()
+    
     workflow_type = yaml_data['Workflow']['Type']
     
     automation_input = get_automation_input(yaml_data)
@@ -138,9 +141,26 @@ def workflow_setup(yaml_data, strata):
 
     aquifer_component_type = yaml_data['Workflow']['Options'].get(
         'AquiferComponentType', DEFAULT_AQUIFER_COMP)
+    
+    strata_type = iam_strata.get_strata_type_from_yaml(yaml_data)
+    
+    if strata_type in types_strata_pars:
+        numberOfShaleLayers = strata.get_num_shale_layers()
+    elif strata_type in types_strata_obs:
+        numberOfShaleLayers = 3
+        
+        strata_data = yaml_data[strata_type]
+        
+        if 'Parameters' in strata_data:
+            if 'numberOfShaleLayers' in strata_data['Parameters']:
+                numberOfShaleLayersInput = strata_data['Parameters']['numberOfShaleLayers']
+                if isinstance(numberOfShaleLayersInput, dict):
+                    if 'value' in numberOfShaleLayersInput:
+                        numberOfShaleLayers = numberOfShaleLayersInput['value']
+                else:
+                    numberOfShaleLayers = numberOfShaleLayersInput
 
-    strata_dict = iam_strata.get_strata_info_from_component(strata)
-    default_aquifer_name = 'aquifer{}'.format(str(strata_dict['numberOfShaleLayers'] - 1))
+    default_aquifer_name = 'aquifer{}'.format(str(numberOfShaleLayers - 1))
 
     aquifer_name = yaml_data['Workflow']['Options'].get(
         'AquiferName', default_aquifer_name)
@@ -316,16 +336,17 @@ def add_well_component_entries(yaml_data, well_component_type, aquifer_name,
     
     # Add more cases for NEW_WORKFLOWS here. Some workflows require Locations 
     # data (e.g., LeakageAssessment), while some do not (AoR).
-    if LOC_INPUT_REQUIRED[workflow_type] and not loc_data_check:
-        # Locations input is required but none was given, resulting in an error
-        logging.error(LOC_INPUT_ERR_MSG.format(workflow_type, workflow_type))
+    if not loc_data_check:
+        if LOC_INPUT_REQUIRED[workflow_type]:
+            # Locations input is required but none was given, resulting in an error
+            logging.error(LOC_INPUT_ERR_MSG.format(workflow_type, workflow_type))
         
-        raise KeyError(LOC_INPUT_ERR_MSG.format(workflow_type, workflow_type))
+            raise KeyError(LOC_INPUT_ERR_MSG.format(workflow_type, workflow_type))
         
-    elif not LOC_INPUT_REQUIRED[workflow_type] and not loc_data_check:
-        # Locations input was not given, but it is not required for the workflow
-        if workflow_type == 'AoR':
-            loc_data = get_aor_loc_data(yaml_data, res_component_name, loc_data_check)
+        elif not LOC_INPUT_REQUIRED[workflow_type]:
+            # Locations input was not given, but it is not required for the workflow
+            if workflow_type == 'AoR':
+                loc_data = get_aor_loc_data(yaml_data, res_component_name, loc_data_check)
     
     if workflow_type == 'AoR':
         # This function checks if CriticalPressureMPa was set to a specific 

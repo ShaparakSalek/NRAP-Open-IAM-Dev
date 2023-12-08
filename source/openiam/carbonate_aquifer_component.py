@@ -15,6 +15,8 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
 
 try:
     import components.aquifer as aqmodel
@@ -574,29 +576,27 @@ class CarbonateAquifer(ComponentModel):
                     self.add_kwarg_linked_to_collection(
                         sinput, collectors[sinput][self.name]['data'])
         # End Connection if statement
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter aqu_thick (possibly) defined by stratigraphy component
         sparam = '{aq}Thickness'.format(aq=component_data['AquiferName'])
         strata = name2obj_dict['strata']
-        connect = None
-        if sparam in strata.pars:
-            connect = strata.pars
-        elif sparam in strata.deterministic_pars:
-            connect = strata.deterministic_pars
-        elif sparam in strata.default_pars:
-            connect = strata.default_pars
-        if not connect:
-            sparam = 'aquiferThickness'
-            if sparam in strata.pars:
-                connect = strata.pars
-            elif sparam in strata.deterministic_pars:
-                connect = strata.deterministic_pars
-            elif sparam in strata.default_pars:
-                connect = strata.default_pars
-            else:
-                print('Unable to find parameter ' + sparam)
+        
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            connect = get_strat_param_dict_for_link(sparam, strata)
+            
+            if not connect:
+                sparam = 'aquiferThickness'
+                connect = get_strat_param_dict_for_link(sparam, strata)
 
-        self.add_par_linked_to_par('aqu_thick', connect[sparam])
+            self.add_par_linked_to_par('aqu_thick', connect[sparam])
+            
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            self.add_par_linked_to_obs('aqu_thick', strata.linkobs[sparam])
 
 
     @staticmethod
