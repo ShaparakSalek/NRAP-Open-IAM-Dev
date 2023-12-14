@@ -10,9 +10,7 @@
 # Control File ex 45a, this example shows how they can be provided
 # in .csv files. For a single injection well the injection rates and injection
 # times can be provided both row-wise and column-wise
-# (see example Control File Example 45b). For multiple injections wells
-# each row corresponds to a different injection well, each column
-# corresponds to a different injection times.
+# (see example Control File Example 45b).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex45c.yaml

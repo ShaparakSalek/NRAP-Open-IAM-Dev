@@ -17,7 +17,7 @@ ModelParams:
         type: lhs
         siz: 30
         #seed: 721
-    Components: [msw1, AnalyticalReservoir1]
+    Components: [AnalyticalReservoir1, msw1]
     OutputDirectory: output/output_ex2_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     GenerateOutputFiles: True

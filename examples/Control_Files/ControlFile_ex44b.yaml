@@ -1,7 +1,7 @@
 # OpenIAM Control File Example 44b
 #
-# This example is similar to Control File Example 44a setup but illustrates
-# LHS type of simulations. Several parameters of Theis Reservoir Component
+# This example is similar to Control File Example 44a, but it illustrates the
+# use of the LHS analysis type. Several parameters of Theis Reservoir component
 # are set up as stochastic (i.e., varying between minimum and maximum values).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):

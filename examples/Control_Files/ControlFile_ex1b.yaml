@@ -71,7 +71,7 @@ AnalyticalReservoir1:
         injRate: 0.1
         reservoirRadius: 5000
         brineResSaturation: 0.15
-        logResPerm: -13.75
+        logResPerm: -12.75
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------

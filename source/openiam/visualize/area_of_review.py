@@ -13,6 +13,7 @@ Examples illustrating applications or setup of area_of_review_plot method:
     ControlFile_ex32a.yaml
     ControlFile_ex32b.yaml
     ControlFile_ex32c.yaml
+    ControlFile_ex47.yaml
 
 Created: August 25th, 2022
 Last Modified: June, 2023
@@ -48,7 +49,8 @@ import openiam.cfi.strata as iam_strata
 # the instances where a component type is called with the approach iam.ComponentName 
 # (e.g., iam.LookupTableReservoir, iam.GeneralizedFlowRate, or iam.GenericAquifer).
 AOR_RESERVOIR_COMPONENTS = ['LookupTableReservoir', 'SimpleReservoir',
-                            'AnalyticalReservoir', 'GenericReservoir']
+                            'AnalyticalReservoir', 'GenericReservoir', 
+                            'TheisReservoir']
 
 AOR_WELLBORE_COMPONENTS = ['OpenWellbore', 'MultisegmentedWellbore', 
                            'CementedWellbore', 'CementedWellboreWR', 
@@ -302,37 +304,11 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
         else:
             time_index_list = get_t_indices(time_list, time)
 
-    components = list(sm.component_models.values())
-    # If injection sites need to be plotted, get the injection sites
-    if yaml_input['plot_injection_sites']:
-        InjectionCoordx = []
-        InjectionCoordy = []
-
-        for comp in components:
-            if comp.class_type in AOR_RESERVOIR_COMPONENTS:
-                if comp.class_type != 'LookupTableReservoir':
-                    InjectionCoordx.append(comp.injX)
-                    InjectionCoordy.append(comp.injY)
-
-        InjectionCoordx = np.unique(InjectionCoordx).tolist()
-        InjectionCoordy = np.unique(InjectionCoordy).tolist()
-
-    else:
-        InjectionCoordx = None
-        InjectionCoordy = None
-
     aq_number = None
     
-    # Go through the components and check if an OpenWellbore is being used
-    for comp_model in model_data['Components']:
-        comp_data = yaml_data[comp_model]
-
-        openwell_cmpnt_found = False
-        if 'Type' in comp_data:
-            if comp_data['Type'] == 'OpenWellbore':
-                openwell_cmpnt_found = True
-                
-                break
+    # Check if an OpenWellbore is being used
+    openwell_cmpnt_found, _, _ = check_for_comp_type(yaml_data, model_data, 
+                                                     'OpenWellbore')
 
     # Get the wellbore data required for process_wellbore_locations()
     for comp_model in model_data['Components']:
@@ -356,41 +332,88 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 grid_option = 'grid' in comp_data_well['Locations']
                 
                 break
-
-    if not well_cmpnt_found:
-        err_msg = "".join(["A suitable wellbore component was not found in the ", 
-                           "components specified in the .yaml file. The suitable wellbore ", 
-                           "component types are: {}.".format(AOR_WELLBORE_COMPONENTS), 
-                           " One of these component types is required for the ", 
-                           "creation of an AoR plot."])
-        logging.error(err_msg)
-        raise KeyError(err_msg)
-
-    # If aq_number was not found with the LeakTo entry, find it directly from 
-    # the entries for the aquifer components. OpenWellbore components will have 
-    # the LeakTo entry (they leak to only one aquifer), but other wellbore 
-    # components leak into multiple aquifers (e.g., MultisegmentedWellbore and CementedWellbore)
-    if not aq_number:
-        for comp_model in model_data['Components']:
-            comp_data = yaml_data[comp_model]
             
-            if 'Type' in comp_data:
-                if comp_data['Type'] in AOR_AQUIFER_COMPONENTS:
-                    if 'AquiferName' in comp_data:
-                        # This works for OpenWellbore components, but LeakTo is not 
-                        # required for components like MultisegmentedWellbores
-                        aq_name = comp_data['AquiferName']
-
-                        if aq_name[0:7] == 'aquifer':
-                            aq_number = int(aq_name[7:None])
-
-                    break
+    # Check if a TheisReservoir is being used. Wellbores are not required 
+    # in that case, but the AoR plots should only evaluate pressure from 
+    # the TheisReservoir.
+    theis_cmpnt_found, theis_name, theis_data = check_for_comp_type(
+        yaml_data, model_data, 'TheisReservoir')
     
-    # Get locations associated with given wellbore component
-    locations_well = locations[comp_model_well]
+    if theis_cmpnt_found:
+        # Get locations associated with the TheisReservoir component
+        theis_locations = locations[theis_name]
+        
+        x_loc = np.array(theis_locations['coordx'])
+        y_loc = np.array(theis_locations['coordy'])
+        
+        grid_option = 'grid' in theis_data['Locations']
+        
+    else:
+        if not well_cmpnt_found:
+            err_msg = "".join(["A suitable wellbore component was not found in the ", 
+                               "components specified in the .yaml file. The suitable wellbore ", 
+                               "component types are: {}.".format(AOR_WELLBORE_COMPONENTS), 
+                               " One of these component types is required for the ", 
+                               "creation of an AoR plot."])
+            logging.error(err_msg)
+            raise KeyError(err_msg)
+        
+        # If aq_number was not found with the LeakTo entry, find it directly from 
+        # the entries for the aquifer components. OpenWellbore components will have 
+        # the LeakTo entry (they leak to only one aquifer), but other wellbore 
+        # components leak into multiple aquifers (e.g., MultisegmentedWellbore and CementedWellbore)
+        if not aq_number:
+            for comp_model in model_data['Components']:
+                comp_data = yaml_data[comp_model]
+                
+                if 'Type' in comp_data:
+                    if comp_data['Type'] in AOR_AQUIFER_COMPONENTS:
+                        if 'AquiferName' in comp_data:
+                            # This works for OpenWellbore components, but LeakTo is not 
+                            # required for components like MultisegmentedWellbores
+                            aq_name = comp_data['AquiferName']
 
-    x_loc = np.array(locations_well['coordx'])
-    y_loc = np.array(locations_well['coordy'])
+                            if aq_name[0:7] == 'aquifer':
+                                aq_number = int(aq_name[7:None])
+
+                        break
+        
+        # Get locations associated with given wellbore component
+        locations_well = locations[comp_model_well]
+
+        x_loc = np.array(locations_well['coordx'])
+        y_loc = np.array(locations_well['coordy'])
+    
+    components = list(sm.component_models.values())
+    # If injection sites need to be plotted, get the injection sites
+    if yaml_input['plot_injection_sites']:
+        InjectionCoordx = []
+        InjectionCoordy = []
+
+        for comp in components:
+            if comp.class_type in AOR_RESERVOIR_COMPONENTS and \
+                comp.class_type != 'LookupTableReservoir':
+                    inj_x = comp.injX
+                    inj_y = comp.injY
+                    
+                    if comp.class_type == 'TheisReservoir':
+                        for x in inj_x:
+                            InjectionCoordx.append(x)
+                        
+                        for y in inj_y:
+                            InjectionCoordy.append(y)
+                        
+                    else:
+                        InjectionCoordx.append(inj_x)
+                        InjectionCoordy.append(inj_y)
+                    
+        
+        InjectionCoordx, InjectionCoordy = remove_redundant_inj_coords(
+            InjectionCoordx, InjectionCoordy)
+
+    else:
+        InjectionCoordx = None
+        InjectionCoordy = None
 
     # This variable is used to check if the current figure uses pressure and if
     # a critical pressure was given
@@ -542,6 +565,30 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                              critPressureInput=critPressureInput, strata_type=strata_type)
 
 
+def check_for_comp_type(yaml_data, model_data, comp_type):
+    """
+    Checks the yaml_data and model_data dictionaries to see if a particular type 
+    of component was used in the simulation. If it was, the function returns a 
+    True value. Otherwise, it returns a False value.
+    """
+    comp_found = False
+    comp_name = None
+    comp_yaml_data = None
+    
+    for comp_model in model_data['Components']:
+        comp_data = yaml_data[comp_model]
+
+        if 'Type' in comp_data:
+            if comp_data['Type'] == comp_type:
+                comp_found = True
+                comp_name = comp_model
+                comp_yaml_data = comp_data
+                
+                break
+    
+    return comp_found, comp_name, comp_yaml_data
+
+
 def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                     analysis='forward',time_option=False, time_index=None,
                     critPressureInput=None, calcCritPressureNoOW=False, 
@@ -610,7 +657,8 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
                 if isinstance(output_component, (iam.SimpleReservoir,
                                                  iam.AnalyticalReservoir,
-                                                 iam.LookupTableReservoir)):
+                                                 iam.LookupTableReservoir, 
+                                                 iam.TheisReservoir)):
                     res_comp_check = True
                 
                 # If the component is a reservoir or aquifer component, proceed
@@ -643,10 +691,6 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                                      for indd in ind_list]
                         obs_percentiles = percentile(s.recarray[obs_names],
                                                      [0, 25, 50, 75, 100])
-
-                        obs_t0 = [full_obs_nm + '_0']
-                        obs_percentiles_t0 = percentile(s.recarray[obs_t0],
-                                                        [0, 25, 50, 75, 100])
 
                         # Find the location index
                         loc_ref = int(output_component.name.split('_')[-1])
@@ -710,13 +754,24 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
         return r'${} \times 10^{{{}}}$'.format(a, b)
 
     # AoR Figure
+    theis_cmpnt_found, _, _ = check_for_comp_type(
+        yaml_data, model_data, 'TheisReservoir')
+    
+    # When using a TheisReservoir, the legend should not refer to wellbores. The 
+    # points would be the output locations of the TheisReservoir, not a wellbore
+    # component.
+    if theis_cmpnt_found:
+        label = 'Grid Points Used for Area of Review'
+    else:
+        label = 'Hypothetical Wellbore for Area of Review'
+    
     fig = plt.figure(figsize=figsize, dpi=figdpi)
 
     ax = plt.gca()
     ax.set_facecolor(BACKGROUND_COLOR)
     plt.plot(x_loc / 1000, y_loc / 1000, linestyle='none', marker='o',
              color='k', markeredgewidth=1, markersize=5, markerfacecolor='none',
-             label='Hypothetical Wellbore for Area of Review')
+             label=label)
 
     # This is the number of columns in the legend
     ncol_number = 1
@@ -836,6 +891,11 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             cbar_ticks = cbar_ticks[cbar_ticks > 0].tolist()
             cbar.ax.set_yticks(cbar_ticks)
             cbar.ax.set_ylim([np.min(levels), np.max(levels)])
+        
+        if theis_cmpnt_found:
+            label = 'Grid Point with Nonzero Result'
+        else:
+            label = 'Wellbore with Nonzero Result'
 
         # Plot colors for individual points so there is less ambiguity
         lgnd_check = False
@@ -848,7 +908,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                              marker='o', markerfacecolor=rgba[0:3],
                              markeredgecolor='k', markeredgewidth=1.5,
                              markersize=12, linestyle='none',
-                             label='Wellbore with Nonzero Result')
+                             label=label)
                     lgnd_check = True
                     ncol_number += 1
 
@@ -870,7 +930,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 critPressure_str = r'${}\times10^{{{}}}$'.format(a, b)
 
                 if np.max(results_temp[:, 0]) < critPressureInput:
-                    title_pressure = ',\nNever Exceeded the P$_{crit}$ of ' + \
+                    title_pressure = ',\nDid Not Exceed the P$_{crit}$ of ' + \
                         '{} MPa'.format(critPressure_str)
 
                 elif np.min(results_temp[:, 0]) > critPressureInput:
@@ -909,7 +969,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 critPressureDiff_levels = np.array([0])
 
                 if np.max(critPressureDiff[:, 0]) < 0:
-                    title_pressure = ',\nNever Exceeded the Local P$_{crit}$ Values'
+                    title_pressure = ',\nDid Not Exceed the Local P$_{crit}$ Values'
 
                 elif np.min(critPressureDiff[:, 0]) > 0:
                     title_pressure = ',\nAll Pressures Exceeded the Local P$_{crit}$ Values'
@@ -1245,6 +1305,25 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
         plt.show()
 
 
+def remove_redundant_inj_coords(InjectionCoordx, InjectionCoordy):
+    """
+    Takes injection x and y lists and removes any redundant entries.
+    """
+    compiled_coords = []
+    InjectionCoordx_updated = []
+    InjectionCoordy_updated = []
+    
+    for i, (inj_x, inj_y) in enumerate(zip(InjectionCoordx, InjectionCoordy)):
+        coord = (inj_x, inj_y)
+        
+        if not coord in compiled_coords:
+            compiled_coords.append(coord)
+            InjectionCoordx_updated.append(inj_x)
+            InjectionCoordy_updated.append(inj_y)
+    
+    return InjectionCoordx_updated, InjectionCoordy_updated
+
+
 def not_boolean_debug_message_AoR(input_name, name, default_value):
     """
     Returns string delivering debug message regarding a variable not being
@@ -1574,17 +1653,33 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
     components = list(sm.component_models.values())
     # If injection sites need to be plotted, get the injection sites
     if yaml_input['plot_injection_sites']:
+        model_data = yaml_data['ModelParams']
+        
+        theis_cmpnt_found, _, _ = check_for_comp_type(
+            yaml_data, model_data, 'TheisReservoir')
+        
         InjectionCoordx = []
         InjectionCoordy = []
 
         for comp in components:
-            if comp.class_type in AOR_RESERVOIR_COMPONENTS:
-                if comp.class_type != 'LookupTableReservoir':
-                    InjectionCoordx.append(comp.injX)
-                    InjectionCoordy.append(comp.injY)
-
-        InjectionCoordx = np.unique(InjectionCoordx).tolist()
-        InjectionCoordy = np.unique(InjectionCoordy).tolist()
+            if comp.class_type in AOR_RESERVOIR_COMPONENTS and \
+                comp.class_type != 'LookupTableReservoir':
+                    inj_x = comp.injX
+                    inj_y = comp.injY
+                    
+                    if comp.class_type == 'TheisReservoir':
+                        for x in inj_x:
+                            InjectionCoordx.append(x)
+                        
+                        for y in inj_y:
+                            InjectionCoordy.append(y)
+                        
+                    else:
+                        InjectionCoordx.append(inj_x)
+                        InjectionCoordy.append(inj_y)
+        
+        InjectionCoordx, InjectionCoordy = remove_redundant_inj_coords(
+            InjectionCoordx, InjectionCoordy)
 
     else:
         InjectionCoordx = None

@@ -4,7 +4,7 @@
 # with multiple injection and extraction wells (i.e., positive vs. negative
 # injRates). Note that this control file was created to be somewhat equivalent
 # to the script example iam_sys_theis_4inj.py: one the locations of interest
-# (500, 500) is setup the same as in the mentioned script.
+# (500, 500) is set up in the same manner as in the mentioned script.
 #
 # The injRates and injTimes are presented here as a lists containing lists.
 # Each injRates and injTimes list corresponds to the well in the same position
