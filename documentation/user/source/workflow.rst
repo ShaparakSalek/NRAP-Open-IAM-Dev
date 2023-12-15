@@ -308,7 +308,7 @@ The ``LeakageAssessment`` workflow requires the ``Locations`` input under ``Well
                     coordx: [100, 200]
                     coordy: [100, 200]
 
-Here, the ``Locations`` entry is given ``coordx`` and coordy`` lists. Any valid input for ``Locations`` 
+Here, the ``Locations`` entry is given ``coordx`` and ``coordy`` lists. Any valid input for ``Locations`` 
 can be given under ``WellboreOptions`` (e.g., the ``file``, ``grid``, or ``range`` options; see 
 *ControlFile_ex30.yaml*).
 
@@ -330,10 +330,10 @@ highest aquifer.
 For examples of the ``LeakageAssessment`` workflow in the control file interface, see *ControlFile_ex58a.yaml* 
 to *ControlFile_ex58c.yaml*.
 
-Setup the AoR Workflow in the Control File Interface
-----------------------------------------------------
+Setup of the AoR Workflow in the Control File Interface
+-------------------------------------------------------
 
-To use the ``AoR`` workflow, set the ``Type`` entry of the ``Workflow `` section to ``AoR``.
+To use the ``AoR`` workflow, set the ``Type`` entry of the ``Workflow`` section to ``AoR``.
 
 When using the ``AoR`` workflow, we recommend setting ``GenerateOutputFiles`` and ``GenerateCombOutputFile`` 
 to ``False`` in the ``ModelParams`` section of the *.yaml* file. The large number of wellbore locations commonly 
@@ -451,10 +451,10 @@ like ``MultisegmentedWellbore`` or ``CementedWellbore``, which do not use a crit
 For examples of the ``AoR`` workflow in the control file interface, see *ControlFile_ex55a.yaml* to 
 *ControlFile_ex56g.yaml*.
 
-Setup the TTFD Workflow in the Control File Interface
------------------------------------------------------
+Setup of the TTFD Workflow in the Control File Interface
+--------------------------------------------------------
 
-To use the ``TTFD`` workflow, set the ``Type`` entry of the ``Workflow ``section to ``TTFD``.
+To use the ``TTFD`` workflow, set the ``Type`` entry of the ``Workflow`` section to ``TTFD``.
 
 The ``TTFD`` Workflow requires the input of ``Locations`` data under ``WellboreOptions``. Any valid 
 input for ``Locations`` can be given under ``WellboreOptions`` (e.g., the ``file``, ``grid``, or ``range`` options; 
@@ -479,7 +479,7 @@ The ``GenericAquifer`` also allows the user to set the initial salinity of the a
 the **dissolved_salt_threshold** parameter is exceeded and how large the *Dissolved_salt* plumes become.
 
 The ``TTFD`` workflow also has all of the optional entries that apply to the ``TTFD`` plot type (``MonitoringLocations``,  
-``WriteDreamOutput``, ``SaveCSVFiles``, ``SpecifyXandYLims, ``SpecifyXandYGridLims``, ``xGridSpacing``, ``yGridSpacing``, 
+``WriteDreamOutput``, ``SaveCSVFiles``, ``SpecifyXandYLims``, ``SpecifyXandYGridLims``, ``xGridSpacing``, ``yGridSpacing``, 
 ``NumZPointsWithinAquifers``, and ``NumZPointsWithinShales``). For the ``TTFD`` workflow, all of these entries are 
 provided under ``Options`` in the ``Workflow`` section of a .yaml control file. For descriptions of all of these options, 
 see the description of the ``TTFD`` plot type in section :ref:`cfi_visualization`.

@@ -178,7 +178,7 @@ form of arrays. This form of input arguments is called dynamic parameters (``DP`
 i.e., component inputs that change over time).
 
 The fifth example file *05_LHS_AR_OW_CA.OpenIAM* illustrates the application of
-three component models: ``AnalyticalReservoir``, ``OpenWellbore``and ``CarbonateAquifer``
+three component models: ``AnalyticalReservoir``, ``OpenWellbore`` and ``CarbonateAquifer``
 components. The example uses the ``LHS`` analysis type to estimate the reservoir's
 response to |CO2| injection, the leakage of fluids through a wellbore, and the impact
 of this leakage on an aquifer overlying the storage reservoir.

@@ -224,7 +224,7 @@ and ``AtmPlumeEnsemble`` plot types all have the optional entries ``PlotInjectio
   thicknesses and depths across the domain.
 
 If set up, ``SpecifyXandYLims`` is a dictionary containing two entries: ``xLims``
-and ``yLims`` (i.e., ``xLims`` and ``yLims`` are indented beneath``SpecifyXandYLims``
+and ``yLims`` (i.e., ``xLims`` and ``yLims`` are indented beneath ``SpecifyXandYLims``
 in a *.yaml* file).
 
 * ``SpecifyXandYLims`` - a dictionary containing two optional entries related
@@ -290,10 +290,10 @@ The ``AoR``, ``GriddedMetric``, and ``GriddedRadialMetric`` plot types have the 
 entry ``TimeList``:
 
 * ``TimeList`` - a list specifying the times (in years) for which to create separate
-  figures (e.g., ``TimeList: [1, 5, 10]). Otherwise, one figure can be created for
-  each timestep by having ``TimeList: All``. If ``TimeList`` is not entered for an ``AoR``
-  plot, the figures created will show the maximum values for all locations across all
-  model times. If ``TimeList`` is not entered for a ``GriddedMetric`` or
+  figures (e.g., ``TimeList: [1, 5, 10]``). Otherwise, one figure can be created for
+  each timestep by having ``TimeList: All``. If ``TimeList`` is not entered for an 
+  ``AoR`` plot, the figures created will show the maximum values for all locations across 
+  all model times. If ``TimeList`` is not entered for a ``GriddedMetric`` or
   ``GriddedRadialMetric`` plot, the default setting is ``TimeList: All``.
 
 The ``TTFD``, ``GriddedMetric``, and ``GriddedRadialMetric`` plot types all have the
@@ -596,7 +596,7 @@ and ``LookupTableStratigraphy``).
 ``InjectionCoordx``, ``InjectionCoordy``, ``PlotStratComponents``,
 ``StrikeAndDipSymbol``, ``SpecifyXandYLims``, ``SpecifyXandYGridLims``,
 ``xGridSpacing``, ``yGridSpacing``, ``View``, ``SaveCSVFiles``, ``ReservoirColor``,
-``ShaleColor``, ``AquiferColor``, ``ReservoirAlpha``, ShaleAlpha``, AquiferAlpha``,
+``ShaleColor``, ``AquiferColor``, ``ReservoirAlpha``, ``ShaleAlpha``, ``AquiferAlpha``,
 ``ReservoirLabel``, ``Shale#Label``, ``Aquifer#Label``, ``FigureDPI``,
 ``FigureSize``, and ``Title``. Four of these entries (``StrikeAndDipSymbol``,
 ``SpecifyXandYLims``, ``SpecifyXandYGridLims``, and ``View``) are dictionaries
@@ -604,7 +604,7 @@ containing additional entries (i.e., more entries indented beneath them in a
 *.yaml* file). The entries ``SpecifyXandYLims``, ``SpecifyXandYGridLims``,
 ``xGridSpacing``, ``yGridSpacing``, ``SaveCSVFiles``, ``PlotInjectionSites``,
 ``InjectionCoordx``, ``InjectionCoordy``, ``ReservoirColor``, ``ShaleColor``,
-``AquiferColor``, ``ReservoirAlpha``, ShaleAlpha``, AquiferAlpha``, ``ReservoirLabel``,
+``AquiferColor``, ``ReservoirAlpha``, ``ShaleAlpha``, ``AquiferAlpha``, ``ReservoirLabel``,
 ``Shale#Label``, ``Aquifer#Label``, ``FigureDPI``, and ``FigureSize`` are
 described above.
 
@@ -618,13 +618,13 @@ described above.
   or "Cemented Wellbore 1" for a Cemented Wellbore. If ``WellLabel`` is entered, the text
   provided will be used. The only acceptable values are ``True`` or ``False``.
 
-* ``WellLabel`` - the label used for wellbores if ``PlotWellLabels``is set to ``True``.
+* ``WellLabel`` - the label used for wellbores if ``PlotWellLabels`` is set to ``True``.
   If the text given includes empty brackets (*{}*), then the location index will be inserted
   in that position. If this entry was given as ``WellLabel: Legacy Well {}``, for example,
   then the labels would range from "Legacy Well 0" to "Legacy Well (N - 1)," where N is the
   maximum location index for the wellbore components (location indices use the python indexing).
   If ``WellLabel`` is given without brackets, then the same text will be displayed for each
-  wellbore component (e.g., ``WellLabel: Well``). if ``PlotWellLabels``is set to ``True``
+  wellbore component (e.g., ``WellLabel: Well``). if ``PlotWellLabels`` is set to ``True``
   but ``WellLabel`` is not entered, labels will be set using the default approach.
 
 * ``PlotInjectionSiteLabels`` - an option to show a text label for the injection
@@ -961,7 +961,7 @@ The dx, dy, and dz plume dimension metrics (e.g., *pH_dy* or *TDS_dz*) are used
 to evaluate whether each (x, y, z) of a grid is within a plume area for
 each model timestep. Note that ``NumZPointsWithinAquifers`` and
 ``NumZPointsWithinShales`` do not have an effect when ``PlumeType`` is given
-as ``CarbonateAquifer`` because a ``CarbonateAquifer``component does not produce
+as ``CarbonateAquifer`` because a ``CarbonateAquifer`` component does not produce
 a dz plume metric.
 
 * ``MonitoringLocations`` - a dictionary containing five optional entries related
@@ -986,7 +986,7 @@ a dz plume metric.
   for this entry, depths beneath the surface are taken as negative values.
   This entry must be provided as a list, even if only one location is used
   (e.g., [-500] or [-500, -400]). The ``coordz`` entry is not required when using
-  an option ``plumeType: CarbonateAquifer``, as the ``CarbonateAquifer``
+  an option ``plumeType: CarbonateAquifer``, as the ``CarbonateAquifer`` 
   component does not produce a dz plume metric.
 
 * ``HorizontalWindow`` - a (maximum) horizontal distance (|m|) from which monitoring
@@ -1046,10 +1046,10 @@ a dz plume metric.
   redundant because those points are included for the aquifers below and above
   the shale.
 
-Below, we show two examples of ``TTFD`` plot entries in the ``Plots``section of a
+Below, we show two examples of ``TTFD`` plot entries in the ``Plots`` section of a
 *.yaml* file. The first plot (*pH_Minimum_Input*) has only the entries required to
 set up the ``TTFD`` plot type: ``PlumeType`` and ``ComponentNameList``. The second
-plot (*TDS_All_Options_Specified.tiff*) includes all optional entries for the ``TTFD``
+plot (*TDS_All_Options_Specified.tiff*) includes all optional entries for the ``TTFD`` 
 plot type. Although there are only two plot entries included, each entry can result
 in the creation of multiple figures (e.g., earliest plume timings, ``TTFD`` from
 monitoring locations, and plume probabilities for each model realization). Note that

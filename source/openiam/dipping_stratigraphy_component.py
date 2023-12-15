@@ -49,8 +49,8 @@ class DippingStratigraphy(ComponentModel):
     *numberOfShaleLayers* parameter cannot vary across the domain.
     
     The ``dipDirection`` keyword can be used to specify the direction of dip. The 
-    ``dipDirection`` can be given as a cardinal direction (``N``,``E``, ``S``, 
-    ``W``, ``NE``, ``SE``, ``SW``,and ``NW``). In the control file interface, 
+    ``dipDirection`` can be given as a cardinal direction (``N``, ``E``, ``S``, 
+    ``W``, ``NE``, ``SE``, ``SW``, and ``NW``). In the control file interface, 
     the ``dipDirection`` can be specified under the ``Controls`` entry, which 
     is entered directly under ``DippingStratigraphy``. For example, the *strike* 
     and *dip* parameters could be given as 45 |deg| and 3 |deg|, respectively. 
