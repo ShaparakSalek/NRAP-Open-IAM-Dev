@@ -22,16 +22,19 @@
 #-------------------------------------------------
 ModelParams:
     # Time is in years
-    EndTime: 10    # EndTime and TimeStep - 1st option to enter time
+    EndTime: 10        # EndTime and TimeStep - 1st option to enter time
     TimeStep: 1.0
-    # TimePoints: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] # 2nd option to enter time
-    # TimePoints: 'examples/Control_Files/input_data/ex1/time_points.csv' # 3rd option to enter time
+    # TimePoints: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]                          # 2nd option to enter time
+    # TimePoints: 'examples/Control_Files/input_data/ex1/time_points.csv'     # 3rd option to enter time
     Analysis: forward
     Components: [AnalyticalReservoir1,
                  CementedWellbore1]
     OutputDirectory: output/output_ex1b_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     Logging: Debug
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateStatFiles: False    # only works with lhs or parstudy simulations
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:

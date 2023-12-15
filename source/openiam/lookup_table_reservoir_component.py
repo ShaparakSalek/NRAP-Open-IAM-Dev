@@ -180,6 +180,15 @@ class LookupTableReservoir(ComponentModel):
     for the Lookup Table Reservoir component which means that the linked lookup tables
     should contain the necessary data to produce them. In addition, the component
     can return any other type of observations provided in the lookup tables.
+
+    For control file examples using the Lookup Table Reservoir component, see 
+    *ControlFile_ex6*, *ControlFile_ex9c*, *ControlFile_ex10*, *ControlFile_ex14*, 
+    *ControlFile_ex24*, *ControlFile_ex32a* to *ControlFile_ex32c*, *ControlFile_ex37*, 
+    *ControlFile_ex40*, and *ControlFile_ex55a* to *ControlFile_ex55d*. For script 
+    examples, see *iam_sys_lutreservoir_5locs.py*, *iam_sys_lutreservoir_mswell.py*, 
+    and *iam_sys_lutreservoir_openwell_futuregen_aor_3d.py*, and 
+    *iam_sys_lutreservoir_mswell_rand_allocated_wells_lhs.py*.
+
     """
     def __init__(self, name, parent, intr_family=None,
                  locX=None, locY=None, locZ=None,

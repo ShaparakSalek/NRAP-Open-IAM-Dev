@@ -140,6 +140,12 @@ class CarbonateAquifer(ComponentModel):
 
     * **Phenol_volume** [|m^3|] - volume of aquifer above phenol threshold.
 
+    For control file examples using the Carbonate Aquifer component, see 
+    *ControlFile_ex3*, *ControlFile_ex4a*, *ControlFile_ex13*, and *ControlFile_ex42*. 
+    For script examples, see *iam_sys_reservoir_mswell_2aquifers.py*, 
+    *iam_sys_reservoir_mswell_4aquifers_timeseries.py*, and 
+    *iam_sys_reservoir_mswell_aquifer_lhs.py*.
+
     """
 
     # Attributes for system connections

@@ -23,7 +23,7 @@ except ImportError:
 
 
 # Assumed gravitational acceleration for critical pressure calculation, m/(s^2)
-GRAV_ACCEL = 9.8
+GRAV_ACCEL = 9.81
 
 # Assumed density of water for critical pressure calculation, kg/(m^3).
 WATER_DENSITY = 1000
@@ -60,22 +60,13 @@ class OpenWellbore(ComponentModel):
     beneath ``Controls``. For an example setup, see control file example 31a.
 
     If ``crit_pressure_approach`` is set to *True*, the default approach is for
-    critical pressure to be calculated as:
+    critical pressure (|Pcrit|, |Pa|) to be calculated in the manner shown in 
+    section :ref:`equations`.
 
-        Pcrit = (rho_w * g * d_aq) + (rho_br * g * (d_res - d_aq)),
-
-    where rho_w and rho_br are the densities of water (1000 |kg/m^3|) and brine
-    (the brineDensity parameter), respectively, g is gravitational acceleration
-    (9.8 |m/s^2|), d_aq is the depth to the bottom of the aquifer impacted by
-    leakage (m) (defined by the wellTop parameter value; if wellTop is 0 m,
-    then the atmosphere receives leakage), and d_res is the depth to the top of
-    the reservoir (m). Higher brine densities generally produce lower leakage
-    rates.
-
-    Instead of calculating critical pressure in this manner, one can enforce a
-    particular critical pressure (the **critPressure** parameter) by setting the
-    argument ``enforce_crit_pressure`` to *True* for the setup of the component.
-    Here is an example in a script setup:
+    Instead of having critical pressure calculated by the component, one can enforce 
+    a particular critical pressure (the **critPressure** parameter) by setting 
+    the argument ``enforce_crit_pressure`` to *True* for the setup of the 
+    component. Here is an example in a script setup:
 
         OpenWellbore(name='ow', parent=sm, crit_pressure_approach=True,
                      enforce_crit_pressure=True)
@@ -136,7 +127,14 @@ class OpenWellbore(ComponentModel):
     * **CO2_aquifer** and **CO2_atm** [|kg/s|] - |CO2| leakage rates
 
     * **brine_aquifer** and **brine_atm** [|kg/s|] - brine leakage rates.
-
+    
+    For control file examples using the Open Wellbore component, see *ControlFile_ex4a*
+    to *ControlFile_ex4b*, *ControlFile_ex9a* to *ControlFile_ex9c*, 
+    *ControlFile_ex32a* to *ControlFile_ex32c*, and *ControlFile_ex55a* to 
+    *ControlFile_ex55d*. For script examples, see *iam_sys_strata_reservoir_openwell_genericaquifer.py*, 
+    *iam_sys_lutstrata_reservoir_openwell.py*, *iam_sys_reservoir_openwell_futuregen_aor_plot.py*,  
+    and *iam_sys_strata_reservoir_openwell_genericaquifer_5locs.py*.
+    
     """
     def __init__(self, name, parent, header_file_dir=None,
                  crit_pressure_approach=False, enforce_crit_pressure=False):

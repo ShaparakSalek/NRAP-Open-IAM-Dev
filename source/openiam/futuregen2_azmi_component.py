@@ -131,6 +131,11 @@ class FutureGen2AZMI(ComponentModel):
     * **Temperature_dz** [|m|] - height of plume where relative change
       in temperature > 0.03%
 
+    For control file examples using the FutureGen 2.0 AZMI component, see 
+    *ControlFile_ex15*, *ControlFile_ex39a*, and *ControlFile_ex39b*. For script 
+    examples, see *iam_sys_reservoir_openwell_futuregen_aor_plot.py*  
+    and *iam_sys_lutreservoir_mswell_futuregen_dream.py*.
+
     """
     def __init__(self, name, parent):
         """

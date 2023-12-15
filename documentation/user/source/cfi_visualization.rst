@@ -1,12 +1,13 @@
 .. _cfi_visualization:
 
-Setup of visualization options
-==============================
+Visualization Options in the CFI
+================================
 
 The plot types available within NRAP-Open-IAM are: ``TimeSeries``, ``TimeSeriesStats``,
 ``TimeSeriesAndStats``, ``StratigraphicColumn``, ``Stratigraphy``, ``AoR``, ``TTFD``,
 ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, and ``AtmPlumeEnsemble``.
-We review the process of creating these plots and then discuss each plot type separately.
+This section review the process of creating these plots in the control file interface (CFI)
+and then discusses each plot type separately.
 
 To create a figure using a simulation run with a *.yaml* control file, the
 the figure must be set up in the *Plots* section. Within the *Plots* section, the
@@ -63,7 +64,7 @@ Each plot type has the optional entries ``FigureDPI`` and ``FigureSize``.
   100). Most figure types produce only one figure file, but plot types like
   ``Stratigraphy`` and ``TTFD`` can produce multiple figures from one entry.
   Larger DPIs will create high-resolution, high-quality figures, but the file
-  sizes are also larger. File size and quality is also influenced by the extension
+  sizes are also larger. File size and quality are also influenced by the extension
   used (e.g., *.png* or *.tiff*). Recommended ``FigureDPI`` values are between
   100 and 300.
 
@@ -77,16 +78,14 @@ Each plot type has the optional entries ``FigureDPI`` and ``FigureSize``.
   ``AtmPlumeSingle`` and ``AtmPlumeEnsemble`` plots. This entry can also be
   provided as ``figsize`` instead of ``FigureSize``.
 
-The ``TimeSeries``, ``TimeSeriesStats``, ``TimeSeriesAndStats``, ``Aor``,
+The ``TimeSeries``, ``TimeSeriesStats``, ``TimeSeriesAndStats``, ``AoR``,
 ``StratigraphicColumn``, and ``Stratigraphy`` plot types have the optional
 entry ``Title``.
 
 * ``Title`` - the text placed in bold at the top of the figure. If the ``Title``
   entry is given for ``StratigraphicColumn`` or ``Stratigraphy`` plots,
-  it replaces the default titles ('Stratigraphy for the Study Area' and
-  'Stratigraphy for the Study Area, Top of Each Unit Shown' for each plot type,
-  respectively). For the remaining plot types, by default, there is no
-  title for the overall figure, only titles for each individual subplot generated
+  it replaces the default titles. For the remaining plot types, by default, there is
+  no title for the overall figure, only titles for each individual subplot generated
   based on the output shown (with ``AoR`` plots having one subplot). Note that
   if one wants to have |CO2| in a title, one should enter it as 'CO$_2$'
   (the $$ symbols aid in the proper formatting).
@@ -174,7 +173,7 @@ label if the setup causes overlap between different labels.
 * ``ShaleColor`` - the color used when plotting all shales (or a specific shale, if given as
   ``Shale#Color``, where ``#`` is an appropriate unit number). The default is red.
 
-* ``AquiferColor`` - the color used when plotting all shales (or a specific shale, if given as
+* ``AquiferColor`` - the color used when plotting all aquifers (or a specific aquifer, if given as
   ``Aquifer#Color``, where ``#`` is an appropriate unit number). The default is blue.
 
 * ``ReservoirAlpha`` - the alpha value used when plotting the reservoir. The default value is
@@ -206,24 +205,23 @@ and ``AtmPlumeEnsemble`` plot types all have the optional entries ``PlotInjectio
   The only acceptable values are ``True`` or ``False``.
 
 * ``InjectionCoordx`` - value or list of values for the x coordinate(s) of
-  injection site(s) (default is None). The value(s) are in meters. This entry must
+  injection site(s) (default is None). The values are given in meters. This entry must
   be provided when using a ``LookupTableReservoir``, as that component type does
-  not have an .injX attribute. Other reservoir types like ``SimpleReservoir`` or
-  ``AnalyticalReservoir`` can be displayed without an InjectionCoordx entry.
+  not have an *.injX* attribute. Other reservoir types like ``AnalyticalReservoir`` 
+  can be displayed without an ``InjectionCoordx`` entry.
 
 * ``InjectionCoordy`` - value or list of values for the y coordinate(s) of
-  injection site(s) (default is None). The value(s) are in meters. This entry must
+  injection site(s) (default is None). The values are given in meters. This entry must
   be provided when using a ``LookupTableReservoir``, as that component type does
-  not have an .injY attribute. Other reservoir types like ``SimpleReservoir`` or
-  ``AnalyticalReservoir`` can be displayed without an InjectionCoordy entry.
+  not have an *.injY* attribute. Other reservoir types like ``AnalyticalReservoir`` 
+  can be displayed without an ``InjectionCoordy`` entry.
 
 * ``SaveCSVFiles`` - an option to save results in *.csv* files. The only acceptable
   values are ``True`` or ``False``. The default value for ``AoR``, ``TTFD``,
   ``GriddedMetric``, ``GriddedRadialMetric``, ``AtmPlumeSingle``, and
   ``AtmPlumeEnsemble`` plots is ``True``, while the default value for ``Stratigraphy``
   plots is ``False``. For ``Stratigraphy`` plots, the *.csv* files contain unit
-  thicknesses and depths across the domain. The *.csv* files are not saved by
-  ``Stratigraphy`` plots when the simulation uses the ``LookupTableStratigraphy`` option.
+  thicknesses and depths across the domain.
 
 If set up, ``SpecifyXandYLims`` is a dictionary containing two entries: ``xLims``
 and ``yLims`` (i.e., ``xLims`` and ``yLims`` are indented beneath``SpecifyXandYLims``
@@ -235,14 +233,14 @@ in a *.yaml* file).
 
 * ``xLims`` - an entry under ``SpecifyXandYLims`` containing a list of length two
   that represents the x-axis limits (e.g., ``xLims: [0, 1000]``; default is None).
-  The values are in meters. The first and second values in the list are the
+  The values are given in meters. The first and second values in the list are the
   lower and upper limits, respectively. If ``xLims`` is not provided or provided
   incorrectly, the figure will use the default approach for setting the
   x-axis limits.
 
 * ``yLims`` - an entry under ``SpecifyXandYLims`` containing a list of length two
   that represents the y-axis limits (e.g., ``yLims: [0, 1000]``; default is None).
-  The values are in meters. The first and second values in the list are the
+  The values are given in meters. The first and second values in the list are the
   lower and upper limits, respectively. If ``yLims`` is not provided or provided
   incorrectly, the figure will use the default approach for setting the
   y-axis limits.
@@ -278,13 +276,13 @@ radial grids produced by a component (e.g., a ``GenericAquifer`` component), whi
 The ``Stratigraphy``, ``TTFD``, and ``AtmPlumeEnsemble`` plot types can all use
 the optional entries ``xGridSpacing`` and ``yGridSpacing``:
 
-* ``xGridSpacing`` - a horizontal distance (m) used as the interval between the
-  grid points in the x-direction (default is None). If this entry is not setup,
+* ``xGridSpacing`` - a horizontal distance (|m|) used as the interval between the
+  grid points in the x-direction (default is None). If this entry is not provided,
   the x-coordinates of the grid points are defined using a default approach
   (1/100th of the range in x-values).
 
-* ``yGridSpacing`` - a horizontal distance (m) used as the interval between the
-  grid points in the y-direction (default is None). If this entry is not setup,
+* ``yGridSpacing`` - a horizontal distance (|m|) used as the interval between the
+  grid points in the y-direction (default is None). If this entry is not provided,
   the y-coordinates of the grid points are defined using a default approach
   (1/100th of the range in y-values).
 
@@ -293,7 +291,7 @@ entry ``TimeList``:
 
 * ``TimeList`` - a list specifying the times (in years) for which to create separate
   figures (e.g., ``TimeList: [1, 5, 10]). Otherwise, one figure can be created for
-  each timestep by having ``TimeList: All``. If TimeList is not entered for an ``AoR``
+  each timestep by having ``TimeList: All``. If ``TimeList`` is not entered for an ``AoR``
   plot, the figures created will show the maximum values for all locations across all
   model times. If ``TimeList`` is not entered for a ``GriddedMetric`` or
   ``GriddedRadialMetric`` plot, the default setting is ``TimeList: All``.
@@ -379,12 +377,11 @@ being plotted (e.g., **pressure** or **brine_aquifer1**) influence the number
 of lines created for that particular metric.
 
 ``TimeSeriesStats`` and ``TimeSeriesAndStats`` plots can only be produced for simulations
-using the Latin Hypercube Sampling (LHS, ``lhs`` in a control file setup)
-or Parameter Study (``parstudy`` in a control file setup) analysis types (not the
-``forward`` analysis type). Simulations using the ``lhs`` and ``parstudy`` analysis
-types create separate simulations (i.e., different realizations) that explore the
-parameter space. The parameters varied are those entered with minimum and maximum
-values, which are meant to model uniform distribution. Consider, for example, a
+using the Latin Hypercube Sampling (LHS, ``lhs`` in the CFI) or Parameter Study (``parstudy``
+in the CFI) analysis types (not the ``forward`` analysis type). Simulations using the ``lhs``
+and ``parstudy`` analysis types create separate simulations (i.e., different realizations) that
+explore the parameter space. The parameters varied are those entered with minimum and maximum
+values, which are meant to model a uniform distribution. Consider, for example, a
 ``TimeSeriesStats`` plot set up for an LHS run with 30 realizations. The ``ModelParams``
 section of the *.yaml* file would be similar to this excerpt from *ControlFile_ex4a.yaml*:
 
@@ -397,7 +394,7 @@ section of the *.yaml* file would be similar to this excerpt from *ControlFile_e
         Analysis:
             Type: lhs
             siz: 30
-        Components: [SimpleReservoir1,
+        Components: [AnalyticalReservoir1,
                      OpenWellbore1,
                      CarbonateAquifer1]
         OutputDirectory: output/output_ex4a_{datetime}
@@ -405,13 +402,13 @@ section of the *.yaml* file would be similar to this excerpt from *ControlFile_e
 
 The entries ``Type: lhs`` and ``siz: 30`` under ``Analysis`` specify the run as an
 LHS simulation with 30 realizations. Each realization will use different values
-for the parameters that are setup to vary. In a ``TimeSeries`` plot, the outputs for
+for the parameters that are set up to vary. In a ``TimeSeries`` plot, the outputs for
 each realization will be represented by separate lines.
 
-If an LHS or parstudy simulation uses many realizations and many component locations,
-the ``TimeSeries`` plot could become visually unclear. To avoid a lack of visual
-clarity, ``TimeSeriesStats`` plots show the basic information about the distribution
-of results. The plot produces lines representing mean and median values as well
+If an ``lhs`` or ``parstudy`` simulation uses many realizations and many component locations,
+a ``TimeSeries`` plot could become visually unclear. To avoid a lack of visual
+clarity, ``TimeSeriesStats`` plots show basic information about the distribution
+of results over time. The plot produces lines representing mean and median values as well
 as shaded regions showing the four quartiles of the distribution varying over time
 (0th to 25th, 25th to 50th, 50th to 75th and 75th to 100th percentiles).
 
@@ -479,8 +476,8 @@ The titles for individual subplots are generated based on the metric shown in th
 (i.e., output type and location the output was produced for). One can specify the subplot
 title that will correspond to a specific output, however, by entering the output name
 under ``Subplot``. The output name depends on the corresponding component, the output type,
-and the location index. For example, a ``SimpleReservoir`` component named SimpleReservoir1
-producing pressure at location 0 will result in an output name of ``SimpleReservoir1_000.pressure``.
+and the location index. For example, an ``AnalyticalReservoir`` component named AnalyticalReservoir1
+producing pressure at location 0 will result in an output name of ``AnalyticalReservoir1_000.pressure``.
 The component name is followed by an underscore, then the location index (starting at 0 and
 expressed with three digits), then a period, and finally the output name (e.g., **pressure**).
 The text used for the title is given after the output name as
@@ -503,10 +500,10 @@ control file.
             Subplot:
                 Use: True
                 NumCols: 2
-                SimpleReservoir1_000.pressure: 'Pressure at Well 0'
-                SimpleReservoir1_001.pressure: 'Pressure at Well 1'
-                SimpleReservoir1_000.CO2saturation: 'CO$_2$ Saturation at Well 0'
-                SimpleReservoir1_001.CO2saturation: 'CO$_2$ Saturation at Well 1'
+                AnalyticalReservoir1_000.pressure: 'Pressure at Well 0'
+                AnalyticalReservoir1_001.pressure: 'Pressure at Well 1'
+                AnalyticalReservoir1_000.CO2saturation: 'CO$_2$ Saturation at Well 0'
+                AnalyticalReservoir1_001.CO2saturation: 'CO$_2$ Saturation at Well 1'
         Pressure_Stats:
             TimeSeriesAndStats: [pressure]
             UseMarkers: True
@@ -517,17 +514,19 @@ control file.
 For examples of ``TimeSeries`` plots, see control file examples 1a, 1b, 2, 3, 7a,
 7b, and 14. For examples of ``TimeSeriesStats`` plots, see control file examples
 4a, 4b, 6, 8, 15, and 39. For examples of ``TimeSeriesAndStats`` plots, see control
-file examples 4a, 14, and 40.
+file examples 4a, 14, and 40. For script examples using the ``TimeSeries`` plot, see
+*iam_sys_reservoir_mswell_4aquifers_timeseries.py* and
+*iam_sys_reservoir_mswell_4aquifers_timeseries_2locs.py*.
 
 StratigraphicColumn
 -------------------
 
-``StratigraphicColumn`` plots show unit thicknesses at one location. If the simulation
-does not use spatially variable stratigraphy, then the unit thicknesses at the one location
-used are representative of the entire domain. For more details regarding the use of
-spatially variable stratigraphy, see the section for the ``Stratigraphy`` plot type below.
-When using spatially variable stratigraphy with the ``LookupTableStratigraphy`` approach,
-the ``StratigraphicColumn`` plot may be more visually clear than the ``Stratigraphy`` plot type.
+``StratigraphicColumn`` plots show unit thicknesses and depths at one location. If the simulation
+does not use spatially variable stratigraphy (e.g., the ``Stratigraphy`` component),
+then the unit thicknesses at the one location used are representative of the entire domain.
+If the simulation does use spatially variable stratigraphy (e.g., the ``DippingStratigraphy``
+or ``LookupTableStratigraphy`` components), then the plot shows the calculated unit thicknesses
+for the location used.
 
 The ``StratigraphicColumn`` plot type has the following optional entries: ``XValue``,
 ``YValue``, ``DepthText``, ``ReservoirColor``, ``ShaleColor``, ``AquiferColor``,
@@ -535,10 +534,10 @@ The ``StratigraphicColumn`` plot type has the following optional entries: ``XVal
 ``AquiferLabel``, ``FigureDPI``, ``FigureSize``, and ``Title``. All of these entries but
 ``XValue``, ``YValue``, and ``DepthText`` are described above.
 
-* ``XValue`` - the x-coordinate (m) of the location used for the plot.
+* ``XValue`` - the x-coordinate (|m|) of the location used for the plot.
   The default value is is 0 m.
 
-* ``YValue`` - the y-coordinate (m) of the location used for the plot.
+* ``YValue`` - the y-coordinate (|m|) of the location used for the plot.
   The default value is is 0 m.
 
 * ``DepthText`` - option specifying whether to show depths at each unit interface
@@ -583,147 +582,14 @@ the default options. The other plot includes a variety of optional entries.
                 DepthText: False
 
 For more examples of ``StratigraphicColumn`` plots, see control file examples
-*ControlFile_ex33a*-*ControlFile_ex38*.
+*ControlFile_ex33a*-*ControlFile_ex38c*.
 
 Stratigraphy
 ------------
 ``Stratigraphy`` plots are three-dimensional plots showing the specified
 stratigraphy as well as features like wellbores and injection sites. These plots
-can vary with the approach used for the stratigraphy. For example, a ``strike`` and
-``dip`` can be assigned in the ``Stratigraphy`` section of a *.yaml* control file.
-Alternatively, the ``LookupTableStratigraphy`` option allows one to create the
-domain's stratigraphy with a *.csv* file containing unit thicknesses. ``Stratigraphy``
-plots also work for simulations with spatially uniform unit thicknesses.
-
-First, we discuss the use of a ``strike`` and ``dip`` options. The ``Stratigraphy``
-section from *ControlFile_ex33a.yaml* is shown below:
-
-.. code-block:: python
-   :lineno-start: 1
-
-    Stratigraphy:
-        spatiallyVariable:
-            strikeAndDip:
-                strike: 315
-                dip: 5
-                dipDirection: NE
-                coordxRefPoint: 1200
-                coordyRefPoint: 1200
-        numberOfShaleLayers:
-            vary: False
-            value: 3
-        shale1Thickness:
-            value: 750.0
-            vary: False
-        shale2Thickness:
-            value: 950.0
-            vary: False
-        shale3Thickness:
-            value: 200
-            vary: False
-        aquifer1Thickness:
-            vary: False
-            value: 200
-        aquifer2Thickness:
-            vary: False
-            value: 200
-        reservoirThickness:
-            vary: False
-            value: 150
-
-To set up spatially variable stratigraphy, one can use ``spatiallyVariable`` keyword
-indented under ``Stratigraphy``. To use strike and dip values, the ``strikeAndDip`` keyword
-needs to be indented under ``spatiallyVariable``. The entries indented under ``strikeAndDip``
-are as follows:
-
-* ``strike`` - the strike of the units in degrees clockwise from north in a map
-  view presentation. For example, strike values of 0 or 180 make the units
-  strike north/south; strike values of 90 or 270 make the units strike
-  east/west, and strike values of 30 or 210 make the units strike
-  northeast/southwest. Acceptable values are in a range between 0 to 360.
-
-* ``dip`` - the dip of the units in degrees, where a positive value corresponds
-  with unit depths increasing in the ``dipDirection`` provided. Acceptable values
-  range from 0 to less than 90.
-
-* ``dipDirection`` - the dip direction provided in a cardinal direction -
-  N, E, S, W, NE, SE, SW, or NW. Note that this entry must be compatible with
-  the ``strike`` entry. For example, units cannot strike north/south and dip to
-  the north, but they could strike north/south and dip to the east or west.
-
-* ``coordxRefPoint`` - the x-coordinate (m) of the reference point. The unit
-  thicknesses provided for the reference point are used to calculate unit
-  thicknesses across the domain.
-
-* ``coordyRefPoint`` - the y-coordinate (m) of the reference point. The unit
-  thicknesses provided for the reference point are used to calculate unit
-  thicknesses across the domain.
-
-Note that the unit thicknesses indented under ``Stratigraphy`` are those at the
-reference point (x = ``coordxRefPoint``, y = ``coordyRefPoint``). When using the
-``strikeAndDip`` option, unit thicknesses in other parts of the domain are
-calculated in relation to this reference point. Other ``Stratigraphy`` component
-parameters like *numberOfShaleLayers* and *datumPressure* cannot vary across the
-domain. Note that units can effectively pinch out, although the thicknesses will
-only be reduced to the minimum value of 1 m. Additionally, while the ``strike``
-and ``dip`` option will make some units thicker (e.g., increasing the thickness
-of the the top shale so that the units beneath it have greater depths), each unit
-thickness cannot exceed the maximum value of 1600 m.
-
-To use the ``LookupTableStratigraphy`` approach, one can use ``spatiallyVariable`` indented
-under ``Stratigraphy`` and then ``LookupTableStratigraphy`` keyword indented under
-``spatiallyVariable``. This approach is demonstrated in *ControlFile_ex38.yaml*:
-
-.. code-block:: python
-   :lineno-start: 1
-
-    Stratigraphy:
-        spatiallyVariable:
-            LookupTableStratigraphy:
-                FileName: 'stratigraphy.csv'
-                FileDirectory: 'examples/Control_Files/input_data/ex38'
-                MaxPointDistance: 100
-
-The entries indented under ``LookupTableStratigraphy`` are as follows:
-
-* ``FileName`` - the name of the *.csv* file containing unit thicknesses and other
-  ``Stratigraphy`` component parameters (*numberOfShaleLayers*, *datumPressure*, and
-  *depth*).
-
-* ``FileDirectory`` - the directory containing the *.csv* file referenced by
-  *FileName*. The directory is given in relation to the main directory used for
-  the NRAP-Open-IAM installation being used but ``FileDirectory`` can also provide
-  an entire path name like
-
-    C:\Users\UserName\Documents\NRAPOpenIAM\examples\Control_Files\input_data\ex38.
-
-* ``MaxPointDistance`` - to set unit thicknesses at each location evaluated in
-  the domain, each location must be within a certain distance of a point in
-  the *.csv* file referenced with ``FileName``. ``MaxPointDistance`` is that maximum
-  distance (m) (default is 100 m). If a location in the domain is not close
-  enough to a point in the *.csv* file, the simulation will return an error.
-  Users can avoid this error by setting ``MaxPointDistance`` to a higher value,
-  but using too high a value could lead to inaccurate depictions of the
-  domain's stratigraphy. ``MaxPointDistance`` is intended to help ensure that
-  ``LookupTableStratigraphy`` *.csv* files include sufficient information. It is the
-  user's responsibility to make sure that the *.csv* file contains sufficient
-  information and the ``MaxPointDistance`` is not too high.
-
-The first two columns of a ``LookupTableStratigraphy`` *.csv* file are x and y
-coordinates (m) with the columns named 'x' and 'y', respectively.
-Any unit thicknesses (m) that vary with x and y values should be listed in
-columns with the same number of rows as the x and y columns. The thicknesses
-specified in a particular row of the *.csv* file correspond to the x and y values
-from the same row. If a unit thickness does not vary with x and y values,
-that unit thickness can be displayed in a column with a single row. A location in
-the domain will be assigned the unit thicknesses from the closest location in the
-``LookupTableStratigraphy`` *.csv* file - if the closest location is within
-``MaxPointDistance`` of the location. For an example, see the *stratigraphy.csv*
-file in the directory *examples/Control_Files/input_data/ex38*.
-
-Note that ``Stratigraphy`` plots created for simulations using ``LookupTableStratigraphy``
-will not have three-dimensional planes. Instead, the tops of each unit are plotted
-as squares along each wellbore.
+work with all stratigraphy component types (``Stratigraphy``, ``DippingStratigraphy``, 
+and ``LookupTableStratigraphy``).
 
 ``Stratigraphy`` plots can have the following optional entries: ``PlotWellbores``,
 ``PlotWellLabels``, ``WellLabel``, ``PlotInjectionSites``, ``PlotInjectionSiteLabels``,
@@ -780,14 +646,14 @@ described above.
 
 * ``coordx`` - an entry under ``StrikeAndDipSymbol`` that specifies the x-coordinate
   at which to plot the strike and dip symbol (default is None). If ``coordx`` is
-  not setup, the graph will use a default location (which depends on the domain).
+  not provided, the graph will use a default location (which depends on the domain).
 
 * ``coordy`` - an entry under ``StrikeAndDipSymbol`` that specifies the y-coordinate
   at which to plot the strike and dip symbol (default is None). If ``coordy`` is
-  not setup, the graph will use a default location (which depends on the domain).
+  not provided, the graph will use a default location (which depends on the domain).
 
 * ``length`` - an entry under ``StrikeAndDipSymbol`` that specifies the length scale
-  (m) of the strike and dip symbol (default is None). For flat-lying units, the
+  (|m|) of the strike and dip symbol (default is None). For flat-lying units, the
   length is the diameter of the circular symbol used. For dipping units, the
   length applies to the line going in direction of strike (not the line in
   the dip direction). If ``length`` is not provided, the graph will use a
@@ -852,15 +718,14 @@ component with option ``PlotInjectionSites: True``.
                     ViewAngleElevation: [5, 10, 5, 10]
                     ViewAngleAzimuth: [300, 300, 310, 310]
 
-For examples of ``Stratigraphy`` plots, see examples *ControlFile_ex33a.yaml*-*ControlFile_ex38.yaml*.
-For examples of using ``Stratigraphy`` plots in a script application, see files
-*iam_sys_reservoir_mswell_stratplot_dipping_strata.py* and
-*iam_sys_reservoir_mswell_stratplot_no_dip.py*.
+For examples of ``Stratigraphy`` plots, see examples *ControlFile_ex33a.yaml*-*ControlFile_ex38c.yaml*.
+For examples of using ``Stratigraphy`` plots in a script application, see the files
+*iam_sys_reservoir_mswell_stratplot_dipping_strata.py* and *iam_sys_reservoir_mswell_stratplot_no_dip.py*.
 
 AoR
 ---
 
-Area of Review (``AoR``) plots are developed to estimate the AoR needed for a geologic
+Area of Review (``AoR``) plots are developed to estimate the ``AoR`` needed for a geologic
 carbon storage project based on the spatial extent of reservoir impacts (pressure
 and |CO2| saturation) and potential aquifer impacts (dissolved salt and dissolved
 |CO2| plume volumes). The potential extent is found by distributing wellbore
@@ -868,13 +733,22 @@ components across the domain. We recommend setting wellbore locations using the
 grid placement option (see examples *ControlFile_ex31a.yaml*  to *ControlFile_ex31d.yaml*).
 The wellbores are hypothetical and used to consider the aquifer impacts that could
 occur if a leakage pathway (extending from the reservoir to the aquifer being considered)
-was available at each ``OpenWellbore`` location. The approach used for ``AoR`` plots
+was available at each wellbore location considered. The approach used for ``AoR`` plots
 is based on the work :cite:`BACON2020`.
+
+``AoR`` plots can be made while using any type of wellbore component, but we recommend using 
+the ``OpenWellbore`` component. The ``OpenWellbore`` component represents a worst-case 
+scenario, where the wellbore is uncemented. Additionally, this component can use a critical 
+pressure in leakage calculations. One might want to use another wellbore type (e.g., 
+``MultisegmentedWellbore`` or ``CementedWellbore``), however, if there are reliable constraints 
+on the effective permeabilities of legacy wells in the study area. Without such constraints, 
+it can be more responsible to evaluate the implications of a worst-case scenario with 
+uncemented legacy wells.
 
 Note that the ``AoR`` plot type is meant to be used only for one aquifer at a time,
 with that aquifer being represented by only one type of aquifer component
 (e.g., representing contaminant spread in aquifer 2 with a ``FutureGen2Aquifer``
-component). For example, file *ControlFile_ex31a.yaml* has ``SimpleReservoir``
+component). For example, file *ControlFile_ex31a.yaml* has ``AnalyticalReservoir``
 components that provide the input for ``OpenWellbore`` components, and the ``OpenWellbore``
 components provide input to ``FutureGen2Aquifer`` components. The ``FutureGen2Aquifer``
 components are set up to represent aquifer 2. If the user added an entry to the *.yaml*
@@ -883,40 +757,90 @@ could not make plots representing the impacts on both aquifers 1 and 2. In this
 case, one would need to create a separate *.yaml* file that creates ``AoR`` plots just
 for aquifer 1.
 
-``AoR`` plots can be created for the following types of outputs: **pressure**,
-**CO2saturation**, **pH_volume**, **TDS_volume**, **Dissolved_CO2_volume**,
-and **Dissolved_salt_volume**. The ``AoR`` plot type examines these metrics
-at each location in the domain (i.e., each hypothetical wellbore location)
-and displays the maximum value over time (across all times or at specific
-times, depending on the ``TimeList`` entry provided; this entry is discussed below).
-For LHS simulations, the ``AoR`` plot displays the maximum values over time at
-each location from all LHS realizations. This approach is meant to depict how
-severe the reservoir and aquifer impacts could become. Using the ``AoR`` plot type
-leads to the creation of *.csv* files containing the values shown in the ``AoR`` plots.
-Note that model run times can increase dramatically with the number of wellbore
-locations. Additionally, some aquifer components generally require longer model run
-times (e.g., ``GenericAquifer``) in comparison with other aquifer components
-(e.g., ``FutureGen2Aquifer``). Also note that ``FutureGen2Aquifer`` is meant to be
-set up for aquifers with bottom depths <= 700 m, while ``FutureGen2AZMI`` is meant
-to be set up for aquifers with bottom depths >= 700 m.
+``AoR`` plots can be created for four types of outputs: reservoir pressires
+(**pressure**), reservoir |CO2| saturations (**CO2saturation**), aquifer contaminant plume
+volumes from |CO2| leakage (**pH_volume** and **Dissolved_CO2_volume**), and aquifer
+contaminant plume volumes from brine leakage (**TDS_volume** or **Dissolved_salt_volume**).
+The type of plume volume output depends on the aquifer component used (e.g., ``GenericAquifer``
+vs. ``FutureGen2Aquifer``).
 
-When using the ``AoR`` plot type, we recommend setting ``GenerateOutputFiles`` and
-``GenerateCombOutputFile`` to ``False`` in the ``ModelParams`` section of the *.yaml* file.
-The large number of wellbore locations commonly used for ``AoR`` plots causes
-a large number of output files. A reservoir and aquifer component is created for
-each wellbore location, and every component will have its output saved. The
-``.csv`` files created for the ``AoR`` plots contain all of the necessary information
-and these files are much smaller in size.
+The ``AoR`` plot type examines these metrics at each location in the domain (i.e., each
+hypothetical wellbore location) and displays the maximum value over time (across all times
+or at specific times, depending on the ``TimeList`` entry provided; this entry is discussed
+below). For ``LHS`` simulations, the ``AoR`` plot displays the maximum values over time at
+each location from all ``LHS`` realizations. This approach is meant to depict how
+severe the reservoir and aquifer impacts could become.
 
-``AoR`` plots can have six optional entries: ``PlotInjectionSites``, ``InjectionCoordx``,
-``InjectionCoordy``, ``SaveCSVFiles``, ``FigureDPI``, ``FigureSize``, and ``TimeList``.
-All of these entries are described above.
+Note that model run times can increase dramatically with the number of wellbore locations.
+Additionally, some aquifer components generally require longer model run times (e.g.,
+``GenericAquifer``) in comparison with other aquifer components (e.g., ``FutureGen2Aquifer``).
+Also note that ``FutureGen2Aquifer`` is meant to be set up for aquifers with bottom depths
+<= 700 m, while ``FutureGen2AZMI`` is meant to be set up for aquifers with bottom depths >= 700 m.
+
+The ``AoR`` plot type can be used with ``AnalyticalReservoir``, ``LookupTableReservoir``, and
+``TheisReseroir`` components. When using a ``TheisReservoir`` component, however, the system
+model should not include wellbore or aquifer compoments (see *ControlFile_ex47.yaml*). The
+``TheisReservoir`` can represent multiple injection and/or extraction wells, but the component
+only produces **pressure** output (if **CO2saturation** is requested from the component, the
+values are always zero). When using a ``TheisReservoir``, the ``AoR`` plot type should only
+be used on the **pressure** output. While an ``AoR`` plot usually focuses on the locations
+used for the wellbore component, when using a ``TheisReservoir`` component the locations
+used are those entered directly for the ``TheisReservoir`` (*ControlFile_ex47.yaml*).
+
+Using the ``AoR`` plot type leads to the creation of *.csv* files containing the values
+shown in the ``AoR`` plots. When using the ``AoR`` plot type, we recommend setting
+``GenerateOutputFiles`` and ``GenerateCombOutputFile`` to ``False`` in the ``ModelParams``
+section of the *.yaml* file. The large number of wellbore locations commonly used for ``AoR``
+plots causes a large number of output files. A reservoir and aquifer component is created for
+each wellbore location, and every component will have its output saved if those options are set
+to ``True``. The *.csv* files created for the ``AoR`` plots contain all of the necessary
+information and these files are much smaller in size.
+
+``AoR`` plots can have nine optional entries: ``PlotInjectionSites``, ``InjectionCoordx``,
+``InjectionCoordy``, ``SaveCSVFiles``, ``FigureDPI``, ``FigureSize``, ``TimeList``, 
+``CriticalPressureMPa``, and ``BrineDensity``. All of these entries except for 
+``CriticalPressureMPa`` and ``BrineDensity`` are described above.
+
+* ``CriticalPressureMPa`` - this entry controls how critical pressure is handled in an ``AoR`` plot 
+  evaluating the *pressure* metric. The entry can either be given as ``Calculated`` or as a number 
+  representing a critical pressure in MPa (e.g., ``CriticalPressureMPa: 20.5`` for 20.5 MPa). Note 
+  that this plot entry only controls how reservoir pressures are evaluated in an ``AoR`` plot; this plot 
+  entry will not impact the behavior of an ``OpenWellbore`` component using a critical pressure. The 
+  crtical pressure for an ``OpenWellbore`` component must be handled in the set up of the component 
+  itself.
+
+* ``BrineDensity`` - When the critical pressure is calculated and the wellbore component has a brine 
+  density parameter (e.g., the ``brineDensity`` parameter of ``OpenWellbore`` and ``MultisegmentedWellbore`` 
+  components), that brine density parameter will be used when calculating the critical pressure. When 
+  the wellbore component does not have a brine density parameter (e.g., ``CementedWellbore`` components) 
+  but critical pressure is calculated, then a brine density in |kg/m^3| can be provided with the 
+  ``BrineDensity`` entry (e.g., ``BrineDensity: 1100`` for a density of 1100 |kg/m^3|). If needed but 
+  not provided, the default value is 1012 |kg/m^3|. If this entry would not be used, given the wellbore 
+  component type and ``CriticalPressureMPa`` entry, then any input provided for ``BrineDensity`` 
+  will be ignored.
+
+If the ``CriticalPressureMPa`` entry is given for an ``AoR`` plot evaluating the **pressure** metric, the 
+the figure will highlight all locations with pressures exceeding the critical pressure used. Without 
+the inclusion of the ``CriticalPressureMPa`` entry, an ``AoR`` plot examining **pressure** will only display 
+the reserovoir pressures across the domain (it will not highlight a particular area of the domain).
+
+For ``AoR`` plots that evaluate the other metrics (**CO2saturation**, **pH_volume**, **TDS_volume**, 
+**Dissolved_CO2_volume**, and **Dissolved_salt_volume**), the figure will highlight any wellbore location 
+that has a nonzero result (i.e., a nonzero |CO2| saturation or a nonzero plume volume).
+
+The ``AoR`` should, however, extend to the grid points closest to the injection site(s) that do not satisfy 
+these criteria (nonzero **CO2saturation** values, nonzero plume volumes, or **pressure** values exceeding 
+the critical pressure). In other words, consider a situation where there is a point with nonzero plume volumes 
+is next to a point that never had plume volumes. If another point was placed between these two points, this 
+new point may also have nonzero plume volumes. Therefore, excluding this area from the ``AoR`` may prevent 
+the detection of leakage events. No such exclusion will occur if the boundaries of the ``AoR`` include points 
+that never met the criteria discussed above.
 
 If the ``TimeList`` entry is not provided for an ``AoR`` plot, the figure will show the
 maximum values at each location across all model times. If ``TimeList`` is provided
 as a list of times in years (e.g., ``TimeList: [1, 5, 10]`` or ``TimeList: [10]``),
 then the figures created will represent the maximum values at each location at the
-specified time(s). Otherwise, an AoR figure can be made for every model time by providing
+specified time(s). Otherwise, an ``AoR`` figure can be made for every model time by providing
 ``TimeList: All``. Evaluating how the potential impacts of a project change over time
 can inform, for example, how the required extents of surveying efforts change
 over time (i.e., discovering and effectively plugging legacy wells at larger distances
@@ -943,7 +867,8 @@ for other reservoir component types.
             SaveCSVFiles: False
             TimeList: All
 
-For examples of AoR plots, see *ControlFile_ex31a.yaml* to *ControlFile_ex32c.yaml*.
+For examples of ``AoR`` plots, see *ControlFile_ex31a.yaml* to *ControlFile_ex32c.yaml*
+and *ControlFile_ex47.yaml*.
 
 TTFD
 ----
@@ -952,7 +877,7 @@ The time to first detection (``TTFD``) plot type uses contaminant plume output f
 aquifer components to simulate when a monitoring well would be able to detect the
 plume in the aquifer(s) considered. If the ``TTFD`` plot type is run without monitoring
 locations provided, it still produces maps showing the spread of contaminant plumes across
-the domain. These figures (and the .csv files that can be saved) could then be used to
+the domain. These figures (and the *.csv* files that can be saved) could then be used to
 decide where to place monitoring sensors.
 
 The ``TTFD`` plot type can produce three types of figures: maps of earliest plume
@@ -1035,9 +960,9 @@ and z-coordinates of the grids used to evaluate plume extents and timings.
 The dx, dy, and dz plume dimension metrics (e.g., *pH_dy* or *TDS_dz*) are used
 to evaluate whether each (x, y, z) of a grid is within a plume area for
 each model timestep. Note that ``NumZPointsWithinAquifers`` and
-``NumZPointsWithinShales`` do not have an effect when setup
-``PlumeType: CarbonateAquifer`` is used because that ``CarbonateAquifer``
-component does not produce a dz plume metric.
+``NumZPointsWithinShales`` do not have an effect when ``PlumeType`` is given
+as ``CarbonateAquifer`` because a ``CarbonateAquifer``component does not produce
+a dz plume metric.
 
 * ``MonitoringLocations`` - a dictionary containing five optional entries related
   to the sensors used to detect aquifer impacts. The five optional entries are
@@ -1047,24 +972,24 @@ component does not produce a dz plume metric.
   ``PlumeType: CarbonateAquifer``).
 
 * ``coordx`` - an entry under ``MonitoringLocations`` that specifies the
-  x-coordinate(s) (m) of monitoring sensor(s), if any sensors are used. This entry
+  x-coordinate(s) (|m|) of monitoring sensor(s), if any sensors are used. This entry
   must be provided as a list, even if only one location is used (e.g., [100]
   or [100, 200]).
 
 * ``coordy`` - an entry under ``MonitoringLocations`` that specifies the
-  y-coordinate(s) (m) of monitoring sensor(s), if any sensors are used. This entry
+  y-coordinate(s) (|m|) of monitoring sensor(s), if any sensors are used. This entry
   must be provided as a list, even if only one location is used (e.g., [100]
   or [100, 200]).
 
 * ``coordz`` - an entry under ``MonitoringLocations`` that specifies the depth(s)
-  (z-coordinate(s), (m)) of monitoring sensor(s), if any sensors are used. Note that
+  (z-coordinate(s), (|m|)) of monitoring sensor(s), if any sensors are used. Note that
   for this entry, depths beneath the surface are taken as negative values.
   This entry must be provided as a list, even if only one location is used
   (e.g., [-500] or [-500, -400]). The ``coordz`` entry is not required when using
   an option ``plumeType: CarbonateAquifer``, as the ``CarbonateAquifer``
   component does not produce a dz plume metric.
 
-* ``HorizontalWindow`` - a (maximum) horizontal distance (m) from which monitoring
+* ``HorizontalWindow`` - a (maximum) horizontal distance (|m|) from which monitoring
   sensor(s) will detect plumes (default is 1). For example, if the HorizontalWindow
   is 5 m, then the sensor will detect any plume at grid locations within 5 m
   of the sensor's ``coordx`` and ``coordy`` values (if the plume is also within
@@ -1082,9 +1007,9 @@ component does not produce a dz plume metric.
   and z-coordinates for monitoring locations, so there will always be a grid point
   for each monitoring sensor.
 
-* ``VerticalWindow`` - a (maximum) vertical distance (m) from which monitoring
+* ``VerticalWindow`` - a (maximum) vertical distance (|m|) from which monitoring
   sensor(s) will detect plumes (default is 1). For example, if the ``VerticalWindow``
-  is 5 m, then the sensor will detect any plume within 5 m of the sensor's
+  is 5 m, then the sensor will detect any plume within 5 |m| of the sensor's
   ``coordz`` values (if the plume is also within ``HorizontalWindow`` of the
   sensor's ``coordx`` and ``coordy`` value). This entry is meant to represent the
   sensitivity of a sensor, but that consideration must also involve the threshold
@@ -1121,12 +1046,12 @@ component does not produce a dz plume metric.
   redundant because those points are included for the aquifers below and above
   the shale.
 
-Below, we show two examples of ``TTFD`` plots setup in the ``Plots``section of a
+Below, we show two examples of ``TTFD`` plot entries in the ``Plots``section of a
 *.yaml* file. The first plot (*pH_Minimum_Input*) has only the entries required to
 set up the ``TTFD`` plot type: ``PlumeType`` and ``ComponentNameList``. The second
-plot (*TDS_All_Options_Specified.tiff*) includes all optional entries for the TTFD
+plot (*TDS_All_Options_Specified.tiff*) includes all optional entries for the ``TTFD``
 plot type. Although there are only two plot entries included, each entry can result
-in the creation of multiple figures (e.g., earliest plume timings, TTFD from
+in the creation of multiple figures (e.g., earliest plume timings, ``TTFD`` from
 monitoring locations, and plume probabilities for each model realization). Note that
 all entries for the ``TTFD`` plot type are indented under ``TTFD`` which is indented
 under the figure name.
@@ -1166,7 +1091,10 @@ under the figure name.
                 WriteDreamOutput: False
                 SaveCSVFiles: True
 
-For examples of TTFD plots, see *ControlFile_ex39.yaml* to *ControlFile_ex43.yaml*.
+For examples of ``TTFD`` plots, see *ControlFile_ex39a.yaml* to *ControlFile_ex43.yaml*.
+For script examples, see *iam_sys_reservoir_mswell_futuregen_ttfdplot_no_dip.py*,
+*iam_sys_reservoir_mswell_futuregen_ttfdplot_no_dip_lhs.py*, and
+*iam_sys_reservoir_mswell_futuregen_ttfdplot_dipping_strata.py*.
 
 GriddedMetric
 -------------
@@ -1234,15 +1162,15 @@ thresholds).
 The ``GriddedRadialMetric`` plot type has three required entries: ``ComponentNameList``,
 ``ZList``, and ``MetricName``. ``ComponentNameList`` and ``MetricName`` are discussed above.
 
-* ``ZList`` - the depths (m) at which to evaluate the radial metric output. The depth in the
+* ``ZList`` - the depths (|m|) at which to evaluate the radial metric output. The depth in the
   radial grid (e.g., **z_coordinate** from ``GenericAquifer``) that is closest to each value
   entered will be used. String inputs representing the bottom of a unit can also be
   provided. For example, the bottom and top depths of aquifer 2 can be set up by entering
   ``ZList: [aquifer2Depth, shale3Depth]``. Shale 3 is on top of aquifer 2, so the bottom
   depth of shale 3 is the top depth of aquifer 2. Note that numeric values given for
   ``ZList`` (not string inputs like shale2Depth) are taken as being negative when they
-  represent a depth beneath the surface (e.g., ``ZList: [-500, -400]`` for depths of 500 m
-  and 400 m).
+  represent a depth beneath the surface (e.g., ``ZList: [-500, -400]`` for depths of 500 |m|
+  and 400 |m|).
 
 The ``GriddedRadialMetric`` plot type has 11 optional entries: ``MinValue``,
 ``DegreeInterval``, ``Realization``, ``TimeList``, ``PlotInjectionSites``, ``InjectionCoordx``,
@@ -1269,7 +1197,7 @@ are discussed above.
   values will be used as the defaults for the corresponding output type (dissolved salt or
   dissolved |CO2|). If all of the times evaluated only have values less or equal to ``MinValue``,
   then one figure will be made. This figure has a title that includes 'All Model Times.' Note
-  that the .csv files saved when ``SaveCSVFiles`` is set to ``True`` will only include
+  that the *.csv* files saved when ``SaveCSVFiles`` is set to ``True`` will only include
   values above ``MinValue``.
 
 * ``DegreeInterval`` - the interval (degrees) used to create a map-view image from the radial
@@ -1278,7 +1206,7 @@ are discussed above.
 
 Note that although the ``Realization`` entry for the ``GriddedRadialMetric`` plot type
 follows the indexing conventions of Python (i.e., ``Realization: 0`` for the first realization),
-the figure files and .csv files saved by the ``GriddedRadialMetric`` plot type will present the
+the figure files and *.csv* files saved by the ``GriddedRadialMetric`` plot type will present the
 simulation number as ranging from one to the total number of realizations (e.g., Simulation 1
 instead of Simulation 0).
 
@@ -1326,9 +1254,9 @@ at the surface creates atmospheric |CO2| plumes. These images are created for ea
 time step during one realization of a simulation. Note that simulations using the
 Latin Hypercube Sampling (``lhs``) or Parameter Study (``parstudy``) analysis types have
 many realizations, while a simulation using a ``forward`` analysis type only has one
-realization. For ``AtmPlumeSingle`` plot type with ``lhs`` or ``parstudy``
+realization. For the ``AtmPlumeSingle`` plot type with ``lhs`` or ``parstudy``
 simulations, the visualization corresponding to the realization of interest
-can be setup with the ``Realization`` entry in the *.yaml* file (discussed above).
+can be specified with the ``Realization`` entry in the *.yaml* file (discussed above).
 Note that using the ``AmtPlumeSingle`` plot type requires the use of an AtmosphericROM
 component.
 
@@ -1421,7 +1349,7 @@ the results from all realizations of the ``lhs`` or ``parstudy`` simulation. The
 probabilities specifically represent the likelihood of |CO2| plume concentrations
 exceeding the threshold set with the **CO_critical** parameter for ``AtmosphericROM``
 components. The probabilities are shown as gridded data. The ``AtmPlumeEnsemble``
-plot type is available only when example setup includes an ``AtmosphericROM`` component.
+plot type is available only when the simulation includes an ``AtmosphericROM`` component.
 
 The ``AtmPlumeEnsemble`` plot type has the optional entries ``PlotReceptors``,
 ``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``, ``SpecifyXandYGridLims``,

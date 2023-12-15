@@ -55,6 +55,8 @@ class ChemicalWellSealing(ComponentModel):
     * **seal_time** [|s|] - predicted time for sealing a fracture by calcite
       recipitation. If fracture doesn't seal this variable is set to 0.0.
 
+    For a control file example using the Chemical Well Sealing component, see 
+    *ControlFile_ex22*. For a script example, see *iam_sys_reservoir_chem_well_seal.py*.
     """
     def __init__(self, name, parent):
         """

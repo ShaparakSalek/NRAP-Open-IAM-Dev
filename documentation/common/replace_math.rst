@@ -39,3 +39,8 @@
 .. |times| unicode:: U+000D7
 .. |y = ax^2 + bx + c| replace:: *y* = *ax* \ :sup:`2`\ + *bx* + *c*
 .. |years| replace:: :math:`years`
+.. |Pcrit| replace:: P\ :sub:`crit`\
+.. |rho_br| replace:: :math:`\rho`:sub:`br`\
+.. |rho_w| replace:: :math:`\rho`:sub:`w`\
+.. |d_aq| replace:: d\ :sub:`aq`\
+.. |d_res| replace:: d\ :sub:`res`\

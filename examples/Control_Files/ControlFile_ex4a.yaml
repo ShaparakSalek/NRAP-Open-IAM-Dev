@@ -130,6 +130,8 @@ Plots:
     #------------------------------------------------------
     Brine_Leakage:
         TimeSeriesStats: [brine_aquifer2]
+        Subplot:
+            Use: False
     #------------------------------------------------------
     # Plot the brine leakage into the aquifer from each well
     # on its own plot

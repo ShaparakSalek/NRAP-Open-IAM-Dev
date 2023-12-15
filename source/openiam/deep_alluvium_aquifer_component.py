@@ -120,6 +120,9 @@ class DeepAlluviumAquifer(ComponentModel):
 
     * **pH_dz** [|m|] - height of plume below pH threshold (pH < 6.75).
 
+    For control file examples using the Deep Alluvium Aquifer, see *ControlFile_ex10* 
+    and *ControlFile_ex43*. For a script example, see *iam_sys_deepalluvium.py*.
+
     """
     def __init__(self, name, parent):
         """

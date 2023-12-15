@@ -81,10 +81,10 @@ class HydrocarbonLeakage(ComponentModel):
       post-injection (default: 0.05)
 
     * **FC4** [-] (0.010 to 0.111) - mole fraction of intermediate hydrocarbons
-      in the reservoir post-injection  (default: 0.05)
+      in the reservoir post-injection (default: 0.05)
 
     * **FC7Plus** [-] (0.123 to 0.500) - mole fraction of heavy hydrocarbons in
-      the reservoir post-injection  (default: 0.35)
+      the reservoir post-injection (default: 0.35)
 
     Component model outputs:
 
@@ -107,6 +107,10 @@ class HydrocarbonLeakage(ComponentModel):
 
     * **mass_CO2_gas_aquifer** [|kg|] - cumulative mass of |CO2| gas leaked to the
       aquifer
+
+    For control file examples using the Hydrocarbon Leakage component, see 
+    *ControlFile_ex52a* and *ControlFile_ex52b*. For a script examples, see 
+    *iam_sys_hydrocarbon_forward_lhs.py*.
 
     """
     def __init__(self, name, parent, **kwargs):

@@ -10,10 +10,10 @@ Components Description
 .. toctree::
 
 This section of the document will describe each of the component models
-available for use in the NRAP-Open-IAM. For each component model all parameters
-that can be specified are described along with units and acceptable ranges.
-Description of the outputs that can be returned by each component is also
-provided.
+available for use in NRAP-Open-IAM. For each component model, all parameters
+that can be specified are described along with the parameters' units and 
+acceptable ranges. Descriptions of the outputs that can be returned by each
+component are also provided.
 
 .. _stratigraphy_component:
 
@@ -22,10 +22,15 @@ Stratigraphy Component
 
 .. automodule:: openiam.Stratigraphy
 
-Simple Reservoir Component
-==========================
+Dipping Stratigraphy Component
+==============================
 
-.. automodule:: openiam.SimpleReservoir
+.. automodule:: openiam.DippingStratigraphy
+
+LookupTableStratigraphy Component
+=================================
+
+.. automodule:: openiam.LookupTableStratigraphy
 
 Analytical Reservoir Component
 ==============================
@@ -37,10 +42,10 @@ Lookup Table Reservoir Component
 
 .. automodule:: openiam.LookupTableReservoir
 
-Generic Reservoir Component
-===========================
+Theis Reservoir Component
+==============================
 
-.. automodule:: openiam.GenericReservoir
+.. automodule:: openiam.TheisReservoir
 
 Multisegmented Wellbore Component
 =================================
@@ -51,11 +56,6 @@ Cemented Wellbore Component
 ===========================
 
 .. automodule:: openiam.CementedWellbore
-
-Cemented Wellbore (WR) Component
-================================
-
-.. automodule:: openiam.CementedWellboreWR
 
 Open Wellbore Component
 =======================

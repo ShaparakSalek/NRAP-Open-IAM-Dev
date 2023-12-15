@@ -30,11 +30,18 @@ INJECTION_DATA_UNITS = {'injRates': 'm^3/s^{-1}', 'injTimes': 'year'}
 class TheisReservoir(ComponentModel):
     """
     The Theis Reservoir component model is an analytical model for pressure in the
-    reservoir.
+    reservoir. This component can simulate the use of multiple injection and/or
+    extraction wells, with the pressure values produced reflecting the interaction
+    of these wells. Each well can have injection rates that vary over time.
+    Positive rates represent injection, while negative rates represent extraction.
+    This component only produces the **pressure** output; it does not produce 
+    usable **CO2saturation** values (if requested, any **CO2saturation** values 
+    produced will be zero). One might therefore consider the wells used to be 
+    injecting or extracting brine, rather than |CO2|.
 
-    In the NRAP-Open-IAM control file, the type name for the Theis Reservoir component is
-    ``TheisReservoir``. The description of the component's parameters are
-    provided below:
+    In the NRAP-Open-IAM control file, the type name for the Theis Reservoir
+    component is ``TheisReservoir``. Descriptions of the component's parameters
+    are provided below:
 
     * **initialPressure** [|Pa|] (8.0e+4 to 1.0e+7) - initial pressure at the top
       of the reservoir (default: 1.0e+6);
@@ -59,7 +66,7 @@ class TheisReservoir(ComponentModel):
     * **brineViscosity** [|Pa*s|] (1.0e-4 to 5.0e-3) - viscosity of brine phase
       (default: 2.535e-3).
 
-    Possible observation from the Theis Reservoir component is:
+    Possible observations from the Theis Reservoir component are:
 
     * **pressure** [|Pa|] - pressure at top of the reservoir at the user
       defined location(s)
@@ -67,9 +74,16 @@ class TheisReservoir(ComponentModel):
     * **CO2saturation** [-] - |CO2| saturation at the top of the reservoir at the
       user defined location(s)
 
-    For compatibility with wellbore components in NRAP-Open-IAM
-    observation CO2saturation of Theis Reservoir component has fixed values
-    of 0 at each time point for any simulation.
+    The **CO2saturation** output is only included for compatibility purposes.
+    Specifically, wellbore components require **CO2saturation** inputs, so an 
+    error could occur if the Theis Reservoir did not provide this output. All 
+    **CO2saturation** values produced by the Theis Reservoir component have fixed
+    values of 0 at each time point for any simulation.
+
+    For control file examples using the Theis Reservoir component, see 
+    *ControlFile_ex44a* to *ControlFile_ex47*. For script examples, see 
+    *iam_sys_theis.py*, *iam_sys_theis_4inj_wells.py*, and *iam_sys_theis_4inj_grid.py*.
+
     """
     def __init__(self, name, parent, injX=0., injY=0., locX=100., locY=100.,
                  injTimes=None, injRates=None):

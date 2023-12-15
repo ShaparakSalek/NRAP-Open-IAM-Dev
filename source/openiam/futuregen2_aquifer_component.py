@@ -119,6 +119,12 @@ class FutureGen2Aquifer(ComponentModel):
     * **Dissolved_CO2_dz** [|m|] - height of plume where relative change
       in dissolved |CO2| concentration > 20%
 
+    For control file examples using the FutureGen 2.0 Aquifer component, see 
+    *ControlFile_ex8c*, *ControlFile_ex14*, *ControlFile_ex26*, *ControlFile_ex31a*, 
+    *ControlFile_ex32a*, and *ControlFile_ex55a*. For script examples, see 
+    *iam_sys_reservoir_openwell_futuregen_aor_plot.py*  and 
+    *iam_sys_lutreservoir_mswell_futuregen_dream.py*.
+
     """
     def __init__(self, name, parent):
         """

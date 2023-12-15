@@ -96,6 +96,13 @@ class AnalyticalReservoir(ComponentModel):
     * **mass_CO2_reservoir** [|kg|] - (injected total) mass of the |CO2|
       in the reservoir.
 
+    For control file examples using the Analytical Reservoir component, see 
+    *ControlFile_ex1a* to *ControlFile_ex5*, *ControlFile_ex8d*, *ControlFile_ex31a* 
+    to *ControlFile_ex31f*, *ControlFile_ex39a* to *ControlFile_ex39c*, 
+    and *ControlFile_ex56a* to *ControlFile_ex56g*. For script examples, see 
+    *iam_sys_reservoir_mswell_2aquifers.py*, *iam_sys_strata_reservoir_openwell_genericaquifer.py*, 
+    *iam_sys_lutstrata_reservoir_mswell.py*, and *iam_sys_reservoir_mswell_generic_lhs.py*.
+
     """
     def __init__(self, name, parent, injX=0., injY=0., locX=100., locY=0.):
 

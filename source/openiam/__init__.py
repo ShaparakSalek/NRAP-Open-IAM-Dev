@@ -53,7 +53,7 @@ from .monitoring_scheduler_component import (
 from .area_estimate_component import AreaEstimate
 
 
-__version__ = 'alpha_2.7.2-23.08.25'
+__version__ = 'alpha_2.8.1-23.12.15'
 
 __all__ = ['IAM_DIR',
            'SystemModel',

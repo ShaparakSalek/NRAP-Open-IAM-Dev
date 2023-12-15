@@ -145,9 +145,11 @@ def get_statistics(data, ax):
              4: data.std(axis=ax), 5: data.var(axis=ax),
              6: np.percentile(data, 2.5, axis=ax),
              7: np.percentile(data, 5.0, axis=ax),
-             8: np.percentile(data, 50.0, axis=ax),
-             9: np.percentile(data, 95.0, axis=ax),
-             10: np.percentile(data, 97.5, axis=ax)}
+             8: np.percentile(data, 25.0, axis=ax),
+             9: np.percentile(data, 50.0, axis=ax),
+             10: np.percentile(data, 75.0, axis=ax),
+             11: np.percentile(data, 95.0, axis=ax),
+             12: np.percentile(data, 97.5, axis=ax)}
 
     return stats
 
@@ -173,8 +175,11 @@ def extract_stats(outputs, data_flip):
         data frames containing statistics regarding parameters and observations
 
     """
-    stat_types = ['Time (days)', 'min', 'max', 'mean', 'stdev', 'variance',
-                  '2.5%tile', '5.0%tile', '50.0%tile', '95.0%tile', '97.5%tile']
+    stat_types = ['Time (days)', 'Minimum', 'Maximum', 'Mean', 
+                  'Standard Deviation', 'Variance',
+                  '25th Per Mille (2.5%)', '5th Percentile', '25th Percentile', 
+                  '50th Percentile', '75th Percentile', '95th Percentile', 
+                  '975th Per Mille (97.5%)']
     all_obs = outputs['observations'][0]
     all_pars = outputs['parameters']
 

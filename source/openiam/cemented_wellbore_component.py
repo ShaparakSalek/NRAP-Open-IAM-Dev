@@ -102,6 +102,11 @@ class CementedWellbore(ComponentModel):
     * **mass_CO2_aquifer1**, **mass_CO2_aquifer2** [|kg|] -
       mass of |CO2| leaked into aquifers.
 
+    For control file examples using the Cemented Wellbore component, see *ControlFile_ex1a* 
+    to *ControlFile_ex1b*, *ControlFile_ex5*,*ControlFile_ex10*, *ControlFile_ex31e*, 
+    and *ControlFile_ex56g*. For script examples, see *iam_sys_reservoir_cmwell.py* 
+    and *iam_sys_lutstrata_reservoir_cmwell.py*.
+
     """
     def __init__(self, name, parent, header_file_dir=None, ignore_tmp_input_check=True):
         """

@@ -24,9 +24,9 @@ copyright = '2023, DOE National Risk Assessment Partnership (NRAP)'
 author = 'NRAP-Open-IAM Development Team'
 
 # The short X.Y version.
-version = 'a2.7'
+version = 'a2.8'
 # The full version, including alpha/beta/rc tags.
-release = 'alpha 2.7.2-23.08.25'
+release = 'alpha 2.8.1-23.12.15'
 
 
 # -- General configuration ---------------------------------------------------
