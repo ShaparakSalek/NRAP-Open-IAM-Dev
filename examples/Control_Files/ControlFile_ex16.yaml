@@ -17,6 +17,7 @@
 # metric is stored in the .csv files used (e.g., including 'temperature: 20'
 # in the Thresholds entry and producing outputs of temperature_areas and
 # temperature_mobility).
+#
 # Control file examples 27 and 28 demonstrate how to include other metrics in
 # the .csv files used for LookupTableReservoir and PlumeStability components.
 #
@@ -46,6 +47,19 @@ ModelParams:
     Components: [PlumeStabilityCmpnt]
     OutputDirectory: output/output_ex16_{datetime}
     Logging: Warning
+#-------------------------------------------------
+# The Stratigraphy component does not affect the PlumeStability component.
+# A section for a stratigraphy component type (Stratigraphy, DippingStratigraphy, or 
+# LookupTableStratigraphy) is required in the control file interface, however.
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 3
+    shale1Thickness: 250.0
+    shale2Thickness: 250.0
+    shale3Thickness: 250.0
+    aquifer1Thickness: 100.0
+    aquifer2Thickness: 100.0
+    reservoirThickness: 50.0
 #-------------------------------------------------
 PlumeStabilityCmpnt:
     Type: PlumeStability
