@@ -16,7 +16,7 @@ except ImportError as err:
 
 import openiam as iam
 
-from openiam.cfi.strata import (get_strata_type_from_yaml, 
+from openiam.cfi.strata import (get_strata_type_from_yaml,
                                 get_comp_types_strata_pars,
                                 get_comp_types_strata_obs)
 
@@ -50,16 +50,16 @@ AOR_AQUIFER_COMPONENT_OUTPUT = {
     }
 
 # Wellbore component types that have a brine density parameter (e.g., brineDensity).
-# If this component type is used AND a BrineDensity input is given under 
+# If this component type is used AND a BrineDensity input is given under
 # yaml_data['Workflow']['Options'], the the BrineDensity input will be removed.
 WELL_COMPS_WITH_BRINE_DENSITY = ['OpenWellbore', 'MultisegmentedWellbore']
 
-# These are the default minimum spacings to use when thinning the point densities 
+# These are the default minimum spacings to use when thinning the point densities
 # from LookupTableReservoir files.
 DEFAULT_MIN_X_SPACING = 20000
 DEFAULT_MIN_Y_SPACING = 20000
 
-# Default grid limits when using the AoR workflow and a reservoir component 
+# Default grid limits when using the AoR workflow and a reservoir component
 # that is not a LookupTableReservoir.
 DEFAULT_AOR_XMIN = -50000
 DEFAULT_AOR_XMAX = 50000
@@ -72,9 +72,9 @@ DEFAULT_AOR_YSIZE = 6
 
 def get_aor_loc_data(yaml_data, res_component_name, loc_data_check):
     """
-    When the AoR workflow is used and the user does not provide location input, 
-    this function returns the loc_data dictionary for add_well_component_entries() 
-    in workflow.py. The location data are either obtained from the LookupTableReservoir 
+    When the AoR workflow is used and the user does not provide location input,
+    this function returns the loc_data dictionary for add_well_component_entries()
+    in workflow.py. The location data are either obtained from the LookupTableReservoir
     .csv files or taken as a grid.
     """
     if yaml_data[res_component_name]['Type'] == 'LookupTableReservoir' and not loc_data_check:
@@ -123,7 +123,7 @@ def get_aor_loc_data(yaml_data, res_component_name, loc_data_check):
         ysize = DEFAULT_AOR_YSIZE
         loc_data = {'grid': {'xmin': xmin, 'xmax': xmax, 'xsize': xsize,
                              'ymin': ymin, 'ymax': ymax, 'ysize': ysize}}
-        
+
     return loc_data
 
 
@@ -133,11 +133,11 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
     AoR that reflects all metrics considered. Pressure results are only considered
     if a critical pressure is provided.
     """
-    # These lists indicate the stratigraphy component types that offer thicknesses 
+    # These lists indicate the stratigraphy component types that offer thicknesses
     # and depths as parameters or as observations.
     types_strata_pars = get_comp_types_strata_pars()
     types_strata_obs = get_comp_types_strata_obs()
-    
+
     output_dir = yaml_data['ModelParams']['OutputDirectory']
 
     aquifer_component_type = yaml_data['Workflow']['Options'].get(
@@ -145,7 +145,7 @@ def get_points_in_aor(yaml_data, sm=None, time_index=None):
 
     # Get the stratigraphy information from the .yaml file
     strata_type = get_strata_type_from_yaml(yaml_data)
-    
+
     AoR_included_x_km = []
     AoR_included_y_km = []
 
@@ -390,7 +390,7 @@ def get_crit_pressure_aor_analysis(num_pressure_points, yaml_data, sm):
     """
     types_strata_pars = get_comp_types_strata_pars()
     types_strata_obs = get_comp_types_strata_obs()
-    
+
     # Get the stratigrapy information from the .yaml file
     strata_type = get_strata_type_from_yaml(yaml_data)
 
@@ -461,35 +461,35 @@ def aor_workflow_analysis(yaml_data, sm, analysis):
             AoR_point_included, analysis=analysis, pressure_included=pressure_included)
 
 
-def set_up_aor_workflow_plots(yaml_data, well_component_type, aquifer_component_type, 
-                              figure_dpi=100, plot_injection_sites=False, 
-                              InjectionCoordx=None, InjectionCoordy=None, 
+def set_up_aor_workflow_plots(yaml_data, well_component_type, aquifer_component_type,
+                              figure_dpi=100, plot_injection_sites=False,
+                              InjectionCoordx=None, InjectionCoordy=None,
                               fig_size=None, extension=None):
     """
     Sets up the plot entry dictionaries for the AoR workflow.
     """
     CriticalPressureMPa = yaml_data['Workflow']['Options'].get(
             'CriticalPressureMPa', DEFAULT_CRIT_PRESSURE_SETTING)
-    
+
     brineDensityInput = yaml_data['Workflow']['Options'].get('BrineDensity', None)
-    
+
     if CriticalPressureMPa != 'Calculated' and brineDensityInput is not None:
         warning_msg = ''.join([
-            'The CriticalPressureMPa input provided under the Workflow: Options ', 
-            'section of the .yaml file was not ''Calculated'', but the BrineDensity ', 
+            'The CriticalPressureMPa input provided under the Workflow: Options ',
+            'section of the .yaml file was not "Calculated", but the BrineDensity ',
             'input was also provided under the same section. The BrineDensity ',
-            'input is only meant to be used when CriticalPressureMPa is given as', 
-            ' ''Calculated'', so the BrineDensity input will not be used.'])
-        
+            'input is only meant to be used when CriticalPressureMPa is given as',
+            ' "Calculated", so the BrineDensity input will not be used.'])
+
         logging.warning(warning_msg)
-        
-        # If a specific critical pressure is being used, then brineDensityInput 
-        # is not required. That value is only used to calculate critical pressure 
-        # in cases where CriticalPressureMPa == 'Calculated' and a wellbore 
-        # component with a brineDensity parameter is not being used. When the wellbore 
+
+        # If a specific critical pressure is being used, then brineDensityInput
+        # is not required. That value is only used to calculate critical pressure
+        # in cases where CriticalPressureMPa == 'Calculated' and a wellbore
+        # component with a brineDensity parameter is not being used. When the wellbore
         # component has a brineDensity parameter, that parameter will be used instead.
         brineDensityInput = None
-    
+
     elif CriticalPressureMPa == 'Calculated' and brineDensityInput is not None:
         if well_component_type in WELL_COMPS_WITH_BRINE_DENSITY:
             warning_msg = ''.join([
@@ -504,15 +504,15 @@ def set_up_aor_workflow_plots(yaml_data, well_component_type, aquifer_component_
                 'be ignored. This input is meant for cases were a calculated ',
                 'critical pressure is used but the wellbore component does ',
                 'not have a brine density parameter.'])
-            
+
             logging.warning(warning_msg)
-            
-            # Set the BrineDensity input to None. The brineDensity parameter will 
-            # be used instead, and removing the BrineDensity input from the .yaml 
+
+            # Set the BrineDensity input to None. The brineDensity parameter will
+            # be used instead, and removing the BrineDensity input from the .yaml
             # file set up automatically (the file that ends with '_WorkflowSetup.yaml')
             # is intended to reduce the possibility of confusion.
             brineDensityInput = None
-    
+
     TimeList = None
     if 'TimeList' in yaml_data['Workflow']['Options']:
         if isinstance(yaml_data['Workflow']['Options']['TimeList'], list) or \
@@ -528,62 +528,62 @@ def set_up_aor_workflow_plots(yaml_data, well_component_type, aquifer_component_
                                    'will be ignored.'])
             logging.warning(warning_msg)
             TimeList = None
-    
+
     plot_types_to_add = AOR_PLOT_NAMES
 
     for plotNum, plot in enumerate(plot_types_to_add):
 
         for plotName in list(plot.keys()):
-            
+
             # Add cases for NEW_WORKFLOWS here, if necessary
             if plotName == 'Aq_CO2_Impact_Plot':
                 metric = plot[plotName].format(
                     AqCO2Metric=AOR_AQUIFER_COMPONENT_OUTPUT[
                         aquifer_component_type][0])
-                
+
             elif plotName == 'Aq_Brine_Impact_Plot':
                 metric = plot[plotName].format(
                     AqSaltMetric=AOR_AQUIFER_COMPONENT_OUTPUT[
                         aquifer_component_type][1])
-                
+
             else:
                 metric = plot[plotName]
-            
+
             if extension:
                 plotName = plotName + extension
-            
-            # SaveCSVFiles is required for each of the AoR plots when using 
+
+            # SaveCSVFiles is required for each of the AoR plots when using
             # the AoR Workflow
             yaml_data['Plots'][plotName] = {'AoR': [metric], 'SaveCSVFiles': True,
                                             'PlotInjectionSites': plot_injection_sites,
                                             'FigureDPI': figure_dpi}
-            
+
             if TimeList:
                 yaml_data['Plots'][plotName]['TimeList'] = TimeList
-            
+
             if metric == 'pressure':
                 yaml_data['Plots'][plotName]['CriticalPressureMPa'] = CriticalPressureMPa
-                
+
                 if brineDensityInput:
                     yaml_data['Plots'][plotName]['BrineDensity'] = brineDensityInput
-            
+
             if InjectionCoordx and InjectionCoordy:
                 yaml_data['Plots'][plotName]['InjectionCoordx'] = InjectionCoordx
                 yaml_data['Plots'][plotName]['InjectionCoordy'] = InjectionCoordy
-            
+
             if fig_size:
                 yaml_data['Plots'][plotName]['FigureSize'] = fig_size
-    
+
     return yaml_data
 
 
 def get_aor_aq_output_list(yaml_data, aquifer_component_type):
     """
-    Returns the aquifer component outputs for the aquifer component type used 
+    Returns the aquifer component outputs for the aquifer component type used
     for the AoR workflow.
     """
     output_list = AOR_AQUIFER_COMPONENT_OUTPUT[aquifer_component_type]
-    
+
     return output_list
 
 
@@ -593,41 +593,41 @@ def set_up_aor_workflow(yaml_data):
     """
     if 'CriticalPressureMPa' not in yaml_data['Workflow']['Options']:
         yaml_data['Workflow']['Options']['CriticalPressureMPa'] = DEFAULT_CRIT_PRESSURE_SETTING
-    
+
     return yaml_data
-    
+
 def aor_crit_pressure_check(yaml_data, well_component_type, controls):
     """
-    This function checks if the CriticalPressureMPa option was provided under 
-    the Options section of a .yaml file. If the entry was provided, it was 
-    set to a specific critical pressure value, and an OpenWellbore component is 
-    being used, this function makes the OpenWellbore component use that critical 
+    This function checks if the CriticalPressureMPa option was provided under
+    the Options section of a .yaml file. If the entry was provided, it was
+    set to a specific critical pressure value, and an OpenWellbore component is
+    being used, this function makes the OpenWellbore component use that critical
     pressure.
     """
     if 'CriticalPressureMPa' in yaml_data['Workflow']['Options']:
         CriticalPressureMPa = yaml_data['Workflow']['Options']['CriticalPressureMPa']
-        
+
         if CriticalPressureMPa != 'Calculated' and well_component_type == 'OpenWellbore':
             try:
                 CriticalPressureMPa = float(CriticalPressureMPa)
             except:
                 err_msg = ''.join([
                     'The input provided for the CriticalPressureMPa entry ({})'.format(
-                        CriticalPressureMPa), 
-                    ', under the Workflow: Options: section of the .yaml file, ', 
-                    'could not be turned into a float value. Check the formatting ', 
+                        CriticalPressureMPa),
+                    ', under the Workflow: Options: section of the .yaml file, ',
+                    'could not be turned into a float value. Check the formatting ',
                     'used for the CriticalPressureMPa input.'])
-                
+
                 logging.error(err_msg)
-                
-                raise KeyError(err_msg)
-            
+
+                raise KeyError(err_msg) from None
+
             CriticalPressurePa = CriticalPressureMPa * 1.0e+6
-            
+
             yaml_data['Workflow']['Options']['WellboreOptions']['Parameters'][
                 'critPressure'] = CriticalPressurePa
-            
-            controls = {'critPressureApproach': True, 
+
+            controls = {'critPressureApproach': True,
                         'enforceCritPressure': True}
-    
+
     return yaml_data, controls

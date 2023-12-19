@@ -45,18 +45,18 @@ except ImportError as err:
 import openiam.cfi.commons as iamcommons
 import openiam.cfi.strata as iam_strata
 
-# If new components types are added to any of these three lists, you also have to edit 
-# the instances where a component type is called with the approach iam.ComponentName 
+# If new components types are added to any of these three lists, you also have to edit
+# the instances where a component type is called with the approach iam.ComponentName
 # (e.g., iam.LookupTableReservoir, iam.GeneralizedFlowRate, or iam.GenericAquifer).
 AOR_RESERVOIR_COMPONENTS = ['LookupTableReservoir', 'SimpleReservoir',
-                            'AnalyticalReservoir', 'GenericReservoir', 
+                            'AnalyticalReservoir', 'GenericReservoir',
                             'TheisReservoir']
 
-AOR_WELLBORE_COMPONENTS = ['OpenWellbore', 'MultisegmentedWellbore', 
-                           'CementedWellbore', 'CementedWellboreWR', 
+AOR_WELLBORE_COMPONENTS = ['OpenWellbore', 'MultisegmentedWellbore',
+                           'CementedWellbore', 'CementedWellboreWR',
                            'GeneralizedFlowRate']
 
-AOR_AQUIFER_COMPONENTS = ['FutureGen2Aquifer', 'FutureGen2AZMI', 'GenericAquifer', 
+AOR_AQUIFER_COMPONENTS = ['FutureGen2Aquifer', 'FutureGen2AZMI', 'GenericAquifer',
                           'DeepAlluviumAquifer']
 
 BACKGROUND_COLOR = [0.67, 0.67, 0.67]
@@ -175,9 +175,9 @@ GRAV_ACCEL = 9.8
 # Assumed density of water for critical pressure calculation, kg/(m^3).
 WATER_DENSITY = 1000
 
-# Assumed density of brine for critical pressure calculation, kg/(m^3). This 
-# value is only used if the wellbore component does not have a brine density parameter 
-# (e.g., brineDensity for OpenWellbore or MultisegmentedWellbore) and the 
+# Assumed density of brine for critical pressure calculation, kg/(m^3). This
+# value is only used if the wellbore component does not have a brine density parameter
+# (e.g., brineDensity for OpenWellbore or MultisegmentedWellbore) and the
 # 'CriticalPressureMPa' input is given as 'Calculated'.
 DEFAULT_BRINE_DENSITY = 1045
 
@@ -282,9 +282,9 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
         figdpi = yaml_input['dpi_input']
 
     critPressureInput = yaml_input['CriticalPressureMPa']
-    
-    # This is used to calculate the critical pressure if critPressureInput is 
-    # given as 'Calculated' but no OpenWellbore component is used. If an OpenWellbore 
+
+    # This is used to calculate the critical pressure if critPressureInput is
+    # given as 'Calculated' but no OpenWellbore component is used. If an OpenWellbore
     # component is used, the brineDensity parameter of that component will be used.
     brineDensityInput = yaml_input['BrineDensity']
 
@@ -305,9 +305,9 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
             time_index_list = get_t_indices(time_list, time)
 
     aq_number = None
-    
+
     # Check if an OpenWellbore is being used
-    openwell_cmpnt_found, _, _ = check_for_comp_type(yaml_data, model_data, 
+    openwell_cmpnt_found, _, _ = check_for_comp_type(yaml_data, model_data,
                                                      'OpenWellbore')
 
     # Get the wellbore data required for process_wellbore_locations()
@@ -321,7 +321,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 comp_data_well = comp_data
 
                 if 'LeakTo' in comp_data:
-                    # This works for OpenWellbore components, but LeakTo is not 
+                    # This works for OpenWellbore components, but LeakTo is not
                     # required for components like MultisegmentedWellbores
                     leakTo = comp_data['LeakTo']
 
@@ -330,46 +330,46 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
                 well_cmpnt_found = True
                 grid_option = 'grid' in comp_data_well['Locations']
-                
+
                 break
-            
-    # Check if a TheisReservoir is being used. Wellbores are not required 
-    # in that case, but the AoR plots should only evaluate pressure from 
+
+    # Check if a TheisReservoir is being used. Wellbores are not required
+    # in that case, but the AoR plots should only evaluate pressure from
     # the TheisReservoir.
     theis_cmpnt_found, theis_name, theis_data = check_for_comp_type(
         yaml_data, model_data, 'TheisReservoir')
-    
+
     if theis_cmpnt_found:
         # Get locations associated with the TheisReservoir component
         theis_locations = locations[theis_name]
-        
+
         x_loc = np.array(theis_locations['coordx'])
         y_loc = np.array(theis_locations['coordy'])
-        
+
         grid_option = 'grid' in theis_data['Locations']
-        
+
     else:
         if not well_cmpnt_found:
-            err_msg = "".join(["A suitable wellbore component was not found in the ", 
-                               "components specified in the .yaml file. The suitable wellbore ", 
-                               "component types are: {}.".format(AOR_WELLBORE_COMPONENTS), 
-                               " One of these component types is required for the ", 
+            err_msg = "".join(["A suitable wellbore component was not found in the ",
+                               "components specified in the .yaml file. The suitable wellbore ",
+                               "component types are: {}.".format(AOR_WELLBORE_COMPONENTS),
+                               " One of these component types is required for the ",
                                "creation of an AoR plot."])
             logging.error(err_msg)
             raise KeyError(err_msg)
-        
-        # If aq_number was not found with the LeakTo entry, find it directly from 
-        # the entries for the aquifer components. OpenWellbore components will have 
-        # the LeakTo entry (they leak to only one aquifer), but other wellbore 
+
+        # If aq_number was not found with the LeakTo entry, find it directly from
+        # the entries for the aquifer components. OpenWellbore components will have
+        # the LeakTo entry (they leak to only one aquifer), but other wellbore
         # components leak into multiple aquifers (e.g., MultisegmentedWellbore and CementedWellbore)
         if not aq_number:
             for comp_model in model_data['Components']:
                 comp_data = yaml_data[comp_model]
-                
+
                 if 'Type' in comp_data:
                     if comp_data['Type'] in AOR_AQUIFER_COMPONENTS:
                         if 'AquiferName' in comp_data:
-                            # This works for OpenWellbore components, but LeakTo is not 
+                            # This works for OpenWellbore components, but LeakTo is not
                             # required for components like MultisegmentedWellbores
                             aq_name = comp_data['AquiferName']
 
@@ -377,13 +377,13 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                                 aq_number = int(aq_name[7:None])
 
                         break
-        
+
         # Get locations associated with given wellbore component
         locations_well = locations[comp_model_well]
 
         x_loc = np.array(locations_well['coordx'])
         y_loc = np.array(locations_well['coordy'])
-    
+
     components = list(sm.component_models.values())
     # If injection sites need to be plotted, get the injection sites
     if yaml_input['plot_injection_sites']:
@@ -392,22 +392,22 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
         for comp in components:
             if comp.class_type in AOR_RESERVOIR_COMPONENTS and \
-                comp.class_type != 'LookupTableReservoir':
-                    inj_x = comp.injX
-                    inj_y = comp.injY
-                    
-                    if comp.class_type == 'TheisReservoir':
-                        for x in inj_x:
-                            InjectionCoordx.append(x)
-                        
-                        for y in inj_y:
-                            InjectionCoordy.append(y)
-                        
-                    else:
-                        InjectionCoordx.append(inj_x)
-                        InjectionCoordy.append(inj_y)
-                    
-        
+                    comp.class_type != 'LookupTableReservoir':
+                inj_x = comp.injX
+                inj_y = comp.injY
+
+                if comp.class_type == 'TheisReservoir':
+                    for x in inj_x:
+                        InjectionCoordx.append(x)
+
+                    for y in inj_y:
+                        InjectionCoordy.append(y)
+
+                else:
+                    InjectionCoordx.append(inj_x)
+                    InjectionCoordy.append(inj_y)
+
+
         InjectionCoordx, InjectionCoordy = remove_redundant_inj_coords(
             InjectionCoordx, InjectionCoordy)
 
@@ -418,15 +418,15 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
     # This variable is used to check if the current figure uses pressure and if
     # a critical pressure was given
     pressure_critP_check = False
-    
-    # This variable is used to check if critical pressure needs to be calculated 
+
+    # This variable is used to check if critical pressure needs to be calculated
     # in the case where there is no OpenWellbore component.
     calcCritPressureNoOW = False
 
     if 'pressure' in output_names and critPressureInput is not None:
         pressure_critP_check = True
-        
-        # This warning message is printed further below if the calculated 
+
+        # This warning message is printed further below if the calculated
         # critical pressure is 0 Pa.
         critP_warning_msg = "".join([
             'The calculated critical pressure for an OpenWellbore component ',
@@ -443,26 +443,26 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
         # This is used to check if the error was already logged. That way, it
         # can be logged only once.
         critP_error_print_check = False
-        
-        # If the CriticalPressureMPa was given as 'Calculated' but an OpenWellbore 
-        # component is not being used, set calcCritPressureNoOW to True. The 
-        # crititcal pressure is then calculated using the BrineDensity specified 
+
+        # If the CriticalPressureMPa was given as 'Calculated' but an OpenWellbore
+        # component is not being used, set calcCritPressureNoOW to True. The
+        # crititcal pressure is then calculated using the BrineDensity specified
         # in the .yaml plot entry and information from a stratigraphy comnponent.
         if not openwell_cmpnt_found:
             calcCritPressureNoOW = True
-        
+
     elif not 'pressure' in output_names and critPressureInput is not None:
         # If the metric is not pressure but the .yaml plot entry included a
         # critical pressure entry, get rid of that entry.
         critPressureInput = None
-    
+
     # Make the figures
     if not time_option:
         # One figure with max values from all model times
         results, critPressure = get_AoR_results(
             x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
             time_option=time_option, critPressureInput=critPressureInput,
-            calcCritPressureNoOW=calcCritPressureNoOW, strata_type=strata_type, 
+            calcCritPressureNoOW=calcCritPressureNoOW, strata_type=strata_type,
             aq_number=aq_number, brineDensityInput=brineDensityInput)
 
         if pressure_critP_check:
@@ -506,9 +506,9 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 results, critPressure = get_AoR_results(
                     x_loc, output_names, sm, s, output_list, yaml_data,
                     analysis=analysis, time_option=time_option,
-                    time_index=time_index, critPressureInput=critPressureInput, 
-                    calcCritPressureNoOW=calcCritPressureNoOW, 
-                    strata_type=strata_type, aq_number=aq_number, 
+                    time_index=time_index, critPressureInput=critPressureInput,
+                    calcCritPressureNoOW=calcCritPressureNoOW,
+                    strata_type=strata_type, aq_number=aq_number,
                     brineDensityInput=brineDensityInput)
 
                 if len(results[results > 0].tolist()) > 0:
@@ -531,7 +531,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
             results, critPressure = get_AoR_results(
                 x_loc, output_names, sm, s, output_list, yaml_data, analysis=analysis,
                 time_option=time_option, time_index=time_index,
-                critPressureInput=critPressureInput, calcCritPressureNoOW=calcCritPressureNoOW, 
+                critPressureInput=critPressureInput, calcCritPressureNoOW=calcCritPressureNoOW,
                 strata_type=strata_type, aq_number=aq_number, brineDensityInput=brineDensityInput)
 
             if pressure_critP_check:
@@ -567,14 +567,14 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
 
 def check_for_comp_type(yaml_data, model_data, comp_type):
     """
-    Checks the yaml_data and model_data dictionaries to see if a particular type 
-    of component was used in the simulation. If it was, the function returns a 
+    Checks the yaml_data and model_data dictionaries to see if a particular type
+    of component was used in the simulation. If it was, the function returns a
     True value. Otherwise, it returns a False value.
     """
     comp_found = False
     comp_name = None
     comp_yaml_data = None
-    
+
     for comp_model in model_data['Components']:
         comp_data = yaml_data[comp_model]
 
@@ -583,15 +583,15 @@ def check_for_comp_type(yaml_data, model_data, comp_type):
                 comp_found = True
                 comp_name = comp_model
                 comp_yaml_data = comp_data
-                
+
                 break
-    
+
     return comp_found, comp_name, comp_yaml_data
 
 
 def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                     analysis='forward',time_option=False, time_index=None,
-                    critPressureInput=None, calcCritPressureNoOW=False, 
+                    critPressureInput=None, calcCritPressureNoOW=False,
                     strata_type='Stratigraphy', aq_number=None, brineDensityInput=None):
     """
     Evaluates and returns the maximum values of a metric for all locations.
@@ -602,7 +602,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
     """
     types_strata_pars = iam_strata.get_comp_types_strata_pars()
     types_strata_obs = iam_strata.get_comp_types_strata_obs()
-    
+
     time = sm.time_array / 365.25
 
     # This is used to store the maximum value of a metric at each location
@@ -620,22 +620,22 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
             # It it's a wellbore component and critPressureInput is 'Calculated',
             # get the critical pressure
             if critPressureInput == 'Calculated' and isinstance(
-                    output_component, (iam.OpenWellbore, iam.MultisegmentedWellbore, 
-                                       iam.CementedWellbore, iam.CementedWellboreWR, 
+                    output_component, (iam.OpenWellbore, iam.MultisegmentedWellbore,
+                                       iam.CementedWellbore, iam.CementedWellboreWR,
                                        iam.GeneralizedFlowRate)):
                 if strata_type in types_strata_pars and critPressure is None:
                     # If using uniform stratigraphy, only do this once
                     critPressureVal = get_crit_pressure(
-                        output_component, sm=sm, yaml_data=yaml_data, 
-                        calcCritPressureNoOW=calcCritPressureNoOW, 
+                        output_component, sm=sm, yaml_data=yaml_data,
+                        calcCritPressureNoOW=calcCritPressureNoOW,
                         aq_number=aq_number, brineDensityInput=brineDensityInput)
 
                     critPressure = critPressureVal
 
                 elif strata_type in types_strata_obs:
                     critPressureVal = get_crit_pressure(
-                        output_component, sm=sm, yaml_data=yaml_data, 
-                        calcCritPressureNoOW=calcCritPressureNoOW, 
+                        output_component, sm=sm, yaml_data=yaml_data,
+                        calcCritPressureNoOW=calcCritPressureNoOW,
                         aq_number=aq_number, brineDensityInput=brineDensityInput)
 
                     # Find the location index
@@ -657,10 +657,10 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
                 if isinstance(output_component, (iam.SimpleReservoir,
                                                  iam.AnalyticalReservoir,
-                                                 iam.LookupTableReservoir, 
+                                                 iam.LookupTableReservoir,
                                                  iam.TheisReservoir)):
                     res_comp_check = True
-                
+
                 # If the component is a reservoir or aquifer component, proceed
                 if aq_comp_check or res_comp_check:
                     # Get maximum values at each location
@@ -726,7 +726,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
     """
     types_strata_pars = iam_strata.get_comp_types_strata_pars()
     types_strata_obs = iam_strata.get_comp_types_strata_obs()
-    
+
     time = sm.time_array / 365.25
 
     if bold_labels:
@@ -756,15 +756,15 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
     # AoR Figure
     theis_cmpnt_found, _, _ = check_for_comp_type(
         yaml_data, model_data, 'TheisReservoir')
-    
-    # When using a TheisReservoir, the legend should not refer to wellbores. The 
+
+    # When using a TheisReservoir, the legend should not refer to wellbores. The
     # points would be the output locations of the TheisReservoir, not a wellbore
     # component.
     if theis_cmpnt_found:
         label = 'Grid Points Used for Area of Review'
     else:
         label = 'Hypothetical Wellbore for Area of Review'
-    
+
     fig = plt.figure(figsize=figsize, dpi=figdpi)
 
     ax = plt.gca()
@@ -822,7 +822,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                                interval)
 
         elif np.Inf in results[:, 0]:
-            # If a wellbore is placed on the injection site, you can get an 
+            # If a wellbore is placed on the injection site, you can get an
             # infinite pressure value. I include "< np.Inf" to avoid that case.
             warning_msg = ''.join([
                 'The results used for the AoR plot included an infinite value. ',
@@ -891,7 +891,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
             cbar_ticks = cbar_ticks[cbar_ticks > 0].tolist()
             cbar.ax.set_yticks(cbar_ticks)
             cbar.ax.set_ylim([np.min(levels), np.max(levels)])
-        
+
         if theis_cmpnt_found:
             label = 'Grid Point with Nonzero Result'
         else:
@@ -937,8 +937,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                     title_pressure = ',\nAll Pressures Exceeded the P$_{crit}$ of ' + \
                         '{} MPa'.format(critPressure_str)
 
-                elif np.min(results_temp[:, 0]) < critPressureInput and \
-                        np.max(results_temp[:, 0]) >= critPressureInput:
+                elif np.min(results_temp[:, 0]) < critPressureInput <= np.max(results_temp[:, 0]):
                     title_pressure = ',\nCertain Pressures Exceeded the P$_{crit}$ of ' + \
                         '{} MPa'.format(critPressure_str)
                     Pcrit_Included = True
@@ -974,8 +973,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
                 elif np.min(critPressureDiff[:, 0]) > 0:
                     title_pressure = ',\nAll Pressures Exceeded the Local P$_{crit}$ Values'
 
-                elif np.min(critPressureDiff[:, 0]) < 0 and \
-                        np.max(critPressureDiff[:, 0]) >= 0:
+                elif np.min(critPressureDiff[:, 0]) < 0 <= np.max(critPressureDiff[:, 0]):
                     title_pressure = ',\nCertain Pressures Exceeded the Local P$_{crit}$ Values'
 
                     Pcrit_Included = True
@@ -1312,15 +1310,15 @@ def remove_redundant_inj_coords(InjectionCoordx, InjectionCoordy):
     compiled_coords = []
     InjectionCoordx_updated = []
     InjectionCoordy_updated = []
-    
+
     for i, (inj_x, inj_y) in enumerate(zip(InjectionCoordx, InjectionCoordy)):
         coord = (inj_x, inj_y)
-        
-        if not coord in compiled_coords:
+
+        if coord not in compiled_coords:
             compiled_coords.append(coord)
             InjectionCoordx_updated.append(inj_x)
             InjectionCoordy_updated.append(inj_y)
-    
+
     return InjectionCoordx_updated, InjectionCoordy_updated
 
 
@@ -1358,7 +1356,7 @@ def get_AoR_yaml_input(yaml_data, name, workflow_figure=False):
     """
 
     yaml_input_keys = [
-        'dpi_input', 'plot_injection_sites', 'InjectionCoordx', 'InjectionCoordy', 
+        'dpi_input', 'plot_injection_sites', 'InjectionCoordx', 'InjectionCoordy',
         'SaveCSVFiles', 'TimeList', 'CriticalPressureMPa', 'BrineDensity']
 
     InjectionCoord_debug_msg = ''.join([
@@ -1393,10 +1391,10 @@ def get_AoR_yaml_input(yaml_data, name, workflow_figure=False):
                         'The CriticalPressureMPa entry will not be used.'])
                     logging.debug(debug_msg)
                     yaml_input['CriticalPressureMPa'] = None
-        
+
         if 'BrineDensity' in AoR_plot_data:
             yaml_input['BrineDensity'] = AoR_plot_data['BrineDensity']
-        
+
         if 'TimeList' in AoR_plot_data:
             yaml_input['TimeList'] = AoR_plot_data['TimeList']
 
@@ -1490,100 +1488,100 @@ def get_t_indices(time_list, time_array):
     return time_index_list
 
 
-def get_crit_pressure(output_component, sm=None, yaml_data=None, 
-                      calcCritPressureNoOW=False, strata_type='Stratigraphy', 
+def get_crit_pressure(output_component, sm=None, yaml_data=None,
+                      calcCritPressureNoOW=False, strata_type='Stratigraphy',
                       aq_number=None, brineDensityInput=None):
     """
-    This function calculates the critical pressure. If an OpenWellbore component 
-    is being used, the function uses the parameters of that component. Otherwise, 
-    the function uses information from a stratigraphy component as well as a 
-    brine density that can be provided under 
+    This function calculates the critical pressure. If an OpenWellbore component
+    is being used, the function uses the parameters of that component. Otherwise,
+    the function uses information from a stratigraphy component as well as a
+    brine density that can be provided under
     """
     types_strata_pars = iam_strata.get_comp_types_strata_pars()
     types_strata_obs = iam_strata.get_comp_types_strata_obs()
-    
+
     if calcCritPressureNoOW:
         if strata_type in types_strata_pars:
             strat_comp = sm.component_models['strata']
         elif strata_type in types_strata_obs:
             strat_comp = sm.component_models['strata' + output_component.name]
-        
+
         if aq_number is None:
             # Assume that the highest aquifer is the focus
             numShaleLayers = iamcommons.get_parameter_val(
                 strat_comp, 'numberOfShaleLayers', sm=sm, yaml_data=yaml_data)
-            
+
             aq_number = numShaleLayers - 1
-        
+
         # Get the bottom depth of the aquifer
         wellTop = iamcommons.get_parameter_val(
             strat_comp, 'aquifer{}Depth'.format(aq_number), sm=sm, yaml_data=yaml_data)
-        
+
         # This is the bottom depth of shale 1, which is the top depth of the reservoir
         reservoirDepth = iamcommons.get_parameter_val(strat_comp, 'shale1Depth',
                                                       sm=sm, yaml_data=yaml_data)
-        
-        # This checks if the output_component has a brineDensity parameter. If not, 
+
+        # This checks if the output_component has a brineDensity parameter. If not,
         # a None value is returned.
         try:
             brineDensityParam = iamcommons.get_parameter_val(output_component, 'brineDensity',
                                                              sm=sm, yaml_data=yaml_data)
         except:
             brineDensityParam = None
-        
+
         if brineDensityParam is not None:
             brineDensity = brineDensityParam
-        
+
         else:
             # This just checks if the brine density parameter is called brine_density.
-            # This convention is not used currently (brineDensity is used), but 
-            # lower case characters with an underscore seems the next most likely 
+            # This convention is not used currently (brineDensity is used), but
+            # lower case characters with an underscore seems the next most likely
             # convention.
             try:
                 brineDensityParam = iamcommons.get_parameter_val(output_component, 'brine_density',
                                                                  sm=sm, yaml_data=yaml_data)
             except:
                 brineDensityParam = None
-            
+
             if brineDensityParam is not None:
                 brineDensity = brineDensityParam
-                
+
             elif brineDensityInput is not None:
-                # If the component does not have a brine density parameter, use 
+                # If the component does not have a brine density parameter, use
                 # the brineDensityInput value given in the plot entry (BrineDensity)
                 brineDensity = brineDensityInput
-                
+
             else:
-                # Someone might unknowingly use this approach without setting the 
-                # BrineDensity input in the .yaml plot entry. This message is meant 
+                # Someone might unknowingly use this approach without setting the
+                # BrineDensity input in the .yaml plot entry. This message is meant
                 # to make them aware of that issue.
                 warning_msg = ''.join([
                     'While making an AoR plot, the critical pressure was calculated ',
-                    'because the ''CriticalPressureMPa'' entry for the AoR plot was ',
-                    'given as ''Calculated''. When the wellbore component has a brineDensity ',
+                    'because the "CriticalPressureMPa" entry for the AoR plot was ',
+                    'given as "Calculated". When the wellbore component has a brineDensity ',
                     'parameter, that parameter value will be used to calculate ',
                     'critical pressure. A component with that parameter was not ',
                     'used in the simulation, however, so the brine density used ',
-                    'in the calculation is set by the ''BrineDensity'' ',
-                    'input provided through the AoR plot''s entry in the .yaml file. ',
-                    'The ''BrineDensity'' entry was not given, however, so the default ',
-                    'value of {} kg/(m^3)'.format(DEFAULT_BRINE_DENSITY), 'will be ', 
+                    'in the calculation is set by the "BrineDensity" ',
+                    'input provided through the AoR plots entry in the .yaml file. ',
+                    'The "BrineDensity" entry was not given, however, so the default ',
+                    'value of {} kg/(m^3)'.format(DEFAULT_BRINE_DENSITY), 'will be ',
                     'used in the calculation of critical pressure. '])
-                
+
                 logging.warning(warning_msg)
-                
+
                 brineDensity = DEFAULT_BRINE_DENSITY
-            
+
     else:
         wellTop = iamcommons.get_parameter_val(output_component, 'wellTop',
                                                sm=sm, yaml_data=yaml_data)
-    
+
         reservoirDepth = iamcommons.get_parameter_val(output_component, 'reservoirDepth',
                                                       sm=sm, yaml_data=yaml_data)
-    
+
         brineDensity = iamcommons.get_parameter_val(output_component, 'brineDensity',
                                                     sm=sm, yaml_data=yaml_data)
-    
+
     critPressureVal = (wellTop * GRAV_ACCEL * WATER_DENSITY) + (
         brineDensity * GRAV_ACCEL * (reservoirDepth - wellTop))
 
@@ -1654,30 +1652,30 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
     # If injection sites need to be plotted, get the injection sites
     if yaml_input['plot_injection_sites']:
         model_data = yaml_data['ModelParams']
-        
+
         theis_cmpnt_found, _, _ = check_for_comp_type(
             yaml_data, model_data, 'TheisReservoir')
-        
+
         InjectionCoordx = []
         InjectionCoordy = []
 
         for comp in components:
             if comp.class_type in AOR_RESERVOIR_COMPONENTS and \
-                comp.class_type != 'LookupTableReservoir':
-                    inj_x = comp.injX
-                    inj_y = comp.injY
-                    
-                    if comp.class_type == 'TheisReservoir':
-                        for x in inj_x:
-                            InjectionCoordx.append(x)
-                        
-                        for y in inj_y:
-                            InjectionCoordy.append(y)
-                        
-                    else:
-                        InjectionCoordx.append(inj_x)
-                        InjectionCoordy.append(inj_y)
-        
+                    comp.class_type != 'LookupTableReservoir':
+                inj_x = comp.injX
+                inj_y = comp.injY
+
+                if comp.class_type == 'TheisReservoir':
+                    for x in inj_x:
+                        InjectionCoordx.append(x)
+
+                    for y in inj_y:
+                        InjectionCoordy.append(y)
+
+                else:
+                    InjectionCoordx.append(inj_x)
+                    InjectionCoordy.append(inj_y)
+
         InjectionCoordx, InjectionCoordy = remove_redundant_inj_coords(
             InjectionCoordx, InjectionCoordy)
 
@@ -1743,7 +1741,7 @@ def plot_aor_workflow_results(yaml_data, sm, All_x_points_km, All_y_points_km,
             ncol_number += 1
 
     grid_option = False
-    # OpenWellbore1 is the default name for an OpenWellbore component in the 
+    # OpenWellbore1 is the default name for an OpenWellbore component in the
     # AoR Workflow.
     if 'OpenWellbore1' in yaml_data:
         if 'Locations' in yaml_data['OpenWellbore1']:

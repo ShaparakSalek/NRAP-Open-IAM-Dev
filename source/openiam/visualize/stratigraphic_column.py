@@ -78,11 +78,11 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
 
     :return: None
     """
-    # These lists indicate the stratigraphy component types that offer thicknesses 
+    # These lists indicate the stratigraphy component types that offer thicknesses
     # and depths as parameters or as observations.
     types_strata_pars = iam_strata.get_comp_types_strata_pars()
     types_strata_obs = iam_strata.get_comp_types_strata_obs()
-    
+
     if boldlabels:
         selected_labelfontweight = 'bold'
     else:
@@ -114,14 +114,14 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
 
     # Get the data
     if comp_type in types_strata_pars:
-        
+
         components = list(sm.component_models.values())
-        
+
         for comp in components:
             if comp.class_type == comp_type:
                 strata_comp = comp
                 break
-        
+
         numShaleLayers = strata_comp.get_num_shale_layers()
 
         strata_dict = iam_strata.get_strata_info_from_component(strata_comp)
@@ -129,7 +129,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
         shaleThicknessList = strata_dict['shaleThicknesses']
         aquiferThicknessList = strata_dict['aquiferThicknesses']
         reservoirThickness = strata_dict['reservoirThickness']
-        
+
         # These need to have negative values
         shaleTopDepthList = (-1 * np.array(strata_dict['shaleTopDepths'])).tolist()
         aquiferTopDepthList = (-1 * np.array(strata_dict['aquiferTopDepths'])).tolist()
@@ -142,12 +142,12 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
         for comp in components:
             if comp.class_type in types_strata_obs:
                 numShaleLayers = comp.get_num_shale_layers()
-                
+
                 break
-        
+
         stratigraphy_by_loc_temp = get_strat_comp_obs(
             x_value, y_value, numShaleLayers, yaml_data)
-        
+
         shaleThicknessList = []
         aquiferThicknessList = []
         shaleTopDepthList = []
@@ -155,25 +155,25 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
         for shaleRef in range(numShaleLayers):
             shaleThicknessList.append(np.max(stratigraphy_by_loc_temp[
                 'shale{}Thickness'.format(shaleRef + 1)]))
-            
+
             # Must be a negative value
             shaleTopDepthList.append(-np.max(stratigraphy_by_loc_temp[
                 'shale{}TopDepth'.format(shaleRef + 1)]))
-            
+
             if (shaleRef + 1) < numShaleLayers:
                 aquiferThicknessList.append(np.max(stratigraphy_by_loc_temp[
                     'aquifer{}Thickness'.format(shaleRef + 1)]))
-                
+
                 # Must be a negative value
                 aquiferTopDepthList.append(-np.max(stratigraphy_by_loc_temp[
                     'aquifer{}TopDepth'.format(shaleRef + 1)]))
-        
+
         reservoirThickness = np.max(stratigraphy_by_loc_temp['reservoirThickness'])
-        
+
         # Must be negative values
         reservoirTopDepth = -np.max(stratigraphy_by_loc_temp['reservoirTopDepth'])
         reservoirDepth = -np.max(stratigraphy_by_loc_temp['reservoirDepth'])
-    
+
     reservoirColor, reservoirAlpha, reservoirAlphaFill, reservoirLabel, \
         shaleColor, shaleAlpha, shaleAlphaFill, shaleLabel, \
             aquiferColor, aquiferAlpha, aquiferAlphaFill, aquiferLabel, \
@@ -223,7 +223,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
 
     # Scale the buffer by the thinnest unit so that it is uniform
     y_buffer_text = np.min(aquiferThicknessList + shaleThicknessList) * 0.075
-    
+
     fig = plt.figure(figsize=figsize, dpi=figdpi)
     ax = fig.add_subplot()
 

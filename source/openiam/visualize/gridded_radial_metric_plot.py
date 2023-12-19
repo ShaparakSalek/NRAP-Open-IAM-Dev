@@ -1121,7 +1121,7 @@ def get_comp_z_lists(sm, z_list, name, components_to_use):
                 except KeyError:
                     # For simulations with spatially variable stratigraphy
                     strata_comp = sm.component_models['strata' + comp.name]
-                
+
                 strata_info = iam_strata.get_strata_info_from_component(strata_comp)
 
                 numShaleLayers = strata_info['numberOfShaleLayers']
@@ -1144,7 +1144,7 @@ def get_comp_z_lists(sm, z_list, name, components_to_use):
                         top_mid_bottom = 'mid'
                     elif 'Depth' in z_val:
                         top_mid_bottom = 'bottom'
-                    
+
                     depth_val = iam_strata.get_unit_depth_from_component(
                         numShaleLayers, strata_comp, unitNumber=unitNumber,
                         unitType=unitType, top_mid_bottom=top_mid_bottom)

@@ -467,36 +467,36 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
             else:
                 # No title
                 pass
-    
+
     if len(xaxis_fontsizes_used) == 0:
         warning_msg = ''.join([
-            'The plot {} was not able to plot any simulation results. '.format(name), 
-            'This outcome can occur if there is an error in the setup of a ', 
-            'TimeSeries plot entry. For example, the input is case-sensitive, ', 
-            'so using "TimeSeries: [Pressure]" will fail to plot pressure results. ', 
-            'In this hypothetical example, the plot entry should say ', 
-            '"TimeSeries: [pressure]" because the name of the metric is pressure ', 
-            '(not Pressure). Alternatively, the component producing the output ', 
-            'may not have been included in the "Components" list in the "ModelParams" ', 
-            'section of the .yaml file - in this case, the component would not ', 
+            'The plot {} was not able to plot any simulation results. '.format(name),
+            'This outcome can occur if there is an error in the setup of a ',
+            'TimeSeries plot entry. For example, the input is case-sensitive, ',
+            'so using "TimeSeries: [Pressure]" will fail to plot pressure results. ',
+            'In this hypothetical example, the plot entry should say ',
+            '"TimeSeries: [pressure]" because the name of the metric is pressure ',
+            '(not Pressure). Alternatively, the component producing the output ',
+            'may not have been included in the "Components" list in the "ModelParams" ',
+            'section of the .yaml file - in this case, the component would not ',
             'be used during the simulation. Check your input.'])
         logging.warning(warning_msg)
-        
+
         # Add subplot
         ax = plt.subplot(1, 1, 1)
         ax.text(0.01, 0.55, 'Results for the given output ({}) could '.format(
-            output_names) + 'not be displayed for the figure {}. '.format(name) 
-            + 'Check your input\nfor errors (e.g., typos in metric names, ' 
-            + 'component producing the output failed to run because it was not ' 
+            output_names) + 'not be displayed for the figure {}. '.format(name)
+            + 'Check your input\nfor errors (e.g., typos in metric names, '
+            + 'component producing the output failed to run because it was not '
             + 'set up properly, etc.).', fontsize=gen_font_size)
-        
+
         min_fontsize = None
-        
+
     else:
         min_fontsize = make_label_fontsizes_uniform(
             subplot_ind - 1, xaxis_fontsizes_used, yaxis_fontsizes_used,
             subplots_data)
-        
+
         if fig_setup['gen_font_size'] > min_fontsize:
             fig_setup['gen_font_size'] = min_fontsize
             update_rc_setup(fig_setup, fontname)
@@ -518,7 +518,7 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                     label_list.append(label)
 
             fig_setup['legend_font_size'] = legend_font_size_ref2
-            
+
             fig_setup = check_legend(handle_list, fig_setup, min_fontsize,
                                      subplots_data)
 
@@ -539,7 +539,7 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                     label_list.append(label)
 
             fig_setup['legend_font_size'] = legend_font_size_ref2
-            
+
             fig_setup = check_legend(handle_list, fig_setup, min_fontsize,
                                      subplots_data)
 

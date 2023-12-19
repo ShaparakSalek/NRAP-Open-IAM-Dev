@@ -126,7 +126,7 @@ INDICATOR = {'pH': 'absolute', 'Pressure': 'relative',
              'CarbonateAquifer': 'absolute'}
 
 
-def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1', 
+def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
               analysis='lhs', figsize=(10, 8), genfontsize=12,
               axislabelfontsize=14, titlefontsize=14, boldlabels=True):
     """
@@ -187,7 +187,7 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     plume_metric_abbrev = yaml_data['Plots'][name]['TTFD']['PlumeType']
     aq_name_list = yaml_data['Plots'][name]['TTFD']['ComponentNameList']
 
@@ -212,7 +212,7 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
         monitoringCoordX = [None]
         monitoringCoordY = [None]
         monitoringCoordZ = [None]
-                
+
     numPointsInAq = TTFD_yaml_input_dict['numPointsInAq']
     numPointsInShales = TTFD_yaml_input_dict['numPointsInShales']
 
@@ -230,30 +230,30 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
         selected_labelfontweight = 'bold'
     else:
         selected_labelfontweight = 'normal'
-    
+
     # Get the stratigraphy information
     strata_type = strata.get_strata_type_from_yaml(yaml_data)
 
     # Get a stratigraphy component
     if strata_type in types_strata_pars:
         strata_comp = sm.component_models['strata']
-        
+
         strata_dict = strata.get_strata_info_from_component(strata_comp)
 
         numShaleLayers = strata_dict['numberOfShaleLayers']
-        
+
     elif strata_type in types_strata_obs:
         strata_comp = None
-        
+
         components = list(sm.component_models.values())
-        
+
         for comp in components:
             if comp.class_type in types_strata_obs:
                 numShaleLayers = comp.get_num_shale_layers()
                 break
-        
+
         del components
-    
+
     # Check if any of the monitoringCoordZ were entered as strings representing depths
     if monitoringCoordZ:
         for ind, coordz in enumerate(monitoringCoordZ):
@@ -262,12 +262,12 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
                     # The monitoringCoordZ values need to be negative
                     monitoringCoordZ[ind] = -iamcommons.get_parameter_val(
                         strata_comp, coordz)
-                    
+
                 elif strata_type in types_strata_obs:
                     stratigraphy_by_loc = get_strat_comp_obs(
-                        float(monitoringCoordX[ind]), float(monitoringCoordY[ind]), 
+                        float(monitoringCoordX[ind]), float(monitoringCoordY[ind]),
                         numShaleLayers, yaml_data)
-                    
+
                     if stratigraphy_by_loc:
                         try:
                             monitoringCoordZ[ind] = -np.max(stratigraphy_by_loc[coordz])
@@ -283,13 +283,13 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
             res_comp_injX, res_comp_injY, x_range, y_range = \
                 get_aq_comp_lists_and_xy_grids(sm, yaml_data,
                                                name, aq_name_list)
-    
+
     x_grid, y_grid = make_xandy_grids(
         x_range, y_range, x_grid_spacing=x_grid_spacing,
         y_grid_spacing=y_grid_spacing, EnforceGridXandYLims=EnforceGridXandYLims,
-        gridXLims=gridXLims, gridYLims=gridYLims, monitoringCoordX=monitoringCoordX, 
+        gridXLims=gridXLims, gridYLims=gridYLims, monitoringCoordX=monitoringCoordX,
         monitoringCoordY=monitoringCoordY)
-    
+
     z_grid = get_z_values(
         yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
         strata_type=strata_type, stratigraphy_comp=strata_comp, numPointsInAq=numPointsInAq,
@@ -395,7 +395,7 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
         if save_results:
             save_results_to_csv(
                 plumeProb, x_grid, y_grid, z_grid, output_dir, plume_metric_abbrev,
-                plotType, ttfd_list=None, ttfd_x_list=None, ttfd_y_list=None, 
+                plotType, ttfd_list=None, ttfd_x_list=None, ttfd_y_list=None,
                 ttfd_z_list=None, analysis=analysis, realization=realization,
                 num_samples=num_samples, strata_type=strata_type, checkCarbAq=checkCarbAq)
 
@@ -411,9 +411,9 @@ def ttfd_plot(yaml_data, model_data, sm, s, output_dir, name='TTFD_Figure1',
             res_comp_injY=res_comp_injY, strata_type=strata_type)
 
 
-def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types, 
-                 strata_type='Stratigraphy', stratigraphy_comp=None, 
-                 numPointsInAq=10, numPointsInShales=3, monitoringCoordZ=None, 
+def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
+                 strata_type='Stratigraphy', stratigraphy_comp=None,
+                 numPointsInAq=10, numPointsInShales=3, monitoringCoordZ=None,
                  min_z_spacing=0.01, lowest_depth=0):
     """
     This function is used to create the z values used in the calculation of TTFD.
@@ -421,7 +421,7 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     # This is used to keep track of whether each monitoringCoordZ value
     # has been added (1 for unused, 0 for already inserted).
     monitoringCoordZCheck = np.ones(len(monitoringCoordZ))
@@ -436,10 +436,10 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
                 # Reset monitoringCoordZCheck, if it is being used
                 if not None in monitoringCoordZ:
                     monitoringCoordZCheck = monitoringCoordZCheckOrig[:]
-                
+
                 stratigraphy_by_loc = get_strat_comp_obs(
                     float(xVal), float(yVal), numShaleLayers, yaml_data)
-                
+
                 shaleThicknessesUpdated = []
                 aquiferThicknessesUpdated = []
                 aquiferBottomDepths = []
@@ -455,21 +455,21 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
                             shaleThicknessesUpdated.append(shaleThickness)
                         else:
                             shaleThicknessesUpdated.append(None)
-                        
+
                         if (shaleRef + 1) < numShaleLayers:
                             aquiferThickness = np.max(stratigraphy_by_loc[
                                 'aquifer{}Thickness'.format(shaleRef + 1)])
-                            
+
                             if aquiferThickness:
                                 aquiferThicknessesUpdated.append(np.max(stratigraphy_by_loc[
                                     'aquifer{}Thickness'.format(shaleRef + 1)]))
-                                
+
                                 aquiferBottomDepths.append(np.max(stratigraphy_by_loc[
                                     'aquifer{}Depth'.format(shaleRef + 1)]))
                             else:
                                 aquiferThicknessesUpdated.append(None)
                                 aquiferBottomDepths.append(None)
-                
+
                 if not None in aquiferBottomDepths:
                     for shaleRef in range(numShaleLayers - 1):
                         z_aq = np.linspace(-aquiferBottomDepths[shaleRef],
@@ -523,7 +523,7 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
                                                      z_sh[:-1]), axis=0)
 
                         elif shaleRef == (numShaleLayers - 2):
-                            z_temp = np.concatenate((z_temp[:-1], z_aq[:-1], 
+                            z_temp = np.concatenate((z_temp[:-1], z_aq[:-1],
                                                      z_sh[:]), axis=0)
 
                             if z is None:
@@ -532,9 +532,9 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
                             if len(z_temp) == z.shape[0]:
                                 z[:, yRef, xRef] = z_temp[:]
                             elif len(z_temp) > z.shape[0]:
-                                # If spatial changes in depths makethe number of 
-                                # z grid points higher than the number of points 
-                                # it had for the first x and y values considered, 
+                                # If spatial changes in depths makethe number of
+                                # z grid points higher than the number of points
+                                # it had for the first x and y values considered,
                                 # do not use the extra points.
                                 z[:, yRef, xRef] = z_temp[0:z.shape[0]]
                             elif len(z_temp) < z.shape[0]:
@@ -543,8 +543,8 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
                                                    num_extra_points)
 
                                 # If spatial changes in depths make the number of
-                                # z grid points lower than the number of points 
-                                # it had for the first x and y values considered, 
+                                # z grid points lower than the number of points
+                                # it had for the first x and y values considered,
                                 # add extra points to compensate.
                                 z_temp = np.concatenate((z_temp[:], z_extra[:]), axis=0)
 
@@ -552,11 +552,11 @@ def get_z_values(yaml_data, numShaleLayers, x_grid, y_grid, aq_component_types,
 
     elif strata_type in types_strata_pars and not 'CarbonateAquifer' in aq_component_types:
         strata_dict = strata.get_strata_info_from_component(stratigraphy_comp)
-        
+
         shaleThicknesses = strata_dict['shaleThicknesses']
         aquiferThicknesses = strata_dict['aquiferThicknesses']
         aquiferBottomDepths = strata_dict['aquiferDepths']
-        
+
         for shaleRef in range(numShaleLayers - 1):
             z_aq = np.linspace(-aquiferBottomDepths[shaleRef],
                                -aquiferBottomDepths[shaleRef]
@@ -699,11 +699,11 @@ def get_plume_timings(yaml_data, sm, s, time_array, sample, plume_metric_abbrev,
                                len(x_grid))) * MAX_TIME
 
         for well, (x0, y0) in enumerate(zip(aq_component_xvals, aq_component_yvals)):
-                
-            z0 = get_z0(yaml_data, x0, y0, strata_comp, numShaleLayers, 
+
+            z0 = get_z0(yaml_data, x0, y0, strata_comp, numShaleLayers,
                         aquiferReference=aq_component_indices[well],
                         strata_type=strata_type)
-            
+
             # z0 will be None if get_z0() encounters an error with get_strat_comp_obs()
             if z0:
                 # Get plume dimensions
@@ -777,7 +777,7 @@ def get_plume_timings(yaml_data, sm, s, time_array, sample, plume_metric_abbrev,
         plumeTiming = np.ones((z_grid.shape[0], len(y_grid), len(x_grid))) * MAX_TIME
 
         for well, (x0, y0) in enumerate(zip(aq_component_xvals, aq_component_yvals)):
-            z0 = get_z0(yaml_data, x0, y0, strata_comp, numShaleLayers, 
+            z0 = get_z0(yaml_data, x0, y0, strata_comp, numShaleLayers,
                         aquiferReference=aq_component_indices[well],
                         strata_type=strata_type)
 
@@ -831,7 +831,7 @@ def get_monitoring_location_ttfd(plumeTimings, x_grid, y_grid, z_grid,
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     # List of TTFD values at or sufficiently close to monitoring location(s)
     ttfd_list = []
 
@@ -978,14 +978,14 @@ def get_z0(yaml_data, x_val, y_val, stratigraphy_comp, numShaleLayers,
     elif strata_type in types_strata_obs:
         stratigraphy_by_loc = get_strat_comp_obs(
             float(x_val), float(y_val), numShaleLayers, yaml_data)
-        
+
         aquiferThicknessesUpdated = []
         aquiferBottomDepths = []
         for shaleRef in range(numShaleLayers - 1):
             try:
                 aquiferThicknessesUpdated.append(np.max(stratigraphy_by_loc[
                     'aquifer{}Thickness'.format(shaleRef + 1)]))
-                
+
                 aquiferBottomDepths.append(np.max(stratigraphy_by_loc[
                     'aquifer{}Depth'.format(shaleRef + 1)]))
             except:
@@ -999,9 +999,9 @@ def get_z0(yaml_data, x_val, y_val, stratigraphy_comp, numShaleLayers,
             z0 = -aquiferBottomDepths[aquiferReference] \
                 + aquiferThicknessesUpdated[aquiferReference]
         else:
-            # stratigraphy_by_loc will be returned as None if the simulation in 
-            # get_strat_comp_obs() fails. It can fail if the x and y coordintes 
-            # are outside of the domain contained in the file used for a 
+            # stratigraphy_by_loc will be returned as None if the simulation in
+            # get_strat_comp_obs() fails. It can fail if the x and y coordintes
+            # are outside of the domain contained in the file used for a
             # LookupTableStratigraphy component.
             z0 = None
 
@@ -1015,7 +1015,7 @@ def write_dream_grid(x_grid, y_grid, z_grid, output_dir, strata_type='Stratigrap
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     # Write grid in feet for DREAM
     filename = os.sep.join([output_dir, 'iam.grid'])
 
@@ -1041,7 +1041,7 @@ def write_dream_grid(x_grid, y_grid, z_grid, output_dir, strata_type='Stratigrap
                             f.write('{},{},{},\n'.format(
                                 xVal / 0.3048, yVal / 0.3048,
                                 z_grid[zRef, 0, 0] / 0.3048))
-                            
+
                         elif strata_type in types_strata_obs:
                             f.write('{},{},{},\n'.format(
                                 xVal / 0.3048, yVal / 0.3048,
@@ -1058,7 +1058,7 @@ def write_dream_output(plumeTimings, x_grid, y_grid, z_grid, plume_metric_abbrev
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     # Write output (in feet) for DREAM
     filename = os.sep.join([output_dir, 'ttfd_{}_{}.iam'.format(
         plume_metric_abbrev, realization)])
@@ -1270,11 +1270,11 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
             debug_msg = gen_monitor_loc_type_warning_msg('coordy', name)
             logging.debug(debug_msg)
             monitoringTTFD = defaultMonitoringTTFD
-        
+
         # If the monitoring coordinates are not in lists, put them in lists
         if not isinstance(monitoringCoordX, list):
             monitoringCoordX = [monitoringCoordX]
-        
+
         if not isinstance(monitoringCoordY, list):
             monitoringCoordY = [monitoringCoordY]
 
@@ -1283,10 +1283,10 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
                 debug_msg = gen_monitor_loc_type_warning_msg('coordz', name)
                 logging.debug(debug_msg)
                 monitoringTTFD = defaultMonitoringTTFD
-            
+
             if not isinstance(monitoringCoordZ, list):
                 monitoringCoordZ = [monitoringCoordZ]
-            
+
             reset_check = False
             pos_vals = []
             for coordz in monitoringCoordZ:
@@ -1294,16 +1294,16 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
                     if np.max(coordz) > 0:
                         pos_vals.append(coordz)
                         reset_check = True
-            
+
             if reset_check:
                 debug_msg = ''.join([
-                    'The coordz values ({}) provided for '.format(monitoringCoordZ), 
-                    'MonitoringLocations in the TTFD plot ', name, ' had (a) ', 
-                    'positive value(s) ({}). The depth values '.format(pos_vals), 
-                    ' represented by coordz are taken as negative when beneath ', 
-                    'the surface. THey can also be entered as strings representing ', 
-                    'unit depths, like aquifer2Depth, aquifer3MidDepth, or ', 
-                    'aquifer4TopDepth. Check your input. The TTFD at the actual ', 
+                    'The coordz values ({}) provided for '.format(monitoringCoordZ),
+                    'MonitoringLocations in the TTFD plot ', name, ' had (a) ',
+                    'positive value(s) ({}). The depth values '.format(pos_vals),
+                    ' represented by coordz are taken as negative when beneath ',
+                    'the surface. THey can also be entered as strings representing ',
+                    'unit depths, like aquifer2Depth, aquifer3MidDepth, or ',
+                    'aquifer4TopDepth. Check your input. The TTFD at the actual ',
                     'monitoring locations will not be plotted.'])
                 logging.debug(debug_msg)
                 monitoringTTFD = defaultMonitoringTTFD
@@ -1313,10 +1313,10 @@ def get_ttfd_plot_yaml_input(yaml_data, name):
                 or (len(monitoringCoordX) != len(monitoringCoordZ))
         else:
             len_check = len(monitoringCoordX) != len(monitoringCoordY)
-        
+
         if len_check:
             debug_msg = gen_monitoring_loc_len_warning(
-                monitoringCoordX, monitoringCoordY, monitoringCoordZ, 
+                monitoringCoordX, monitoringCoordY, monitoringCoordZ,
                 plume_type, name)
             logging.debug(debug_msg)
             monitoringTTFD = defaultMonitoringTTFD
@@ -1542,8 +1542,8 @@ def gen_monitor_loc_type_warning_msg(loc_type, name):
     debug_msg = ''.join([
         'The {} values provided for monitoring locations in ',
         'the TTFD plot ', name, ' were not of type int, float, string, or list. ',
-        'Only strings that represent a unit depth can be used, such as aquifer2Depth ', 
-        'aquifer2MidDepth, or aquifer2TopDepth. Check your input in the .yaml file. ', 
+        'Only strings that represent a unit depth can be used, such as aquifer2Depth ',
+        'aquifer2MidDepth, or aquifer2TopDepth. Check your input in the .yaml file. ',
         'The TTFD at the actual monitoring locations will not be plotted.']).format(loc_type)
 
     return debug_msg
@@ -1582,11 +1582,11 @@ def get_aq_comp_lists_and_xy_grids(sm, yaml_data, name, aq_name_list):
     simulation(s). These boundaries are then used to make the x_grid and y_grid
     values required for the function get_plume_timings().
     """
-    # These lists indicate the stratigraphy component types that offer thicknesses 
+    # These lists indicate the stratigraphy component types that offer thicknesses
     # and depths as parameters or as observations.
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     # Define grid coordinates. These are overwritten within the loop below
     min_x_val = 9e99
     max_x_val = 0
@@ -1766,14 +1766,14 @@ def get_aq_comp_lists_and_xy_grids(sm, yaml_data, name, aq_name_list):
 
     x_range = [min_x_val, max_x_val]
     y_range = [min_y_val, max_y_val]
-    
+
     if len(aq_component_types) == 0:
         err_msg = ''.join([
-            'While making a TTFD plot, the code failed to collect information ', 
-            'for the aquifer component(s). This outcome can occur if the ', 
-            'ComponentNameList entry does not contain the names of any of the ', 
-            'aquifer components used. For example, a spelling error would ', 
-            'prevent the aquifer component name from being recognized correctly. ', 
+            'While making a TTFD plot, the code failed to collect information ',
+            'for the aquifer component(s). This outcome can occur if the ',
+            'ComponentNameList entry does not contain the names of any of the ',
+            'aquifer components used. For example, a spelling error would ',
+            'prevent the aquifer component name from being recognized correctly. ',
             'This TTFD plot will likely fail to show any results. Check your input.'])
         logging.error(err_msg)
 
@@ -1853,7 +1853,7 @@ def make_xandy_grids(x_range, y_range, x_grid_spacing=None,
             y_grid = np.linspace(min_y_val - y_buffer, max_y_val + y_buffer,
                                  101, endpoint=True)[:, None]
 
-    if (not None in monitoringCoordX) and (not None and monitoringCoordY):
+    if (not None in monitoringCoordX) and (not None in monitoringCoordY):
         for monitorCoord in monitoringCoordX:
             # If there is already an x value there, or close enough, then
             # do not add the monitoringCoordX.
@@ -1893,7 +1893,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     TTFD_yaml_input_dict = get_ttfd_plot_yaml_input(yaml_data, name)
 
     figureDPI = TTFD_yaml_input_dict['FigureDPI']
@@ -2193,7 +2193,7 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
                 zMask = np.ma.masked_inside(
                     z_grid[:, 0, 0], subplot_min_z_val, subplot_max_z_val)
                 zIndices = zIndices[zMask.mask]
-                
+
             elif strata_type in types_strata_obs:
                 zIndices = range(len(z_grid))
 
@@ -2585,7 +2585,7 @@ def save_results_to_csv(metric, x_grid, y_grid, z_grid, output_dir,
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     checkValidResults = True
 
     if resultsType == 'plumeProbabilities':
@@ -2743,7 +2743,7 @@ def save_grid_to_csv(x_grid, y_grid, z_grid, output_dir, strata_type='Stratigrap
     """
     types_strata_pars = strata.get_comp_types_strata_pars()
     types_strata_obs = strata.get_comp_types_strata_obs()
-    
+
     if not os.path.exists(os.path.join(output_dir, 'csv_files')):
         os.mkdir(os.path.join(output_dir, 'csv_files'))
 

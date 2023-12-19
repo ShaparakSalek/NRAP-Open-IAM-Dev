@@ -7,59 +7,42 @@ for the figures produced by sensitivity_analysis.py.
 # Dictionary used for the labels of parameters in sensitivity_analysis.py.
 # Labels that are particularly long include '\n' so they are on the split lines.
 PAR_NAME_DICT = {
-    # Stratigraphy component parameters
+    # Stratigraphy and Analytical Reservoir components parameters
     'numberOfShaleLayers': 'Number of Shale Layers',
-    'shaleThickness': 'Shale Thickness',
+    'shaleThickness': 'Shale Thickness',  # Does not include variations like
+    # shale2Thickness - they will default to the actual parameter name
     'aquiferThickness': 'Aquifer Thickness',
-    'reservoirThickness': 'Reservoir Thickness',
+    'reservoirThickness': 'Reservoir Thickness', # also for Generic Reservoir
     'datumPressure': 'Datum Pressure',
+    # Stratigraphy component only
     'depth': 'Depth', # I am intentionally keeping this vague, as depth is
     # reservoir top depth for Stratigraphy components and aquifer bottom depth
     # for FutureGen2Aqufier components
     # Reservoir component parameters
-    # Simple Reservoir component
+    # Both Simple and Analytical Reservoir components
     'logResPerm': 'Log. Reservoir Permeability',
     'reservoirPorosity': 'Reservoir Porosity',
-    'brineDensity': 'Brine Density',
-    'CO2Density': 'CO$_2$ Density',
-    'brineViscosity': 'Brine Viscosity',
-    'CO2Viscosity': 'CO$_2$ Viscosity',
+    'brineDensity': 'Brine Density',      # also for Multisegmented wellbore
+    'CO2Density': 'CO$_2$ Density',       # also for Multisegmented wellbore
+    'brineViscosity': 'Brine Viscosity',  # also for Multisegmented wellbore
+    'CO2Viscosity': 'CO$_2$ Viscosity',   # also for Multisegmented wellbore
     'brineResSaturation': 'Residual Brine Saturation',
-    'compressibility': 'Compressibility',
     'injRate': 'Injection Rate',
-    # Analytical Reservoir component
-    'logResPerm': 'Log. Reservoir Permeability',
-    'reservoirPorosity': 'Reservoir Porosity',
+    # Simple Reservoir Component only
+    'compressibility': 'Compressibility', # also for Multisegmented wellbore
+    # Analytical Reservoir component only
     'reservoirRadius': 'Reservoir Radius',
-    'brineDensity': 'Brine Density',
-    'CO2Density': 'CO$_2$ Density',
-    'brineViscosity': 'Brine Viscosity',
-    'CO2Viscosity': 'CO$_2$ Viscosity',
-    'brineResSaturation': 'Residual Brine Saturation',
     'brineCompressibility': 'Brine Compressibility',
-    'injRate': 'Injection Rate',
-    'numberOfShaleLayers': 'Number of Shale Layers',
-    'shaleThickness': 'Shale Thickness', # Does not include variations like
-    # shale2Thickness - they will default to the actual parameter name
-    'aquiferThickness': 'Aquifer Thickness',
-    'reservoirThickness': 'Reservoir Thickness',
-    'datumPressure': 'Datum Pressure',
     # Generic Reservoir component
     'reservoirDepth': 'Reservoir Depth', # Note: Generic reservoir uses it for base
     # of reservoir, OpenWellbore uses it for top (wellbore base)
-    'reservoirThickness': 'Reservoir Thickness',
     'resTempGradient': 'Reservoir Temp. Gradient',
     'initialSalinity': 'Initial Salinity',
     # Wellbore component parameters
     # Multisegmented Wellbore component
     'logWellPerm': 'Log. Wellbore Permeability',
     'logAquPerm': 'Log. Aquifer Permeability',
-    'brineDensity': 'Brine Density',
-    'CO2Density': 'CO$_2$ Density',
-    'brineViscosity': 'Brine Viscosity',
-    'CO2Viscosity': 'CO$_2$ Viscosity',
     'aquBrineResSaturation': 'Residual Brine Saturation\nin Aquifer',
-    'compressibility': 'Compressibility',
     'wellRadius': 'Well Radius',
     # Cemented Wellbore component
     'logThiefPerm': 'Log. Thief\nZone Permeability',
@@ -72,7 +55,6 @@ PAR_NAME_DICT = {
     'brineSalinity': 'Brine Salinity',
     'wellTop': 'Well Top Depth',
     'criticalPressure': 'Critical Pressure',
-    'reservoirDepth': 'Reservoir Depth',
      # Generalized Flow Rate component
     'logPeakCO2Rate': 'Log. Peak\nCO$_2$ Flow Rate',
     'timePeakCO2Rate': 'Time of Peak\nCO$_2$ Flow Rate',
