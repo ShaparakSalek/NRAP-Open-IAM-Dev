@@ -48,10 +48,10 @@ class AnalyticalReservoir(ComponentModel):
     * **CO2Density** [|kg/m^3|] (450 to 976) - density of |CO2| phase
       (default: 479)
 
-    * **brineViscosity** [|Pa*s|] (2.3e-4 to 15.9e-4) - viscosity of brine phase
+    * **brineViscosity** [|Pa*s|] (2.3e-4 to 1.59e-3) - viscosity of brine phase
       (default: 2.535e-4)
 
-    * **CO2Viscosity** [|Pa*s|] (0.455e-6 to 1.043e-4)  - viscosity of |CO2| phase
+    * **CO2Viscosity** [|Pa*s|] (4.55e-7 to 1.043e-4) - viscosity of |CO2| phase
       (default: 3.95e-5)
 
     * **brineResSaturation** [-] (0 to 0.25) - residual saturation of brine phase
@@ -164,8 +164,8 @@ class AnalyticalReservoir(ComponentModel):
         self.pars_bounds['reservoirPorosity'] = [0.10, 0.30]
         self.pars_bounds['brineDensity'] = [965.0, 1195.0]
         self.pars_bounds['CO2Density'] = [450.0, 976.0]
-        self.pars_bounds['brineViscosity'] = [2.3e-4, 15.9e-4]
-        self.pars_bounds['CO2Viscosity'] = [0.455e-6, 1.043e-4]
+        self.pars_bounds['brineViscosity'] = [2.3e-4, 1.59e-3]
+        self.pars_bounds['CO2Viscosity'] = [4.55e-7, 1.043e-4]
         self.pars_bounds['brineResSaturation'] = [0.0, 0.25]
         self.pars_bounds['brineCompressibility'] = [3.63e-12, 2.31e-11]
         self.pars_bounds['reservoirRadius'] = [500, 100000]

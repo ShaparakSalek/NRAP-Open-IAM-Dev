@@ -1969,9 +1969,9 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
     fig = plt.figure(name, figsize = figsize)
     cmap = plt.cm.get_cmap(colormap)
 
-    ax = plt.gca()
-
     if plotType == 'monitoringTTFD':
+        ax = plt.gca()
+        
         if not checkCarbAq:
             min_z = np.min(z_grid)
             max_z = np.max(z_grid)
@@ -2037,6 +2037,8 @@ def plot_plume_metric(plumeMetric, plotType, yaml_data, num_samples,
             plt.ylim(np.min(y_grid) / 1000.0, np.max(y_grid) / 1000.0)
 
     elif checkCarbAq:
+        ax = plt.gca()
+        
         sensor_lgnd_check = plot_wells_inj_sites(
             ax, aq_component_xvals, aq_component_yvals, None,
             None, plot_injection_sites, InjectionCoordx,

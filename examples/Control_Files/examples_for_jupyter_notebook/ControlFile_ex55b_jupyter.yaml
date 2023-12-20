@@ -32,18 +32,17 @@ ModelParams:
     GenerateCombOutputFile: False
     Logging: Error
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        LookupTableStratigraphy:
-            FileName: 'stratigraphy.csv'
-            FileDirectory: 'examples/Control_Files/input_data/ex32b'
-            MaxPointDistance: 100
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex32b'
+    Parameters:
+        numberOfShaleLayers: 5
 #-------------------------------------------------
 Workflow:
     Type: AoR
     Options:
-        AoRFigureName: Overall_AoR_Plot.tiff
-        FigureDPI: 300
+        FigureName: Overall_AoR_Plot.tiff
+        FigureDPI: 100
         TimeList: [0, 1, 5, 10, 15, 20]
         PlotInjectionSites: True
         InjectionCoordx: 2.37e5
@@ -86,4 +85,3 @@ Workflow:
                 log_permh: -11.92
                 log_aniso: 0.3
                 rel_vol_frac_calcite: 0.01
-                depth: aquifer4Depth

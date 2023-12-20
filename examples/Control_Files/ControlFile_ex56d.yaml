@@ -54,7 +54,7 @@ Workflow:
         PlotInjectionSites: True
         FigureDPI: 300
         TimeList: All
-        CriticalPressureMPa: 30.0             # This critical pressure (30 MPa) will also apply to the OpenWellbore component
+        CriticalPressureMPa: 23.5             # This critical pressure (23.5 MPa) will also apply to the OpenWellbore component
         ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             Parameters:
@@ -66,11 +66,8 @@ Workflow:
                 reservoirRadius: 75000
                 brineResSaturation: 0.01
         AquiferName: aquifer2                 # the wellbores will leak to this aquifer
-        WellboreOptions:                      # Uses the default locations, the grid options with x and y ranging from -50 km to 50 km (xsize and ysize of 6)
-            Controls:
-                critPressureApproach: True
-                enforceCritPressure: True     # Because this is set to True, the critPressure parameter will be used
-            Parameters:
+        WellboreOptions:                      # Uses the default locations, the grid options with x and y ranging from 
+            Parameters:                       # -50 km to 50 km (xsize and ysize of 6)
                 wellRadius: 0.05
                 logReservoirTransmissivity: -10.97
                 logAquiferTransmissivity: -10.0
