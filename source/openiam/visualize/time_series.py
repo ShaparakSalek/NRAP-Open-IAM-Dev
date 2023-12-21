@@ -73,7 +73,7 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                      analysis='forward', savefig=None, title=None, subplot=None,
                      plot_type=None, figsize=None, fontname='Arial',
                      gen_font_size=10, axis_label_font_size=12,
-                     title_font_size=12, legend_font_size=10, bold_labels=True,
+                     title_font_size=12, legend_font_size=9, bold_labels=True,
                      useMathTextOption=True, generate_title=True,
                      plot_grid_option=True, grid_alpha_val=0.15):
     """
@@ -199,19 +199,19 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
     """
     # Dictionary with variables used to adjust figure formatting
     fig_setup = {'gen_font_size': gen_font_size,
-             'axis_label_font_size': axis_label_font_size,
-             'title_font_size': title_font_size,
-             'legend_font_size': legend_font_size,
-             'line_width': LINEWIDTH_REF,
-             'ax_line_width': AX_LINEWIDTH_REF,
-             'xtick_size': XTICK_SIZE_REF,
-             'ytick_size': YTICK_SIZE_REF,
-             'xtick_width': XTICK_WIDTH_REF,
-             'ytick_width': YTICK_WIDTH_REF,
-             'axis_label_pad': AXIS_LABEL_PAD_REF,
-             'title_pad': TITLE_PAD_REF,
-             'xaxis_font_size': axis_label_font_size,
-             'yaxis_font_size': axis_label_font_size}
+                 'axis_label_font_size': axis_label_font_size,
+                 'title_font_size': title_font_size,
+                 'legend_font_size': legend_font_size,
+                 'line_width': LINEWIDTH_REF,
+                 'ax_line_width': AX_LINEWIDTH_REF,
+                 'xtick_size': XTICK_SIZE_REF,
+                 'ytick_size': YTICK_SIZE_REF,
+                 'xtick_width': XTICK_WIDTH_REF,
+                 'ytick_width': YTICK_WIDTH_REF,
+                 'axis_label_pad': AXIS_LABEL_PAD_REF,
+                 'title_pad': TITLE_PAD_REF,
+                 'xaxis_font_size': axis_label_font_size,
+                 'yaxis_font_size': axis_label_font_size}
 
     selected_keys = ['gen_font_size', 'axis_label_font_size',
                      'title_font_size', 'legend_font_size', 'line_width',
@@ -231,8 +231,8 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
         # height or width). This scaling uses the length scale with the largest change
         # relative to the default values (e.g., if height has a larger change, then
         # fontsize is scaled using the specified height value).
-        dw_ratio = np.abs(figsize[0] - DEFAULT_FIG_WIDTH)/DEFAULT_FIG_WIDTH
-        dh_ratio = np.abs(figsize[1] - DEFAULT_FIG_HEIGHT)/DEFAULT_FIG_HEIGHT
+        dw_ratio = np.abs(figsize[0] - DEFAULT_FIG_WIDTH) / DEFAULT_FIG_WIDTH
+        dh_ratio = np.abs(figsize[1] - DEFAULT_FIG_HEIGHT) / DEFAULT_FIG_HEIGHT
 
         if figsize != (DEFAULT_FIG_WIDTH, DEFAULT_FIG_HEIGHT):
             if dw_ratio > dh_ratio:
@@ -242,18 +242,18 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                 L1 = DEFAULT_FIG_HEIGHT
                 L2 = figsize[1]
 
-            # Update the font sizes -  some of these are also updated later on, depending
+            # Update the font sizes - some of these are also updated later on, depending
             # on subplot sizes. The fontsize is adjusted depending on the input figsize -
             # sufficiently shrinking the fontsize can be important for small figures, but
             # increasing font sizes in the same way often leads to font that is way too large.
             if (L2 / L1) < 1:
                 for key in selected_keys:
                     # The formula is simplified based on initial Nate's idea
-                    fig_setup[key] = 0.5*(1 + L2/L1) * fig_setup[key]
+                    fig_setup[key] = 0.5 * (1 + L2/L1) * fig_setup[key]
             elif (L2 / L1) > 1:
                 for key in selected_keys:
                     # The formula is simplified based on initial Nate's idea
-                    fig_setup[key] = 0.25*(3 + L2/L1) * fig_setup[key]
+                    fig_setup[key] = 0.25 * (3 + L2/L1) * fig_setup[key]
 
     # These are updated separately depending on the number of rows and columns
     xaxis_font_size_ref = fig_setup['axis_label_font_size']
@@ -624,7 +624,7 @@ def update_single_plot_setup(fig_setup, fontname):
     fig_setup['title_font_size'] *= SINGLE_PLOT_FONTSIZE_ADJUST
     # The legend font sizes can easily become too big, so the initial
     # adjustment is scaled down
-    fig_setup['legend_font_size'] = 0.5*fig_setup['legend_font_size']*(
+    fig_setup['legend_font_size'] = 0.5 * fig_setup['legend_font_size'] * (
         1 + SINGLE_PLOT_FONTSIZE_ADJUST)
     value = fig_setup['gen_font_size']
     font = {'family': fontname,
@@ -717,10 +717,18 @@ def setup_subplots_data(subplot, plot_type, num_plots):
     if 'Use' in subplots_data:
         subplots_data['use'] = subplots_data['Use']
         del subplots_data['Use']
+    
+    if 'ncol' in subplots_data:
+        subplots_data['ncols'] = subplots_data['ncol']
+        del subplots_data['ncol']
 
     if 'NumCols' in subplots_data:
         subplots_data['ncols'] = subplots_data['NumCols']
         del subplots_data['NumCols']
+    
+    if 'NumCol' in subplots_data:
+        subplots_data['ncols'] = subplots_data['NumCol']
+        del subplots_data['NumCol']
 
     # Process plot type
     if plot_type is None:
@@ -1218,48 +1226,50 @@ def check_legend(handle_list, fig_setup, min_fontsize, subplots_data):
     if min_fontsize:
         if fig_setup['legend_font_size'] > min_fontsize:
             fig_setup['legend_font_size'] = min_fontsize
-
-    if subplots_data['ncols'] == 2:
-        fig_setup['legend_font_size'] *= 0.9
-    elif subplots_data['ncols'] == 3:
-        fig_setup['legend_font_size'] *= 0.75
-    elif subplots_data['ncols'] >= 4:
-        fig_setup['legend_font_size'] *= 0.67
-
+    
+    scaling_factors = [0.9, 0.75, 0.67, 0.5, 0.33]
+    
     if subplots_data['single_plot']:
         if LEGEND_ITEM_THRESH1 <= len(handle_list) < LEGEND_ITEM_THRESH2:
-            fig_setup['legend_font_size'] *= 0.9
+            fig_setup['legend_font_size'] *= scaling_factors[0]
 
         elif LEGEND_ITEM_THRESH2 <= len(handle_list) < LEGEND_ITEM_THRESH3:
-            fig_setup['legend_font_size'] *= 0.75
-            fig_setup['legend_framealpha'] *= 0.75
+            fig_setup['legend_font_size'] *= scaling_factors[1]
+            fig_setup['legend_framealpha'] *= scaling_factors[1]
 
         elif LEGEND_ITEM_THRESH3 <= len(handle_list) < LEGEND_ITEM_THRESH4:
-            fig_setup['legend_font_size'] *= 0.67
-            fig_setup['legend_framealpha'] *= 0.67
+            fig_setup['legend_font_size'] *= scaling_factors[2]
+            fig_setup['legend_framealpha'] *= scaling_factors[2]
             fig_setup['legend_columns'] = 2
 
         elif len(handle_list) >= LEGEND_ITEM_THRESH4:
-            fig_setup['legend_font_size'] *= 0.5
-            fig_setup['legend_framealpha'] *= 0.5
+            fig_setup['legend_font_size'] *= scaling_factors[3]
+            fig_setup['legend_framealpha'] *= scaling_factors[3]
             fig_setup['legend_columns'] = 2
 
     else:
+        if subplots_data['ncols'] == 2:
+            fig_setup['legend_font_size'] *= scaling_factors[0]
+        elif subplots_data['ncols'] == 3:
+            fig_setup['legend_font_size'] *= scaling_factors[1]
+        elif subplots_data['ncols'] >= 4:
+            fig_setup['legend_font_size'] *= scaling_factors[2]
+        
         if LEGEND_ITEM_THRESH1 <= len(handle_list) < LEGEND_ITEM_THRESH2:
-            fig_setup['legend_font_size'] *= 0.75
+            fig_setup['legend_font_size'] *= scaling_factors[1]
 
         elif LEGEND_ITEM_THRESH2 <= len(handle_list) < LEGEND_ITEM_THRESH3:
-            fig_setup['legend_font_size'] *= 0.67
-            fig_setup['legend_framealpha'] *= 0.75
+            fig_setup['legend_font_size'] *= scaling_factors[2]
+            fig_setup['legend_framealpha'] *= scaling_factors[1]
 
         elif LEGEND_ITEM_THRESH3 <= len(handle_list) < LEGEND_ITEM_THRESH4:
-            fig_setup['legend_font_size'] *= 0.5
-            fig_setup['legend_framealpha'] *= 0.5
+            fig_setup['legend_font_size'] *= scaling_factors[3]
+            fig_setup['legend_framealpha'] *= scaling_factors[3]
             fig_setup['legend_columns'] = 2
 
         elif len(handle_list) >= LEGEND_ITEM_THRESH4:
-            fig_setup['legend_font_size'] *= 0.33
-            fig_setup['legend_framealpha'] *= 0.5
+            fig_setup['legend_font_size'] *= scaling_factors[4]
+            fig_setup['legend_framealpha'] *= scaling_factors[3]
             fig_setup['legend_columns'] = 2
 
     return fig_setup

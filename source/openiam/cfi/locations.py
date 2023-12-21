@@ -9,6 +9,7 @@ import logging
 import math
 import random
 import numpy as np
+import pandas as pd
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -894,3 +895,82 @@ def process_wellbore_locations(comp_data, comp_model, locations):
         locations[comp_model].pop('coordz')
 
     return locations
+
+
+def save_locations_data(locations, model_data, csv_files_dir):
+    """
+    Saves the coordx and coordy values for all components with 'Locations' in their 
+    section of the yaml_data dictionary. Without this functionality, it can be 
+    difficult to obtain the coordx and coordy of wellbores with randomly generated 
+    locations (i.e., used with the 'RandomLocDomain' field in a control file). 
+    """
+    if not os.path.exists(csv_files_dir):
+        os.mkdir(csv_files_dir)
+    
+    # By default, the data are saved as column-wise (data_flip = True). If data_flip
+    # is False, the data are saved row-wise
+    data_flip = model_data.get('OutputType', True)
+    
+    xyz_coords = ['coordx', 'coordy', 'coordz']
+    
+    for comp_name in locations.keys():
+        # Initialize lists of all locations, values, and location labels
+        all_x = []
+        all_y = []
+        all_z = []
+        values = []
+        
+        added_to_labels = False
+        z_check = False
+        
+        for key in locations[comp_name].keys():
+            if key in xyz_coords:
+                values = locations[comp_name][key]
+                
+                if 'x' in key:
+                    all_x.append(values)
+                elif 'y' in key:
+                    all_y.append(values)
+                elif 'z' in key:
+                    all_z.append(values)
+                    z_check = True
+                
+                if not added_to_labels:
+                    loc_labels = [comp_name + '_{0:03}'.format(ind) 
+                                  for ind in range(len(values))]
+                    added_to_labels = True
+        
+        if not z_check:
+            coord_labels = xyz_coords[:-1]
+        else:
+            coord_labels = xyz_coords
+        
+        try:
+            all_locs = np.zeros((len(coord_labels), len(loc_labels)))
+            
+            all_locs[0, :] = np.array(all_x)
+            all_locs[1, :] = np.array(all_y)
+            
+            if z_check:
+                all_locs[2, :] = np.array(all_z)
+            
+            if data_flip:
+                all_locations = pd.DataFrame(
+                    data=all_locs.transpose(), columns=coord_labels, index=loc_labels)
+                
+            else:
+                all_locations = pd.DataFrame(
+                    data=all_locs,  columns=loc_labels, index=coord_labels)
+
+            all_locations.to_csv(
+                os.path.join(csv_files_dir, 'locations_{}'.format(comp_name)) 
+                + ".csv", float_format='%1.12e')
+        except:
+            # If the file cannot be saved due to an error, log a message.
+            err_msg = ''.join([
+                'There was a problem while saving the locations file for the ', 
+                'component {}. Check your input. This '.format(comp_name), 
+                'file will not be saved if "GenerateLocationsFile" is set to ', 
+                '"False" under the "ModelParams" section of a .yaml control file.'])
+            logging.error(err_msg)
+    

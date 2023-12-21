@@ -85,6 +85,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex31a_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
     Logging: Debug
 #-------------------------------------------------
 Stratigraphy:

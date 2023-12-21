@@ -78,7 +78,6 @@ Workflow:
                     max: -13.0
                     value: -13.5
                 brineDensity: 1100
-                reservoirRadius: 3000
                 brineResSaturation: 0.075
         WellboreComponentType: MultisegmentedWellbore
         WellboreOptions:

@@ -30,11 +30,12 @@ ModelParams:
     Components: [AnalyticalReservoir1,
                  CementedWellbore1]
     OutputDirectory: output/output_ex1b_{datetime}
-    OutputType: 1  # 0 - row-wise; 1 - column-wise
+    OutputType: 1                   # For OutputType, 0 produces row-wise files and 1 produces column-wise files
     Logging: Debug
+    GenerateLocationsFiles: True    # Specifies whether or not to save output locations to .csv files (e.g., locations of wellbore components)
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
-    GenerateStatFiles: False    # only works with lhs or parstudy simulations
+    GenerateStatFiles: False        # only works with lhs or parstudy simulations
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:

@@ -53,7 +53,7 @@ Workflow:
         Subplot:
             Use: True
             NumCols: 2
-        FigureSize: [14, 8]            # The default TimeSeriesStats FigureSize is [13, 8], so the figures produced will be wider at [14, 8]
+        FigureSize: [13, 6]            # The default TimeSeriesStats FigureSize is [13, 8]
         FigureName: Name.tiff          # Because the LeakageAssessment workflow produces multiple figures, only the .tiff extension from this input will be used
         ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
@@ -68,7 +68,6 @@ Workflow:
                     max: -13.0
                     value: -13.5
                 brineDensity: 1100
-                reservoirRadius: 3000
                 brineResSaturation: 0.075
         WellboreComponentType: OpenWellbore
         WellboreOptions:

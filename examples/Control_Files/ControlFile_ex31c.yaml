@@ -33,7 +33,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex31c_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
-    Logging: Debug
+    Logging: Error
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:

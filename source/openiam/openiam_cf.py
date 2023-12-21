@@ -30,7 +30,7 @@ import openiam as iam
 from openiam import IAM_DIR
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
-from openiam.cfi.locations import (process_cell_centers,
+from openiam.cfi.locations import (save_locations_data, process_cell_centers, 
                                    process_fault_segment_centers,
                                    process_reservoir_locations,
                                    process_wellbore_locations)
@@ -728,6 +728,8 @@ def main(yaml_filename, binary_file=False):
         clean_components(yaml_data)
         process_output(yaml_data, model_data, output_list, out_dir, sm, s,
                        analysis, time_array, csv_files_dir)
+        
+        process_location_data(locations, model_data, csv_files_dir)
 
     if 'Analysis' in yaml_data:
         process_analysis(yaml_data, model_data, sm, s, output_list,
@@ -764,26 +766,24 @@ def main(yaml_filename, binary_file=False):
     return True
 
 
+def process_location_data(locations, model_data, csv_files_dir):
+    """
+    Determine whether to save the locations data to .csv files. If so, save the 
+    file. One file is made for each component entry in a .yaml file (each component 
+    that is also in the locaitons dictionary). The default approach is to save 
+    the files.
+    """
+    save_locations = model_data.get('GenerateLocationsFiles', True)
+    
+    if save_locations:
+        # Create files containing the locations data
+        save_locations_data(locations, model_data, csv_files_dir)
+
+
 def process_print_system_options(model_data, sm, out_dir, analysis):
     """
     Decompose, filter, and print the system model and component model objects
     into a human-readable text file for debugging and information purposes.
-
-    Parameters
-    ----------
-    model_data : TYPE
-        DESCRIPTION.
-    sm : TYPE
-        DESCRIPTION.
-    out_dir : TYPE
-        DESCRIPTION.
-    analysis : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-
     """
     to_print_system = model_data.get('GenerateSystemPrintFile', False)
     to_print_components = model_data.get('GenerateComponentsPrintFiles', False)

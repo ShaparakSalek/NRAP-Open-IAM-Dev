@@ -326,13 +326,34 @@ def add_well_component_entries(yaml_data, well_component_type, aquifer_name,
     controls = {'critPressureApproach': True, 'enforceCritPressure': False}
     
     loc_data_check = False
+    rand_loc_check = False
     if 'WellboreOptions' in yaml_data['Workflow']['Options']:
-        if 'Controls' in yaml_data['Workflow']['Options']['WellboreOptions']:
+        well_options = yaml_data['Workflow']['Options']['WellboreOptions']
+        
+        if 'Controls' in well_options:
             controls.update(yaml_data['Workflow']['Options']['WellboreOptions']['Controls'])
 
-        if 'Locations' in yaml_data['Workflow']['Options']['WellboreOptions']:
-            loc_data = yaml_data['Workflow']['Options']['WellboreOptions']['Locations']
+        if 'Locations' in well_options:
+            loc_data = well_options['Locations']
             loc_data_check = True
+    
+        if 'RandomLocDomain' in well_options:
+            if 'Number' in well_options:
+                number_wells = well_options['Number']
+                rand_domain = well_options['RandomLocDomain']
+                rand_loc_check = True
+                
+                # If 'Locations'was not provided but sufficient random domain 
+                # input was provided, the 'Locations' section will be removed below.
+                if not loc_data_check:
+                    loc_data = None
+                
+            else:
+                warning_msg = ''.join([
+                    'To use the "RandomLocDomain"" entry under the "Workflow: Options: ', 
+                    'WellboreOptions" section of a control file, the "Number" ', 
+                    'entry must also be provided under the "WellboreOptions" section.'])
+                logging.warning(warning_msg)
     
     # Add more cases for NEW_WORKFLOWS here. Some workflows require Locations 
     # data (e.g., LeakageAssessment), while some do not (AoR).
@@ -359,6 +380,15 @@ def add_well_component_entries(yaml_data, well_component_type, aquifer_name,
     yaml_data[compName] = {'Type': well_component_type, 'LeakTo': aquifer_name,
                            'Connection': res_component_name, 'Locations': loc_data,
                            'Outputs': output_list}
+    
+    if rand_loc_check:
+        yaml_data[compName]['RandomLocDomain'] = rand_domain
+        yaml_data[compName]['Number'] = number_wells
+        
+        # If 'Locations' was not provided but enough random domain input was, 
+        # remove the 'Locations' section. Keeping it as None would result in an error.
+        if not loc_data_check:
+            del yaml_data[compName]['Locations']
     
     if well_component_type == 'OpenWellbore':
         yaml_data[compName]['Controls'] = controls

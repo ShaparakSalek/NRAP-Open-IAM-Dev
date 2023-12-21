@@ -426,7 +426,7 @@ def process_output(yaml_data, model_data, output_list, out_dir, sm, s, analysis,
         if time_array is not None:
             timefile = os.path.join(out_dir, 'csv_files', 'time_series.csv')
             np.savetxt(timefile, time_array / 365.25, fmt='%.12e',
-                   delimiter=',', header='Time (years)')
+                       delimiter=',', header='Time (years)')
 
     try:
         # No need to save pickled output for script runs
