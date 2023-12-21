@@ -112,14 +112,16 @@ Workflow:
         CriticalPressureMPa: Calculated
         AutomateAqCompSetup: False
         AutomatePlotsSetup: False
-        ReservoirComponentType: SimpleReservoir
+        ReservoirComponentType: AnalyticalReservoir
         ReservoirOptions:
             InjectionWell:
                 coordx: 0
                 coordy: 0
             Parameters:
                 injRate: 0.33
-                logResPerm: -10.15
+                logResPerm: -12.15
+                reservoirRadius: 15000
+                brineResSaturation: 0.05
         AquiferName: aquifer2     # the wellbores will leak to this aquifer
         WellboreOptions:
             Locations:

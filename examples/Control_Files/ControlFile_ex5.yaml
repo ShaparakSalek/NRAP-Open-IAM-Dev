@@ -1,7 +1,7 @@
 # OpenIAM Control File Example 5
 #
 # This example evaluates the CO2 and brine leakage through a
-# CementedWellbore component connected to a SimpleReservoir component.
+# CementedWellbore component connected to a AnalyticalReservoir component.
 # Additionally, this example uses the parameter study analysis type
 # (parstudy). The entry of 'nvals: 3' under 'Analysis' specifies that
 # three values will be evaluated for each parameter that varies (i.e.,
@@ -26,7 +26,7 @@ ModelParams:
     Analysis:
         type: parstudy
         nvals: 3
-    Components: [SimpleReservoir1,
+    Components: [AnalyticalReservoir1,
                  CementedWellbore1]
     OutputDirectory: output/output_ex5_{datetime}
 #-------------------------------------------------
@@ -47,18 +47,18 @@ Stratigraphy:
         vary: False
         value: 51.2
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReseroir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReseroir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:             # Because there is no Parameters section, all
+    Type: AnalyticalReservoir     # parameters will be set to default values.
 #-------------------------------------------------
 CementedWellbore1:
     Locations:
         coordx: [100, 540]
         coordy: [100, 630]
     Type: CementedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Parameters:
         logWellPerm:
             min: -13.95

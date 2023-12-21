@@ -286,6 +286,11 @@ class SealHorizon(ComponentModel):
     * **mass_CO2_aquifer_total**, **mass_brine_aquifer_total** [|kg|] - cumulative
       (for all cells) mass of the |CO2| and brine leaked through seal layer
       into overlying aquifer.
+
+    For control file examples using the Seal Horizon component, see *ControlFile_ex19* 
+    and *ControlFile_ex23*. For script examples, see *iam_sys_lutreservoir_seal_horizon.py* 
+    and *iam_sys_lutreservoir_seal_horizon_samplers.py*.
+
     """
 
     def __init__(self, name, parent, locX=None, locY=None, area=None, **kwargs):
@@ -1638,11 +1643,9 @@ def test_scenario2():
     # Cumulative brine mass: [0.         2.29072213]
 
 
-if __name__ == "__main__":
-
+def test_seal_horizon_component(test_case=1):
     # Setup logging and constants.
     logging.basicConfig(level=logging.DEBUG)
-    test_case = 1  # 2 is a maximum number of test cases
 
     if test_case == 1:
         test_scenario1()

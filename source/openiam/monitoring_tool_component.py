@@ -535,7 +535,6 @@ class MonitoringTool3(ComponentModel):
         return out
 
 
-
 def reservoir_data():
     pressure_data = np.array([[27175000., 29385000., 31743000.,
                                32337000., 32931000., 33525000.,
@@ -571,7 +570,7 @@ def reservoir_data():
     return pressure_data, saturation_data
 
 
-def test_case_monitoring_tool1():
+def test_monitoring_tool1():
     from openiam import SystemModel, MultisegmentedWellbore
 
     num_years = 10
@@ -646,7 +645,7 @@ def test_case_monitoring_tool1():
         print(obs_nm, '\n', outputs[obs_nm])
 
 
-def test_case_monitoring_tool2():
+def test_monitoring_tool2():
     from openiam import SystemModel, MultisegmentedWellbore
 
     num_years = 10
@@ -729,7 +728,7 @@ def test_case_monitoring_tool2():
     print('Components indices that were checked at each time point')
     print(mntr.details['cmpnts_indices'])
 
-def test_case_monitoring_tool3():
+def test_monitoring_tool3():
     from openiam import SystemModel, MultisegmentedWellbore
 
     num_years = 10
@@ -816,14 +815,12 @@ def test_case_monitoring_tool3():
     print(mntr.details['cmpnts_indices'])
 
 
-if __name__ == "__main__":
+def test_monitoring_tool_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
 
-    test_case = 3
-
-    test_to_run = {1: test_case_monitoring_tool1,
-                   2: test_case_monitoring_tool2,
-                   3: test_case_monitoring_tool3}
+    test_to_run = {1: test_monitoring_tool1,
+                   2: test_monitoring_tool2,
+                   3: test_monitoring_tool3}
 
     # Run corresponding test example
     test_to_run[test_case]()

@@ -1,8 +1,7 @@
 # OpenIAM Control File Example 39b
 #
 # This example is similar to Control File example 39a, but it uses
-# spatially variable stratigraphy (the strikeAndDip option). The TTFD
-# plot type does not work with LookupTableStratigraphy.
+# a DippingStratigraphy component.
 #
 # Because the units dip to the southwest here, the plume timing figures
 # will show an assymetry. Plumes will spread more easily to the northeast.
@@ -11,10 +10,17 @@
 # plot that exports .csv files (through the entry 'SaveCSVFiles: True') to
 # see how unit depths vary across the domain. Additionally, one can examine the
 # .csv files with plume timings and the x, y, and z grids - these files are
-# created by the TTFD plot entry if 'SaveCSVFiles' is set to True. When using
-# spatially uniform stratigraphy, separate .csv files are created for the x, y,
-# and z grid - results are evaluated at all combinations of the grid point values.
-# When using dipping stratigraphy, the z grid values vary with x and y, so
+# created by the TTFD plot entry if 'SaveCSVFiles' is set to True. Alternatively, 
+# one can force the monitoring z values to conform with a specific unit depth 
+# by that unit depth in 'coordz' under 'MonitoringLocations'. For example, one could 
+# use 'coordz: [aquifer1MidDepth, aquifer1MidDepth, aquifer1MidDepth, aquifer1MidDepth]' 
+# if you want the sensor to be in the middle of aquifer 1. That input is present below, 
+# but silenced with a '#' character.
+#
+# When using a Stratigraphy component (spatially uniform stratigraphy), separate 
+# .csv files are created for the x, y, and z grid - results are evaluated at all 
+# combinations of the grid point values. When using a DippingStratigraphy or 
+# LookupTableStratigraphy component, the z grid values vary with x and y, so
 # one file with all grid point combinations is created. Because it contains all
 # combinations of x, y, and z points, this file can be rather large (here, several Mb).
 #
@@ -27,29 +33,30 @@ ModelParams:
     EndTime: 50
     TimeStep: 1
     Analysis: forward
-    Components: [SimpleReservoir1, MultisegmentedWellbore1,
+    Components: [AnalyticalReservoir1, MultisegmentedWellbore1,
                  FutureGen2AZMI1]
     OutputDirectory: output/output_ex39b_{datetime}
     Logging: Info
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        strikeAndDip:
-            strike: 135
-            dip: 30
-            dipDirection: SW
-            coordxRefPoint: 0
-            coordyRefPoint: 0
-    numberOfShaleLayers: 3
-    shale3Thickness: 365.0
-    shale2Thickness: 950.0
-    shale1Thickness: 750.0
-    aquifer2Thickness: 85
-    aquifer1Thickness: 85
-    reservoirThickness: 150
+DippingStratigraphy:
+    ReferenceLocation:
+        coordx: 0
+        coordy: 0
+    Controls:
+        dipDirection: SW
+    Parameters:
+        strike: 135
+        dip: 30
+        numberOfShaleLayers: 3
+        shale1Thickness: 750.0
+        shale2Thickness: 950.0
+        shale3Thickness: 365
+        aquifer1Thickness: 85
+        aquifer2Thickness: 85
+        reservoirThickness: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate: 10
         logResPerm: -12
@@ -57,12 +64,14 @@ SimpleReservoir1:
         CO2Density: 775.0
         brineViscosity: 7.5e-4
         CO2Viscosity: 6.6e-5
+        reservoirRadius: 10000
+        brineResSaturation: 0
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 MultisegmentedWellbore1:
     Type: MultisegmentedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 5
     Locations:
         coordx: [100, 200, 300, 400, 500]
@@ -103,6 +112,7 @@ FutureGen2AZMI1:
 Plots:
     Strat_Plot:
         Stratigraphy:
+            SaveCSVFiles: True
     TTFD_Plot:
         TTFD:
             FigureDPI: 300
@@ -110,9 +120,10 @@ Plots:
             MonitoringLocations:
                 coordx: [125, 225, 325, 425]
                 coordy: [125, 225, 325, 425]
-                coordz: [-1325, -1250, -1170, -1080]
+                # coordz: [aquifer1MidDepth, aquifer1MidDepth, aquifer1MidDepth, aquifer1MidDepth]
+                coordz: [-1325, -1250, -1170, -1080]     # depths are entered as negative here, but string inputs like 'aquifer1Depth' do not need to be negative
                 HorizontalWindow: 1
-                VerticalWindow: 5
+                VerticalWindow: 20
             PlotInjectionSites: True
             SpecifyXandYLims:
                 xLims: [-75, 675]

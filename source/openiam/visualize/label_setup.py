@@ -238,12 +238,12 @@ TITLE_DICT = {
     'Temperature_dy': 'Temperature-Change Plume Width',
     'Temperature_dz': 'Temperature-Change Plume Height',
     # Generic aquifer component
-    'Dissolved_salt_volume': 'Dissolved Salt Volume',
+    # key 'Dissolved_salt_volume' is already present for aquifer components above
     'Dissolved_salt_dr': 'Dissolved Salt Plume Radius',
     'Dissolved_salt_dz': 'Dissolved Salt Plume Height',
-    'Dissolved_salt_mass_fraction': 'Dissolved Salt Mass Fraction',
+    # key 'Dissolved_salt_mass_fraction' is already present for aquifer components above
     'Dissolved_CO2_dr': 'Dissolved CO$_2$ Plume Radius',
-    'Dissolved_CO2_mass_fraction': 'Dissolved CO$_2$ Mass Fraction',
+    # key 'Dissolved_CO2_mass_fraction' is already present for aquifer components above
     # Plume stability component
     'pressure_areas': 'Pressure Plume Area',
     'pressure_areas_dt': 'Change in Pressure Plume Area',

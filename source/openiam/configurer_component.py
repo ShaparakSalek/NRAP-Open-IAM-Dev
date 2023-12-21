@@ -568,24 +568,22 @@ class WellDepthRiskConfigurer(ComponentModel):
         return out
 
 
-def test_case_pressure_based_risk_configurer():
+def test_pressure_based_risk_configurer():
     pass
 
 
-def test_case_data_based_risk_configurer():
-    pass
-
-def test_case_well_depth_risk_configurer():
+def test_data_based_risk_configurer():
     pass
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARNING)
+def test_well_depth_risk_configurer():
+    pass
 
-    test_case = 2
 
-    test_to_run = {1: test_case_pressure_based_risk_configurer,
-                   2: test_case_data_based_risk_configurer}
+def test_configurer_component(test_case=1):
+    test_to_run = {1: test_pressure_based_risk_configurer,
+                   2: test_data_based_risk_configurer,
+                   3: test_well_depth_risk_configurer}
 
     # Run corresponding test example
     test_to_run[test_case]()

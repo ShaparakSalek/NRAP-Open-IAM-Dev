@@ -391,7 +391,7 @@ class GenericReservoir(ComponentModel):
         return (check_flag == 0)
 
 
-if __name__ == "__main__":
+def test_generic_reservoir_component():
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model

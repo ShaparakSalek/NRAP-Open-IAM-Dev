@@ -29,8 +29,8 @@ import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import MultisegmentedWellbore, RateToMassAdapter, SystemModel, \
-    SimpleReservoir, CarbonateAquifer, Stratigraphy
+from openiam import (MultisegmentedWellbore, RateToMassAdapter, SystemModel,
+                     AnalyticalReservoir, CarbonateAquifer, Stratigraphy)
 import openiam.visualize as vis
 
 if __name__ == "__main__":
@@ -75,42 +75,42 @@ if __name__ == "__main__":
     strata.add_par('datumPressure', value=101325, vary=False)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm,
-                                                         locX=100, locY=100))
+    ares = sm.add_component_model_object(
+        AnalyticalReservoir(name='ares', parent=sm, locX=100, locY=100))
 
-    sres.add_par('injRate', value=0.25, vary=False)
-    sres.add_par('logResPerm', value=-11.5, vary=False)
-    sres.add_par_linked_to_par('numberOfShaleLayers',
+    ares.add_par('injRate', value=0.25, vary=False)
+    ares.add_par('logResPerm', value=-12.5, vary=False)
+    ares.add_par_linked_to_par('numberOfShaleLayers',
                                strata.deterministic_pars['numberOfShaleLayers'])
-    sres.add_par_linked_to_par('shale1Thickness',
+    ares.add_par_linked_to_par('shale1Thickness',
                                strata.deterministic_pars['shale1Thickness'])
-    sres.add_par_linked_to_par('shale2Thickness',
+    ares.add_par_linked_to_par('shale2Thickness',
                                strata.deterministic_pars['shale2Thickness'])
-    sres.add_par_linked_to_par('shale3Thickness',
+    ares.add_par_linked_to_par('shale3Thickness',
                                strata.deterministic_pars['shale3Thickness'])
-    sres.add_par_linked_to_par('shale4Thickness',
+    ares.add_par_linked_to_par('shale4Thickness',
                                strata.deterministic_pars['shale4Thickness'])
-    sres.add_par_linked_to_par('shale5Thickness',
+    ares.add_par_linked_to_par('shale5Thickness',
                                strata.deterministic_pars['shale5Thickness'])
-    sres.add_par_linked_to_par('aquifer1Thickness',
+    ares.add_par_linked_to_par('aquifer1Thickness',
                                strata.deterministic_pars['aquifer1Thickness'])
-    sres.add_par_linked_to_par('aquifer2Thickness',
+    ares.add_par_linked_to_par('aquifer2Thickness',
                                strata.deterministic_pars['aquifer2Thickness'])
-    sres.add_par_linked_to_par('aquifer3Thickness',
+    ares.add_par_linked_to_par('aquifer3Thickness',
                                strata.deterministic_pars['aquifer3Thickness'])
-    sres.add_par_linked_to_par('aquifer4Thickness',
+    ares.add_par_linked_to_par('aquifer4Thickness',
                                strata.deterministic_pars['aquifer4Thickness'])
-    sres.add_par_linked_to_par('reservoirThickness',
+    ares.add_par_linked_to_par('reservoirThickness',
                                strata.deterministic_pars['reservoirThickness'])
-    sres.add_par_linked_to_par('datumPressure',
+    ares.add_par_linked_to_par('datumPressure',
                                strata.default_pars['datumPressure'])
 
     # Add observations of reservoir component model
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs('mass_CO2_reservoir')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs('mass_CO2_reservoir')
 
     # Add multisegmented wellbore component.
     ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms', parent=sm))
@@ -147,8 +147,8 @@ if __name__ == "__main__":
                              strata.default_pars['datumPressure'])
 
     # Add keyword arguments linked to the output provided by reservoir model
-    ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add observations of multisegmented wellbore component model
     ms.add_obs_to_be_linked('CO2_aquifer1')
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     # FIGURE 1: PRESSURE
     fig_num += 1
     output_names = ['pressure']
-    output_list = {sres: 'pressure'}
+    output_list = {ares: 'pressure'}
 
     plot_data['TimeSeries'] = output_names
     vis.time_series_plot(output_names, sm, None, plot_data, output_list,
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     # FIGURE 2: CO2 SATURATION AND CO2 MASS IN RESERVOIR
     fig_num += 1
     output_names = ['CO2saturation', 'mass_CO2_reservoir']
-    output_list = {sres: ['CO2saturation', 'mass_CO2_reservoir']}
+    output_list = {ares: ['CO2saturation', 'mass_CO2_reservoir']}
     subplot = {'use': True, 'ncols': 1}
 
     plot_data['TimeSeries'] = output_names

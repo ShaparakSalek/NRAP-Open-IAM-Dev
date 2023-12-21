@@ -233,7 +233,7 @@ class Grid():
         print()
 
 
-if __name__ == "__main__":
+def test_enmesh():
 
     # set grid boundaries
     grid = Grid(xmin=0, xmax=1000, ymin=0, ymax=1000, zmin=0, zmax=900)

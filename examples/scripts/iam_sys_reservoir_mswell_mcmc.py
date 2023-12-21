@@ -1,5 +1,5 @@
 '''
-This example performs MCMC on the simple reservoir model to produce
+This example performs MCMC on the analytical reservoir model to produce
 posterior distributions for the reservoir permeability (logResPerm),
 reservoir porosity (reservoirPorosity) and reservoir thickness
 (reservoirThickness) - parameters constrained by measured values of pressure
@@ -19,7 +19,7 @@ import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import SystemModel, SimpleReservoir, MultisegmentedWellbore
+from openiam import SystemModel, AnalyticalReservoir, MultisegmentedWellbore
 
 
 if __name__=='__main__':
@@ -37,16 +37,16 @@ if __name__=='__main__':
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component model
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('logResPerm', min=-13., max=-11., value=-12.)
-    sres.add_par('reservoirPorosity', min=0.05, max=0.5, value=0.3)
-    sres.add_par('reservoirThickness', min=20., max=40., value=30)
+    ares.add_par('logResPerm', min=-13.5, max=-12.5, value=-13.)
+    ares.add_par('reservoirPorosity', min=0.1, max=0.3, value=0.25)
+    ares.add_par('reservoirThickness', min=20., max=40., value=30)
 
     # Add observations of reservoir component model to be used by the next component
-    sres.add_obs('pressure')  # by default observations at all time points are added
-    sres.add_obs('CO2saturation')
+    ares.add_obs('pressure')  # by default observations at all time points are added
+    ares.add_obs('CO2saturation')
 
     # Create synthetic observations by running the model forward with
     # specified parameter 'values' defined above in add_par calls.
@@ -55,34 +55,34 @@ if __name__=='__main__':
     pres_list = []
     sat_list = []
     for ind in range(len(time_array)):
-        pres_list.append(sres.obs['pressure'+'_'+str(ind)].sim)
-        sat_list.append(sres.obs['CO2saturation'+'_'+str(ind)].sim)
+        pres_list.append(ares.obs['pressure'+'_'+str(ind)].sim)
+        sat_list.append(ares.obs['CO2saturation'+'_'+str(ind)].sim)
 
     # index + value option should be used if one is interested in analysis of
     # particular data points. User can also specify what are the measured
     # values of observations to compare them versus simulated.
-    sres.add_obs('pressure', index=list(range(num_years+1)), value=pres_list)
-    sres.add_obs('CO2saturation', index=list(range(num_years+1)), value=sat_list)
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure', index=list(range(num_years+1)), value=pres_list)
+    ares.add_obs('CO2saturation', index=list(range(num_years+1)), value=sat_list)
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
 
     # Run MCMC to produce parameter posterior distributions based on consistency
-    # with sres model observations 'pressure' and 'CO2saturation'
+    # with ares model observations 'pressure' and 'CO2saturation'
     ss = sm.emcee(nwalkers=nwalkers, nsamples=nsamples_per_walker, burnin=burnin)
 
     # Create trace plots. This is done somewhat manually here, but could
     # be easily encapsulated in a SystemModel method
     # Perm plots
-    f1,ax = plt.subplots(3, 1, sharex=True, figsize=(10, 10))
+    f1, ax = plt.subplots(3, 1, sharex=True, figsize=(10, 10))
     ax[0].plot(ss.chain[:, burnin:, 0].T, color='k', alpha=0.4)
-    ax[0].axhline(-12, color='gray', lw=2)
+    ax[0].axhline(-13, color='gray', lw=2)
     ax[0].set_ylabel('logResPerm')
-    ax[0].set_ylim(-13, -11)
+    ax[0].set_ylim(-14, -12)
     # Porosity plots
     ax[1].plot(ss.chain[:, burnin:, 1].T, color='k', alpha=0.4)
-    ax[1].axhline(0.3, color='gray', lw=2)
+    ax[1].axhline(0.25, color='gray', lw=2)
     ax[1].set_ylabel('Porosity')
-    ax[1].set_ylim(0.05, 0.5)
+    ax[1].set_ylim(0.1, 0.3)
     # Thickness plots
     ax[2].plot(ss.chain[:, burnin:, 2].T, color='k', alpha=0.4)
     ax[2].axhline(0.3, color='gray', lw=2)
@@ -106,18 +106,18 @@ if __name__=='__main__':
     # of the same name from reservoir model. In this example all wellbore
     # component parameters are default parameters, i.e., linked to the
     # corresponding parameters of the reservoir model
-    ms.add_par_linked_to_par('numberOfShaleLayers', sres.default_pars['numberOfShaleLayers'])
-    ms.add_par_linked_to_par('shale1Thickness', sres.default_pars['shaleThickness'])
-    ms.add_par_linked_to_par('shale2Thickness', sres.default_pars['shaleThickness'])
-    ms.add_par_linked_to_par('shale3Thickness', sres.default_pars['shaleThickness'])
-    ms.add_par_linked_to_par('aquifer1Thickness', sres.default_pars['aquiferThickness'])
-    ms.add_par_linked_to_par('aquifer2Thickness', sres.default_pars['aquiferThickness'])
-    ms.add_par_linked_to_par('reservoirThickness', sres.pars['reservoirThickness'])
-    ms.add_par_linked_to_par('datumPressure', sres.default_pars['datumPressure'])
+    ms.add_par_linked_to_par('numberOfShaleLayers', ares.default_pars['numberOfShaleLayers'])
+    ms.add_par_linked_to_par('shale1Thickness', ares.default_pars['shaleThickness'])
+    ms.add_par_linked_to_par('shale2Thickness', ares.default_pars['shaleThickness'])
+    ms.add_par_linked_to_par('shale3Thickness', ares.default_pars['shaleThickness'])
+    ms.add_par_linked_to_par('aquifer1Thickness', ares.default_pars['aquiferThickness'])
+    ms.add_par_linked_to_par('aquifer2Thickness', ares.default_pars['aquiferThickness'])
+    ms.add_par_linked_to_par('reservoirThickness', ares.pars['reservoirThickness'])
+    ms.add_par_linked_to_par('datumPressure', ares.default_pars['datumPressure'])
 
     # Add keyword arguments linked to the output provided by reservoir model
-    ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
     ms.add_obs('brine_aquifer1')
     ms.add_obs('CO2_aquifer1')
 

@@ -73,7 +73,7 @@ class AtmosphericROM(ComponentModel):
 
     * **y_receptor** [|m|] - y-coordinate of receptor
 
-    Possible observations from the Atmospheric Model component are:
+    Possible observations from the Atmospheric model component are:
 
     * **outflag_r###** [-] - count of critical distances receptor is within
       from original leak points; here, ### is a receptor number starting at 000
@@ -87,6 +87,10 @@ class AtmosphericROM(ComponentModel):
     * **y_new_s###** [|m|] - y-coordinate of leakage source
 
     * **critical_distance_s###** [|m|] - critical downwind distance from each source.
+
+    For control file examples using the Atmospheric model, see *ControlFile_ex9a* 
+    to *ControlFile_ex9c*. For script examples, see *iam_sys_reservoir_openwell_atmosphere.py* 
+    and *iam_sys_reservoir_openwell_atmosphere_5locs_lhs.py*.
 
     """
     def __init__(self, name, parent, header_file_dir=None):
@@ -478,7 +482,7 @@ class AtmosphericROM(ComponentModel):
         return (check_flag == 0)
 
 
-if __name__ == "__main__":
+def test_atmRom_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array}  # time is given in days

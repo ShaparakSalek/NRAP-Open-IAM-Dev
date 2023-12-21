@@ -107,6 +107,11 @@ class MultisegmentedWellbore(ComponentModel):
     * **mass_CO2_aquifer1**, **mass_CO2_aquifer2**,..., **mass_CO2_aquiferN** [|kg|]
       - mass of the |CO2| leaked into the aquifer.
 
+    For control file examples using the Multisegmented Wellbore, see *ControlFile_ex2*, 
+    *ControlFile_ex3*, *ControlFile_ex8a*, *ControlFile_ex24*, *ControlFile_ex31f*, 
+    and *ControlFile_ex39a*. For script examples, see *iam_sys_reservoir_mswell_2aquifers.py*, 
+    *iam_sys_lutstrata_reservoir_mswell.py*, and 
+    *iam_sys_reservoir_mswell_futuregen_ttfdplot_dipping_strata.py*.
     """
     def __init__(self, name, parent):
         """
@@ -422,7 +427,7 @@ def read_data(filename):
     return None
 
 
-if __name__ == "__main__":
+def test_multisegmented_wellbore_component():
     try:
         from openiam import AnalyticalReservoir
     except ImportError as err:

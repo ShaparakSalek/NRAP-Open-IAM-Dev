@@ -101,9 +101,9 @@ class IAM_Post_Processor():
         if not os.path.exists(output_filename1):
             if not os.path.exists(output_filename2):
                 raise ValueError('IAM Output file not found in specified folder')
-            else:
-                with open(output_filename2, 'rb') as fi:
-                    self.sim_data = pickle.load(fi)
+
+            with open(output_filename2, 'rb') as fi:
+                self.sim_data = pickle.load(fi)
         else:
             with open(output_filename1, 'rb') as fi:
                 self.sim_data = pickle.load(fi)
@@ -254,8 +254,8 @@ class IAM_Post_Processor():
         if comp_list:
             if len(comp_list) == 1:
                 return comp_list[0]
-            else:
-                return comp_list
+
+            return comp_list
         else:
             return False
 
@@ -271,8 +271,7 @@ class IAM_Post_Processor():
         if comp_list:
             if len(comp_list) == 1:
                 return comp_list[0]
-            else:
-                return comp_list
+            return comp_list
         else:
             return False
 
@@ -288,14 +287,13 @@ class IAM_Post_Processor():
         if comp_list:
             if len(comp_list) == 1:
                 return comp_list[0]
-            else:
-                return comp_list
+            return comp_list
         else:
             return False
 
     def sensitivity_analysis(self, sensitivity_type, outputs, sensitivity_dict):
         """
-        Method for computing and plotting correlation or sensitivity coeffiecents
+        Method for computing and plotting correlation or sensitivity coefficients
 
         :param sensitivity_type: Type of Sensitivity Analysis to perform.
             Valid inputs are CorrelationCoeff, SensitivityCoeff,

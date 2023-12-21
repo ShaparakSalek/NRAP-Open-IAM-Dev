@@ -19,7 +19,9 @@ except ImportError as err:
 
 import components.wellbore.hydrocarbon_leakage.hydrocarbon_leakage_ROM as hydrcarbrom
 from openiam.cfi.commons import process_parameters
-import openiam.cfi.strata as iam_strata
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
+
 
 class HydrocarbonLeakage(ComponentModel):
     """
@@ -79,10 +81,10 @@ class HydrocarbonLeakage(ComponentModel):
       post-injection (default: 0.05)
 
     * **FC4** [-] (0.010 to 0.111) - mole fraction of intermediate hydrocarbons
-      in the reservoir post-injection  (default: 0.05)
+      in the reservoir post-injection (default: 0.05)
 
     * **FC7Plus** [-] (0.123 to 0.500) - mole fraction of heavy hydrocarbons in
-      the reservoir post-injection  (default: 0.35)
+      the reservoir post-injection (default: 0.35)
 
     Component model outputs:
 
@@ -105,6 +107,10 @@ class HydrocarbonLeakage(ComponentModel):
 
     * **mass_CO2_gas_aquifer** [|kg|] - cumulative mass of |CO2| gas leaked to the
       aquifer
+
+    For control file examples using the Hydrocarbon Leakage component, see 
+    *ControlFile_ex52a* and *ControlFile_ex52b*. For a script examples, see 
+    *iam_sys_hydrocarbon_forward_lhs.py*.
 
     """
     def __init__(self, name, parent, **kwargs):
@@ -226,27 +232,24 @@ class HydrocarbonLeakage(ComponentModel):
                 self.add_obs(obs_nm)
 
             component_data['Outputs'] = new_comp_outputs
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Determine number of shale layers in the stratigraphy
         strata = name2obj_dict['strata']
-        if 'numberOfShaleLayers' in strata.deterministic_pars:
-            num_shale_layers = strata.deterministic_pars['numberOfShaleLayers'].value
-        elif 'numberOfShaleLayers' in strata.default_pars:
-            num_shale_layers = strata.default_pars['numberOfShaleLayers'].value
-        else:
-            num_shale_layers = 3
-
-        # Consider an option when reservoirDepth is already added
-        # as referring to spatially varying stratigraphy
-        if 'reservoirDepth' not in self.pars and \
-                'reservoirDepth' not in self.deterministic_pars:
-            res_depth_expr = ' + '.join(['{}.shale{}Thickness'.format(
-                strata.name, ind) for ind in range(1, num_shale_layers+1)])+' + '+\
-                    ' + '.join(['{}.aquifer{}Thickness'.format(
-                        strata.name, ind) for ind in range(1, num_shale_layers)])
-
-            # Depth to the top of reservoir (usually)
-            self.add_composite_par('reservoirDepth', res_depth_expr)
+        
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            sparam = 'shale1Depth'
+            
+            connect = get_strat_param_dict_for_link(sparam, strata)
+            
+            self.add_par_linked_to_par('reservoirDepth', connect[sparam])
+            
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            self.add_par_linked_to_obs('reservoirDepth', strata.linkobs['shale1Depth'])
 
     def simulation_model(self, p, **kwargs):
         """
@@ -298,7 +301,7 @@ class HydrocarbonLeakage(ComponentModel):
         return out
 
 
-if __name__ == "__main__":
+def test_hydrocarbon_leakage_component():
     from openiam import SystemModel
     import matplotlib.pyplot as plt
 

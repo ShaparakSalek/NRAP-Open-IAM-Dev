@@ -1,7 +1,7 @@
 # OpenIAM Control File Example 11
 #
-# This example couples the simple reservoir, multisegmented wellbore, and
-# carbonate aquifer models. The saturation/pressure output produced by the simple
+# This example couples the analytical reservoir, multisegmented wellbore, and
+# carbonate aquifer models. The saturation/pressure output produced by the analytical
 # reservoir model is used to drive leakage from five multisegmented wellbore
 # models separated into two groups according to their properties (i.e.,
 # differences in well permeability and wellbore radius). Two of the five wellbore
@@ -26,8 +26,10 @@
 ModelParams:
     EndTime: 50
     TimeStep: 1.0
-    Analysis: forward
-    Components: [ca1, ca2, sr1, msw1, msw2]
+    Analysis:
+        type: lhs
+        siz: 100
+    Components: [ca1, ca2, ar1, msw1, msw2]
     OutputDirectory: output/output_ex11_{datetime}
     Logging: Debug
 #-------------------------------------------------
@@ -59,22 +61,23 @@ Stratigraphy:
         min: 30.0
         max: 50.0
         value: 40.0
-
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-sr1:
-    Type: SimpleReservoir
+ar1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             min: 0.1
-            max: 10.0
-            value: 1.0
+            max: 1.0
+            value: 0.5
         logResPerm:
-            min: -12.5
-            max: -11.0
-            value: -11.5
+            min: -13.0
+            max: -12.0
+            value: -12.5
+        reservoirRadius: 2500
+        brineResSaturation: 0.125
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
@@ -83,7 +86,7 @@ msw1:
         coordx: [100, 450]
         coordy: [100, 125]
     Type: MultisegmentedWellbore
-    Connection: sr1
+    Connection: ar1
     Parameters:
         logWellPerm:
             min: -14.0
@@ -105,7 +108,7 @@ msw2:
         coordx: [200, 450, 340]
         coordy: [100, 225, 50]
     Type: MultisegmentedWellbore
-    Connection: sr1
+    Connection: ar1
     Parameters:
         logWellPerm:
             min: -13.0

@@ -54,10 +54,10 @@ Stratigraphy:
         value: 51.2
 #-------------------------------------------------
 # Reservoir1 is a user defined name for component
-# Type SimpleReservoir is the component class name
+# Type AnalyticalReservoir is the component class name
 #-------------------------------------------------
 Reservoir1:
-    Type: SimpleReservoir
+    Type: AnalyticalReservoir
     Parameters:
         reservoirPorosity:
             min: 0.2
@@ -67,6 +67,9 @@ Reservoir1:
             min: 0.01
             max: 0.02
             value: 0.015
+        reservoirRadius:
+            value: 10000
+            vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
@@ -120,7 +123,7 @@ Analysis:
         UseFormattedLabels: True
         SaveCSVFiles: True
     TimeSeriesSensitivity:
-        Outputs: CO2_aquifer1
+        Outputs: [CO2_aquifer1]
         FigureDPI: 300
         UseFormattedLabels: True
         SaveCSVFiles: True

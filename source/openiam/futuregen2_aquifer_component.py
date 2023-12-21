@@ -15,6 +15,8 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
 
 try:
     import components.aquifer.FutureGen2.aquifer.futuregen2_aquifer_ROM as fgarom
@@ -116,6 +118,12 @@ class FutureGen2Aquifer(ComponentModel):
 
     * **Dissolved_CO2_dz** [|m|] - height of plume where relative change
       in dissolved |CO2| concentration > 20%
+
+    For control file examples using the FutureGen 2.0 Aquifer component, see 
+    *ControlFile_ex8c*, *ControlFile_ex14*, *ControlFile_ex26*, *ControlFile_ex31a*, 
+    *ControlFile_ex32a*, and *ControlFile_ex55a*. For script examples, see 
+    *iam_sys_reservoir_openwell_futuregen_aor_plot.py*  and 
+    *iam_sys_lutreservoir_mswell_futuregen_dream.py*.
 
     """
     def __init__(self, name, parent):
@@ -379,45 +387,76 @@ class FutureGen2Aquifer(ComponentModel):
                 'brine_mass', adapter.linkobs['mass_brine_{aquifer_name}'.format(
                     aquifer_name=aq_name)])
         # End Connection if statement
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter depth (to the bottom of the aquifer)
         strata = name2obj_dict['strata']
-        if 'depth' not in self.pars and \
-                'depth' not in self.deterministic_pars:
-            self.add_par_linked_to_par(
-                'depth', strata.composite_pars['{}Depth'.format(aq_name)])
+        
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            if 'depth' not in self.pars and \
+                    'depth' not in self.deterministic_pars:
+                self.add_par_linked_to_par(
+                    'depth', strata.composite_pars['{}Depth'.format(aq_name)])
+            
+            # Take care of parameter thick (possibly) defined by stratigraphy component
+            if 'aqu_thick' not in self.pars and \
+                    'aqu_thick' not in self.deterministic_pars:
+                sparam = '{aq}Thickness'.format(aq=aq_name)
+                
+                connect = get_strat_param_dict_for_link(sparam, strata)
+                
+                if connect is None:
+                    sparam = 'aquiferThickness'
+                    
+                    connect = get_strat_param_dict_for_link(sparam, strata)
+                    
+                    if connect is None:
+                        err_msg = ''.join([
+                            'Unable to find "{}" or "{}" parameters. Please ',
+                            'check setup of the stratigraphy.']).format(
+                                sparam, '{aq}Thickness'.format(aq=aq_name))
+                        logging.error(err_msg)
+                        raise KeyError(err_msg)
 
-        # Take care of parameter thick (possibly) defined by stratigraphy component
-        if 'aqu_thick' not in self.pars and \
-                'aqu_thick' not in self.deterministic_pars:
-            sparam = '{aq}Thickness'.format(aq=aq_name)
-            connect = None
-            if sparam in strata.pars:
-                connect = strata.pars
-            elif sparam in strata.deterministic_pars:
-                connect = strata.deterministic_pars
-            elif sparam in strata.default_pars:
-                connect = strata.default_pars
-            if connect is None:
-                sparam = 'aquiferThickness'
-                if sparam in strata.pars:
-                    connect = strata.pars
-                elif sparam in strata.deterministic_pars:
-                    connect = strata.deterministic_pars
-                elif sparam in strata.default_pars:
-                    connect = strata.default_pars
-                else:
-                    err_msg = ''.join([
-                        'Unable to find "{}" or "{}" parameters. Please ',
-                        'check setup of the stratigraphy.']).format(
-                            sparam, '{aq}Thickness'.format(aq=aq_name))
-                    logging.error(err_msg)
-                    raise KeyError(err_msg)
+                self.add_par_linked_to_par('aqu_thick', connect[sparam])
+            
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            if 'depth' in self.pars or 'depth' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'depth', '{}Depth'.format(aq_name))
+                
+                logging.warning(warning_msg)
+                    
+                if 'depth' in self.pars:
+                    del self.pars['depth']
+                
+                elif 'depth' in self.deterministic_pars:
+                    del self.deterministic_pars['depth']
+            
+            self.add_par_linked_to_obs(
+                'depth', strata.linkobs['{}Depth'.format(aq_name)])
+            
+            if 'aqu_thick' in self.pars or 'aqu_thick' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'aqu_thick', '{}Thickness'.format(aq_name))
+                
+                logging.warning(warning_msg)
+                    
+                if 'aqu_thick' in self.pars:
+                    del self.pars['aqu_thick']
+                
+                elif 'aqu_thick' in self.deterministic_pars:
+                    del self.deterministic_pars['aqu_thick']
+            
+            self.add_par_linked_to_obs(
+                'aqu_thick', strata.linkobs['{}Thickness'.format(aq_name)])
 
-            self.add_par_linked_to_par('aqu_thick', connect[sparam])
 
-
-if __name__ == "__main__":
+def test_futuregen2_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0, 2)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

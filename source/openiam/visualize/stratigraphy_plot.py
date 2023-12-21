@@ -11,10 +11,11 @@ Examples illustrating applications or setup of stratigraphy_plot method:
     ControlFile_ex35.yaml
     ControlFile_ex36.yaml
     ControlFile_ex37.yaml
-    ControlFile_ex38.yaml
+    ControlFile_ex38a.yaml
+    ControlFile_ex38b.yaml
 
 Created: September 15th, 2022
-Last Modified: February 10th, 2023
+Last Modified: October 30th, 2023
 
 @author: Nate Mitchell (Nathaniel.Mitchell@NETL.DOE.GOV)
 @contributor: Veronika Vasylkivska (Veronika.Vasylkivska@NETL.DOE.GOV)
@@ -34,8 +35,9 @@ import matplotlib.colors as clrs
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
-import openiam.cfi.commons as iamcommons
+import openiam.cfi.commons as iam_commons
 import openiam.cfi.strata as iam_strata
+from openiam.visualize.get_strat_obs import get_strat_comp_obs
 
 reservoir_components = ['LookupTableReservoir',
                         'SimpleReservoir',
@@ -43,21 +45,19 @@ reservoir_components = ['LookupTableReservoir',
 
 wellbore_components = ['MultisegmentedWellbore',
                        'CementedWellbore',
+                       'CementedWellboreWR',
                        'OpenWellbore',
                        'GeneralizedFlowRate']
 
 
-def stratigraphy_plot(yaml_data, model_data, sm,
-                      name='strata_Figure1', savefig=None, title=None,
-                      figsize=(12, 10), figdpi=100, genfontsize=12,
-                      axislabelfontsize=14, titlefontsize=14,
+def stratigraphy_plot(yaml_data, model_data, sm, name='strata_Figure1',
+                      savefig=None, title=None, figsize=(12, 10), figdpi=100,
+                      genfontsize=12, axislabelfontsize=14, titlefontsize=14,
                       boldlabels=True, plot_wellbore_locations=True,
-                      view_elev=None, view_azimuth=None,
-                      LUTS_max_z=0, plot_well_labels=True,
+                      view_elev=None, view_azimuth=None, plot_well_labels=True,
                       plot_SandD_symbol=True, SandD_location=None,
                       plot_indiv_strat_comps=False, save_stratigraphy=False,
-                      plot_injection_sites=False,
-                      plot_injection_site_labels=False,
+                      plot_injection_sites=False, plot_injection_site_labels=False,
                       EnforceXandYLims=False, EnforceXandYGridLims=False,
                       Enforce_SandD_symbol_length=False, numberXTicks=5,
                       numberYTicks=5):
@@ -72,7 +72,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     :param model_data: Input from the 'ModelParams' section of the .yaml file
     :type model_data: dict
 
-    :param sm: OpenIAM System model for which plots are created
+    :param sm: NRAP-Open-IAM System model for which the plots are created
     :type sm: openiam.SystemModel object
 
     :param name: Figure Name to be used/created.
@@ -132,10 +132,6 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         provided within a list, although the length should also match that of
         the view_elev input.
     :type view_azimuth: list, int, or float
-
-    :param LUTS_max_z: Upper limit used for the z axis when the
-        LookupTableStratigrapy option is used. Default value is 100 m.
-    :type LUTS_max_z: int or float
 
     :param plot_well_labels: option to the name of each wellbore
     :type plot_well_labels: bool
@@ -206,6 +202,11 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
     :return: None
     """
+    # These lists indicate the stratigraphy component types that offer thicknesses
+    # and depths as parameters or as observations.
+    types_strata_pars = iam_strata.get_comp_types_strata_pars()
+    types_strata_obs = iam_strata.get_comp_types_strata_obs()
+
     if view_elev is None:
         view_elev = [10, 30]
 
@@ -218,24 +219,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         selected_labelfontweight = 'normal'
 
     # Get the stratigrapy information from the .yaml file
-    strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
-
-    var_type = strata_var_info['var_type']
-    strike = strata_var_info['strike']
-    dip = strata_var_info['dip']
-    dipDirection = strata_var_info['dipDirection']
-    coordxReferencePoint = strata_var_info['coordxReferencePoint']
-    coordyReferencePoint = strata_var_info['coordyReferencePoint']
-
-    if coordxReferencePoint is None:
-        coordxReferencePoint = 0
-
-    if coordyReferencePoint is None:
-        coordyReferencePoint = 0
-
-    if var_type == 'strikeAndDip':
-        dipDirectionDegrees = iam_strata.obtain_dip_direction_degrees(
-            strike, dipDirection)
+    comp_type = iam_strata.get_strata_type_from_yaml(yaml_data)
 
     # Get the stratigraphy plot input from the .yaml file
     strat_plot_yaml_input = read_strata_plot_yaml_input(yaml_data, name)
@@ -291,6 +275,9 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     if strat_plot_yaml_input['plot_SandD_symbol'] is not None:
         plot_SandD_symbol = strat_plot_yaml_input['plot_SandD_symbol']
 
+        if comp_type == 'LookupTableStratigraphy':
+            plot_SandD_symbol = False
+
     if strat_plot_yaml_input['SandD_location'] is not None:
         SandD_location = strat_plot_yaml_input['SandD_location']
 
@@ -303,23 +290,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         view_elev = strat_plot_yaml_input['view_elev']
         view_azimuth = strat_plot_yaml_input['view_azimuth']
 
-    # If LookupTableStratigrapy is being used, a component's location is needed
-    # later in the code (any component). This location is used to read the table
-    # - using an invalid location (too far away) would produce an error.
     components = list(sm.component_models.values())
-    if var_type == 'LookupTable':
-        plot_indiv_strat_comps = True
-        LUTS_loc_check = True
-        for comp in components:
-            if LUTS_loc_check:
-                if comp.class_type in reservoir_components:
-                    x_vals = comp.locX
-                    y_vals = comp.locY
-
-                    if LUTS_loc_check:
-                        x_val_LUTS = x_vals
-                        y_val_LUTS = y_vals
-                        LUTS_loc_check = False
 
     # Create the x and y values used for the 3D planes
     if EnforceXandYGridLims:
@@ -403,13 +374,19 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         num_x_points = int(np.ceil((max_x_val - min_x_val)
                                    / x_grid_spacing) + 1)
     else:
-        num_x_points = 101
+        if comp_type in types_strata_obs:
+            num_x_points = 11
+        else:
+            num_x_points = 101
 
     if set_ygrid_spacing:
         num_y_points = int(np.ceil((max_y_val - min_y_val)
                                    / y_grid_spacing) + 1)
     else:
-        num_y_points = 101
+        if comp_type in types_strata_obs:
+            num_y_points = 11
+        else:
+            num_y_points = 101
 
     uniq_x = np.linspace(min_x_val - x_buffer,
                          max_x_val + x_buffer,
@@ -439,26 +416,17 @@ def stratigraphy_plot(yaml_data, model_data, sm,
             SandD_loc_y = np.mean([max_y_val, min_y_val]) + ((max_y_val - min_y_val) / 4)
             SandD_location = [SandD_loc_x, SandD_loc_y]
 
-    if var_type == 'LookupTable':
-        file_name = yaml_data['Stratigraphy']['spatiallyVariable'][
-            'LookupTableStratigraphy']['FileName']
-        file_directory = yaml_data['Stratigraphy']['spatiallyVariable'][
-            'LookupTableStratigraphy']['FileDirectory']
+    # Get the number of shale layers
+    if comp_type in types_strata_pars:
+        strata_comp = sm.component_models['strata']
+        numShaleLayers = strata_comp.get_num_shale_layers()
 
-        LUTStrat_dict = iam_strata.get_lut_stratigraphy_dict(
-            file_name, file_directory, x_val_LUTS, y_val_LUTS)
+    elif comp_type in types_strata_obs:
+        for comp in components:
+            if comp.class_type in types_strata_obs:
+                numShaleLayers = comp.get_num_shale_layers()
 
-        numShaleLayers = LUTStrat_dict['numberOfShaleLayers']
-
-    else:
-        if var_type == 'strikeAndDip':
-            strataReferencePoint = sm.component_models['strataRefPoint']
-        else:
-            strataReferencePoint = sm.component_models['strata']
-
-        strata_dict = iam_strata.get_strata_info_from_component(strataReferencePoint)
-
-        numShaleLayers = strata_dict['numberOfShaleLayers']
+                break
 
     reservoirColor, reservoirAlpha, reservoirAlphaFill, reservoirLabel, \
         shaleColor, shaleAlpha, shaleAlphaFill, shaleLabel, \
@@ -477,98 +445,55 @@ def stratigraphy_plot(yaml_data, model_data, sm,
     plt3d = plt.figure(figsize=figsize, dpi=figdpi)
     plt3d_ax = plt3d.add_subplot(projection='3d')
 
-    if var_type == 'LookupTable':
-        plot_SandD_symbol = False
-        save_stratigraphy = False
-        plot_indiv_strat_comps = True
+    if comp_type in types_strata_obs:
+        stratigraphy_by_loc = get_strat_comp_obs(x_loc, y_loc, numShaleLayers,
+                                                 yaml_data)
+    elif comp_type in types_strata_pars:
+        stratigraphy_by_loc = create_strata_planes_dict(x_loc, y_loc, sm, yaml_data)
 
-        first_time_check = True
-        for comp in components:
-            if comp.class_type in reservoir_components:
-                strat_comp_temp = sm.component_models['strata' + comp.name]
+    # Plot the top of each unit as a 3D surface
+    surface = -stratigraphy_by_loc['reservoirDepth'][:, :]
+    plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                          color=reservoirColor, alpha=reservoirAlphaFill,
+                          shade=False)
 
-                maxDepth_temp = iam_strata.get_unit_depth_from_component(
-                    numShaleLayers, strat_comp_temp,
-                    unitType='reservoir', top_or_bottom='bottom')
+    surface = -stratigraphy_by_loc['reservoirTopDepth'][:, :]
+    plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                          color=reservoirColor, alpha=(reservoirAlphaFill / 2),
+                          shade=False)
+    plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
+                  reservoirLabel, zdir='y', color=reservoirColor,
+                  alpha=reservoirAlpha, fontsize=genfontsize - 2,
+                  fontweight='bold')
 
-                if first_time_check:
-                    maxDepth = maxDepth_temp
-                    first_time_check = False
-                elif maxDepth_temp > maxDepth:
-                    maxDepth = maxDepth_temp
-
-        z0_plane = np.zeros((x_loc.shape[0], x_loc.shape[1]))
-        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, z0_plane,
-                              color=shaleColor[-1], alpha=shaleAlphaFill[-1], shade=False)
-
-        plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, z0_plane[0, 0],
-                      'Shale ' + str(numShaleLayers), zdir='y', color=shaleColor[-1],
-                      alpha=shaleAlpha[-1], fontsize=genfontsize - 2, fontweight='bold')
-
-    else:
-        shaleThicknessesReferencePoint = strata_dict['shaleThicknesses']
-
-        aquiferThicknessesReferencePoint = strata_dict['aquiferThicknesses']
-
-        reservoirThicknessReferencePoint = strata_dict['reservoirThickness']
-
-        # Dictionary containing the arrays used for the 3D graph
-        stratigraphy_by_loc = create_strata_planes_dict(
-            x_loc, y_loc, numShaleLayers,
-            shaleThicknessesReferencePoint,
-            aquiferThicknessesReferencePoint,
-            reservoirThicknessReferencePoint,
-            var_type, strataReferencePoint,
-            coordxReferencePoint=coordxReferencePoint,
-            coordyReferencePoint=coordyReferencePoint,
-            strike=strike, dip=dip,
-            dipDirection=dipDirection)
-
-        # Plot the top of each unit as a 3D surface
-        surface = -stratigraphy_by_loc['resBottomDepth'][:, :]
+    for shaleRef in range(1, numShaleLayers + 1):
+        surface = -stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef)][:, :]
         plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                              color=reservoirColor, alpha=reservoirAlphaFill,
-                              shade=False)
+                              color=shaleColor[shaleRef - 1],
+                              alpha=shaleAlphaFill[shaleRef - 1], shade=False)
 
-        surface = -stratigraphy_by_loc['resTopDepth'][:, :]
-        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                              color=reservoirColor, alpha=(reservoirAlphaFill / 2),
-                              shade=False)
         plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                      reservoirLabel, zdir='y', color=reservoirColor,
-                      alpha=reservoirAlpha, fontsize=genfontsize - 2,
-                      fontweight='bold')
+                      shaleLabel[shaleRef - 1], zdir='y', color=shaleColor[shaleRef - 1],
+                      alpha=shaleAlpha[shaleRef - 1],
+                      fontsize=genfontsize - 2, fontweight='bold')
 
-        for shaleRef in range(1, numShaleLayers + 1):
-            surface = -stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef)][:, :]
+        if shaleRef < numShaleLayers:
+            surface = -stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef)][:, :]
             plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                                  color=shaleColor[shaleRef - 1],
-                                  alpha=shaleAlphaFill[shaleRef - 1], shade=False)
+                                  color=aquiferColor[shaleRef - 1],
+                                  alpha=aquiferAlphaFill[shaleRef - 1],
+                                  shade=False)
 
             plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                          shaleLabel[shaleRef - 1], zdir='y', color=shaleColor[shaleRef - 1],
-                          alpha=shaleAlpha[shaleRef - 1],
+                          aquiferLabel[shaleRef - 1], zdir='y',
+                          color=aquiferColor[shaleRef - 1],
+                          alpha=aquiferAlpha[shaleRef - 1],
                           fontsize=genfontsize - 2, fontweight='bold')
 
-            if shaleRef < numShaleLayers:
-                surface = -stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef)][:, :]
-                plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                                      color=aquiferColor[shaleRef - 1],
-                                      alpha=aquiferAlphaFill[shaleRef - 1],
-                                      shade=False)
-
-                plt3d_ax.text(x_loc[0, 0] / 1000, y_loc[0, 0] / 1000, surface[0, 0],
-                              aquiferLabel[shaleRef - 1], zdir='y',
-                              color=aquiferColor[shaleRef - 1],
-                              alpha=aquiferAlpha[shaleRef - 1],
-                              fontsize=genfontsize - 2, fontweight='bold')
-
-    if var_type == 'LookupTable':
-        zlim = [-maxDepth, LUTS_max_z]
-    else:
-        zlim = plt3d_ax.get_zlim()
+    zlim = plt3d_ax.get_zlim()
 
     if plot_injection_sites:
+        injection_label_check = False
         for comp in components:
             if comp.class_type in reservoir_components:
                 if comp.class_type == 'LookupTableReservoir':
@@ -576,122 +501,59 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                     y_vals_res = InjectionCoordy
 
                     try:
-                        x_vals_res = float(x_vals_res)
-                        y_vals_res = float(y_vals_res)
+                        x_vals_res = [float(x_vals_res)]
+                        y_vals_res = [float(y_vals_res)]
                     except TypeError:
-                        x_vals_res = np.array(list(x_vals_res), dtype=float)
-                        y_vals_res = np.array(list(y_vals_res), dtype=float)
+                        x_vals_res = np.array(list(x_vals_res), dtype=float).tolist()
+                        y_vals_res = np.array(list(y_vals_res), dtype=float).tolist()
 
                 else:
-                    x_vals_res = float(comp.injX)
-                    y_vals_res = float(comp.injY)
+                    x_vals_res = [float(comp.injX)]
+                    y_vals_res = [float(comp.injY)]
 
-                if not isinstance(x_vals_res, float):
-                    for x_res_ref, x_res_val in enumerate(x_vals_res):
-                        if var_type == 'strikeAndDip':
-                            # Get the reservoir top depth
-                            updatedStratigraphy = \
-                                iam_strata.update_stratigraphy_by_strike_and_dip(
-                                    numberOfShaleLayers=numShaleLayers,
-                                    shaleThicknessList=shaleThicknessesReferencePoint[:],
-                                    aquiferThicknessList=aquiferThicknessesReferencePoint[:],
-                                    reservoirThickness=reservoirThicknessReferencePoint,
-                                    strike=strike, dip=dip, dipDirection=dipDirection,
-                                    coordxRefPoint=coordxReferencePoint,
-                                    coordyRefPoint=coordyReferencePoint,
-                                    location_x=x_res_val,
-                                    location_y=y_vals_res[x_res_ref],
-                                    strataRefPoint=strataReferencePoint)
-
-                            resTopDepth_temp = updatedStratigraphy['reservoirTopDepth']
-
-                        elif var_type == 'noVariation':
-                            resTopDepth_temp = sum(shaleThicknessesReferencePoint) \
-                                + sum(aquiferThicknessesReferencePoint)
-                        elif var_type == 'LookupTable':
-                            # Don't try to plot a vertical line from the
-                            # surface to the reservoir when using
-                            # LookupTable Stratigraphy.
-                            pass
-
-                        # Plot a 'shadow' beneath the point
-                        plt3d_ax.plot(x_res_val / 1000,
-                                      y_vals_res[x_res_ref] / 1000,
-                                      zlim[0], marker='s', markersize=3,
-                                      color=[0.67, 0.67, 0.67], linewidth=1)
-
-                        if var_type != 'LookupTable':
-                            plt3d_ax.plot([x_res_val / 1000,
-                                           x_res_val / 1000],
-                                          [y_vals_res[x_res_ref] / 1000,
-                                           y_vals_res[x_res_ref] / 1000],
-                                          [-resTopDepth_temp, 0], marker='s',
-                                          markersize=3,
-                                          color=[0.25, 0.25, 0.25], linewidth=1)
-
-                        plt3d_ax.plot(x_res_val / 1000,
-                                      y_vals_res[x_res_ref] / 1000,
-                                      0, marker='s', markersize=3,
-                                      color=[0.25, 0.25, 0.25], linewidth=1,
-                                      zorder=98)
-
-                        if plot_injection_site_labels and \
-                                x_res_ref == (len(x_vals_res) - 1):
-                            plt3d_ax.text(x_res_val / 1000,
-                                          y_vals_res[x_res_ref] / 1000, 0,
-                                          'Injection\nSites', zdir='x', color='k',
-                                          fontsize=genfontsize - 4, fontweight='bold',
-                                          zorder=99)
-
+                if len(x_vals_res) > 1:
+                    plural_sites = 's'
                 else:
-                    if var_type == 'strikeAndDip':
-                        # Get the reservoir top depth
-                        updatedStratigraphy = \
-                            iam_strata.update_stratigraphy_by_strike_and_dip(
-                                numberOfShaleLayers=numShaleLayers,
-                                shaleThicknessList=shaleThicknessesReferencePoint[:],
-                                aquiferThicknessList=aquiferThicknessesReferencePoint[:],
-                                reservoirThickness=reservoirThicknessReferencePoint,
-                                strike=strike, dip=dip, dipDirection=dipDirection,
-                                coordxRefPoint=coordxReferencePoint,
-                                coordyRefPoint=coordyReferencePoint,
-                                location_x=x_vals_res,
-                                location_y=y_vals_res,
-                                strataRefPoint=strataReferencePoint)
+                    plural_sites = ''
 
-                        resTopDepth_temp = updatedStratigraphy['reservoirTopDepth']
+                for x_res_ref, x_res_val in enumerate(x_vals_res):
+                    if comp_type in types_strata_pars:
+                        resTopDepth_temp = iam_commons.get_parameter_val(
+                            strata_comp, 'reservoirTopDepth', sm=sm, yaml_data=yaml_data)
 
-                    elif var_type == 'noVariation':
-                        resTopDepth_temp = sum(shaleThicknessesReferencePoint) \
-                            + sum(aquiferThicknessesReferencePoint)
-                    elif var_type == 'LookupTable':
-                        # Don't try to plot a vertical line from the
-                        # surface to the reservoir when using
-                        # LookupTable Stratigraphy.
-                        pass
+                    elif comp_type in types_strata_obs:
+                        stratigraphy_by_loc_temp = get_strat_comp_obs(
+                            x_vals_res, y_vals_res, numShaleLayers, yaml_data)
+
+                        resTopDepth_temp = np.max(stratigraphy_by_loc_temp['reservoirTopDepth'])
 
                     # Plot a 'shadow' beneath the point
-                    plt3d_ax.plot(x_vals_res / 1000, y_vals_res / 1000,
+                    plt3d_ax.plot(x_res_val / 1000,
+                                  y_vals_res[x_res_ref] / 1000,
                                   zlim[0], marker='s', markersize=3,
                                   color=[0.67, 0.67, 0.67], linewidth=1)
 
-                    if var_type != 'LookupTable':
-                        plt3d_ax.plot([x_vals_res / 1000, x_vals_res / 1000],
-                                      [y_vals_res / 1000, y_vals_res / 1000],
-                                      [-resTopDepth_temp, 0], marker='s',
-                                      markersize=3, color=[0.25, 0.25, 0.25],
-                                      linewidth=1)
+                    plt3d_ax.plot([x_res_val / 1000,
+                                   x_res_val / 1000],
+                                  [y_vals_res[x_res_ref] / 1000,
+                                   y_vals_res[x_res_ref] / 1000],
+                                  [-resTopDepth_temp, 0], marker='s',
+                                  markersize=3,
+                                  color=[0.25, 0.25, 0.25], linewidth=1)
 
-                    plt3d_ax.plot(x_vals_res / 1000, y_vals_res / 1000,
+                    plt3d_ax.plot(x_res_val / 1000,
+                                  y_vals_res[x_res_ref] / 1000,
                                   0, marker='s', markersize=3,
                                   color=[0.25, 0.25, 0.25], linewidth=1,
                                   zorder=98)
 
-                    if plot_injection_site_labels:
-                        plt3d_ax.text(x_vals_res / 1000, y_vals_res / 1000, 0,
-                                      'Injection\nSite', zdir='x', color='k',
+                    if plot_injection_site_labels and not injection_label_check:
+                        plt3d_ax.text(x_res_val / 1000,
+                                      y_vals_res[x_res_ref] / 1000, 0,
+                                      'Injection\nSite{}'.format(plural_sites), zdir='x', color='k',
                                       fontsize=genfontsize - 4, fontweight='bold',
                                       zorder=99)
+                        injection_label_check = True
 
     if plot_wellbore_locations:
         for comp in components:
@@ -710,35 +572,38 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'Open\nWellbore {}'.format(number)
 
-                    z_min = iamcommons.get_parameter_val(comp, 'reservoirDepth',
+                    z_min = iam_commons.get_parameter_val(comp, 'reservoirDepth',
                                                          sm=sm, yaml_data=yaml_data)
-                    z_max = iamcommons.get_parameter_val(comp, 'wellTop',
+
+                    z_max = iam_commons.get_parameter_val(comp, 'wellTop',
                                                          sm=sm, yaml_data=yaml_data)
 
                 elif comp.class_type == 'MultisegmentedWellbore':
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'M.S.\nWellbore {}'.format(number)
 
-                    if var_type in ['strikeAndDip', 'LookupTable']:
+                    if comp_type in types_strata_obs:
                         strata_temp = sm.component_models['strata' + comp.name]
 
                         z_min = iam_strata.get_unit_depth_from_component(
                             numShaleLayers, strata_temp,
-                            unitType='reservoir', top_or_bottom='top')
+                            unitType='reservoir', top_mid_bottom='top',
+                            depth_obs=True, sm=sm)
 
-                    elif var_type == 'noVariation':
-                        z_min=iam_strata.get_unit_depth_from_component(
-                            numShaleLayers, strataReferencePoint,
-                            unitType='reservoir', top_or_bottom='top')
+                    elif comp_type in types_strata_pars:
+                        z_min = iam_strata.get_unit_depth_from_component(
+                            numShaleLayers, strata_comp,
+                            unitType='reservoir', top_mid_bottom='top')
 
                     z_max = 0
 
-                elif comp.class_type == 'CementedWellbore':
+                elif (comp.class_type == 'CementedWellbore'
+                      or comp.class_type == 'CementedWellboreWR'):
                     number = int(comp.name[(comp.name.index('_') + 1):None])
                     compName = 'Cemented\nWellbore {}'.format(number)
 
-                    z_min = iamcommons.get_parameter_val(comp, 'wellDepth',
-                                                         sm=sm, yaml_data=yaml_data)
+                    z_min = iam_commons.get_parameter_val(comp, 'wellDepth',
+                                                          sm=sm, yaml_data=yaml_data)
                     z_max = 0
 
                 # Plot a 'shadow' beneath the point
@@ -806,14 +671,16 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 x_vals_well = res_comp.locX
                 y_vals_well = res_comp.locY
 
-                if var_type in ['strikeAndDip', 'LookupTable']:
+                if comp_type in types_strata_obs:
                     strata_temp = sm.component_models['strata' + comp.name]
-                elif var_type == 'noVariation':
+                elif comp_type in types_strata_pars:
                     strata_temp = sm.component_models['strata']
+
+                depth_obs = (comp_type in types_strata_obs)
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='reservoir',
-                    top_or_bottom='bottom')
+                    top_mid_bottom='bottom', depth_obs=depth_obs, sm=sm)
 
                 plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
                               -z_temp, marker='s', markersize=2,
@@ -821,7 +688,7 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='reservoir',
-                    top_or_bottom='top')
+                    top_mid_bottom='top', depth_obs=depth_obs, sm=sm)
 
                 plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
                               -z_temp, marker='s', markersize=2,
@@ -829,7 +696,8 @@ def stratigraphy_plot(yaml_data, model_data, sm,
 
                 z_temp = iam_strata.get_unit_depth_from_component(
                     numShaleLayers, strata_temp, unitType='shale',
-                    unitNumber=numShaleLayers, top_or_bottom='top')
+                    unitNumber=numShaleLayers, top_mid_bottom='top',
+                    depth_obs=depth_obs, sm=sm)
 
                 plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
                               -z_temp, marker='s', markersize=2,
@@ -838,7 +706,8 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                 for shaleRef in range(numShaleLayers - 1):
                     z_temp = iam_strata.get_unit_depth_from_component(
                         numShaleLayers, strata_temp, unitType='shale',
-                        unitNumber=(shaleRef + 1), top_or_bottom='top')
+                        unitNumber=(shaleRef + 1), top_mid_bottom='top',
+                        depth_obs=depth_obs, sm=sm)
 
                     plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
                                   -z_temp, marker='s', markersize=2,
@@ -847,7 +716,8 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                     if (shaleRef + 1) < numShaleLayers:
                         z_temp = iam_strata.get_unit_depth_from_component(
                             numShaleLayers, strata_temp, unitType='aquifer',
-                            unitNumber=(shaleRef + 1), top_or_bottom='top')
+                            unitNumber=(shaleRef + 1), top_mid_bottom='top',
+                            depth_obs=depth_obs, sm=sm)
 
                         plt3d_ax.plot(x_vals_well / 1000, y_vals_well / 1000,
                                       -z_temp, marker='s', markersize=2,
@@ -874,14 +744,9 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                  [zlim[0], 0], color='k', linewidth=1)
 
     # Plot a 'shadow' beneath the planes
-    if var_type == 'LookupTable':
-        zmin_plane = np.ones((x_loc.shape[0], x_loc.shape[1])) * zlim[0]
-        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, zmin_plane,
-                              color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
-    else:
-        surface[:, :] = zlim[0]
-        plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
-                              color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
+    surface[:, :] = zlim[0]
+    plt3d_ax.plot_surface(x_loc / 1000, y_loc / 1000, surface,
+                          color=[0.5, 0.5, 0.5], alpha=0.25, shade=False)
 
     if zlim[0] >= -500:
         z_interval = 100
@@ -923,18 +788,9 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                         fontweight='bold', labelpad=axislabel_pad)
 
     if not title:
-        if var_type == 'LookupTable':
-            plt3d_ax.set_title(
-                'Stratigraphy for the Study Area,\nRed Squares: '
-                + 'Top of Shales, Blue Squares: Top of Aquifers,\nGray '
-                + 'Squares: Top and Bottom of the Reservoir',
-                fontsize=titlefontsize, fontweight=selected_labelfontweight,
-                pad=0)
-        else:
-            plt3d_ax.set_title(
-                'Stratigraphy for the Study Area,\nTop of Each Unit Shown',
-                fontsize=titlefontsize, fontweight=selected_labelfontweight,
-                pad=0)
+        plt3d_ax.set_title(
+            'Stratigraphy for the Study Area,\nTop of Each Unit Shown',
+            fontsize=titlefontsize, fontweight=selected_labelfontweight, pad=0)
     else:
         plt3d_ax.set_title(title, fontweight=selected_labelfontweight,
                            fontsize=titlefontsize, pad=0)
@@ -968,10 +824,15 @@ def stratigraphy_plot(yaml_data, model_data, sm,
         else:
             L = 2 * (((max_x_val - min_x_val) * (max_y_val - min_y_val)) ** 0.25)
 
-        if var_type == 'strikeAndDip':
+        if comp_type == 'DippingStratigraphy':
+            for comp in components:
+                if comp.class_type in types_strata_obs:
+                    strat_comp = comp
 
-            x_points, y_points, z_points = iam_strata.make_xyz_points_from_strike_and_dip(
-                dip, dipDirectionDegrees, L1=L * 0.75, L2=L, L3=L, L4=L,
+                    break
+
+            x_points, y_points, z_points = strat_comp.make_xyz_points_from_strike_and_dip(
+                L1=L * 0.75, L2=L, L3=L, L4=L,
                 point0_xyz=[SandD_location[0], SandD_location[1], 0])
 
             x_p0 = x_points[0]
@@ -1000,12 +861,14 @@ def stratigraphy_plot(yaml_data, model_data, sm,
                           [z_p0, z_p0],
                           color='k', linewidth=2, zorder=101)
 
+            dip = strat_comp.get_par_values(['dip'])
+
             plt3d_ax.text(x_p4 / 1000, y_p4 / 1000, z_p0,
-                          str(dip), zdir='x', color='w',
+                          str(dip[0]), zdir='x', color='w',
                           fontsize=genfontsize - 2, fontweight='bold',
                           zorder=102)
 
-        elif var_type == 'noVariation':
+        elif comp_type == 'Stratigraphy':
             degrees_for_circle = np.arange(0, 360, 1)
 
             circleX = np.zeros(len(degrees_for_circle))
@@ -1226,13 +1089,16 @@ def read_strata_plot_yaml_input(yaml_data, name):
                 logging.debug(debug_msg)
                 yaml_input['plot_injection_sites'] = False
 
-            elif len(yaml_input['InjectionCoordx']) != len(yaml_input['InjectionCoordy']):
-                debug_msg = ''.join([
-                    'The InjectionCoordy provided for Stratigraphy plot ', name,
-                    'was not of the same length as the InjectionCoordx provided. ',
-                    'Check your input. Injection sites will not be displayed.'])
-                logging.debug(debug_msg)
-                yaml_input['plot_injection_sites'] = False
+            elif isinstance(yaml_input['InjectionCoordx'], list) and isinstance(
+                    yaml_input['InjectionCoordy'], list):
+                if len(yaml_input['InjectionCoordx']) != len(yaml_input['InjectionCoordy']):
+                    debug_msg = ''.join([
+                        'The InjectionCoordy provided for Stratigraphy plot ', name,
+                        'was not of the same length as the InjectionCoordx provided. ',
+                        'Check your input. Injection sites will not be displayed.'])
+                    logging.debug(debug_msg)
+
+                    yaml_input['plot_injection_sites'] = False
 
         if yaml_input['InjectionCoordx'] is not None and \
                 yaml_input['InjectionCoordy'] is None:
@@ -1422,16 +1288,12 @@ def check_SandD_location(SandD_location, min_x_val, max_x_val, min_y_val,
     return reset_SandD_location
 
 
-def create_strata_planes_dict(x_loc, y_loc, numShaleLayers,
-                              shaleThicknessesReferencePoint,
-                              aquiferThicknessesReferencePoint,
-                              reservoirThicknessReferencePoint,
-                              var_type, strataReferencePoint,
-                              coordxReferencePoint=0, coordyReferencePoint=0,
-                              strike=None, dip=None, dipDirection=None):
+def create_strata_planes_dict(x_loc, y_loc, sm, yaml_data):
     """
     Function that creates a dictionary containing gridded values of unit
-    thicknesses, top depths, and bottom depths.
+    thicknesses, top depths, and bottom depths. This function is intended to be
+    used exclusively with Stratigraphy components (not LookupTableStratigraphy
+    or DippingStratigraphy components).
 
     :param x_loc: 2-dimensional grid of x values (m) used to create and display
         the 3D planes
@@ -1441,142 +1303,68 @@ def create_strata_planes_dict(x_loc, y_loc, numShaleLayers,
         the 3D planes
     :type y_loc: numpy.ndarray
 
-    :param numShaleLayers: number of shale layers
-    :type numShaleLayers: int or float
+    :param sm: NRAP-Open-IAM System model for which the plots are created
+    :type sm: openiam.SystemModel object
 
-    :param shaleThicknessesReferencePoint: List of shale thicknesses, where the
-        first entry is the lowest shale and the last is the highest. If strike
-        and dip values are being used, these thicknesses only apply at
-        the reference point.
-    :type shaleThicknessesReferencePoint: list
-
-    :param aquiferThicknessesReferencePoint: List of aquifer thicknesses, where
-        the first entry is the lowest aquifer and the last is the highest. If
-        strike and dip values are being used, these thicknesses only apply at
-        the reference point.
-    :type aquiferThicknessesReferencePoint: list
-
-    :param reservoirThicknessReferencePoint: Thickness of the reservoir at the
-        reference point.
-    :type reservoirThicknessReferencePoint: list
-
-    :param var_type: Option used for the domain's stratigraphy. 'noVariation'
-        means the strata are flat and unchanging over space while
-        'strikeAndDip' means that unit thicknesses change according to strike,
-        dip, and dipDirection values. 'LookupTable' means that the stratigraphy
-        at each component location (e.g., wells) is specified in a table - that
-        option is not handled by this function.
-    :type var_type: str
-
-    :param strike: The units' strike in degrees clockwise from north, so that
-        90 is east, 180 is south, and 270 is west. The default value is None.
-    :type strike: int, float, or None
-
-    :param dip: The units' dip in degrees.
-    :type dip: int, float, or None
-
-    :param dipDirection: The units' dip direction in a cardinal direction: N,
-        E, S, W, NE, SE, SW, or NW.
-    :type dip: str or None
+    :param yaml_data: Dictionary of input values from the entire .yaml file
+    :type yaml_data: dict
 
     :returns: stratigraphy_by_loc
     """
+    strata_comp = sm.component_models['strata']
 
     stratigraphy_by_loc = dict()
 
-    stratigraphy_by_loc['resTopDepth'] = np.zeros((x_loc.shape[0], x_loc.shape[1]))
-    stratigraphy_by_loc['resBottomDepth'] = np.zeros((x_loc.shape[0], x_loc.shape[1]))
+    numShaleLayers = iam_commons.get_parameter_val(
+        strata_comp, 'numberOfShaleLayers', sm=sm, yaml_data=yaml_data)
 
-    for shaleRef in range(numShaleLayers - 1, -1, -1):
-        nm_v1 = 'shale{}'.format(shaleRef + 1)
-        stratigraphy_by_loc[nm_v1 + 'Thickness'] = np.zeros((x_loc.shape[0],
-                                                             x_loc.shape[1]))
-        stratigraphy_by_loc[nm_v1 + 'TopDepth'] = np.zeros((x_loc.shape[0],
-                                                            x_loc.shape[1]))
+    reservoirThickness = iam_commons.get_parameter_val(
+        strata_comp, 'reservoirThickness', sm=sm, yaml_data=yaml_data)
+
+    stratigraphy_by_loc['reservoirThickness'] = np.ones(
+        (x_loc.shape[0], x_loc.shape[1])) * reservoirThickness
+
+    reservoirDepth = iam_commons.get_parameter_val(
+        strata_comp, 'reservoirDepth', sm=sm, yaml_data=yaml_data)
+
+    stratigraphy_by_loc['reservoirDepth'] = np.ones(
+        (x_loc.shape[0], x_loc.shape[1])) * reservoirDepth
+
+    reservoirTopDepth = iam_commons.get_parameter_val(
+        strata_comp, 'reservoirTopDepth', sm=sm, yaml_data=yaml_data)
+
+    stratigraphy_by_loc['reservoirTopDepth'] = np.ones(
+        (x_loc.shape[0], x_loc.shape[1])) * reservoirTopDepth
+
+    for shaleRef in range(numShaleLayers):
+        shaleThickness = iam_commons.get_parameter_val(
+            strata_comp, 'shale{}Thickness'.format(shaleRef + 1), sm=sm,
+            yaml_data=yaml_data)
+
+        stratigraphy_by_loc['shale{}Thickness'.format(shaleRef + 1)] = np.ones(
+            (x_loc.shape[0], x_loc.shape[1])) * shaleThickness
+
+        shaleTopDepth = iam_commons.get_parameter_val(
+            strata_comp, 'shale{}TopDepth'.format(shaleRef + 1), sm=sm,
+            yaml_data=yaml_data)
+
+        stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef + 1)] = np.ones(
+            (x_loc.shape[0], x_loc.shape[1])) * shaleTopDepth
+
         if (shaleRef + 1) < numShaleLayers:
-            nm_v2 = 'aquifer{}'.format(shaleRef + 1)
-            stratigraphy_by_loc[nm_v2 + 'Thickness'] = np.zeros((x_loc.shape[0],
-                                                                 x_loc.shape[1]))
-            stratigraphy_by_loc[nm_v2 + 'TopDepth'] = np.zeros((x_loc.shape[0],
-                                                                x_loc.shape[1]))
+            aquiferThickness = iam_commons.get_parameter_val(
+                strata_comp, 'aquifer{}Thickness'.format(shaleRef + 1), sm=sm,
+                yaml_data=yaml_data)
 
-    if var_type == 'strikeAndDip':
-        for x_ref in range(x_loc.shape[0]):
-            for y_ref in range(x_loc.shape[1]):
-                x_loc_temp = float(x_loc[x_ref, y_ref])
-                y_loc_temp = float(y_loc[x_ref, y_ref])
+            stratigraphy_by_loc['aquifer{}Thickness'.format(shaleRef + 1)] = np.ones(
+                (x_loc.shape[0], x_loc.shape[1])) * aquiferThickness
 
-                updatedStratigraphy = iam_strata.update_stratigraphy_by_strike_and_dip(
-                    numberOfShaleLayers=numShaleLayers,
-                    shaleThicknessList=shaleThicknessesReferencePoint[:],
-                    aquiferThicknessList=aquiferThicknessesReferencePoint[:],
-                    reservoirThickness=reservoirThicknessReferencePoint,
-                    strike=strike, dip=dip, dipDirection=dipDirection,
-                    coordxRefPoint=coordxReferencePoint,
-                    coordyRefPoint=coordyReferencePoint,
-                    location_x=x_loc_temp, location_y=y_loc_temp,
-                    strataRefPoint=strataReferencePoint)
+            aquiferTopDepth = iam_commons.get_parameter_val(
+                strata_comp, 'aquifer{}TopDepth'.format(shaleRef + 1), sm=sm,
+                yaml_data=yaml_data)
 
-                shaleThicknessListUpdated = updatedStratigraphy['shaleThicknessList']
-                aquiferThicknessListUpdated = updatedStratigraphy['aquiferThicknessList']
-
-                shaleTopDepthListUpdated = updatedStratigraphy['shaleTopDepthList']
-                aquiferTopDepthListUpdated = updatedStratigraphy['aquiferTopDepthList']
-                resTopDepthUpdated = updatedStratigraphy['reservoirTopDepth']
-
-                resBottomDepthUpdated = updatedStratigraphy['reservoirBottomDepth']
-
-                stratigraphy_by_loc['resTopDepth'][x_ref, y_ref] = resTopDepthUpdated
-
-                stratigraphy_by_loc['resBottomDepth'][x_ref, y_ref] = resBottomDepthUpdated
-
-                for shaleRef in range(numShaleLayers - 1, -1, -1):
-                    nm_v1 = 'shale{}'.format(shaleRef + 1)
-                    stratigraphy_by_loc[nm_v1+'Thickness'][x_ref, y_ref] = \
-                        shaleThicknessListUpdated[shaleRef]
-
-                    stratigraphy_by_loc[nm_v1+'TopDepth'][x_ref, y_ref] = \
-                        shaleTopDepthListUpdated[shaleRef]
-
-                    if (shaleRef + 1) < numShaleLayers:
-                        nm_v2 = 'aquifer{}'.format(shaleRef + 1)
-                        stratigraphy_by_loc[nm_v2 + 'Thickness'][x_ref, y_ref] = \
-                            aquiferThicknessListUpdated[shaleRef]
-
-                        stratigraphy_by_loc[nm_v2 + 'TopDepth'][x_ref, y_ref] = \
-                            aquiferTopDepthListUpdated[shaleRef]
-
-    elif var_type == 'noVariation':
-        stratigraphy_by_loc['resThickness'] = np.ones(
-            (x_loc.shape[0], x_loc.shape[1])) * reservoirThicknessReferencePoint
-
-        for shaleRef in range(numShaleLayers - 1, -1, -1):
-            stratigraphy_by_loc['shale{}Thickness'.format(shaleRef + 1)] = np.ones(
-                (x_loc.shape[0], x_loc.shape[1])) * shaleThicknessesReferencePoint[shaleRef]
-
-            if (shaleRef + 1) < numShaleLayers:
-                stratigraphy_by_loc['aquifer{}Thickness'.format(shaleRef + 1)] = np.ones(
-                    (x_loc.shape[0], x_loc.shape[1])) * aquiferThicknessesReferencePoint[shaleRef]
-
-        stratigraphy_by_loc['shale{}TopDepth'.format(numShaleLayers)][:, :] = 0
-
-        for shaleRef in range(numShaleLayers - 1, 0, -1):
-            stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef)][:, :] = \
-                stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef+1)][:, :] \
-                                        + stratigraphy_by_loc['shale' + str(shaleRef + 1)
-                                                        + 'Thickness'][:, :]
-
-            stratigraphy_by_loc['shale{}TopDepth'.format(shaleRef)][:, :] = \
-                stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef)][:, :]  \
-                    + stratigraphy_by_loc['aquifer{}Thickness'.format(shaleRef)][:, :]
-
-        stratigraphy_by_loc['resTopDepth'][:, :] = \
-            stratigraphy_by_loc['shale1TopDepth'][:, :] \
-                + stratigraphy_by_loc['shale1Thickness'][:, :]
-
-        stratigraphy_by_loc['resBottomDepth'][:, :] = \
-            stratigraphy_by_loc['resTopDepth'][:, :] \
-                + stratigraphy_by_loc['resThickness'][:, :]
+            stratigraphy_by_loc['aquifer{}TopDepth'.format(shaleRef + 1)] = np.ones(
+                (x_loc.shape[0], x_loc.shape[1])) * aquiferTopDepth
 
     return stratigraphy_by_loc
 
@@ -1602,8 +1390,7 @@ def save_stratigraphy_by_loc_to_csv(output_dir, x_loc, y_loc, numShaleLayers,
     :type numShaleLayers: int or float
 
     :param stratigraphy_by_loc: Dictionary containing the 2D- distribution of
-        unit thicknesses, top depths, and bottom depths. This dictionary is
-        produced by the function create_strata_planes_dict().
+        unit thicknesses, top depths, and bottom depths.
     :type stratigraphy_by_loc: dict
 
     :returns: None

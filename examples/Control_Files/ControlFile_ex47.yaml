@@ -1,85 +1,118 @@
 # OpenIAM Control File Example 47
 #
-# This example demonstrates the use of the GenericReservoir component.
-# Here, reservoir pressures and CO2 saturations are produced for three
-# locations ('coordx' and 'coordy' under the 'Locations' entry).
+# This example demonstrate the use of the AoR plot type in a simulation using 
+# a TheisReservoir component. The TheisReservoir component only produces 
+# pressure values, so only use the AoR plot type with the pressure metric. 
+# If CO2saturation output is requested from the TheisReservoir, it will produce
+# CO2saturation values of zero. Therefore, do not attempt to create AoR plots 
+# showing the CO2saturation values from a TheisReservoir component.
+#
+# When creating an AoR plot with the pressure output of a TheisReservoir component, 
+# the CriticalPressureMPa input should not be set to 'Calculated'. Instead, the 
+# user should specify a critical pressure in MPa (e.g., 'CriticalPressureMPa: 18.0' 
+# for 18 MPa).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex47.yaml
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex47.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
-    EndTime: 5
+    EndTime: 50      # 50 years
     TimeStep: 1
     Analysis: forward
-    Components: [Reservoir]
+    Components: [TheisReservoir1]
     OutputDirectory: output/output_ex47_{datetime}
-    Logging: Debug
+    OutputType: 1  # 0 - row-wise; 1 - column-wise
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateStatFiles: False
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
         vary: False
         value: 3
-    reservoirThickness:
-        vary: False
-        value: 70.0
     shale1Thickness:
         vary: False
-        value: 240.0
-    aquifer1Thickness:
-        vary: False
-        value: 55.0
+        value: 250.0
     shale2Thickness:
         vary: False
-        value: 350.0
-    aquifer2Thickness:
-        vary: False
-        value: 45.0
+        value: 250.0
     shale3Thickness:
         vary: False
-        value: 450.0
+        value: 250.0
+    aquifer1Thickness:
+        vary: False
+        value: 100.0
+    aquifer2Thickness:
+        vary: False
+        value: 100.0
+    reservoirThickness:
+        vary: False
+        value: 50.0
 #-------------------------------------------------
-# Reservoir is a user defined name for component
-# GenericReservoir is the NRAP-Open-IAM class name
-#-------------------------------------------------
-Reservoir:
-    Type: GenericReservoir
+TheisReservoir1:
+    Type: TheisReservoir
     InjectionWell:
-        coordx: 0
-        coordy: 0
+        # The first four locations are injection wells, the last is an extraction well
+        coordx: [707.11, -707.11, -707.11, 707.11, 0]
+        coordy: [707.11, 707.11, -707.11, -707.11, 0]
     Locations:
-        coordx: [100, 200, 300]
-        coordy: [100, 200, 300]
+        grid:
+            xmin: -2000
+            xmax: 2000
+            xsize: 10
+            ymin: -2000
+            ymax: 2000
+            ysize: 10
+    # injRates are given in m^3/s
+    injRates: examples/Control_Files/input_data/ex47/inj_rates.csv
+    # injTimes are given in years
+    injTimes: examples/Control_Files/input_data/ex47/inj_times.csv
     Parameters:
-        injRate:
+        # reservoirThickness parameter of reservoir component is linked to stratigraphy
+        initialPressure:
+            value: 1.0e+6
             vary: False
-            value: 50.0
         logResPerm:
+            value: -13.5
             vary: False
-            value: -13.0
-        resTempGradient:
-            vary: False
-            value: 25.0
-        initialSalinity:
-            vary: False
-            value: 0.04
         reservoirPorosity:
-            vary: False
             value: 0.2
-    Outputs: [pressure,
-              CO2saturation]
+            vary: False
+        brineDensity:
+            value: 1000
+            vary: False
+        brineViscosity:
+            value: 2.535e-3
+            vary: False
+        CO2Density:
+            value: 800
+            vary: False
+        compressibility:
+            value: 2.46e-9
+            vary: False
+    Outputs: [pressure]
 #-------------------------------------------------
 Plots:
-    pressure_reals:
+    Theis_Pressure:
         TimeSeries: [pressure]
+        UseMarkers: True
+        FigureDPI: 150
         Subplot:
-            NumCols: 3
-            Use: True
-        Title: Reservoir Pressure
-    saturation_reals:
-        TimeSeries: [CO2saturation]
-        Subplot:
-            NumCols: 3
-            Use: True
-        Title: Reservoir CO$_2$ saturation
+            Use: False
+    AoR_Pressure:
+        AoR: [pressure]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+        Title: 'AoR: Pressure'
+        CriticalPressureMPa: 18.0
+    AoR_Pressure_TimeList:
+        AoR: [pressure]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+        Title: 'AoR: Pressure'
+        CriticalPressureMPa: 18.0
+        TimeList: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]

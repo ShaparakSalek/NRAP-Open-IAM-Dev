@@ -4,6 +4,13 @@
 # also demonstrates the use of the TimeList entry with the AoR plot type.
 # The TimeList entry is also shown in Control File example 31d.
 #
+# This example requires additional FutureGen 2.0 data set.
+# FutureGen 2.0 data set can be downloaded from the following source:
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
+#
+# The downloaded data set should be placed here:
+#    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex32c.yaml
 #
@@ -19,12 +26,11 @@ ModelParams:
     GenerateCombOutputFile: False
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        LookupTableStratigraphy:
-            FileName: 'stratigraphy.csv'
-            FileDirectory: 'examples/Control_Files/input_data/ex32b'
-            MaxPointDistance: 100
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex32b'
+    Parameters:
+        numberOfShaleLayers: 5
 #-------------------------------------------------
 LookupTableReservoir1:
     Type: LookupTableReservoir
@@ -101,46 +107,45 @@ FutureGen2Aquifer1:
 Plots:
     Strat_Plot:
         Stratigraphy:
-            FigureDPI: 300
-            PlotWellbores: True
+            FigureDPI: 200
+            PlotWellbores: False
             PlotWellLabels: False
             PlotInjectionSites: True
             PlotInjectionSiteLabels: True
-            PlotStratComponents: True
-            InjectionCoordx: 2.37e5
-            InjectionCoordy: 4.41e6
+            InjectionCoordx: 2.37e+5
+            InjectionCoordy: 4.41e+6
             View:
-                ViewAngleElevation: [5, 5, 5, 5, 5]
-                ViewAngleAzimuth: [240, 255, 270, 285, 300]
+                ViewAngleElevation: [10, 10, 10]
+                ViewAngleAzimuth: [270, 300, 330]
     AoR_Pressure:
         AoR: [pressure]
         TimeList: [1, 5, 10, 15, 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: True
     AoR_CO2Sat:
         AoR: [CO2saturation]
         TimeList: [1, 5, 10, 15, 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False
     AoR_pH:
         AoR: [pH_volume]
         TimeList: [10, 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False
     AoR_TDS:
         AoR: [TDS_volume]
         TimeList: All
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         FigureDPI: 100
         SaveCSVFiles: False

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-This example couples stratigraphy and simple reservoir components.
+This example couples stratigraphy and analytical reservoir components.
 Stratigraphy component defines gridded parameter shale1Thickness which is
 then used to define a deterministic parameter of the same name
-for the simple reservoir component.
+for the analytical reservoir component.
 
 Example of run:
 $ python iam_sys_strata_reservoir_gridded_pars.py
@@ -14,7 +14,7 @@ import logging
 import numpy as np
 
 sys.path.insert(0,os.sep.join(['..','..','source']))
-from openiam import DataInterpolator, Stratigraphy, SimpleReservoir
+from openiam import DataInterpolator, Stratigraphy, AnalyticalReservoir
 
 try:
     from openiam import SystemModel
@@ -47,27 +47,28 @@ if __name__ == "__main__":
     strata.add_par('shale2Thickness', min=40.0, max=60., value=50.0)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm,
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm,
         injX=37200., injY=48000., locX=37478.0, locY=48333.0))  # chosen injX, injY are arbitrary
 
     # Add parameters of reservoir component model
-    sres.add_par_linked_to_par('numberOfShaleLayers',
+    ares.add_par_linked_to_par('numberOfShaleLayers',
                          strata.deterministic_pars['numberOfShaleLayers'])
-    sres.add_par('injRate', min=0.4, max=0.6, value=0.5)
-    sres.add_par('shale1Thickness', vary=False,
-        value=strata.gridded_pars['shale1Thickness'](np.array([[sres.locX,sres.locY]])))
-    sres.add_par_linked_to_par('shale2Thickness', strata.pars['shale2Thickness'])
-    sres.add_par_linked_to_par('shale3Thickness', strata.default_pars['shaleThickness'])
+    ares.add_par('injRate', min=0.4, max=0.6, value=0.5)
+    ares.add_par('reservoirRadius', value=500.0, vary=False)
+    ares.add_par('shale1Thickness', vary=False,
+        value=strata.gridded_pars['shale1Thickness'](np.array([[ares.locX, ares.locY]])))
+    ares.add_par_linked_to_par('shale2Thickness', strata.pars['shale2Thickness'])
+    ares.add_par_linked_to_par('shale3Thickness', strata.default_pars['shaleThickness'])
 
-    sres.add_par_linked_to_par('aquifer1Thickness', strata.default_pars['aquiferThickness'])
-    sres.add_par_linked_to_par('aquifer2Thickness', strata.default_pars['aquiferThickness'])
-    sres.add_par_linked_to_par('aquifer3Thickness', strata.default_pars['aquiferThickness'])
+    ares.add_par_linked_to_par('aquifer1Thickness', strata.default_pars['aquiferThickness'])
+    ares.add_par_linked_to_par('aquifer2Thickness', strata.default_pars['aquiferThickness'])
+    ares.add_par_linked_to_par('aquifer3Thickness', strata.default_pars['aquiferThickness'])
 
-    sres.add_par_linked_to_par('reservoirThickness', strata.default_pars['reservoirThickness'])
+    ares.add_par_linked_to_par('reservoirThickness', strata.default_pars['reservoirThickness'])
 
-    sres.add_par_linked_to_par('datumPressure', strata.default_pars['datumPressure'])
+    ares.add_par_linked_to_par('datumPressure', strata.default_pars['datumPressure'])
 
-    sres.add_obs('pressure')
+    ares.add_obs('pressure')
 
     # Run system model using current values of its parameters
     sm.forward()
@@ -77,4 +78,4 @@ if __name__ == "__main__":
     print('------------------------------------------------------------------')
 
     # Print pressure
-    print('pressure', sm.collect_observations_as_time_series(sres,'pressure'), sep='\n')
+    print('pressure', sm.collect_observations_as_time_series(ares, 'pressure'), sep='\n')

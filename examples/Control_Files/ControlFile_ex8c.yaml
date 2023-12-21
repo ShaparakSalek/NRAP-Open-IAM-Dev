@@ -42,15 +42,18 @@ Stratigraphy:
         value: 100.0
 #-------------------------------------------------
 Reservoir1:
-    Type: SimpleReservoir
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 0.1
             vary: False
         logResPerm:
-            value: -12
-            min: -12.5
-            max: -11.5
+            value: -12.5
+            min: -13
+            max: -12
+        reservoirRadius:
+            value: 10000
+            vary: False
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
 Wellbore1:
@@ -127,7 +130,7 @@ Analysis:
         FigureDPI: 300
         SaveCSVFiles: True
     TimeSeriesSensitivity:
-        Outputs: TDS_volume
+        Outputs: [TDS_volume, pH_volume]
         FigureDPI: 300
         SaveCSVFiles: True
         NumberIncluded: 10   # default is 5

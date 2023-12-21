@@ -1,7 +1,7 @@
 # OpenIAM Control File Example 39a
 #
 # This example demonstrates the use of the time to first detection (TTFD) plot
-# type for a simulation with a simple reservoir, multisegmented wellbores,
+# type for a simulation with analytical reservoir, multisegmented wellbore,
 # and aquifer components. If monitoring locations are provided (see below), the TTFD
 # plot type specifically represents the use of a monitoring well to detect a
 # contaminant plume in (an) aquifer(s). If no monitoring locations are given, then
@@ -57,7 +57,7 @@ ModelParams:
     Analysis:
         type: lhs
         siz: 30
-    Components: [SimpleReservoir1, MultisegmentedWellbore1,
+    Components: [AnalyticalReservoir1, MultisegmentedWellbore1,
                  FutureGen2AZMI1]
     OutputDirectory: output/output_ex39a_{datetime}
     Logging: Info
@@ -71,21 +71,23 @@ Stratigraphy:
     aquifer1Thickness: 85
     reservoirThickness: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
-        injRate: 10
+        injRate: 3
         logResPerm: -12
         brineDensity: 1030.9
         CO2Density: 775.0
         brineViscosity: 7.5e-4
         CO2Viscosity: 6.6e-5
+        reservoirRadius: 10000
+        brineResSaturation: 0
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 MultisegmentedWellbore1:
     Type: MultisegmentedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 5
     Locations:
         coordx: [100, 200, 300, 400, 500]

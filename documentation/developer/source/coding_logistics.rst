@@ -104,6 +104,7 @@ examples of methods that are usually redefined within a given component. ::
             self.gridded_pars = OrderedDict()
             self.parlinked_pars = OrderedDict()
             self.obslinked_pars = OrderedDict()
+            self.compositeobslinked_pars = OrderedDict()
 
             # Keyword arguments
             self.obs_linked_kwargs = OrderedDict()
@@ -908,7 +909,7 @@ and observations to the component models.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_par
+.. automethod:: openiam.ComponentModel.add_par
 
 ----
 
@@ -938,7 +939,7 @@ i.e. stochastic parameters of all components.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_default_par
+.. automethod:: openiam.ComponentModel.add_default_par
 
 ----
 
@@ -989,7 +990,7 @@ and are not available for the processing once the simulation is complete.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_obs
+.. automethod:: openiam.ComponentModel.add_obs
 
 ----
 
@@ -1001,7 +1002,7 @@ If the component model is supposed to return a structured (or "gridded") observa
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_grid_obs
+.. automethod:: openiam.ComponentModel.add_grid_obs
 
 ----
 
@@ -1034,7 +1035,7 @@ scalar (not an array) the system model keeps track of the observation.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_local_obs
+.. automethod:: openiam.ComponentModel.add_local_obs
 
 ----
 
@@ -1056,7 +1057,7 @@ observation assigned by the user. For example, ::
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_obs_to_be_linked
+.. automethod:: openiam.ComponentModel.add_obs_to_be_linked
 
 ----
 
@@ -1095,7 +1096,7 @@ value as an already defined parameter.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_par_linked_to_par
+.. automethod:: openiam.ComponentModel.add_par_linked_to_par
 
 ----
 
@@ -1130,7 +1131,7 @@ depends on should be added with the ``add_obs_to_be_linked`` method.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_par_linked_to_obs
+.. automethod:: openiam.ComponentModel.add_par_linked_to_obs
 
 ----
 
@@ -1152,7 +1153,7 @@ expression which may contain references to parameters of the same and/or other c
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_composite_par
+.. automethod:: openiam.ComponentModel.add_composite_par
 
 ----
 
@@ -1208,6 +1209,86 @@ but rather the name of the variable that keeps the reference
 to the corresponding component and the type of parameters involved in the
 expression for the composite parameter.
 
+The method ``add_par_linked_to_composite_obs`` is similar to ``add_composite_par``, but
+``add_par_linked_to_composite_obs`` can calculate a parameter value as a function of
+parameters and/or observations. The method ``add_composite_par`` can only calculate
+parameters as a function of other parameters.
+
+----
+
+.. automethod:: openiam.ComponentModel.add_par_linked_to_composite_obs
+
+----
+
+As noted above for the method ``add_par_linked_to_obs``, parameters in NRAP-Open-IAM are
+assumed to be constant in time. Therefore, the method ``add_par_linked_to_composite_obs``
+is only meant to be used with observations that are constant with time. Any input that
+varies with time should be provided as a keyword argument, not as a parameter.
+
+The following piece of code contains several examples utilizing the
+``add_par_linked_to_composite_obs`` method. ::
+
+    # Assume we have a component model cm1 defined somewhere above in the code
+    # as an instance of Component1 class with name 'cmpnt1'. The lines
+    # below add several observations for this component.
+    cm1.add_obs('obs_1')
+    cm1.add_obs('obs_2')
+    cm1.add_obs('obs_3')
+
+    # The observations must also be added to the linkobs dictionary of cm1, cm1.linkobs
+    cm1.add_obs_to_be_linked('obs_1')
+    cm1.add_obs_to_be_linked('obs_2')
+    cm1.add_obs_to_be_linked('obs_3')
+
+    # Now assume we have another component model cm2 defined as an instance of
+    # Component2 class with name 'cmpnt2'. This component will have a parameter
+    # 'par_1' calculated as a function of the observations of cm1. The function
+    # is given by the expression expr.
+    expr = '(cmpnt1.obs_1 + cmpnt1.obs_2) / cmpnt1.obs_3'
+    cm2.add_par_linked_to_composite_obs('par_1', expr)
+
+    # Now assume there is another component model cm3 defined as an instance of
+    # Component3 class with name 'cmpnt3'. We use this component to demonstrate that
+    # a composite observation-linked parameter can be calculated with the observations
+    # of multiple components. First, add the observations of this component.
+    cm3.add_obs('obs_1')
+    cm3.add_obs('obs_2')
+    cm3.add_obs('obs_3')
+
+    # The observations must also be added to the linkobs dictionary of cm3, cm3.linkobs
+    cm3.add_obs_to_be_linked('obs_1')
+    cm3.add_obs_to_be_linked('obs_2')
+    cm3.add_obs_to_be_linked('obs_3')
+
+    # Now the parameter 'par_2' of cm2 is set as a function of the observations of cm1
+    # and cm3.
+    expr = 'cmpnt1.obs_1 + cmpnt1.obs_2 + cmpnt3.obs_1 + cmpnt3.obs_2'
+    cm2.add_par_linked_to_composite_obs('par_2', expr)
+
+    # Finally, give cm2 a deterministic parameter 'par_3'. This parameter will be used
+    # in the expression for the composite observation-linked parameter 'par_4' to
+    # demonstrate that the expression can include both parameters and observations.
+    cm2.add_par('par_3', value=10, vary=False)
+    expr = 'cmpnt2.par_3 / (cmpnt1.obs_3 + cmpnt3.obs_3)'
+    cm2.add_par_linked_to_composite_obs('par_4', expr)
+
+For a component to have a composite observation-linked parameter (a component dependent
+on the observations from other components), any components producing observations used
+in the function need to run prior to the dependent component. To make a component run
+earlier, it must be added to the system model before another component. Components are
+run in the order they are added to the system model. In the example shown above cm2
+must be added to the system model after cm1 and cm3.
+
+Once a composite observation-linked parameter is set in the manner shown above, it is
+stored in the ordered dictionary compositeobslinked_pars. For example, the parameter value
+of 'par_1' for cm2 can be obtained in the following manner. This approach would only
+return a value after the simulation has run, however. Prior to the simulation, the
+composite observation-linked parameter would have a value of zero. ::
+
+    # After running the simulation, print the 'par_1' value of cm2
+    par_1_value = cm2.compositeobslinked_pars['par_1'].value
+    print(par_1_value)
+
 Keyword arguments
 -----------------
 
@@ -1246,7 +1327,7 @@ in time in a predetermined way, one can use method ``add_dynamic_kwarg``.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_dynamic_kwarg
+.. automethod:: openiam.ComponentModel.add_dynamic_kwarg
 
 ----
 
@@ -1272,7 +1353,7 @@ of one component to the observation of another component.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_kwarg_linked_to_obs
+.. automethod:: openiam.ComponentModel.add_kwarg_linked_to_obs
 
 ----
 
@@ -1350,7 +1431,7 @@ and passed in this form to the corresponding component.
 
 ----
 
-.. automethod:: openiam.iam_model_classes.ComponentModel.add_kwarg_linked_to_collection
+.. automethod:: openiam.ComponentModel.add_kwarg_linked_to_collection
 
 ----
 

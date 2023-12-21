@@ -1,0 +1,154 @@
+# OpenIAM Control File Example 39c
+#
+# This example is similar to control file example 38a - like that example, 
+# this example uses a LookupTableStratigraphy component. Unlike that example, 
+# this example demonstrates the use of the TTFD plot type while using a 
+# LookupTableStratigraphy component.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex39c.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1
+    Analysis: forward
+    Components: [AnalyticalReservoir1, OpenWellbore1, GenericAquifer1]
+    OutputDirectory: 'output/output_ex39c_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex39c'
+    Parameters:
+        numberOfShaleLayers: 3
+        datumPressure: 101325
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Parameters:
+        injRate:
+            value: 0.5
+            vary: False
+        logResPerm:
+            value: -14.0
+            vary: False
+        reservoirRadius:
+            value: 10000
+            vary: False
+        brineResSaturation:
+            value: 0.05
+            vary: False
+    Outputs: [pressure, CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: AnalyticalReservoir1
+    Number: 1
+    Locations:
+        coordx: [1767.76]
+        coordy: [1767.76]
+    LeakTo: aquifer1
+    Controls:
+        critPressureApproach: True
+    Parameters:
+        wellRadius:
+            value: 0.2
+            vary: False
+        logReservoirTransmissivity:
+            value: -11.0
+            vary: False
+        logAquiferTransmissivity:
+            value: -9.0
+            vary: False
+        brineSalinity:
+            value: 0.0475
+            vary: False
+        brineDensity:
+            value: 1025
+            vary: False
+    Outputs: [CO2_aquifer, brine_aquifer]
+#-------------------------------------------------
+GenericAquifer1:
+    Type: GenericAquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer1
+    Parameters:
+        por:
+            value: 0.2
+            vary: False
+        log_permh:
+            value: -10
+            vary: False
+        log_aniso:
+            value: 0.3
+            vary: False
+        dissolved_salt_threshold:
+            value: 0.01
+            vary: False
+    Outputs: [Dissolved_salt_volume, Dissolved_CO2_volume, 
+              Dissolved_CO2_dr, Dissolved_CO2_dz]
+#-------------------------------------------------
+Plots:
+    Pressure:
+        TimeSeries: [pressure]
+        Subplot:
+            Use: False
+    CO2_Saturation:
+        TimeSeries: [CO2saturation]
+        Subplot:
+            Use: False
+    Brine_Leakage:
+        TimeSeries: [brine_aquifer]
+        Subplot:
+            Use: False
+    CO2_Leakage:
+        TimeSeries: [CO2_aquifer]
+        Subplot:
+            Use: False
+    CO2_Plume_Volumes:
+        TimeSeries: [Dissolved_CO2_volume]
+        Subplot:
+            Use: False
+    CO2_Plume_Volumes:
+        TimeSeries: [Dissolved_CO2_volume]
+        Subplot:
+            Use: False
+    Strat_Plot:
+        Stratigraphy:
+            SaveCSVFiles: True
+            FigureDPI: 150
+            PlotWellbores: True
+            PlotWellLabels: False
+            PlotInjectionSites: True
+            PlotInjectionSiteLabels: True
+            SpecifyXandYGridLims:
+                gridXLims: [-6000, 6000]
+                gridYLims: [-6000, 6000]
+            View:
+                ViewAngleElevation: [5, 5, 5, 5]
+                ViewAngleAzimuth: [285, 300, 315, 330]
+    TTFD_Plot:
+        TTFD:
+            FigureDPI: 200
+            PlumeType: Dissolved_CO2
+            ComponentNameList: [GenericAquifer1]
+            MonitoringLocations:
+                coordx: [1944.54, 1944.54, 1944.54]
+                coordy: [1944.54, 1944.54, 1944.54]
+                coordz: [aquifer1Depth, aquifer1MidDepth, aquifer1TopDepth]
+                HorizontalWindow: 1
+                VerticalWindow: 50
+            PlotInjectionSites: True
+            WriteDreamOutput: False
+            SaveCSVFiles: True
+            SpecifyXandYGridLims:
+                gridXLims: [-500, 2500]
+                gridYLims: [-500, 2500]
+            NumZPointsWithinAquifers: 20

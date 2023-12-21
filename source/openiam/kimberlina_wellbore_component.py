@@ -259,7 +259,7 @@ class KimberlinaWellbore(ComponentModel):
         pass
 
 
-if __name__ == "__main__":
+def test_kimberlina_wellbore_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 5.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

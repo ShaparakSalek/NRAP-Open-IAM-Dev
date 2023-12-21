@@ -360,8 +360,3 @@ class AreaEstimate(ComponentModel):
 
     def reset(self):
         return
-
-
-if __name__ == "__main__":
-
-    pass

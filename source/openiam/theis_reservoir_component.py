@@ -14,6 +14,8 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
 
 try:
     import components.reservoir.theis.theis_reservoir_ROM as tresrom
@@ -28,11 +30,18 @@ INJECTION_DATA_UNITS = {'injRates': 'm^3/s^{-1}', 'injTimes': 'year'}
 class TheisReservoir(ComponentModel):
     """
     The Theis Reservoir component model is an analytical model for pressure in the
-    reservoir.
+    reservoir. This component can simulate the use of multiple injection and/or
+    extraction wells, with the pressure values produced reflecting the interaction
+    of these wells. Each well can have injection rates that vary over time.
+    Positive rates represent injection, while negative rates represent extraction.
+    This component only produces the **pressure** output; it does not produce 
+    usable **CO2saturation** values (if requested, any **CO2saturation** values 
+    produced will be zero). One might therefore consider the wells used to be 
+    injecting or extracting brine, rather than |CO2|.
 
-    In the NRAP-Open-IAM control file, the type name for the Theis Reservoir component is
-    ``TheisReservoir``. The description of the component's parameters are
-    provided below:
+    In the NRAP-Open-IAM control file, the type name for the Theis Reservoir
+    component is ``TheisReservoir``. Descriptions of the component's parameters
+    are provided below:
 
     * **initialPressure** [|Pa|] (8.0e+4 to 1.0e+7) - initial pressure at the top
       of the reservoir (default: 1.0e+6);
@@ -57,7 +66,7 @@ class TheisReservoir(ComponentModel):
     * **brineViscosity** [|Pa*s|] (1.0e-4 to 5.0e-3) - viscosity of brine phase
       (default: 2.535e-3).
 
-    Possible observation from the Theis Reservoir component is:
+    Possible observations from the Theis Reservoir component are:
 
     * **pressure** [|Pa|] - pressure at top of the reservoir at the user
       defined location(s)
@@ -65,9 +74,16 @@ class TheisReservoir(ComponentModel):
     * **CO2saturation** [-] - |CO2| saturation at the top of the reservoir at the
       user defined location(s)
 
-    For compatibility with wellbore components in NRAP-Open-IAM
-    observation CO2saturation of Theis Reservoir component has fixed values
-    of 0 at each time point for any simulation.
+    The **CO2saturation** output is only included for compatibility purposes.
+    Specifically, wellbore components require **CO2saturation** inputs, so an 
+    error could occur if the Theis Reservoir did not provide this output. All 
+    **CO2saturation** values produced by the Theis Reservoir component have fixed
+    values of 0 at each time point for any simulation.
+
+    For control file examples using the Theis Reservoir component, see 
+    *ControlFile_ex44a* to *ControlFile_ex47*. For script examples, see 
+    *iam_sys_theis.py*, *iam_sys_theis_4inj_wells.py*, and *iam_sys_theis_4inj_grid.py*.
+
     """
     def __init__(self, name, parent, injX=0., injY=0., locX=100., locY=100.,
                  injTimes=None, injRates=None):
@@ -315,25 +331,29 @@ class TheisReservoir(ComponentModel):
         # of injection wells
         self.process_injection_and_location_args(
             injX, injY, locX, locY, injTimes, injRates, setup=1)
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Take care of parameter reservoirThickness
         strata = name2obj_dict['strata']
         par_name = 'reservoirThickness'
         if (par_name not in self.pars) and (par_name not in self.deterministic_pars):
-            connect = None
-            if par_name in strata.pars:
-                connect = strata.pars
-            elif par_name in strata.deterministic_pars:
-                connect = strata.deterministic_pars
-            elif par_name in strata.default_pars:
-                connect = strata.default_pars
-            else:
-                err_msg = ''.join(['Unable to find "reservoirThickness" ',
-                                   'parameter. Please check setup of the stratigraphy.'])
-                logging.error(err_msg)
-                raise KeyError(err_msg)
+            if name2obj_dict['strata_type'] in types_strata_pars:
+                connect = get_strat_param_dict_for_link(par_name, strata)
+                
+                if connect is None:
+                    err_msg = ''.join(['Unable to find "reservoirThickness" ',
+                                       'parameter. Please check setup of the stratigraphy.'])
+                    logging.error(err_msg)
+                    raise KeyError(err_msg)
 
-            self.add_par_linked_to_par(par_name, connect[par_name])
+                self.add_par_linked_to_par(par_name, connect[par_name])
+                
+            elif name2obj_dict['strata_type'] in types_strata_obs:
+                self.add_par_linked_to_obs(par_name, strata.linkobs[par_name])
 
     @staticmethod
     def get_injection_data(comp_name, component_data, input_type):
@@ -582,7 +602,7 @@ class TheisReservoir(ComponentModel):
     system_params = ['reservoirThickness']
 
 
-if __name__ == "__main__":
+def test_theis_reservoir_component():
     __spec__ = None
 
     logging.basicConfig(level=logging.WARNING)

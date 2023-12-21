@@ -6,6 +6,7 @@
 .. |deg| replace:: :math:`^{\circ}`
 .. |t_i| replace:: t\ :sub:`i`\
 .. |m| replace:: :math:`m`
+.. |km| replace:: :math:`km`
 .. |m/s| replace:: :math:`m/s`
 .. |m^2| replace:: :math:`m^2`
 .. |m^3| replace:: :math:`m^3`
@@ -16,6 +17,12 @@
 .. |kg| replace:: :math:`kg`
 .. |kg/s| replace:: :math:`kg/s`
 .. |kg/m^3| replace:: :math:`kg/m^3`
+.. |mg/L| replace:: :math:`mg/L`
+.. |mg/m^3| replace:: :math:`mg/m^3`
+.. |g/m^3| replace:: :math:`g/m^3`
+.. |mg/g| replace:: :math:`mg/g`
+.. |g/kg| replace:: :math:`g/kg`
+.. |L/m^3| replace:: :math:`L/m^3`
 .. |L| replace:: :math:`L`
 .. |E| replace:: :math:`E`
 .. |T| replace:: :math:`T`
@@ -39,3 +46,8 @@
 .. |times| unicode:: U+000D7
 .. |y = ax^2 + bx + c| replace:: *y* = *ax* \ :sup:`2`\ + *bx* + *c*
 .. |years| replace:: :math:`years`
+.. |Pcrit| replace:: P\ :sub:`crit`\
+.. |rho_br| replace:: :math:`\rho`:sub:`br`\
+.. |rho_w| replace:: :math:`\rho`:sub:`w`\
+.. |d_aq| replace:: d\ :sub:`aq`\
+.. |d_res| replace:: d\ :sub:`res`\

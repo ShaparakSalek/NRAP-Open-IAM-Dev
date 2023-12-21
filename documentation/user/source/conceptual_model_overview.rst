@@ -1,33 +1,35 @@
 .. include:: ../../common/replace_math.rst
 
-Conceptual model and overview
+.. _conceptual_model_overview:
+
+Conceptual Model and Overview
 =============================
 
-NRAP-Open-IAM is designed for modeling and simulating the behaviour of geologic
+NRAP-Open-IAM is designed for simulating and analyzing the behavior of geologic
 carbon storage (GCS) system models. These system models can include
 representations of reservoir response to |CO2| injection, the resulting impacts
 on potential leakage pathways like wellbores, and any contaminant plumes that
 form in aquifers or the atmosphere due to brine or |CO2| leakage. Each
 part of this process (reservoir response, leakage pathway behavior, and impacts
 on the receptor of leakage) is represented by a particular component within
-the system model. Additionally, NRAP-Open-IAM can automate specific types of
-analysis, for example, determining the area of review for a GCS site. The intended
-purpose of NRAP-Open-IAM is to provide quantitative metrics that aid in GCS
-project planning, permitting, and operational decision support. NRAP-Open-IAM
-can be run through the graphical use interface (GUI; section :ref:`gui_operation`),
+the system model. Additionally, NRAP-Open-IAM can automate specific analyses, 
+such as determining the area of review for a GCS site. The intended purpose
+of NRAP-Open-IAM is to provide quantitative metrics that aid in GCS project
+planning, permitting, and operational decision support. NRAP-Open-IAM can be
+run through the graphical use interface (GUI; section :ref:`gui_operation`),
 the control file interface (section :ref:`control_file`), or a script-based
 approach in Python.
 
-System model design
+System Model Design
 -------------------
 
 Within NRAP-Open-IAM, the system model contains components that are connected
 to each other. For example, a reservoir component can provide pressures and |CO2|
 saturations to a wellbore component. The wellbore component then uses these
 inputs to calculate |CO2| and brine leakage rates to a specific aquifer.
-In its turn an aquifer component can use these leakage rates to model the evolution
+In its turn, an aquifer component can use these leakage rates to model the evolution
 of pH and TDS plumes within the aquifer. An aquifer component is a receptor type of
-component which can also be represented by an atmosphere component.
+component, which can also be represented by an atmosphere component.
 For example, a wellbore component can provide leakage rates to the atmosphere,
 and an atmosphere component can then be used to model the evolution of
 atmospheric contaminant plumes. :numref:`workflow_figure1` is a conceptual
@@ -38,7 +40,7 @@ A stratigraphy component can be used to define the thicknesses and depths
 of the storage reservoir, aquifers, and aquitards in the model domain.
 Many NRAP-Open-IAM components are designed to link with the stratigraphy
 component in a way that automatically sets component parameters related
-to the stratigraphy without additional user efforts.
+to the stratigraphy.
 
 .. _workflow_figure1:
 
@@ -59,16 +61,14 @@ to model brine and |CO2| leakage rates through a fractured caprock overlying
 the storage reservoir, but the predicted leakage rates occur over an area
 of the caprock/reservoir interface. The aquifer components shown in
 :numref:`workflow_figure1` are designed to receive leakage rates from a point
-source, like a wellbore, and, therefore, are not appropriate to use with
-rates that apply over an area or a linear element (e.g., faults in the
+source, like a wellbore, and therefore should not be used with rates
+that apply over an area or a linear element (e.g., faults in the
 ``FaultFlow`` component). Such components can still be used to evaluate
 leakage risks, however, and :numref:`workflow_figure2` shows a conceptual model
 demonstrating the connection of a reservoir component with a non-local leakage
 pathway component (i.e., not a point source leakage pathway). Aquifer
 components accepting leakage rates that apply over areas or linear elements may be
-developed in the future. The system model shown in :numref:`workflow_figure2`
-represents how these non-local leakage pathway components can be used
-with the currently available aquifer components.
+developed in the future.
 
 .. _workflow_figure2:
 
@@ -79,7 +79,7 @@ with the currently available aquifer components.
 
    Non-local Leakage System Model Design
 
-NRAP-Open-IAM has several components that are designed to not be connected to other
+NRAP-Open-IAM has several components that are not designed to be connected to other
 components. For example, the ``PlumeStability`` component does not connect
 to the stratigraphy or leakage pathway components. Instead, it uses .csv files
 containing reservoir conditions over time to evaluate the development and
@@ -121,7 +121,7 @@ wells will self-seal (:numref:`workflow_figure3`), and (3) to model the behavior
 of the whole GCS site (excluding wells that will self-seal;
 :numref:`workflow_figure1`).
 
-Component parameters and applications
+Component Parameters and Applications
 -------------------------------------
 
 Each component model has a variety of parameters, and these parameters have
@@ -133,12 +133,12 @@ Different components are meant to be used in different applications.
 For example, the ``TheisReservoir`` component was designed to handle multiple
 (brine) injection and/or extraction wells over a large area, with the pressures
 produced reflecting the interaction of multiple wells. In contrast,
-the ``SimpleReservoir`` component can simulate only one injection well.
+the ``AnalyticalReservoir`` component can simulate only one injection well.
 The ``FutureGen2Aquifer`` and ``FutureGen2AZMI`` components were designed
 to represent the specific geochemistry of the Future Gen site but may be
 applicable to similar aquifers with depths between 100 m and 700 m
 (``FutureGen2Aquifer``) and 700 m and 1600 m (``FutureGen2AZMI``).
-The ``OpenWellbore`` component is useful for worst-case comparison scenarios
+The ``OpenWellbore`` component is useful for evaluating worst-case scenarios
 where leakage through an unplugged wellbore enters an aquifer. In contrast,
 a ``MultisegmentedWellbore`` component simulates flow through impaired cement
 and can account for leakage into multiple aquifers overlying the injection zone.
@@ -147,7 +147,7 @@ and their intended applications are available in chapter :ref:`components_compar
 Descriptions of NRAP-Open-IAM components and their parameters are
 provided in chapter :ref:`components_description` below.
 
-Analysis types
+Analysis Types
 --------------
 
 NRAP-Open-IAM simulations can use one of three analysis types: ``Forward``,
@@ -158,14 +158,14 @@ parameter is fixed at a certain value, so the simulation has the same results ea
 time it is run.
 
 ``LHS`` simulations (``lhs`` in the control file interface) are stochastic:
-the parameters are varied between minimum and maximum values according to their
-dsitribution. An ``LHS`` simulation consists of many separate realizations,
-where each realization has different parameter values. This approach helps
-to address parameter uncertainty. For example, by constraining parameter values
-within reasonable (and random) bounds, one can focus on the proportion of ``LHS``
-realizations in which leakage occurs. This proportion can be used to estimate
-the likelihood of such a leakage event. Leakage occurring in 10% of realizations
-could be considered to correspond to a 10% probability of leakage, given the user's
+the parameters are varied between minimum and maximum values. An ``LHS``
+simulation consists of many separate realizations, where each realization 
+has different parameter values. This approach helps to address parameter 
+uncertainty. For example, by constraining parameter values within
+reasonable bounds, one can focus on the proportion of ``LHS`` realizations
+in which leakage occurs. This proportion can be used to estimate the likelihood
+of such a leakage event. Leakage occurring in 10% of realizations could
+be considered to correspond to a 10% probability of leakage, given the user's
 current understanding of the parameter values. Latin Hypercube Sampling
 is different from a purely random approach in that it evenly samples
 the range of values for each stochastic parameter, and runs the model
@@ -178,7 +178,10 @@ multiple subranges, each ``LHS`` simulation requires a minimum number of realiza
 If one attempts to run an ``LHS`` simulation without a sufficient number
 of realizations, the code will raise a ``LinAlgError`` saying
 "Matrix is not positive definite." If this error occurs, increase the total
-number of realizations.
+number of realizations. Additionally, if you attempt to run an ``LHS`` simulation 
+without including any parameters that vary stochastically (i.e., by giving the 
+parameter minimum and maximum limits), then the simulation will encounter an error. 
+In this case, the simulation should instead use a ``Forward`` analysis type.
 
 The ``Parstudy`` analysis type (``parstudy`` in the control file interface)
 also evaluates different realizations of each simulation, where each realization
@@ -192,25 +195,30 @@ of realizations for ``Parstudy`` simulations increases exponentially with the nu
 stochastic parameters.
 
 Overall, the ``Forward`` analysis type is intended to be used for decision-support
-of GCS system models that are deterministic and conceptually appropriate.
-The ``LHS`` analysis type is intended to be used for decision-support of GCS
-system models that address the uncertainty in parameter values. Finally,
-the ``Parstudy`` analysis type is intended to be used to study the effects
-of certain parameters on model outputs (i.e., sensitivity analysis). Studying
-the effects of certain parameters is important for decision support.
-Understanding which parameters have the most significant impact can help
-inform the user about the parameters they should focus on constraining
-in their study area. Control file interface can help to automate sensitivity
-analysis within ``LHS`` simulations; see *ControlFile_ex8a*-*ControlFile_ex8c*.
+GCS system models that are constrained in scope; in some cases, a deterministic
+simulation can demonstrate a finding in a more clear and concise manner.
+The ``LHS`` analysis type is intended to be used for decision-support GCS
+system models that address the uncertainty in parameter values. There can be 
+substantial uncertainty in parameters like permeability, and producing results
+that effectively support an argument (e.g., that leakage risks are minimal at a 
+site) can require the acknowledgement and representation of that uncertainty 
+in GCS system models. Finally, the ``Parstudy`` analysis type is intended 
+to be used to study the effects of certain parameters on model outputs 
+(i.e., sensitivity analysis). Studying the effects of certain parameters 
+is important for decision support. Understanding which parameters have the 
+most significant impact can help inform the user about the parameters they should 
+focus on constraining in their study area. The control file interface can 
+also be used to automate sensitivity analysis within ``LHS`` simulations; 
+see *ControlFile_ex8a*-*ControlFile_ex8d*.
 
-Visualization options
-=====================
+Visualization Options
+---------------------
 
 NRAP-Open-IAM includes a variety of visualization options. For example, there are
 multiple options for plotting a model domain's stratigraphy with
 2-dimensional and 3-dimensional plots. The 3-dimensional ``Stratigraphy`` plot
-type can display features like injection sites and wellbores. The user can
-specify spatial variations in unit thicknesses and depths, and the
+type can display features like injection sites and wellbores. Certain stratigraphy
+components can create spatial variations in unit thicknesses and depths, and the
 stratigraphy visualization options are provided to help users ensure that
 the model domain conforms to the intended design. Other plot types available
 with NRAP-Open-IAM include: time series of outputs; map-view figures showing
@@ -218,9 +226,31 @@ the extent of reservoir and aquifers impacts (meant to inform an operation's
 area of review (``AoR``)); map-view figures showing when monitoring wells
 at specified locations can detect contaminant plumes in aquifers
 (time to first detection, ``TTFD``); and map-view figures showing the extent
-of atmospheric |CO2| plumes. The plotting options in NRAP-Open-IAM through the GUI
-interface (section :ref:`gui_operation`) are somewhat limited. Control file
-and script inteface have access to all visualization options in NRAP-Open-IAM
-(see, e.g., section :ref:`cfi_visualization`). Simulation results are saved
-in .csv files, however, and these files can be used to create figures in separate
-programs.
+of atmospheric |CO2| plumes.
+
+Many of the plot types are not available through the post-processing stage of the GUI
+(section :ref:`gui_operation`); this part of the GUI can only generate time series plots and
+maps of atmospheric |CO2| plumes. When using a workflow (section :ref:`workflow`) in the GUI,
+however, the workflow will automatically save figures to the output directory. For example, 
+the ``AoR`` workflow will save ``AoR`` plots, while the ``TTFD`` workflow will save ``TTFD``
+plots. The control file interface and script applications have access to all visualization
+options in NRAP-Open-IAM (see, e.g., section :ref:`cfi_visualization`). Simulation results
+are also saved in .csv files, however, and these files can be used to create figures in
+separate programs.
+
+Workflow Types
+--------------
+
+NRAP-Open-IAM simulations can be set up manually, where the user selects every 
+component and sets up the connections between components (e.g., a reservoir component 
+providing pressures and |CO2| saturations to a wellbore component). Alternatively, the 
+user can also set up a simulation by selecting a workflow type (section :ref:`workflow`).
+A workflow considers a specific type of analysis (e.g., determining an area of review)
+and automatically configures aspects of the system model for that analysis type. For
+example, the ``AoR`` workflow requires reservoir, wellbore, and aquifer components that
+are connected and produce certain outputs. The ``AoR`` workflow automatically sets up
+the component connections and output types, preventing the errors that can occur if the
+system model and components are not set up correctly. A workflow generally serves as a
+blueprint for a system model (:numref:`workflow_figure1`), allowing the user to perform
+a specific analysis more quickly and easily. Workflows are avaialble in the control file
+interface and GUI.

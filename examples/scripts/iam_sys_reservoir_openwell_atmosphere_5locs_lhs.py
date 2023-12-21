@@ -1,6 +1,6 @@
 '''
-This example illustrates linking of simple reservoir, open wellbore and
-atmosphere models. The saturation/pressure output produced by several simple
+This example illustrates linking of analytical reservoir, open wellbore and
+atmosphere models. The saturation/pressure output produced by several analytical
 reservoir components is used to drive leakage from open wellbores.
 |CO2| leakage rates are passed to the atmosphere model.
 
@@ -18,7 +18,7 @@ import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import SystemModel, SimpleReservoir, OpenWellbore, AtmosphericROM
+from openiam import SystemModel, AnalyticalReservoir, OpenWellbore, AtmosphericROM
 from matk import pyDOE
 
 
@@ -46,48 +46,48 @@ if __name__ == '__main__':
     num_wells = 5
     well_xys = xymins + pyDOE.lhs(2, samples=num_wells)*(xymaxs-xymins)
 
-    sress = []
+    aress = []
     mss = []
     ow = []
     co2_leakrates_collector = []
     for i, crds in enumerate(well_xys):
 
         # Add reservoir components
-        sress.append(sm.add_component_model_object(
-            SimpleReservoir(name='sres'+str(i), parent=sm,
+        aress.append(sm.add_component_model_object(
+            AnalyticalReservoir(name='ares'+str(i), parent=sm,
                             injX=0., injY=0., locX=crds[0], locY=crds[1])))
 
         # Add parameters of reservoir component model
-        sress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
-        sress[-1].add_par('injRate', value=0.05, vary=False)
+        aress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
+        aress[-1].add_par('injRate', value=0.05, vary=False)
         if i == 0:
-            sress[-1].add_par('shale1Thickness', min=300.0, max=500., value=400.0)
-            sress[-1].add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
-            sress[-1].add_par('shale2Thickness', min=700.0, max=900., value=800.0)
-            sress[-1].add_par('aquifer2Thickness', min=60.0, max=80., value=75.0)
-            sress[-1].add_par('shale3Thickness', min=150.0, max=250., value=200.0)
-            sress[-1].add_par('logResPerm', min=-12.5, max=-11.5, value=-12.)
+            aress[-1].add_par('shale1Thickness', min=300.0, max=500., value=400.0)
+            aress[-1].add_par('aquifer1Thickness', min=20.0, max=60., value=50.0)
+            aress[-1].add_par('shale2Thickness', min=700.0, max=900., value=800.0)
+            aress[-1].add_par('aquifer2Thickness', min=60.0, max=80., value=75.0)
+            aress[-1].add_par('shale3Thickness', min=150.0, max=250., value=200.0)
+            aress[-1].add_par('logResPerm', min=-12.5, max=-11.5, value=-12.)
         else:
-            sress[-1].add_par_linked_to_par(
-                'shale1Thickness', sress[0].pars['shale1Thickness'])
-            sress[-1].add_par_linked_to_par(
-                'aquifer1Thickness', sress[0].pars['aquifer1Thickness'])
-            sress[-1].add_par_linked_to_par(
-                'shale2Thickness', sress[0].pars['shale2Thickness'])
-            sress[-1].add_par_linked_to_par(
-                'aquifer2Thickness', sress[0].pars['aquifer2Thickness'])
-            sress[-1].add_par_linked_to_par(
-                'shale3Thickness', sress[0].pars['shale3Thickness'])
-            sress[-1].add_par_linked_to_par(
-                'logResPerm', sress[0].pars['logResPerm'])
+            aress[-1].add_par_linked_to_par(
+                'shale1Thickness', aress[0].pars['shale1Thickness'])
+            aress[-1].add_par_linked_to_par(
+                'aquifer1Thickness', aress[0].pars['aquifer1Thickness'])
+            aress[-1].add_par_linked_to_par(
+                'shale2Thickness', aress[0].pars['shale2Thickness'])
+            aress[-1].add_par_linked_to_par(
+                'aquifer2Thickness', aress[0].pars['aquifer2Thickness'])
+            aress[-1].add_par_linked_to_par(
+                'shale3Thickness', aress[0].pars['shale3Thickness'])
+            aress[-1].add_par_linked_to_par(
+                'logResPerm', aress[0].pars['logResPerm'])
 
         # Add observations of reservoir component model to be used by the next component
-        sress[-1].add_obs_to_be_linked('pressure')
-        sress[-1].add_obs_to_be_linked('CO2saturation')
+        aress[-1].add_obs_to_be_linked('pressure')
+        aress[-1].add_obs_to_be_linked('CO2saturation')
 
         # Add observations of reservoir component model
-        sress[-1].add_obs('pressure')
-        sress[-1].add_obs('CO2saturation')
+        aress[-1].add_obs('pressure')
+        aress[-1].add_obs('CO2saturation')
 
         # Add open wellbore component
         ow.append(sm.add_component_model_object(
@@ -101,16 +101,16 @@ if __name__ == '__main__':
         ow[-1].add_par('wellTop', value=0.0, vary=False)
 
         # Add keyword arguments of the open wellbore component model
-        ow[-1].add_kwarg_linked_to_obs('pressure', sress[-1].linkobs['pressure'])
-        ow[-1].add_kwarg_linked_to_obs('CO2saturation', sress[-1].linkobs['CO2saturation'])
+        ow[-1].add_kwarg_linked_to_obs('pressure', aress[-1].linkobs['pressure'])
+        ow[-1].add_kwarg_linked_to_obs('CO2saturation', aress[-1].linkobs['CO2saturation'])
 
         # Add composite parameter of open wellbore component
         ow[-1].add_composite_par(
-            'reservoirDepth', expr='+'.join(['sres0.shale1Thickness',
-                                             'sres0.shale2Thickness',
-                                             'sres0.shale3Thickness',
-                                             'sres0.aquifer1Thickness',
-                                             'sres0.aquifer2Thickness']))
+            'reservoirDepth', expr='+'.join(['ares0.shale1Thickness',
+                                             'ares0.shale2Thickness',
+                                             'ares0.shale3Thickness',
+                                             'ares0.aquifer1Thickness',
+                                             'ares0.aquifer2Thickness']))
 
         # Add observations of open wellbore component model
         ow[-1].add_obs_to_be_linked('CO2_atm')

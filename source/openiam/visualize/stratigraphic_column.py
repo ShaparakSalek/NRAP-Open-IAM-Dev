@@ -9,7 +9,7 @@ Examples illustrating applications or setup of stratigraphy_plot method:
     ControlFile_ex34.yaml
     ControlFile_ex35.yaml
     ControlFile_ex36.yaml
-    ControlFile_ex38.yaml
+    ControlFile_ex38c.yaml
 
 Created: September 15th, 2022
 Last Modified: February 10th, 2023
@@ -30,7 +30,7 @@ SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(SOURCE_DIR)
 
 import openiam.cfi.strata as iam_strata
-
+from openiam.visualize.get_strat_obs import get_strat_comp_obs
 
 DEPTH_LABEL = '{:.2f} m'
 
@@ -78,26 +78,18 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
 
     :return: None
     """
+    # These lists indicate the stratigraphy component types that offer thicknesses
+    # and depths as parameters or as observations.
+    types_strata_pars = iam_strata.get_comp_types_strata_pars()
+    types_strata_obs = iam_strata.get_comp_types_strata_obs()
+
     if boldlabels:
         selected_labelfontweight = 'bold'
     else:
         selected_labelfontweight = 'normal'
 
     # Get the stratigrapy information from the .yaml file
-    strata_var_info = iam_strata.get_strata_var_info_from_yaml(yaml_data)
-
-    var_type = strata_var_info['var_type']
-    strike = strata_var_info['strike']
-    dip = strata_var_info['dip']
-    dipDirection = strata_var_info['dipDirection']
-    coordxReferencePoint = strata_var_info['coordxReferencePoint']
-    coordyReferencePoint = strata_var_info['coordyReferencePoint']
-
-    if coordxReferencePoint is None:
-        coordxReferencePoint = 0
-
-    if coordyReferencePoint is None:
-        coordyReferencePoint = 0
+    comp_type = iam_strata.get_strata_type_from_yaml(yaml_data)
 
     # Get the stratigraphy plot input from the .yaml file
     strat_plot_yaml_input = read_strat_col_plot_yaml_input(yaml_data, name)
@@ -121,86 +113,66 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
         plot_depth_text = True
 
     # Get the data
-    if var_type == 'noVariation':
-        strata = sm.component_models['strata']
+    if comp_type in types_strata_pars:
 
-        strata_dict = iam_strata.get_strata_info_from_component(strata)
+        components = list(sm.component_models.values())
 
-        numShaleLayers = strata_dict['numberOfShaleLayers']
+        for comp in components:
+            if comp.class_type == comp_type:
+                strata_comp = comp
+                break
+
+        numShaleLayers = strata_comp.get_num_shale_layers()
+
+        strata_dict = iam_strata.get_strata_info_from_component(strata_comp)
+
         shaleThicknessList = strata_dict['shaleThicknesses']
         aquiferThicknessList = strata_dict['aquiferThicknesses']
         reservoirThickness = strata_dict['reservoirThickness']
 
-    elif var_type == 'strikeAndDip':
-        strataReferencePoint = sm.component_models['strataRefPoint']
+        # These need to have negative values
+        shaleTopDepthList = (-1 * np.array(strata_dict['shaleTopDepths'])).tolist()
+        aquiferTopDepthList = (-1 * np.array(strata_dict['aquiferTopDepths'])).tolist()
+        reservoirDepth = (-1 * np.array(strata_dict['reservoirDepth'])).tolist()
+        reservoirTopDepth = (-1 * np.array(strata_dict['reservoirTopDepth'])).tolist()
 
-        strata_dict = iam_strata.get_strata_info_from_component(strataReferencePoint)
+    elif comp_type in types_strata_obs:
+        # Get the number of shale layers
+        components = list(sm.component_models.values())
+        for comp in components:
+            if comp.class_type in types_strata_obs:
+                numShaleLayers = comp.get_num_shale_layers()
 
-        numShaleLayers = strata_dict['numberOfShaleLayers']
+                break
 
-        shaleThicknessesReferencePoint = strata_dict['shaleThicknesses']
+        stratigraphy_by_loc_temp = get_strat_comp_obs(
+            x_value, y_value, numShaleLayers, yaml_data)
 
-        aquiferThicknessesReferencePoint = strata_dict['aquiferThicknesses']
+        shaleThicknessList = []
+        aquiferThicknessList = []
+        shaleTopDepthList = []
+        aquiferTopDepthList = []
+        for shaleRef in range(numShaleLayers):
+            shaleThicknessList.append(np.max(stratigraphy_by_loc_temp[
+                'shale{}Thickness'.format(shaleRef + 1)]))
 
-        reservoirThicknessReferencePoint = strata_dict['reservoirThickness']
+            # Must be a negative value
+            shaleTopDepthList.append(-np.max(stratigraphy_by_loc_temp[
+                'shale{}TopDepth'.format(shaleRef + 1)]))
 
-        updatedStratigraphy = \
-            iam_strata.update_stratigraphy_by_strike_and_dip(
-                numberOfShaleLayers=numShaleLayers,
-                shaleThicknessList=shaleThicknessesReferencePoint[:],
-                aquiferThicknessList=aquiferThicknessesReferencePoint[:],
-                reservoirThickness=reservoirThicknessReferencePoint,
-                strike=strike, dip=dip, dipDirection=dipDirection,
-                coordxRefPoint=coordxReferencePoint,
-                coordyRefPoint=coordyReferencePoint,
-                location_x=x_value, location_y=y_value,
-                strataRefPoint=strataReferencePoint)
+            if (shaleRef + 1) < numShaleLayers:
+                aquiferThicknessList.append(np.max(stratigraphy_by_loc_temp[
+                    'aquifer{}Thickness'.format(shaleRef + 1)]))
 
-        shaleThicknessList = updatedStratigraphy['shaleThicknessList']
-        aquiferThicknessList = updatedStratigraphy['aquiferThicknessList']
-        reservoirThickness = updatedStratigraphy['reservoirThickness']
+                # Must be a negative value
+                aquiferTopDepthList.append(-np.max(stratigraphy_by_loc_temp[
+                    'aquifer{}TopDepth'.format(shaleRef + 1)]))
 
-        shaleTopDepthList = updatedStratigraphy['shaleTopDepthList']
-        aquiferTopDepthList = updatedStratigraphy['aquiferTopDepthList']
-        reservoirTopDepth = updatedStratigraphy['reservoirTopDepth']
-        reservoirBottomDepth = updatedStratigraphy['reservoirBottomDepth']
+        reservoirThickness = np.max(stratigraphy_by_loc_temp['reservoirThickness'])
 
-        reservoirTopDepth = -reservoirTopDepth
-        reservoirBottomDepth = -reservoirBottomDepth
-
-        for shaleRef in range(0, numShaleLayers - 1):
-            shaleTopDepthList[shaleRef] = -shaleTopDepthList[shaleRef]
-
-            if shaleRef != (numShaleLayers - 1):
-                aquiferTopDepthList[shaleRef] = -aquiferTopDepthList[shaleRef]
-
-    elif var_type == 'LookupTable':
-        file_name = yaml_data['Stratigraphy']['spatiallyVariable'][
-            'LookupTableStratigraphy']['FileName']
-        file_directory = yaml_data['Stratigraphy']['spatiallyVariable'][
-            'LookupTableStratigraphy']['FileDirectory']
-
-        LUTStrat_dict = iam_strata.get_lut_stratigraphy_dict(
-            file_name, file_directory, x_value, y_value)
-
-        numShaleLayers = LUTStrat_dict['numberOfShaleLayers']
-        shaleThicknessList = LUTStrat_dict['shaleThickness_List']
-        aquiferThicknessList = LUTStrat_dict['aquiferThickness_List']
-        reservoirThickness = LUTStrat_dict['resThickness']
-
-    if var_type in ['noVariation', 'LookupTable']:
-        reservoirTopDepth = -1 * (np.sum(shaleThicknessList) + np.sum(aquiferThicknessList))
-        reservoirBottomDepth = reservoirTopDepth - reservoirThickness
-
-        shaleTopDepthList = [0] * len(shaleThicknessList)
-        aquiferTopDepthList = [0] * len(aquiferThicknessList)
-
-        for shaleRef in range(len(shaleTopDepthList) - 2, -1, -1):
-            aquiferTopDepthList[shaleRef] = shaleTopDepthList[
-                shaleRef + 1] - shaleThicknessList[shaleRef + 1]
-
-            shaleTopDepthList[shaleRef] = aquiferTopDepthList[
-                shaleRef] - aquiferThicknessList[shaleRef]
+        # Must be negative values
+        reservoirTopDepth = -np.max(stratigraphy_by_loc_temp['reservoirTopDepth'])
+        reservoirDepth = -np.max(stratigraphy_by_loc_temp['reservoirDepth'])
 
     reservoirColor, reservoirAlpha, reservoirAlphaFill, reservoirLabel, \
         shaleColor, shaleAlpha, shaleAlphaFill, shaleLabel, \
@@ -255,18 +227,18 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
     fig = plt.figure(figsize=figsize, dpi=figdpi)
     ax = fig.add_subplot()
 
-    ax.plot(x_range_reservoir, [reservoirBottomDepth, reservoirBottomDepth],
+    ax.plot(x_range_reservoir, [reservoirDepth, reservoirDepth],
             color=reservoirColor, alpha=reservoirAlpha, zorder=10)
 
     ax.plot(x_range_reservoir, [reservoirTopDepth, reservoirTopDepth],
             color=reservoirColor, alpha=reservoirAlpha, zorder=10)
 
     ax.fill_between(x_range_reservoir, [reservoirTopDepth, reservoirTopDepth],
-                    [reservoirBottomDepth, reservoirBottomDepth],
+                    [reservoirDepth, reservoirDepth],
                     color=reservoirColor, alpha=reservoirAlphaFill)
 
     # Text for unit label
-    y_text = reservoirBottomDepth + y_buffer_text
+    y_text = reservoirDepth + y_buffer_text
 
     ax.text(x_text_reservoir, y_text, reservoirLabel, color=reservoirColor,
             alpha=reservoirAlpha, fontsize=genfontsize - 2,
@@ -274,9 +246,9 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
 
     # Text for unit depth
     if plot_depth_text:
-        depth_text = DEPTH_LABEL.format(-reservoirBottomDepth)
+        depth_text = DEPTH_LABEL.format(reservoirDepth)
 
-        ax.text(x_text_depth_reservoir, y_text, DEPTH_LABEL.format(-reservoirTopDepth),
+        ax.text(x_text_depth_reservoir, y_text, depth_text,
                 color=reservoirColor, alpha=reservoirAlpha, fontsize=genfontsize - 2,
                 fontweight=selected_labelfontweight, zorder=10)
 
@@ -294,7 +266,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
                 color=shaleColor[shaleRef], alpha=shaleAlphaFill[shaleRef])
 
             y_text = reservoirTopDepth + y_buffer_text
-            depth_text = DEPTH_LABEL.format(-reservoirTopDepth)
+            depth_text = DEPTH_LABEL.format(reservoirTopDepth)
         else:
             ax.fill_between(
                 x_range_shales, [shaleTDValue, shaleTDValue],
@@ -303,7 +275,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
                 color=shaleColor[shaleRef], alpha=shaleAlphaFill[shaleRef])
 
             y_text = aquiferTopDepthList[shaleRef - 1] + y_buffer_text
-            depth_text = DEPTH_LABEL.format(-aquiferTopDepthList[shaleRef - 1])
+            depth_text = DEPTH_LABEL.format(aquiferTopDepthList[shaleRef - 1])
 
         # Text for unit label
         ax.text(x_text_shales, y_text, shaleLabel[shaleRef],
@@ -319,6 +291,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
                     fontweight=selected_labelfontweight, zorder=10)
 
         if shaleRef != (len(shaleTopDepthList) - 1):
+            # Plot aquifers
             ax.plot(x_range_aquifers, [shaleTDValue, shaleTDValue],
                     color=aquiferColor[shaleRef],
                     alpha=aquiferAlpha[shaleRef], zorder=10)
@@ -344,7 +317,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
 
             # Text for unit depth
             if plot_depth_text:
-                depth_text = DEPTH_LABEL.format(-shaleTDValue)
+                depth_text = DEPTH_LABEL.format(shaleTDValue)
 
                 ax.text(x_text_depth_aquifers, y_text, depth_text,
                         color=aquiferColor[shaleRef], alpha=aquiferAlpha[shaleRef],
@@ -359,7 +332,7 @@ def stratigraphic_column(yaml_data, sm, name='strat_column_Figure1',
     ax.set_xlim(x_lims_strat_col)
     ax.set_xticks([])
 
-    if var_type == 'noVariation':
+    if comp_type in types_strata_pars:
         x_label = 'Stratigraphic Column'
     else:
         x_label = 'Stratigraphic Column at\nx = {} km, y = {} km'.format(
@@ -436,7 +409,7 @@ def read_strat_col_plot_yaml_input(yaml_data, name):
                 debug_msg = ''.join([
                     'The input provided for DepthText in the StratigraphicColumn ',
                     'plot ', name, ' was not of boolean type. The default value '
-                    ' of True will be used.'])
+                    'of True will be used.'])
                 logging.debug(debug_msg)
 
     return yaml_input

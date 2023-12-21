@@ -1,0 +1,70 @@
+# OpenIAM Control File Example 56g
+#
+# This example demonstrates the use of the AoR Workflow in a simulation
+# using a CementedWellbore (WellboreComponentType: CementedWellbore).
+#
+# Because a specific critical pressure is not given, the AoR Workflow will
+# use the default approach of calculating critical pressure. A critical pressure
+# is calculated with a brine density. When the wellbore component has a brine
+# density parameter (e.g., brineDensity from OpenWellbore or MultisegmentedWellbore
+# components), that parameter value will be used when calculating critical pressure.
+# The CementedWellbore component does not have a brine density parameter, however.
+# In this case, a brine density value (in kg/(m^3)) can be provided through the
+# BrineDensity entry under 'Workflow: Options'.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56g.yaml
+#
+# Last Modified: July, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 10
+    TimeStep: 1.0
+    Analysis: forward
+    Components: []
+    OutputDirectory: 'output/output_ex56g_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 750
+    shale2Thickness:
+        vary: False
+        value: 475.0
+    shale3Thickness:
+        vary: False
+        value: 100
+    aquifer1Thickness:
+        vary: False
+        value: 22.4
+    aquifer2Thickness:
+        vary: False
+        value: 19.2
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+Workflow:
+    Type: AoR
+    Options:
+        PlotInjectionSites: True
+        BrineDensity: 1250          # the BrineDensity entry will influence the map-view figure of pressure, but not the behavior of the CementedWellbore component
+        ReservoirComponentType: AnalyticalReservoir
+        ReservoirOptions:
+            Parameters:
+                injRate: 0.05
+                logResPerm: -12.85
+                reservoirRadius: 75000
+                brineResSaturation: 0.2
+        WellboreComponentType: CementedWellbore
+        WellboreOptions:
+            Parameters:
+                logWellPerm: -13.85
+        AquiferName: aquifer1
+        AquiferComponentType: FutureGen2Aquifer

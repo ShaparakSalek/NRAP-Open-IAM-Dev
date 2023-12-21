@@ -143,7 +143,7 @@ Plots:
         TTFD:
             PlumeType: Dissolved_CO2
             FigureSize: (15, 12)
-            FigureDPI: 300
+            FigureDPI: 100
             PlotInjectionSites: True
             InjectionCoordx: 2.37e5
             InjectionCoordy: 4.41e6

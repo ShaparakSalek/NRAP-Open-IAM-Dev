@@ -733,6 +733,15 @@ class SystemModel(matk):
                 aeval.symtable[sub('\.', '_', comp_par.name)] = comp_par.value
                 pars[k] = comp_par.value
 
+            # For any components that are not handled below, add their observations
+            # to the interpreter
+            if (cm.run_frequency == 1 and not to_reset):
+                for k, lobs in cm.linkobs.items():
+                    if self.component_models[cm.name].linkobs[k].sim is not None:
+                        aeval.symtable[sub('\.', '_', self.component_models[
+                            cm.name].linkobs[k].name)] = self.component_models[
+                                cm.name].linkobs[k].sim
+
             # Run component's model at frequency defined by the component's run_frequency attribute
             if (cm.run_frequency == 2) or ((cm.run_frequency == 1) and (to_reset is True)) or (
                     (cm.run_frequency == 3) and (sm_kwargs['time_index'] in cm.run_time_indices)):
@@ -742,6 +751,33 @@ class SystemModel(matk):
                     lobs_cm, lobs_nm = lobs.split('.')
                     if lobs_nm in self.component_models[lobs_cm].linkobs:
                         pars[k] = self.component_models[lobs_cm].linkobs[lobs_nm].sim
+                        # Add the observation-linked parameter to the interpreter
+                        aeval.symtable[sub('\.', '_', cm.name + '.' + k)] = \
+                            self.component_models[lobs_cm].linkobs[lobs_nm].sim
+
+                # Determine composite observation-linked parameters
+                for k, compobsl_par in cm.compositeobslinked_pars.items():
+                    cm.compositeobslinked_pars[k].value = aeval(
+                        sub('\.', '_', compobsl_par.expr))
+                    if not compobsl_par.value:
+                        warning_msg = ''.join([
+                            'The composite observation-linked parameter {} '.format(
+                                compobsl_par.name),
+                            'with the expression {} was calculated '.format(
+                                compobsl_par.expr),
+                            'as having a value of {}. '.format(
+                                compobsl_par.value),
+                            'For a composite observation-linked parameter to ',
+                            'be calculated correctly, any components that ',
+                            'produce observations used in the expression ',
+                            'need to be added to the system model before this ',
+                            'component ({}). Check the order in '.format(cm.name),
+                            'which components were added as well as the expression ',
+                            'used for this composite observation-linked parameter.'])
+                        logging.warning(warning_msg)
+                    # Add composite observation-linked parameter value to aeval
+                    aeval.symtable[sub('\.', '_', compobsl_par.name)] = compobsl_par.value
+                    pars[k] = compobsl_par.value
 
                 # Determine keyword parameters that obtain their values from observations
                 for k, lkwargs in cm.obs_linked_kwargs.items():
@@ -862,6 +898,14 @@ class SystemModel(matk):
                 for k in keys_to_be_removed:
                     total_out.pop(k)  # remove arrays/matrices from output
 
+                # For any components that are handled after this component within
+                # the loop, add the observations of this component to the interpreter.
+                for k, lobs in cm.linkobs.items():
+                    if self.component_models[cm.name].linkobs[k].sim is not None:
+                        aeval.symtable[sub('\.', '_', self.component_models[
+                            cm.name].linkobs[k].name)] = self.component_models[
+                                cm.name].linkobs[k].sim
+
         return total_out
 
     def system_model(self, pardict=None, job_number=None):
@@ -886,7 +930,7 @@ class SystemModel(matk):
                      'time_step': self.time_array[1] - self.time_array[0],
                      'time_index': 0}   # time_index is needed for dynamic kwargs
 
-        # Initializa system model outputs dictionary
+        # Initialize system model outputs dictionary
         total_out = {}
 
         # For some components the model method may not be run (run_frequency = 0)
@@ -1145,6 +1189,7 @@ class ComponentModel():
         self.gridded_pars = OrderedDict()  # placeholder for future work
         self.parlinked_pars = OrderedDict()
         self.obslinked_pars = OrderedDict()
+        self.compositeobslinked_pars = OrderedDict()
 
         # Keyword arguments
         self.obs_linked_kwargs = OrderedDict()
@@ -1332,7 +1377,7 @@ class ComponentModel():
         :type kwargs: dict
         """
         if obs_type == 'scalar':
-            self.obs_linked_pars[name] = obslink.name
+            self.obslinked_pars[name] = obslink.name
         elif obs_type == 'grid':
             self.grid_obs_linked_pars[name] = {'name': obslink.name}
             if ('constr_type' in kwargs) and ('loc_ind' in kwargs):
@@ -1366,6 +1411,28 @@ class ComponentModel():
             self.gridded_pars[name] = interpolator
         else:
             self.gridded_pars.__setitem__(name, interpolator)
+
+    def add_par_linked_to_composite_obs(self, name, expr=None):
+        """
+        Add parameter linked to a function of observations and parameters.
+
+        We assign a composite observation-linked parameter by evaluating an expression
+        expression containing the names of observations and parameters.
+
+        :param name: name of composite observation-linked parameter
+        :type name: str
+
+        :param expression: expression for calculating the value of parameter.
+            It has a form: 'f(obs_nm1,obs_nm2,obs_nm3,...)'
+        :type expression: str
+
+        """
+        if name in self.compositeobslinked_pars:
+            self.compositeobslinked_pars[name] = Parameter(
+                '.'.join([self.name, name]), parent=self._parent, expr=expr)
+        else:
+            self.compositeobslinked_pars.__setitem__(name, Parameter(
+                '.'.join([self.name, name]), parent=self._parent, expr=expr))
 
     def add_composite_par(self, name, expr=None):
         """
@@ -1612,8 +1679,8 @@ class ComponentModel():
             if self.run_time_indices is not None:
                 # Obtain an intersection of the lists provided in the argument
                 # and defined in the component attribute
+                val_list = [val_list[ind] for ind in ind_array if ind in self.run_time_indices]
                 ind_array = [ind for ind in ind_array if ind in self.run_time_indices]
-                val_list = val_list[ind_array]
 
             # Add observation name to the list of base observations in the system model
             if base_nm not in self._parent.obs_base_names:
@@ -1910,7 +1977,7 @@ class SamplerModel(ComponentModel):
         pass
 
 
-if __name__ == "__main__":
+def test_base_classes():
     sm = SystemModel()
     cmpnt = ComponentModel('cmpnt', sm)
 

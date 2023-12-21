@@ -1,0 +1,73 @@
+# OpenIAM Control File Example 56f
+#
+# This example demonstrates the use of the AoR Workflow in a simulation
+# using a MultisegmentedWellbore (WellboreComponentType: MultisegmentedWellbore).
+#
+# Here, the critical pressure is specified as 15 MPa (CriticalPressureMPa: 15.0). 
+# This critical pressure will be used in the map-view figures examining reservoir 
+# pressures, but it will not impact the behavior of the MultisegmentedWellbore 
+# components (which do not use a critical pressure).
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56f.yaml
+#
+# Last Modified: July, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 10
+    TimeStep: 1.0
+    Analysis: forward
+    Components: []
+    OutputDirectory: 'output/output_ex56f_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 750
+    shale2Thickness:
+        vary: False
+        value: 475.0
+    shale3Thickness:
+        vary: False
+        value: 100
+    aquifer1Thickness:
+        vary: False
+        value: 22.4
+    aquifer2Thickness:
+        vary: False
+        value: 19.2
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+Workflow:
+    Type: AoR
+    Options:
+        PlotInjectionSites: True
+        CriticalPressureMPa: 15.0
+        ReservoirComponentType: AnalyticalReservoir
+        ReservoirOptions:
+            Parameters:
+                injRate: 0.1
+                logResPerm: -14.5
+                reservoirRadius: 75000
+                brineResSaturation: 0.01
+        WellboreComponentType: MultisegmentedWellbore
+        WellboreOptions:
+            Parameters:
+                wellRadius: 0.01
+                logAqu1Perm: -11.0
+                logAqu2Perm: -11.0
+                logWellPerm: -13.0
+                brineDensity: 1150
+                CO2Density: 775.0
+                brineViscosity: 3.0e-5
+                CO2Viscosity: 6.6e-5
+        AquiferName: aquifer1
+        AquiferComponentType: FutureGen2Aquifer

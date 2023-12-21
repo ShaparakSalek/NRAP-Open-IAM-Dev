@@ -25,11 +25,10 @@ import random
 import datetime
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, Stratigraphy, SimpleReservoir,
+from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
                      MultisegmentedWellbore)
 
 import openiam as iam
-import openiam.cfi.strata as iam_strata
 import openiam.visualize as iam_vis
 
 
@@ -52,15 +51,6 @@ if __name__ == "__main__":
     # These lists are required by stratigraphy_plot()
     shaleThicknessList = [shale1Thickness, shale2Thickness, shale3Thickness]
     aquiferThicknessList = [aquifer1Thickness, aquifer2Thickness]
-
-    strike = 315
-    dip = 5
-    dipDirection = 'NE'
-    coordxRefPoint = 0
-    coordyRefPoint = 0
-
-    dipDirectionDegrees = iam_strata.obtain_dip_direction_degrees(
-        strike, dipDirection)
 
     injectionX = 2500
     injectionY = 2500
@@ -119,7 +109,7 @@ if __name__ == "__main__":
 
     # Lists of components
     strata = []
-    sres = []
+    ares = []
     ms = []
 
     # List of all components except for stratigraphy components. This list is
@@ -139,9 +129,12 @@ if __name__ == "__main__":
     strata[-1].add_par('aquifer2Thickness', value=aquifer2Thickness, vary=False)
     strata[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
     strata[-1].add_par('datumPressure', value=datumPressure, vary=False)
-    # This is meant for the Control File interface, but it also calculates
-    # parameters like unit depths. Those unit depths are used in stratigraphy_plot().
-    strata[-1].connect_with_system()
+    
+    composite_depth_pars = strata[-1].get_composite_depth_names()
+    
+    for comp_depth in composite_depth_pars:
+        par_expr = strata[-1].get_depth_expr(comp_depth)
+        strata[-1].add_composite_par(comp_depth, par_expr)
 
     numberOfWells = 6
     np.random.seed(random.randint(0, 1.0e6))
@@ -154,30 +147,31 @@ if __name__ == "__main__":
         # The names for the reservoir and wellbore components at this location.
         # This naming convention is required by stratigraphy_plot() because the
         # convention is used by the control file interface.
-        sresName = 'SimpleReservoir_{0:03}'.format(locRef)
+        aresName = 'AnalyticalReservoir_{0:03}'.format(locRef)
         msName = 'MultisegmentedWellbore_{0:03}'.format(locRef)
 
         # Add reservoir component for the current well
-        sres.append(sm.add_component_model_object(SimpleReservoir(
-            name=sresName, parent=sm, locX=well_x_values[locRef],
+        ares.append(sm.add_component_model_object(AnalyticalReservoir(
+            name=aresName, parent=sm, locX=well_x_values[locRef],
             locY=well_y_values[locRef], injX=injectionX, injY=injectionY)))
 
         # Add parameters of reservoir component model
-        sres[-1].add_par('injRate', value=0.5, vary=False)
-        sres[-1].add_par('brineDensity', value=1100, vary=False)
-        sres[-1].add_par('numberOfShaleLayers', value=numberOfShaleLayers, vary=False)
-        sres[-1].add_par('shale1Thickness', value=shaleThicknessList[0], vary=False)
-        sres[-1].add_par('shale2Thickness', value=shaleThicknessList[1], vary=False)
-        sres[-1].add_par('shale3Thickness', value=shaleThicknessList[2], vary=False)
-        sres[-1].add_par('aquifer1Thickness', value=aquiferThicknessList[0], vary=False)
-        sres[-1].add_par('aquifer2Thickness', value=aquiferThicknessList[1], vary=False)
-        sres[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
-        sres[-1].add_par('datumPressure', value=datumPressure, vary=False)
+        ares[-1].add_par('injRate', value=0.5, vary=False)
+        ares[-1].add_par('reservoirRadius', value=4500.0, vary=False)
+        ares[-1].add_par('brineDensity', value=1100, vary=False)
+        ares[-1].add_par('numberOfShaleLayers', value=numberOfShaleLayers, vary=False)
+        ares[-1].add_par('shale1Thickness', value=shaleThicknessList[0], vary=False)
+        ares[-1].add_par('shale2Thickness', value=shaleThicknessList[1], vary=False)
+        ares[-1].add_par('shale3Thickness', value=shaleThicknessList[2], vary=False)
+        ares[-1].add_par('aquifer1Thickness', value=aquiferThicknessList[0], vary=False)
+        ares[-1].add_par('aquifer2Thickness', value=aquiferThicknessList[1], vary=False)
+        ares[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
+        ares[-1].add_par('datumPressure', value=datumPressure, vary=False)
 
-        sres[-1].add_obs('pressure')
-        sres[-1].add_obs('CO2saturation')
-        sres[-1].add_obs_to_be_linked('pressure')
-        sres[-1].add_obs_to_be_linked('CO2saturation')
+        ares[-1].add_obs('pressure')
+        ares[-1].add_obs('CO2saturation')
+        ares[-1].add_obs_to_be_linked('pressure')
+        ares[-1].add_obs_to_be_linked('CO2saturation')
 
         # Add multisegmented wellbore component
         ms.append(sm.add_component_model_object(
@@ -189,38 +183,38 @@ if __name__ == "__main__":
 
         # Add linked parameters: common to reservoir and wellbore components
         ms[-1].add_par_linked_to_par(
-            'numberOfShaleLayers', sres[-1].deterministic_pars['numberOfShaleLayers'])
+            'numberOfShaleLayers', ares[-1].deterministic_pars['numberOfShaleLayers'])
         ms[-1].add_par_linked_to_par(
-            'shale1Thickness', sres[-1].deterministic_pars['shale1Thickness'])
+            'shale1Thickness', ares[-1].deterministic_pars['shale1Thickness'])
         ms[-1].add_par_linked_to_par(
-            'shale2Thickness', sres[-1].deterministic_pars['shale2Thickness'])
+            'shale2Thickness', ares[-1].deterministic_pars['shale2Thickness'])
         ms[-1].add_par_linked_to_par(
-            'shale3Thickness', sres[-1].deterministic_pars['shale3Thickness'])
+            'shale3Thickness', ares[-1].deterministic_pars['shale3Thickness'])
         ms[-1].add_par_linked_to_par(
-            'aquifer1Thickness', sres[-1].deterministic_pars['aquifer1Thickness'])
+            'aquifer1Thickness', ares[-1].deterministic_pars['aquifer1Thickness'])
         ms[-1].add_par_linked_to_par(
-            'aquifer2Thickness', sres[-1].deterministic_pars['aquifer2Thickness'])
+            'aquifer2Thickness', ares[-1].deterministic_pars['aquifer2Thickness'])
         ms[-1].add_par_linked_to_par(
-            'reservoirThickness', sres[-1].deterministic_pars['reservoirThickness'])
+            'reservoirThickness', ares[-1].deterministic_pars['reservoirThickness'])
         ms[-1].add_par_linked_to_par(
-            'datumPressure', sres[-1].deterministic_pars['datumPressure'])
+            'datumPressure', ares[-1].deterministic_pars['datumPressure'])
 
         # Add keyword arguments linked to the output provided by reservoir model
-        ms[-1].add_kwarg_linked_to_obs('pressure', sres[-1].linkobs['pressure'])
-        ms[-1].add_kwarg_linked_to_obs('CO2saturation', sres[-1].linkobs['CO2saturation'])
+        ms[-1].add_kwarg_linked_to_obs('pressure', ares[-1].linkobs['pressure'])
+        ms[-1].add_kwarg_linked_to_obs('CO2saturation', ares[-1].linkobs['CO2saturation'])
 
         # Add observations of multisegmented wellbore component model
         ms[-1].add_obs('brine_aquifer1')
         ms[-1].add_obs('CO2_aquifer1')
 
-        components.append(sres[-1])
+        components.append(ares[-1])
         components.append(ms[-1])
 
-        yaml_data[sres[-1].name] = dict()
-        yaml_data[sres[-1].name]['Type'] = 'SimpleReservoir'
+        yaml_data[ares[-1].name] = dict()
+        yaml_data[ares[-1].name]['Type'] = 'AnalyticalReservoir'
         yaml_data[ms[-1].name] = dict()
         yaml_data[ms[-1].name]['Type'] = 'MultisegmentedWellbore'
-        yaml_data[ms[-1].name]['Connection'] = sres[-1].name
+        yaml_data[ms[-1].name]['Connection'] = ares[-1].name
 
     # Run system model using current values of its parameters
     sm.forward()  # system model is run deterministically
@@ -229,10 +223,10 @@ if __name__ == "__main__":
     print('                  Forward method illustration ')
     print('------------------------------------------------------------------')
     print('pressure, Well 1\n',
-          sm.collect_observations_as_time_series(sres[0], 'pressure'))
+          sm.collect_observations_as_time_series(ares[0], 'pressure'))
     print('------------------------------------------------------------------')
     print('pressure, Well 2\n',
-          sm.collect_observations_as_time_series(sres[1], 'pressure'))
+          sm.collect_observations_as_time_series(ares[1], 'pressure'))
     print('------------------------------------------------------------------')
     print('CO2_aquifer1, Well 1\n',
           sm.collect_observations_as_time_series(ms[0], 'CO2_aquifer1'))

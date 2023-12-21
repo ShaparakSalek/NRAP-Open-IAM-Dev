@@ -40,7 +40,7 @@ ModelParams:
     Analysis:
         type: lhs
         siz: 30
-    Components: [SimpleReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    Components: [AnalyticalReservoir1, OpenWellbore1, FutureGen2Aquifer1]
     OutputDirectory: 'output/output_ex31d_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
@@ -69,8 +69,8 @@ Stratigraphy:
         vary: False
         value: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 1.0
@@ -78,12 +78,18 @@ SimpleReservoir1:
         logResPerm:
             value: -11.0
             vary: False
+        reservoirRadius:
+            value: 30000
+            vary: False
+        brineResSaturation:
+            value: 0.175
+            vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 25   # 5*5
     LeakTo: aquifer2
     Locations:
@@ -112,7 +118,7 @@ OpenWellbore1:
             value: 0.2
             vary: False
         brineDensity:
-            value: 1050
+            value: 1075
             vary: False
         # If critPressureApproach is set to True and enforceCritPressure
         # is left at the default of False, the parameters wellTop, reservoirDepth,

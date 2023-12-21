@@ -1,6 +1,6 @@
 '''
-This example couples the simple reservoir, open wellbore and
-carbonate aquifer models. The saturation/pressure output produced by simple
+This example couples the analytical reservoir, open wellbore and
+carbonate aquifer models. The saturation/pressure output produced by analytical
 reservoir model is used to drive leakage from a single open wellbore
 model, which is passed to the input of an adapter that provides well
 coordinates, |CO2| and brine leakage rates and cumulative mass fluxes to the
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, SimpleReservoir, OpenWellbore,
+from openiam import (SystemModel, AnalyticalReservoir, OpenWellbore,
                      CarbonateAquifer, RateToMassAdapter)
 from openiam.visualize import (correlations_at_time, time_series_sensitivities,
                                multi_sensitivities_barplot,
@@ -39,26 +39,26 @@ if __name__ == "__main__":
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=900.0, max=1100., value=1000.0)
-    sres.add_par('shale2Thickness', min=900.0, max=1100., value=1000.0)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', min=900.0, max=1100., value=1000.0)
+    ares.add_par('shale2Thickness', min=900.0, max=1100., value=1000.0)
     # Shale 3 has a fixed thickness of 11.2 m
-    sres.add_par('shale3Thickness', value=11.2, vary=False)
+    ares.add_par('shale3Thickness', value=11.2, vary=False)
     # Aquifer 1 (thief zone has a fixed thickness of 22.4)
-    sres.add_par('aquifer1Thickness', value=22.4, vary=False)
+    ares.add_par('aquifer1Thickness', value=22.4, vary=False)
     # Aquifer 2 (shallow aquifer) has a fixed thickness of 19.2
-    sres.add_par('aquifer2Thickness', value=400, vary=False)
+    ares.add_par('aquifer2Thickness', value=400, vary=False)
     # Reservoir has a fixed thickness of 51.2
-    sres.add_par('reservoirThickness', value=51.2, vary=False)
+    ares.add_par('reservoirThickness', value=51.2, vary=False)
 
     # Add observations of reservoir component model
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
 
     # Add open wellbore component
     ow = sm.add_component_model_object(OpenWellbore(name='ow', parent=sm))
@@ -70,18 +70,18 @@ if __name__ == "__main__":
     ow.add_par('brineSalinity', value=0.1, vary=False)
 
     # Add keyword arguments of open wellbore component
-    ow.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ow.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ow.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ow.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add composite parameter of open wellbore component
     ow.add_composite_par('reservoirDepth',
-                         expr='+'.join(['sres.shale1Thickness',
-                                        'sres.shale2Thickness',
-                                        'sres.shale3Thickness',
-                                        'sres.aquifer1Thickness',
-                                        'sres.aquifer2Thickness']))
+                         expr='+'.join(['ares.shale1Thickness',
+                                        'ares.shale2Thickness',
+                                        'ares.shale3Thickness',
+                                        'ares.aquifer1Thickness',
+                                        'ares.aquifer2Thickness']))
     ow.add_composite_par(
-        'wellTop', expr='sres.shale3Thickness + sres.aquifer2Thickness')
+        'wellTop', expr='ares.shale3Thickness + ares.aquifer2Thickness')
 
     # Add observations of open wellbore component
     ow.add_obs_to_be_linked('CO2_aquifer')
@@ -277,13 +277,14 @@ if __name__ == "__main__":
         capture_point=15)
 
     multi_sensitivities_barplot(
-        ['sres.pressure_50', 'ow.CO2_aquifer_50', 'ow.brine_aquifer_50',
+        ['ares.pressure_50', 'ow.CO2_aquifer_50', 'ow.brine_aquifer_50',
          'adapt.mass_CO2_aquifer_50', 'adapt.mass_brine_aquifer_50',
          'ca.pH_volume_50', 'ca.TDS_volume_50'], sm, lhs_sample,
         savefig=os.sep.join([output_directory, 'multi-bar-sensitivities.png']))
 
     corr_coeffs = correlations_at_time(
-        lhs_sample, capture_point=50, excludes=['ow.CO2_atm', 'ow.brine_atm'],
+        lhs_sample, time_array, capture_point=50,
+        excludes=['ow.CO2_atm', 'ow.brine_atm'],
         plot=True, figsize=(15, 15), printout=False, xrotation=90,
         title='Pearson Correlation Coefficients at 50 years',
         savefig=os.sep.join([output_directory, 'Corr_coeff_at_time_50.png']))

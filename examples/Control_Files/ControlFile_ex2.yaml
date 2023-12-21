@@ -1,7 +1,7 @@
 # OpenIAM Control File Example 2
 #
 # This example computes the leakage from a leaky well (MultisegmentedWellbore
-# component) connected to a SimpleReservoir component. Uncertainty is represented
+# component) connected to a AnalyticalReservoir component. Uncertainty is represented
 # through parameter variations (between the min and max values) with Latin
 # Hypercube Sampling (lhs) across 30 realizations (siz: 30).
 #
@@ -17,7 +17,7 @@ ModelParams:
         type: lhs
         siz: 30
         #seed: 721
-    Components: [msw1, SimpleReservoir1]
+    Components: [AnalyticalReservoir1, msw1]
     OutputDirectory: output/output_ex2_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
     GenerateOutputFiles: True
@@ -45,19 +45,21 @@ Stratigraphy:
         value: 250.0
     shale3Thickness: 250
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 3
             vary: False
         logResPerm:
             min: -13.0
-            max: -11.0
-            value: -12.0
+            max: -12.0
+            value: -12.5
+        reservoirRadius: 2500
+        brineResSaturation: 0.1
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
@@ -66,7 +68,7 @@ msw1:
     Locations:
         coordx: [100]
         coordy: [100]
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Parameters:
         logWellPerm:
             min: -14.0

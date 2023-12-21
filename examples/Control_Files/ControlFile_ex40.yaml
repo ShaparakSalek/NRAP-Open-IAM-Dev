@@ -13,9 +13,9 @@
 # include PlotInjectionSites: True. When using a LookupTableReservoir,
 # you must also include entries for InjectionCoordx and InjectionCoordy.
 #
-# This example requires the additional FutureGen 2.0 data set.
+# This example requires additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
-# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
@@ -135,20 +135,22 @@ Plots:
         subplot:
             use: True
             ncols: 2
+    Strat_Col:
+        StratigraphicColumn:
     TTFD_Plot:
         TTFD:
             PlumeType: Dissolved_CO2
             FigureDPI: 300
             PlotInjectionSites: True
-            InjectionCoordx: 2.37e5
-            InjectionCoordy: 4.41e6
+            InjectionCoordx: 2.37e+5
+            InjectionCoordy: 4.41e+6
             MonitoringLocations:
                 # coordx: 236377.0
                 # coordy: 4409269.5
                 # coordz: -1015
                 coordx: [236377.0, 236758.0, 236377.0, 236758.0]
                 coordy: [4409269.5, 4410107.6, 4409269.5, 4410107.6]
-                coordz: [-1015, -715, -1015, -715] # Near the tops of aquifers 1 and 3
+                coordz: [-980, -715, -980, -715] # Near the tops of aquifers 1 and 3
                 HorizontalWindow: 1
-                VerticalWindow: 5
+                VerticalWindow: 10
             ComponentNameList: [FutureGen2AZMI1, FutureGen2AZMI2]

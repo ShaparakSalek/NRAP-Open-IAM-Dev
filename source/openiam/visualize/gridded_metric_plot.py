@@ -20,7 +20,7 @@ from matplotlib import ticker
 
 from .label_setup import Y_LABEL_DICT
 from openiam.visualize import time_series
-import openiam.cfi.commons as iamcommons
+import openiam.cfi.commons as iam_commons
 
 
 RC_FONT = {'family': 'Arial', 'weight': 'normal', 'size': None}
@@ -577,7 +577,7 @@ def get_comps_and_limits(components_name_list, yaml_data, name, sm):
                     component_types.append(comp.class_type)
 
                     if comp.class_type in AREA_COMPONENTS:
-                        cell_area = iamcommons.get_parameter_val(comp, 'area')
+                        cell_area = iam_commons.get_parameter_val(comp, 'area')
                         component_cell_areas.append(cell_area)
 
                         cell_loc = comp.cell_xy_centers
@@ -632,7 +632,7 @@ def get_comps_and_limits(components_name_list, yaml_data, name, sm):
                     elif comp.class_type in FAULT_COMPONENTS:
                         component_cell_areas.append(None)
 
-                        nSegments = iamcommons.get_parameter_val(comp, 'nSegments')
+                        nSegments = iam_commons.get_parameter_val(comp, 'nSegments')
                         component_num_parts.append(nSegments)
 
                         comp_data = yaml_data[compName]
@@ -644,13 +644,13 @@ def get_comps_and_limits(components_name_list, yaml_data, name, sm):
                             component_xvals[-1].append(loc_data['coordx'][locRef])
                             component_yvals[-1].append(loc_data['coordy'][locRef])
 
-                        length = iamcommons.get_parameter_val(comp, 'length')
+                        length = iam_commons.get_parameter_val(comp, 'length')
                         component_length.append(length)
 
-                        strike = iamcommons.get_parameter_val(comp, 'strike')
+                        strike = iam_commons.get_parameter_val(comp, 'strike')
                         component_strike.append(strike)
 
-                        dip = iamcommons.get_parameter_val(comp, 'dip')
+                        dip = iam_commons.get_parameter_val(comp, 'dip')
                         component_dip.append(dip)
 
                         # Adjust the min and ax x and y to account for the fault length

@@ -21,6 +21,16 @@
 # file example 18), the resulting square may be too small to show details.
 # In such cases, we recommend setting PlotOverAreas to False.
 #
+# The use of the LookupTableReservoir in this example requires the additional
+# Kimberlina data set. THe Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
+# Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following places:
+# 1. https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/e438721e-31db-470e-8073-3590c0735915
+# 2. https://gitlab.com/NRAP/Kimberlina_data
+# 3. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
+#
+# The downloaded data set should be placed here:
+#    source/components/reservoir/lookuptables/Kimb_54_sims
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex19.yaml
 #-------------------------------------------------

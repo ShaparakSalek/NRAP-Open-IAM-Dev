@@ -1288,7 +1288,7 @@ class ParameterSetup5(SamplerModel):
         return out
 
 
-def test_case_parameter_setup1():
+def test_parameter_setup1():
     # Import needed packages and classes
     from matk import pyDOE
     from openiam import SystemModel, AnalyticalReservoir, MultisegmentedWellbore
@@ -1389,32 +1389,29 @@ def test_case_parameter_setup1():
     print('Generated permeability \n', permeability)
 
 
-def test_case_parameter_setup2():
+def test_parameter_setup2():
     pass
 
 
-def test_case_parameter_setup3():
+def test_parameter_setup3():
     pass
 
-def test_case_parameter_setup4():
-    pass
-
-
-def test_case_parameter_setup5():
+def test_parameter_setup4():
     pass
 
 
+def test_parameter_setup5():
+    pass
 
-if __name__ == "__main__":
+
+def test_parameter_setup_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
 
-    test_case = 3
-
-    test_to_run = {1: test_case_parameter_setup1,
-                   2: test_case_parameter_setup2,
-                   3: test_case_parameter_setup3,
-                   4: test_case_parameter_setup4,
-                   5: test_case_parameter_setup5}
+    test_to_run = {1: test_parameter_setup1,
+                   2: test_parameter_setup2,
+                   3: test_parameter_setup3,
+                   4: test_parameter_setup4,
+                   5: test_parameter_setup5}
 
     # Run corresponding test example
     test_to_run[test_case]()

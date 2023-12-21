@@ -1,7 +1,7 @@
 '''
 NRAP-Open-IAM Time To First Detection example
-This examples couples the simple reservoir, multisegmented wellbore and
-carbonate aquifer models.  The saturation/pressure output produced by simple
+This examples couples the analytical reservoir, multisegmented wellbore and
+carbonate aquifer models.  The saturation/pressure output produced by analytical
 reservoir model is used to drive leakage from a single open wellbore
 model, which is passed to the input of an adapter that provides well
 coordinates, CO2 and brine leakage rates and cumulative mass fluxes to the
@@ -46,7 +46,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, SimpleReservoir, MultisegmentedWellbore,
+from openiam import (SystemModel, AnalyticalReservoir, MultisegmentedWellbore,
                      CarbonateAquifer, RateToMassAdapter)
 
 
@@ -62,20 +62,21 @@ if __name__ == "__main__":
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(
-        name='sres', parent=sm, injX=0., injY=0., locX=500., locY=500.))
+    ares = sm.add_component_model_object(AnalyticalReservoir(
+        name='ares', parent=sm, injX=0., injY=0., locX=500., locY=500.))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=30.0, max=150., value=45.0)
-    sres.add_par('injRate', min=0.1, max=10.0, value=1.0)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('reservoirRadius', value=2000, vary=False)
+    ares.add_par('shale1Thickness', min=30.0, max=150., value=45.0)
+    ares.add_par('injRate', min=0.1, max=10.0, value=1.0)
 
     # Add observations of reservoir component model
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs('mass_CO2_reservoir')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs('mass_CO2_reservoir')
 
     # Add multisegmented wellbore component
     ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms', parent=sm))
@@ -84,24 +85,24 @@ if __name__ == "__main__":
 
     # Add linked parameters: common to both components
     ms.add_par_linked_to_par('numberOfShaleLayers',
-                             sres.deterministic_pars['numberOfShaleLayers'])
-    ms.add_par_linked_to_par('shale1Thickness', sres.pars['shale1Thickness'])
+                             ares.deterministic_pars['numberOfShaleLayers'])
+    ms.add_par_linked_to_par('shale1Thickness', ares.pars['shale1Thickness'])
     ms.add_par_linked_to_par('shale2Thickness',
-                             sres.default_pars['shaleThickness'])
+                             ares.default_pars['shaleThickness'])
     ms.add_par_linked_to_par('shale3Thickness',
-                             sres.default_pars['shaleThickness'])
+                             ares.default_pars['shaleThickness'])
     ms.add_par_linked_to_par('aquifer1Thickness',
-                             sres.default_pars['aquiferThickness'])
+                             ares.default_pars['aquiferThickness'])
     ms.add_par_linked_to_par('aquifer2Thickness',
-                             sres.default_pars['aquiferThickness'])
+                             ares.default_pars['aquiferThickness'])
     ms.add_par_linked_to_par('reservoirThickness',
-                             sres.default_pars['reservoirThickness'])
+                             ares.default_pars['reservoirThickness'])
     ms.add_par_linked_to_par('datumPressure',
-                             sres.default_pars['datumPressure'])
+                             ares.default_pars['datumPressure'])
 
     # Add keyword arguments linked to the output provided by reservoir model
-    ms.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    ms.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add observations of multisegmented wellbore component model
     ms.add_obs_to_be_linked('CO2_aquifer1')
@@ -202,8 +203,8 @@ if __name__ == "__main__":
     results = s.run(cpus=ncpus, verbose=False)
 
     # get plumes
-    x0 = sres.locX
-    y0 = sres.locY
+    x0 = ares.locX
+    y0 = ares.locY
     ind_list = list(range(len(time_array)))
     dxs = np.array([s.recarray['ca.dx_'+str(indd)] for indd in ind_list])
     dys = np.array([s.recarray['ca.dy_'+str(indd)] for indd in ind_list])

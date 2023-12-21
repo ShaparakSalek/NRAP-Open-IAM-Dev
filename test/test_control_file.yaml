@@ -6,7 +6,7 @@ ModelParams:
     EndTime: 5
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1,
+    Components: [AnalyticalReservoir1,
                  CementedWellbore1,
                  CarbonateAquifer1,
                  msw1,
@@ -40,17 +40,21 @@ Stratigraphy:
         vary: False
         value: 101325.0
 #-------------------------------------------------
-# SimpleReservoir1 is a user defined name for component
-# the type SimpleReservoir is the ROM model name
+# AnalyticalReservoir1 is a user defined name for component
+# the type AnalyticalReservoir is the ROM model name
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
+        logResPerm: -13.0
+        reservoirRadius: 10000
+        injRate: 0.2
+        reservoirPorosity: 0.3
     Outputs: [pressure,
               CO2saturation]
 CementedWellbore1:
     Type: CementedWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Locations:
         coordx: [100]
         coordy: [100]

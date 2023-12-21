@@ -1,6 +1,6 @@
 '''
-This example couples the simple reservoir, multisegmented wellbore and
-carbonate aquifer models. The saturation/pressure output produced by simple
+This example couples the analytical reservoir, multisegmented wellbore and
+carbonate aquifer models. The saturation/pressure output produced by analytical
 reservoir model is used to drive leakage from five multisegmented wellbore
 models, which is passed to the input of an adapter that provides well
 coordinates, |CO2| and brine leakage rates and cumulative mass fluxes to the
@@ -16,7 +16,7 @@ import numpy as np
 
 sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, SimpleReservoir, MultisegmentedWellbore,
+from openiam import (SystemModel, AnalyticalReservoir, MultisegmentedWellbore,
                      CarbonateAquifer, RateToMassAdapter)
 from matk import pyDOE
 
@@ -37,32 +37,33 @@ if __name__=='__main__':
     num_wells = 5
     well_xys = xymins + pyDOE.lhs(2,samples=num_wells)*(xymaxs-xymins)
 
-    sress = []
+    aress = []
     mss = []
     adapts = []
     for i,crds in enumerate(well_xys):
         # Add reservoir component
-        sress.append(sm.add_component_model_object(
-                SimpleReservoir(name='sres'+str(i), parent=sm,
-                injX=0., injY=0., locX=crds[0], locY=crds[1])))
+        aress.append(sm.add_component_model_object(
+            AnalyticalReservoir(name='ares'+str(i), parent=sm,
+                                injX=0., injY=0., locX=crds[0], locY=crds[1])))
 
         # Add parameters of reservoir component model
-        sress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
-        sress[-1].add_par('injRate', value=0.8, vary=False)
-        sress[-1].add_par('shale1Thickness', min=30.0, max=50., value=40.0)
-        sress[-1].add_par('aquifer1Thickness', value=300., vary=False)
-        sress[-1].add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
-        sress[-1].add_par('shale3Thickness', min=10.0, max=50., value=35.0)
-        sress[-1].add_par('logResPerm', min=-13.,max=-11., value=-12.)
+        aress[-1].add_par('numberOfShaleLayers', value=3, vary=False)
+        aress[-1].add_par('injRate', value=0.8, vary=False)
+        aress[-1].add_par('reservoirRadius', value=1000.0, vary=False)
+        aress[-1].add_par('shale1Thickness', min=30.0, max=50., value=40.0)
+        aress[-1].add_par('aquifer1Thickness', value=300., vary=False)
+        aress[-1].add_par('aquifer2Thickness', min=30.0, max=50., value=45.0)
+        aress[-1].add_par('shale3Thickness', min=10.0, max=50., value=35.0)
+        aress[-1].add_par('logResPerm', min=-13., max=-12., value=-12.5)
 
         # Add observations of reservoir component model to be used by the next component
-        sress[-1].add_obs_to_be_linked('pressure')
-        sress[-1].add_obs_to_be_linked('CO2saturation')
+        aress[-1].add_obs_to_be_linked('pressure')
+        aress[-1].add_obs_to_be_linked('CO2saturation')
 
         # Add observations of reservoir component model
-        sress[-1].add_obs('pressure')
-        sress[-1].add_obs('CO2saturation')
-        sress[-1].add_obs('mass_CO2_reservoir')
+        aress[-1].add_obs('pressure')
+        aress[-1].add_obs('CO2saturation')
+        aress[-1].add_obs('mass_CO2_reservoir')
 
         # Add multisegmented wellbore component
         mss.append(sm.add_component_model_object(
@@ -71,23 +72,23 @@ if __name__=='__main__':
         # are the same as for the reservoir component
         # Add parameters linked to the same parameters from reservoir model
         mss[-1].add_par_linked_to_par(
-            'numberOfShaleLayers', sress[-1].deterministic_pars['numberOfShaleLayers'])
+            'numberOfShaleLayers', aress[-1].deterministic_pars['numberOfShaleLayers'])
         mss[-1].add_par_linked_to_par(
-            'shale1Thickness', sress[-1].pars['shale1Thickness'])
+            'shale1Thickness', aress[-1].pars['shale1Thickness'])
         mss[-1].add_par_linked_to_par(
-            'shale2Thickness', sress[-1].default_pars['shaleThickness'])
+            'shale2Thickness', aress[-1].default_pars['shaleThickness'])
         mss[-1].add_par_linked_to_par(
-            'shale3Thickness', sress[-1].pars['shale3Thickness'])
+            'shale3Thickness', aress[-1].pars['shale3Thickness'])
         mss[-1].add_par_linked_to_par(
-            'aquifer1Thickness', sress[-1].deterministic_pars['aquifer1Thickness'])
+            'aquifer1Thickness', aress[-1].deterministic_pars['aquifer1Thickness'])
         mss[-1].add_par_linked_to_par(
-            'aquifer2Thickness', sress[-1].pars['aquifer2Thickness'])
+            'aquifer2Thickness', aress[-1].pars['aquifer2Thickness'])
 
         # Add keyword arguments linked to the output provided by reservoir model
         mss[-1].add_kwarg_linked_to_obs(
-            'pressure', sress[-1].linkobs['pressure'])
+            'pressure', aress[-1].linkobs['pressure'])
         mss[-1].add_kwarg_linked_to_obs(
-            'CO2saturation', sress[-1].linkobs['CO2saturation'])
+            'CO2saturation', aress[-1].linkobs['CO2saturation'])
         mss[-1].add_obs('brine_aquifer1')
         mss[-1].add_obs('CO2_aquifer1')
         mss[-1].add_obs_to_be_linked('brine_aquifer1')
@@ -120,7 +121,7 @@ if __name__=='__main__':
     ca.add_par('corr_len', min=1.0, max=3.95, value=2.475)
     ca.add_par('aniso', min=1.1, max=49.1, value=25.1)
     ca.add_par('mean_perm', min=-13.8, max=-10.3, value=-12.05)
-    ca.add_par_linked_to_par('aqu_thick', sress[0].deterministic_pars['aquifer1Thickness'])
+    ca.add_par_linked_to_par('aqu_thick', aress[0].deterministic_pars['aquifer1Thickness'])
     ca.add_par('hyd_grad', min=2.88e-4, max=1.89e-2, value=9.59e-3)
     ca.add_par('calcite_ssa', min=0, max=1.e-2, value=5.5e-03)
     ca.add_par('organic_carbon', min=0, max=1.e-2, value=5.5e-03)
@@ -140,10 +141,6 @@ if __name__=='__main__':
     for ind in range(5):   # 5 is a number of wellbores
         CO2_rate_obs_list.append(mss[ind].linkobs['CO2_aquifer1'])
         brine_rate_obs_list.append(mss[ind].linkobs['brine_aquifer1'])
-    # Print created collections
-    print('------------------------------------------------------------------')
-    print(CO2_rate_obs_list)
-    print(brine_rate_obs_list)
 
     # Add aquifer component's keyword argument co2_rate linked to the collection created above
     ca.add_kwarg_linked_to_collection('co2_rate', CO2_rate_obs_list)
@@ -156,19 +153,11 @@ if __name__=='__main__':
     for ind in range(5):   # 5 is a number of wellbores
         CO2_mass_obs_list.append(adapts[ind].linkobs['mass_CO2_aquifer1'])
         brine_mass_obs_list.append(adapts[ind].linkobs['mass_brine_aquifer1'])
-    # Print created collections
-    print('------------------------------------------------------------------')
-    print(CO2_mass_obs_list)
-    print(brine_mass_obs_list)
 
     # Add aquifer component's keyword argument co2_mass linked to the collection created above
     ca.add_kwarg_linked_to_collection('co2_mass', CO2_mass_obs_list)
     # Add aquifer component's keyword argument brine_rate linked to the collection created above
     ca.add_kwarg_linked_to_collection('brine_mass', brine_mass_obs_list)
-
-    # Print aquifer component keywrod arguments linked to collections
-    print('------------------------------------------------------------------')
-    print(ca.collection_linked_kwargs)
 
     # Add observations (output) from the carbonate aquifer model
     ca.add_obs('pH_volume')
@@ -178,9 +167,9 @@ if __name__=='__main__':
     sm.forward()
 
     # Print some of the observations
-    for i, sres in enumerate(sress):
-        pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-        CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
+    for i, ares in enumerate(aress):
+        pressure = sm.collect_observations_as_time_series(ares, 'pressure')
+        CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
         print('------------------------------------------------------------------')
         print('Pressure at wellbore {}'.format(i+1), pressure, sep='\n')
         print('CO2 saturation at wellbore {}'.format(i+1), CO2saturation, sep='\n')

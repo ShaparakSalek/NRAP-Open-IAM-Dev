@@ -20,6 +20,23 @@
 # the OpenWellbore is hypothetical and the AoR plot code is set up to exclude
 # such a result.
 #
+# Additionally, this example shows how to set the critical pressure of an OpenWellbore 
+# component to a specific value. This example uses the same stratigraphy from example 
+# 31a, and with the brineDensity value used in that example (1015 kg/(m^3)) the 
+# calculated critical pressure is 22.78 MPa. Instead of using that calculated critical 
+# pressure, this example enforces a lower critical pressure of 22.07 MPa. To enforce a 
+# critical pressure, set both 'critPressureApproach' and 'enforceCritPressure' to True 
+# (these entries are under 'Controls'). Then provide the 'critPressure' parameter under 
+# the 'Parameters' section. With a lower critical pressure used here, the leakage rates 
+# are increased.
+#
+# Setting the critical pressure for the OpenWellbore component does not automatically 
+# change the critical pressure used in the AoR plot examining reservoir pressures, 
+# however. An AoR plot that examines reservoir pressures only examines output from the
+# reservoir component. To maintain a uniform treatment of critical pressure, the critical 
+# pressure used in the AoR plot can be specified with the 'CriticalPressureMPa' entry 
+# under the plot name (under Plot1, 'CriticalPressureMPa: 22.07' for 22.07 MPa).
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31b.yaml
 #
@@ -29,7 +46,7 @@ ModelParams:
     EndTime: 10
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1,
+    Components: [AnalyticalReservoir1, OpenWellbore1,
                  GenericAquifer1]
     OutputDirectory: 'output/output_ex31b_{datetime}'
     GenerateOutputFiles: False
@@ -59,21 +76,27 @@ Stratigraphy:
         vary: False
         value: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 0.33
             vary: False
         logResPerm:
-            value: -10.15
+            value: -12.15
+            vary: False
+        reservoirRadius:
+            value: 15000
+            vary: False
+        brineResSaturation:
+            value: 0.15
             vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Number: 49   # (7*7)
     LeakTo: aquifer2
     Locations:
@@ -85,7 +108,8 @@ OpenWellbore1:
             ymax: 7500
             ysize: 7
     Controls:
-        critPressureApproach: True
+        critPressureApproach: True    # To use the critPressure parameter, critPressureApproach needs to be set to True. Using False would cause it to not use a critical pressure at all (calculated or specified with critPressure).
+        enforceCritPressure: True     # Setting this to True makes the OpenWellbore use the critPressure parameter instead of a calculated critical pressure.
     Parameters:
         wellRadius:
             value: 0.05
@@ -99,15 +123,12 @@ OpenWellbore1:
         brineSalinity:
             value: 0.2
             vary: False
-        brineDensity:
-            value: 1015
-            vary: False
+        critPressure: 2.31e+07        # Because the critPressure parameter is specified, 
+        # brineDensity: 1075          # the brineDensity parameter is not used here
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
         # and don't need to be set explicitly unless different values
-        # are required. The parameters wellTop, reservoirDepth, and brineDensity
-        # are used to calculate critical pressure (if the parameter criticalPressure
-        # is not provided).
+        # are required.
     Outputs: [CO2_aquifer,
               brine_aquifer]
 #-------------------------------------------------
@@ -136,7 +157,7 @@ Plots:
         PlotInjectionSites: True
         FigureDPI: 200
         SaveCSVFiles: True
-        CriticalPressureMPa: Calculated
+        CriticalPressureMPa: 23.1      # Set as 23.1 MPa to be consistent with the OpenWellbore component's critPressure parameter
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

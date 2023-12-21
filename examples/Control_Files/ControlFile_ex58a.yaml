@@ -1,0 +1,107 @@
+# OpenIAM Control File Example 58a
+#
+# This example demosntrates the use of the LeakageAssessment Workflow.
+# This Workflow automatically adds and sets up a reservoir component and a
+# wellbore component (no aquifer component). The output of the wellbore
+# component includes CO2 and brine leakage rates. The LeakageAssessment
+# Workflow then makes a time series plot showing these leakage rates. This
+# Workflow requires the inclusion of 'Locations' input under
+# 'Workflow: Options: WellboreOptions'.
+#
+# This example uses a deterministic simulation ('Analysis: forward') and
+# produces four TimeSeries plots ('PlotType: TimeSeries'). If the 'PlotType'
+# entry is not given when using the LeakageAssessment Workflow, then the default
+# plot type is TimeSeries (as opposed to TimeSeriesStats or TimeSeriesAndStats).
+#
+# Because 'Interpolation2D' is set to True for the LookupTableReservoir
+# component, the reservoir component will not interpolate reservoir conditions
+# in a three-dimensional manner. If 'Interpolation2D' is set to False, you have
+# to provide 'coordz' values for the wellbores under 'Locations'. These 'coordz'
+# values represent the base of the wellbore, within or at the top of the reservoir.
+# For the depth of the wellbore base to be used in three-dimensional interpolation
+# of the reservoir data, the LookupTableReservoir .csv files must also include
+# depth ('z') values. Here, 'Interpolation2D' is set to True so the three-dimensional
+# reservoir data are turned into a flat, two-dimensional data set.
+#
+# This example requires the additional FutureGen 2.0 data set.
+# FutureGen 2.0 data set can be downloaded from the following source:
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
+#
+# The downloaded data set should be placed here:
+#     source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex58a.yaml
+#
+# Last Modified: September, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20
+    TimeStep: 1.0
+    Analysis: forward
+    Components: []
+    OutputDirectory: 'output/output_ex58a_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        value: 5
+        vary: False
+    shale1Thickness:
+        value: 198.7
+        vary: False
+    shale2Thickness:
+        value: 74.4
+        vary: False
+    shale3Thickness:
+        value: 110.3
+        vary: False
+    shale4Thickness:
+        value: 118.9
+        vary: False
+    shale5Thickness:
+        value: 418.71
+        vary: False
+    aquifer1Thickness:
+        value: 33.2
+        vary: False
+    aquifer2Thickness:
+        value: 84.1
+        vary: False
+    aquifer3Thickness:
+        value: 31.1
+        vary: False
+    aquifer4Thickness:
+        value: 61.6
+        vary: False
+    reservoirThickness:
+        value: 7.0
+        vary: False
+#-------------------------------------------------
+Workflow:
+    Type: LeakageAssessment
+    Options:
+        PlotType: TimeSeries          # Options are TimeSeries, TimeSeriesStats, or TimeSeriesAndStats
+        FigureDPI: 300
+        ReservoirComponentType: LookupTableReservoir
+        ReservoirOptions:
+            FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+            TimeFile: time_points.csv
+            ParameterFilename: parameters_and_filenames_trunc.csv
+            Interpolation2D: True     # If you set this to False, you also have to provide coordz values for the wellbores
+            Parameters:
+                index: 1
+        WellboreComponentType: OpenWellbore
+        WellboreOptions:
+            Locations:                # Locations input is required when using the LeakageAssessment Workflow
+                coordx: [2.353e+5]
+                coordy: [4.409e+6]
+            Parameters:
+                wellRadius: 0.05
+                logReservoirTransmissivity: -10.0
+                logAquiferTransmissivity: -10.0
+                brineSalinity: 0.0475
+                brineDensity: 1075
+        AquiferName: aquifer4

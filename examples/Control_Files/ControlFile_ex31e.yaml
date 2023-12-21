@@ -1,0 +1,147 @@
+# OpenIAM Control File Example 31e
+#
+# This example demonstrates the use of the AoR plot type in a simulation 
+# using a CementedWellbore component.
+#
+# Under the AoR plot Pressure_Plot_CritP_Calc, the CriticalPressureMPa input 
+# is given as 'Calculated'. This AoR plot will therefore show a critical pressure 
+# calculated with the depth to the top of the reservoir, the depth to the bottom 
+# of the aquifer considered (controlled by 'AquiferName: aquifer2' under the aquifer 
+# component's entry OR by the entry 'LeakTo: aquifer2' when an OpenWellbore 
+# component is used - CementedWellbores do not need the LeakTo entry), and a brine 
+# density. When the wellbore component used has a brine density parameter 
+# (e.g., brineDensity for OpenWellbore or MultisegmentedWellbore), that parameter 
+# value will be used. When the wellbore component does not have a brine density parameter 
+# (e.g., CementedWellbore), the brine density used in a pressure AoR plot can be 
+# specified through the BrineDensity entry. Under the AoR plot Pressure_Plot_CritP_Calc, 
+# the brine density is given as 1100 kg/(m^3) ('BrineDensity: 1100'). If a calculated 
+# critical pressure was used, the wellbore component does not have a brine density 
+# parameter, and no value was provided with the BrineDensity entry, then a default 
+# brine density of 1012 kg/(m^3) would be used. The log for the simulation (IAM_log.log) 
+# would include a warning that the default brine density was used, however.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31e.yaml
+#
+# Last Modified: August, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [AnalyticalReservoir1, CementedWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex31e_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 525.0
+    shale2Thickness:
+        vary: False
+        value: 475.0
+    shale3Thickness:
+        vary: False
+        value: 11.2
+    aquifer1Thickness:
+        vary: False
+        value: 22.4
+    aquifer2Thickness:
+        vary: False
+        value: 19.2
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    Parameters:
+        injRate:
+            vary: False
+            value: 0.05
+        logResPerm:
+            vary: False
+            value: -12.0
+        reservoirRadius:
+            value: 75000
+            vary: False
+        brineResSaturation:
+            value: 0.175
+            vary: False
+    Outputs: [pressure, CO2saturation]
+#-------------------------------------------------
+CementedWellbore1:
+    Type: CementedWellbore
+    Connection: AnalyticalReservoir1
+    Number: 100   # 10*10
+    Locations:
+        grid:
+            xmin: -50000
+            xmax: 50000
+            xsize: 10
+            ymin: -50000
+            ymax: 50000
+            ysize: 10
+    Parameters:
+        logWellPerm:
+            vary: False
+            value: -13.95
+        logThiefPerm:
+            vary: False
+            value: -13.95
+    Outputs: [CO2_aquifer1,
+              CO2_aquifer2,
+              CO2_atm,
+              brine_aquifer1,
+              brine_aquifer2]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: CementedWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        por:
+            value: 0.18
+            vary: False
+        log_permh:
+            value: -12
+            vary: False
+        log_aniso:
+            value: 0.3
+            vary: False
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
+#-------------------------------------------------
+Plots:
+    Pressure_Plot_CritP_Calc:
+        AoR: [pressure]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+        CriticalPressureMPa: Calculated
+        BrineDensity: 1100             # BrineDensity is given in kg/(m^3) - this input is used to calculate critical pressure.
+    Pressure_Plot_CritP_Given:
+        AoR: [pressure]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+        CriticalPressureMPa: 11.1      # For this plot, critical pressure is specified - not calculated based on depths and brine density
+    Plot2:
+        AoR: [CO2saturation]
+    Plot3:
+        AoR: [pH_volume]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+    Plot4:
+        AoR: [TDS_volume]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True

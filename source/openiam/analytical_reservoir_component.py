@@ -36,7 +36,11 @@ class AnalyticalReservoir(ComponentModel):
     * **reservoirPorosity** [-] (0.1 to 0.3) - porosity of reservoir (default: 0.15)
 
     * **reservoirRadius** [|m|] (500 to 100,000) - distance between injection well
-      and outer reservoir boundary (default: 500)
+      and outer reservoir boundary (default: 100,000). The reservoirRadius should 
+      not be smaller than the distance between the injection well and any leakage 
+      pathway components connected to the ``AnalyticalReservoir`` (e.g., wellbores 
+      or faults). If the radius is too small, the simulation will print a warning 
+      message.
 
     * **brineDensity** [|kg/m^3|] (965 to 1195) - density of brine phase
       (default: 1045)
@@ -44,10 +48,10 @@ class AnalyticalReservoir(ComponentModel):
     * **CO2Density** [|kg/m^3|] (450 to 976) - density of |CO2| phase
       (default: 479)
 
-    * **brineViscosity** [|Pa*s|] (2.3e-4 to 15.9e-4) - viscosity of brine phase
+    * **brineViscosity** [|Pa*s|] (2.3e-4 to 1.59e-3) - viscosity of brine phase
       (default: 2.535e-4)
 
-    * **CO2Viscosity** [|Pa*s|] (0.455e-6 to 1.043e-4)  - viscosity of |CO2| phase
+    * **CO2Viscosity** [|Pa*s|] (4.55e-7 to 1.043e-4) - viscosity of |CO2| phase
       (default: 3.95e-5)
 
     * **brineResSaturation** [-] (0 to 0.25) - residual saturation of brine phase
@@ -91,6 +95,13 @@ class AnalyticalReservoir(ComponentModel):
 
     * **mass_CO2_reservoir** [|kg|] - (injected total) mass of the |CO2|
       in the reservoir.
+
+    For control file examples using the Analytical Reservoir component, see 
+    *ControlFile_ex1a* to *ControlFile_ex5*, *ControlFile_ex8d*, *ControlFile_ex31a* 
+    to *ControlFile_ex31f*, *ControlFile_ex39a* to *ControlFile_ex39c*, 
+    and *ControlFile_ex56a* to *ControlFile_ex56g*. For script examples, see 
+    *iam_sys_reservoir_mswell_2aquifers.py*, *iam_sys_strata_reservoir_openwell_genericaquifer.py*, 
+    *iam_sys_lutstrata_reservoir_mswell.py*, and *iam_sys_reservoir_mswell_generic_lhs.py*.
 
     """
     def __init__(self, name, parent, injX=0., injY=0., locX=100., locY=0.):
@@ -139,7 +150,7 @@ class AnalyticalReservoir(ComponentModel):
         self.add_default_par('CO2Viscosity', value=3.95e-5)
         self.add_default_par('brineResSaturation', value=0.0)
         self.add_default_par('brineCompressibility', value=4.5e-12)
-        self.add_default_par('reservoirRadius', value=500)
+        self.add_default_par('reservoirRadius', value=100000)
         self.add_default_par('reservoirThickness', value=50.0)
         self.add_default_par('numberOfShaleLayers', value=3)
         self.add_default_par('shaleThickness', value=250.0)
@@ -153,8 +164,8 @@ class AnalyticalReservoir(ComponentModel):
         self.pars_bounds['reservoirPorosity'] = [0.10, 0.30]
         self.pars_bounds['brineDensity'] = [965.0, 1195.0]
         self.pars_bounds['CO2Density'] = [450.0, 976.0]
-        self.pars_bounds['brineViscosity'] = [2.3e-4, 15.9e-4]
-        self.pars_bounds['CO2Viscosity'] = [0.455e-6, 1.043e-4]
+        self.pars_bounds['brineViscosity'] = [2.3e-4, 1.59e-3]
+        self.pars_bounds['CO2Viscosity'] = [4.55e-7, 1.043e-4]
         self.pars_bounds['brineResSaturation'] = [0.0, 0.25]
         self.pars_bounds['brineCompressibility'] = [3.63e-12, 2.31e-11]
         self.pars_bounds['reservoirRadius'] = [500, 100000]
@@ -199,6 +210,7 @@ class AnalyticalReservoir(ComponentModel):
             warn_msg = ''.join([
                 'Parameter {} of AnalyticalReservoir component {} ',
                 'is out of boundaries.']).format(key, self.name)
+            
             if key.startswith('shale') and key.endswith('Thickness'):
                 if (val < self.pars_bounds['shaleThickness'][0]) or (
                         val > self.pars_bounds['shaleThickness'][1]):
@@ -399,7 +411,8 @@ class AnalyticalReservoir(ComponentModel):
     def reset(self):
         pass
 
-if __name__ == "__main__":
+
+def test_analytical_reservoir_component():
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model
@@ -428,6 +441,7 @@ if __name__ == "__main__":
     # Add parameters of reservoir component model
     # Ebigbo 2007 setting (validated)
     res.add_par('logResPerm', value=-13.69897, vary=False)
+    res.add_par('reservoirRadius', value=500.0, vary=False)
     res.add_par('reservoirPorosity', value=0.15, vary=False)
     res.add_par('datumPressure', value=101325.0, vary=False)
     res.add_par('brineDensity', value=1045.0, vary=False)
@@ -435,7 +449,7 @@ if __name__ == "__main__":
     res.add_par('brineViscosity', value=2.535e-4, vary=False)
     res.add_par('CO2Viscosity', value=3.95e-5, vary=False)
     res.add_par('brineResSaturation', value=0.0, vary=False)
-    res.add_par('injRate', value=0.01, vary=False)
+    res.add_par('injRate', value=0.1, vary=False)
     res.add_par('reservoirRadius', value=500, vary=False)
     res.add_par('brineCompressibility', value=1.e-11, vary=False)
 

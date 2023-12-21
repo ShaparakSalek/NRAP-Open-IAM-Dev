@@ -180,6 +180,15 @@ class LookupTableReservoir(ComponentModel):
     for the Lookup Table Reservoir component which means that the linked lookup tables
     should contain the necessary data to produce them. In addition, the component
     can return any other type of observations provided in the lookup tables.
+
+    For control file examples using the Lookup Table Reservoir component, see 
+    *ControlFile_ex6*, *ControlFile_ex9c*, *ControlFile_ex10*, *ControlFile_ex14*, 
+    *ControlFile_ex24*, *ControlFile_ex32a* to *ControlFile_ex32c*, *ControlFile_ex37*, 
+    *ControlFile_ex40*, and *ControlFile_ex55a* to *ControlFile_ex55d*. For script 
+    examples, see *iam_sys_lutreservoir_5locs.py*, *iam_sys_lutreservoir_mswell.py*, 
+    and *iam_sys_lutreservoir_openwell_futuregen_aor_3d.py*, and 
+    *iam_sys_lutreservoir_mswell_rand_allocated_wells_lhs.py*.
+
     """
     def __init__(self, name, parent, intr_family=None,
                  locX=None, locY=None, locZ=None,
@@ -861,7 +870,7 @@ class LookupTableReservoir(ComponentModel):
             logging.error(err_msg)
             raise KeyError(err_msg)
 
-    def simulation_model(self, p, time_point=365.35,
+    def simulation_model(self, p, time_point=365.25,
                          locX=None, locY=None, locZ=None):
         """
         Return pressure and |CO2| saturation at the bottom of leaking well.
@@ -962,7 +971,7 @@ class LookupTableReservoir(ComponentModel):
                         self.num_points, self.tri_vertices, self.tri_weights = find_weights(
                             (self.locX, self.locY, self.locZ), interpr.triangulation)
 
-        # Initialize dictionary of leakage rates
+        # Initialize output dictionary
         out = dict()
 
         # Extract index from updated dictionary
@@ -1019,10 +1028,9 @@ class LinkError(Exception):
     table reservoir component is not linked to any interpolator family.
     """
 
-if __name__ == "__main__":
-
+def test_lookup_table_reservoir_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
-    test_case = 1
+
     if test_case == 1:
         data_set_fldr = 'Kimb_54_sims'
         loc_x = 37478.0

@@ -2,7 +2,7 @@
 #
 # This example demonstrates how to display the injection location(s) when
 # using a Lookup Table Reservoir. Control File example 33 shows how
-# to display the injection location when using a simple reservoir - a simple
+# to display the injection location when using a AnalyticalReservoir - an analytical
 # reservoir has a specified injection location, even if it resorts to
 # the default location of x = 0 m and y = 0 m. Lookup Table Reservoirs do not
 # have specified injection locations attached to them, so one has to manually
@@ -20,9 +20,9 @@
 # to represent the tops of each unit. The entries for 'xLims', 'yLims',
 # 'gridXLims', and 'gridYLims' must all have units of meters.
 #
-# This example requires the additional FutureGen 2.0 data set.
+# This example requires additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
-# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims

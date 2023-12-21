@@ -9,24 +9,18 @@ Last Modified: June, 2023
 @author: Veronika Vasylkivska (Veronika.Vasylkivska@NETL.DOE.GOV)
 LRST (Battelle/Leidos) supporting NETL
 """
-import warnings
 import logging
 import math
 import re
 
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.cbook
 import matplotlib.colors as clrs
 from matk.sampleset import percentile, mean
 from .label_setup import (LEGEND_DICT, Y_LABEL_DICT, Y_LABEL_SPLIT_DICT,
                           Y_LABEL_2ROWS_DICT, Y_LABEL_2ROWS_SPLIT_DICT,
                           TITLE_DICT, TITLE_SPLIT_DICT)
 
-# Ignore futurewarning from numpy about record array subarray copies vs views.
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=matplotlib.cbook.mplDeprecation)
 
 # Constants used to adjust figure formatting
 DEFAULT_FIG_WIDTH = 13
@@ -34,6 +28,8 @@ DEFAULT_FIG_HEIGHT = 8
 AXIS_LABEL_PAD_REF = 4
 TITLE_PAD_REF = 3
 SINGLE_PLOT_FONTSIZE_ADJUST = 1.5
+
+MIN_FONT_SIZE = 3
 
 AX_LINEWIDTH_REF = 1.5
 LINEWIDTH_REF = 2.5
@@ -472,13 +468,38 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                 # No title
                 pass
 
-    min_fontsize = make_label_fontsizes_uniform(
-        subplot_ind - 1, xaxis_fontsizes_used, yaxis_fontsizes_used,
-        subplots_data)
+    if len(xaxis_fontsizes_used) == 0:
+        warning_msg = ''.join([
+            'The plot {} was not able to plot any simulation results. '.format(name),
+            'This outcome can occur if there is an error in the setup of a ',
+            'TimeSeries plot entry. For example, the input is case-sensitive, ',
+            'so using "TimeSeries: [Pressure]" will fail to plot pressure results. ',
+            'In this hypothetical example, the plot entry should say ',
+            '"TimeSeries: [pressure]" because the name of the metric is pressure ',
+            '(not Pressure). Alternatively, the component producing the output ',
+            'may not have been included in the "Components" list in the "ModelParams" ',
+            'section of the .yaml file - in this case, the component would not ',
+            'be used during the simulation. Check your input.'])
+        logging.warning(warning_msg)
 
-    if fig_setup['gen_font_size'] > min_fontsize:
-        fig_setup['gen_font_size'] = min_fontsize
-        update_rc_setup(fig_setup, fontname)
+        # Add subplot
+        ax = plt.subplot(1, 1, 1)
+        ax.text(0.01, 0.55, 'Results for the given output ({}) could '.format(
+            output_names) + 'not be displayed for the figure {}. '.format(name)
+            + 'Check your input\nfor errors (e.g., typos in metric names, '
+            + 'component producing the output failed to run because it was not '
+            + 'set up properly, etc.).', fontsize=gen_font_size)
+
+        min_fontsize = None
+
+    else:
+        min_fontsize = make_label_fontsizes_uniform(
+            subplot_ind - 1, xaxis_fontsizes_used, yaxis_fontsizes_used,
+            subplots_data)
+
+        if fig_setup['gen_font_size'] > min_fontsize:
+            fig_setup['gen_font_size'] = min_fontsize
+            update_rc_setup(fig_setup, fontname)
 
     # Used to reset the legend font size within the loop through the axes.
     # Otherwise, the font size could shrink from one subplot to the next.
@@ -497,13 +518,14 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                     label_list.append(label)
 
             fig_setup['legend_font_size'] = legend_font_size_ref2
+
             fig_setup = check_legend(handle_list, fig_setup, min_fontsize,
                                      subplots_data)
 
             ax.legend(handle_list, label_list, fancybox=False,
                       fontsize=fig_setup['legend_font_size'],
                       framealpha=fig_setup['legend_framealpha'],
-                      ncol=fig_setup['legend_columns'])
+                      ncols=fig_setup['legend_columns'])
 
     elif analysis in ['lhs', 'parstudy']:
         ax_list = fig.axes
@@ -517,13 +539,14 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
                     label_list.append(label)
 
             fig_setup['legend_font_size'] = legend_font_size_ref2
+
             fig_setup = check_legend(handle_list, fig_setup, min_fontsize,
                                      subplots_data)
 
             ax.legend(handle_list, label_list, fancybox=False,
                       fontsize=fig_setup['legend_font_size'],
                       framealpha=fig_setup['legend_framealpha'],
-                      ncol=fig_setup['legend_columns'])
+                      ncols=fig_setup['legend_columns'])
     else:
         pass
 
@@ -852,11 +875,14 @@ def adjust_x_label(ax, fig, fig_setup, subplots_data):
 
         # If the xlabel is too long, shrink the fontsize
         if (width_frac > MAX_XLABEL_WIDTH_FRAC) or (height_frac > MAX_XLABEL_HEIGHT_FRAC):
-            fig_setup['xaxis_font_size'] = 0.95*fig_setup['xaxis_font_size']
-            h_xlabel = ax.set_xlabel(
-                'Time, t [years]', fontsize=fig_setup['xaxis_font_size'],
-                fontweight=fig_setup['label_font_weight'],
-                labelpad=fig_setup['axis_label_pad'])
+            if 0.95 * fig_setup['xaxis_font_size'] >= MIN_FONT_SIZE:
+                fig_setup['xaxis_font_size'] = 0.95 * fig_setup['xaxis_font_size']
+                h_xlabel = ax.set_xlabel(
+                    'Time, t [years]', fontsize=fig_setup['xaxis_font_size'],
+                    fontweight=fig_setup['label_font_weight'],
+                    labelpad=fig_setup['axis_label_pad'])
+            else:
+                continue_test = False
         else:
             continue_test = False
 
@@ -896,11 +922,14 @@ def adjust_y_label(obs_name, cmpnt_name, ax, fig, fig_setup, subplots_data, useM
         height_frac, width_frac = width_and_depth_frac(fig, h_ylabel, subplots_data)
         # If the ylabels are still too long, shrink the fontsize
         if (height_frac > MAX_YLABEL_HEIGHT_FRAC) or (width_frac > MAX_YLABEL_WIDTH_FRAC):
-            fig_setup['yaxis_font_size'] *= 0.95
-            h_ylabel = ax.set_ylabel(y_label,
-                                     fontsize=fig_setup['yaxis_font_size'],
-                                     fontweight=fig_setup['label_font_weight'],
-                                     labelpad=fig_setup['axis_label_pad'])
+            if 0.95 * fig_setup['yaxis_font_size'] >= MIN_FONT_SIZE:
+                fig_setup['yaxis_font_size'] *= 0.95
+                h_ylabel = ax.set_ylabel(y_label,
+                                         fontsize=fig_setup['yaxis_font_size'],
+                                         fontweight=fig_setup['label_font_weight'],
+                                         labelpad=fig_setup['axis_label_pad'])
+            else:
+                continue_test = False
         else:
             continue_test = False
 
@@ -962,11 +991,14 @@ def adjust_title(sub_title, ax, fig, fig_setup, subplots_data):
 
             # If the title is still too long, shrink the fontsize
             if (height_frac > MAX_TITLE_HEIGHT_FRAC) or (width_frac > MAX_TITLE_WIDTH_FRAC):
-                fig_setup['title_font_size'] *= 0.95
-                h_title = ax.set_title(sub_title,
-                                       fontsize=fig_setup['title_font_size'],
-                                       fontweight=fig_setup['label_font_weight'],
-                                       pad=fig_setup['title_pad'])
+                if fig_setup['title_font_size'] * 0.95 >= MIN_FONT_SIZE:
+                    fig_setup['title_font_size'] *= 0.95
+                    h_title = ax.set_title(sub_title,
+                                           fontsize=fig_setup['title_font_size'],
+                                           fontweight=fig_setup['label_font_weight'],
+                                           pad=fig_setup['title_pad'])
+                else:
+                    continue_test = False
             else:
                 continue_test = False
 
@@ -1061,7 +1093,6 @@ def make_label_fontsizes_uniform(num_subplots, xaxis_fontsizes_used,
     """
     Function that ensures all x and y axis labels have the same fontsizes
     """
-
     min_fontsize = np.min(xaxis_fontsizes_used)
 
     if np.min(yaxis_fontsizes_used) < min_fontsize:
@@ -1184,9 +1215,9 @@ def check_legend(handle_list, fig_setup, min_fontsize, subplots_data):
     adjusted based on the number of subplots. If the legend fontsize is larger
     than min_fontsize, it is set to min_fontsize.
     """
-
-    if fig_setup['legend_font_size'] > min_fontsize:
-        fig_setup['legend_font_size'] = min_fontsize
+    if min_fontsize:
+        if fig_setup['legend_font_size'] > min_fontsize:
+            fig_setup['legend_font_size'] = min_fontsize
 
     if subplots_data['ncols'] == 2:
         fig_setup['legend_font_size'] *= 0.9

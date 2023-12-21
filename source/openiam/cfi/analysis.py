@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import collections
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -341,6 +342,7 @@ def stacked_sensitivity_bars(analysis_dict, model_data, sm, s, output_list, time
 
         sensitivities_list = []
         for ob in cp_obs:
+            nan_check = False
             if 'OutputDirectory' in model_data:
                 sens_dict_full['savefig'] = os.path.join(
                     model_data['OutputDirectory'],
@@ -355,20 +357,25 @@ def stacked_sensitivity_bars(analysis_dict, model_data, sm, s, output_list, time
                     os.mkdir(os.path.join(
                         model_data['OutputDirectory'], 'csv_files'))
 
-            sens_dict2 = {}
-
-            for key, value in list(sens_dict_full.items()):
-                if isinstance(value, str):
-                    v = value.format(ob=ob, cp=cp)
-                else:
-                    v = value
-                sens_dict2[key] = v
-
             sensitivities = s.rbd_fast(obsname=ob, print_to_console=False)
+            
+            if True in np.isnan(sensitivities['S1']):
+                nan_check = True
+            
             sensitivities_list.append(sensitivities)
-
-        iam_vis.stacked_sensitivities_barplot(
-            sensitivities_list, cp_obs, sm, **sens_dict_full)
+        
+        if nan_check:
+            logging.warning(''.join([
+                'While assessing the observation {} at the time index {}, '.format(
+                    ob, cp), 
+                'the sensitivities for the StackedSensitivityBars Analysis type ', 
+                'included a nan value. This outcome can occur when the observation ', 
+                'is constant with time (e.g., remaining at zero). The ', 
+                'StackedSensitivityBars Analysis plot for this observation and ', 
+                'time index will not be made.']))
+        else:
+            iam_vis.stacked_sensitivities_barplot(
+                sensitivities_list, cp_obs, sm, **sens_dict_full)
 
 
 def time_series_sensitivity(analysis_dict, model_data, sm, s, output_list, time_array):
@@ -386,7 +393,7 @@ def time_series_sensitivity(analysis_dict, model_data, sm, s, output_list, time_
     else:
         obs = analysis_dict['TimeSeriesSensitivity']
         sens_dict = {}
-
+    
     if isinstance(obs, str):
         obs = [obs]
 

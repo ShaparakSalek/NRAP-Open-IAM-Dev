@@ -3,6 +3,7 @@ from math import sqrt
 import sys
 import os
 import logging
+from warnings import warn
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,8 +19,13 @@ except ImportError:
     print('\nERROR: Unable to load ROM for Simple Reservoir component\n')
     sys.exit()
 
+
 class SimpleReservoir(ComponentModel):
     """
+    Note: Simple Reservoir component will be deprecated in the future versions
+    of NRAP-Open-IAM. We recommend using Analytical Reservoir component instead.
+    In this case updating the parameters might be needed.
+
     The Simple Reservoir component model is a semi-analytical model for the
     reservoir. It is focused on flow across relatively large distances
     and does not take into account discrete features of the flow paths such as
@@ -115,6 +121,11 @@ class SimpleReservoir(ComponentModel):
 
         :returns: SimpleReservoir class object
         """
+        # Throw a deprecation warning on initialization of the class.
+        # Using of stacklevel=2 will show a warning as being raised from
+        # whatever is calling the __init__ method rather from the __init__ itself.
+        warn(f'\n{self.__class__.__name__} class will be deprecated. Use AnalyticalReservoir instead.',
+             DeprecationWarning, stacklevel=2)
         # Set up keyword arguments of the 'model' method provided by the system model
         model_kwargs = {'time_point': 365.25, 'time_step': 365.25}   # default value of 365.25 days
 
@@ -378,7 +389,7 @@ class SimpleReservoir(ComponentModel):
         pass
 
 
-if __name__ == "__main__":
+def test_simple_reservoir_component():
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model

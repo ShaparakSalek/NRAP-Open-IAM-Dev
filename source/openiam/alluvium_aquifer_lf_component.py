@@ -16,7 +16,6 @@ except ImportError as err:
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
 
 
-
 class AlluviumAquiferLF(ComponentModel):
     """
     The Alluvium Aquifer LF (low flux) component model is a reduced order model
@@ -406,7 +405,7 @@ class AlluviumAquiferLF(ComponentModel):
                     aquifer_name=aq_name)])
 
 
-if __name__ == "__main__":
+def test_alluvium_aquifer_lf_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 6.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

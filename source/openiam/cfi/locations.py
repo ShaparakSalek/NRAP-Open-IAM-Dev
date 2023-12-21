@@ -501,6 +501,12 @@ def coord_locations(cmpnt_name, loc_data):
     else:
         locations['coordx'] = loc_data['coordx']
         locations['coordy'] = loc_data['coordy']
+        
+        if not isinstance(locations['coordx'], list):
+            locations['coordx'] = [locations['coordx']]
+        
+        if not isinstance(locations['coordy'], list):
+            locations['coordy'] = [locations['coordy']]
 
         try:
             locations['coordz'] = loc_data['coordz']

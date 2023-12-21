@@ -6,18 +6,17 @@
 # if their depths become too small. Note, however, that each unit can only
 # be reduced to a minimum depth of 1 m: the unit is still there, it is just very
 # thin. This example also uses the option "PlotStratComponents: True" within
-# the Stratigraphy Plot. When using the option "spatiallyVariable: strikeAndDip"
-# within the Stratigraphy section, the code actually creates a separate stratigraphy
-# component for every other component (e.g., each OpenWellbore).
-# The unit thicknesses for each stratigraphy component are calculated based
-# on the component's location and the strike and dip values used.
-# The component for which the stratigraphy component was made is then given
-# the parameters of the newly created stratigraphy component. The wellbores
+# the Stratigraphy Plot. When using the DippingStratigraphy component, the code 
+# actually creates a separate DippingStratigraphy component for every other 
+# component (e.g., each OpenWellbore). The unit thicknesses for each DippingStratigraphy 
+# component are calculated based on the component's location and the strike and dip 
+# values used. The component for which the stratigraphy component was made is then given
+# the parameters of the newly created DippingStratigraphy component. The wellbores
 # are plotted as vertical lines, and the unit depths along each wellbores
 # are plotted as red or blue circles (for the tops of shales or aquifers,
 # respectively). By varying the ViewAngleElevation and ViewAngleAzimuth values,
 # this example is meant to further demonstrate the stratigraphy created with
-# the strike and dip option. The options "PlotWellLabels: False"
+# the DippingStratigraphy component. The options "PlotWellLabels: False"
 # and "StrikeAndDipSymbol: PlotSymbol: False" are used so that the markers
 # representing unit depths can be seen more clearly. Additionally,
 # having "PlotInjectionLocations: True" makes the code plot the injection sites
@@ -45,55 +44,66 @@ ModelParams:
     EndTime: 50
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1]
+    Components: [AnalyticalReservoir1, OpenWellbore1]
     OutputDirectory: output/output_ex35_{datetime}
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        strikeAndDip:
-            strike: 270
-            dip: 25
-            dipDirection: S
-            coordxRefPoint: 0
-            coordyRefPoint: 0
-    numberOfShaleLayers:
-        vary: False
-        value: 3
-    shale1Thickness:
-        value: 750.0
-        vary: False
-    shale2Thickness:
-        value: 950.0
-        vary: False
-    shale3Thickness:
-        value: 365
-        vary: False
-    aquifer1Thickness:
-        vary: False
-        value: 200
-    aquifer2Thickness:
-        vary: False
-        value: 200
-    reservoirThickness:
-        vary: False
-        value: 150
+DippingStratigraphy:
+    ReferenceLocation:
+        coordx: 0
+        coordy: 0
+    Controls:
+        dipDirection: S
+    Parameters:
+        strike:
+            value: 270
+            vary: False
+        dip:
+            value: 25
+            vary: False
+        numberOfShaleLayers:
+            vary: False
+            value: 3
+        shale1Thickness:
+            value: 750.0
+            vary: False
+        shale2Thickness:
+            value: 950.0
+            vary: False
+        shale3Thickness:
+            value: 365
+            vary: False
+        aquifer1Thickness:
+            vary: False
+            value: 200
+        aquifer2Thickness:
+            vary: False
+            value: 200
+        reservoirThickness:
+            vary: False
+            value: 150
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 1
             vary: False
         logResPerm:
-            value: -10.15
+            value: -12.15
+            vary: False
+        reservoirRadius:
+            value: 10000
+            vary: False
+        brineResSaturation:
+            value: 0
             vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Locations:
         grid:
             xmin: 500

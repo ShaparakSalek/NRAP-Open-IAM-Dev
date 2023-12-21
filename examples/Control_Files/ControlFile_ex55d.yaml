@@ -8,9 +8,9 @@
 # by each of the four AoR plots made as well as the overall AoR Workflow plot
 # (i.e., the plot that reflects all metrics).
 #
-# This example requires the additional FutureGen 2.0 data set.
+# This example requires additional FutureGen 2.0 data set.
 # FutureGen 2.0 data set can be downloaded from the following source:
-# https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
+# https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
 #
 # The downloaded data set should be placed here:
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
@@ -30,22 +30,21 @@ ModelParams:
     GenerateCombOutputFile: False
     Logging: Debug
 #-------------------------------------------------
-Stratigraphy:
-    spatiallyVariable:
-        LookupTableStratigraphy:
-            FileName: 'stratigraphy.csv'
-            FileDirectory: 'examples/Control_Files/input_data/ex32b'
-            MaxPointDistance: 100
+LookupTableStratigraphy:
+    FileName: 'stratigraphy.csv'
+    FileDirectory: 'examples/Control_Files/input_data/ex32b'
+    Parameters:
+        numberOfShaleLayers: 5
 #-------------------------------------------------
 Workflow:
     Type: AoR
     Options:
-        AoRFigureName: Overall_AoR_Plot.png
+        FigureName: Overall_AoR_Plot.png
         FigureDPI: 300
         TimeList: All            # [0, 1, 5, 10, 15 20]
         PlotInjectionSites: True
-        InjectionCoordx: 2.37e5
-        InjectionCoordy: 4.41e6
+        InjectionCoordx: 2.37e+5
+        InjectionCoordy: 4.41e+6
         CriticalPressureMPa: Calculated
         AutomateResCompSetup: True
         AutomateWellCompSetup: True
@@ -56,14 +55,14 @@ Workflow:
             FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
-            Interpolation2D: False
+            Interpolation2D: False      # only set this to False if the wellbores are given z values
             Parameters:
                 index: 1
         WellboreComponentType: OpenWellbore
         WellboreOptions:
             Locations:
                 file: source/components/reservoir/lookuptables/FutureGen2/1008_sims/fg1.csv
-                read_z_values: True
+                read_z_values: True     # If this is set to False, then Interpolation2D under ReservoirOptions needs to be set to True
                 thin_point_density: True
                 min_x_spacing: 10000
                 min_y_spacing: 10000

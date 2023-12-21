@@ -14,6 +14,8 @@ except ImportError as err:
     print('Unable to load IAM class module: {}'.format(err))
 
 from openiam.cfi.commons import process_parameters, process_dynamic_inputs
+from openiam.cfi.strata import (get_comp_types_strata_pars, get_comp_types_strata_obs, 
+                                get_strat_param_dict_for_link)
 
 try:
     import components.wellbore.cemented as cwmodel
@@ -499,16 +501,17 @@ class CementedWellboreWR(ComponentModel):
 
         # Process dynamic inputs if any
         process_dynamic_inputs(self, component_data)
+        
+        # These lists indicate the stratigraphy component types that offer thicknesses 
+        # and depths as parameters or as observations.
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
 
         # Get strata component
         strata = name2obj_dict['strata']
+        
         # Determine number of shale layers
-        if 'numberOfShaleLayers' in strata.deterministic_pars:
-            num_shale_layers = strata.deterministic_pars['numberOfShaleLayers'].value
-        elif 'numberOfShaleLayers' in strata.default_pars:
-            num_shale_layers = strata.default_pars['numberOfShaleLayers'].value
-        else:
-            num_shale_layers = 3
+        num_shale_layers = strata.get_num_shale_layers()
 
         # Determine whether it's an unexpected scenario with more than 2 aquifers
         if 'LeakTo' in component_data:
@@ -531,14 +534,29 @@ class CementedWellboreWR(ComponentModel):
 
         # wellDepth can also come from table, so we need to add check for the
         # presence of the parameter among parameters of the component itself
-        strata = name2obj_dict['strata']
-        if 'wellDepth' not in self.pars and \
-                'wellDepth' not in self.deterministic_pars:
-            res_depth = '{}.shale1Thickness '.format(strata.name)
-            for il in range(1, num_shale_layers):
-                res_depth += ('+ {nm}.aquifer{il}Thickness + {nm}.shale{ilp1}Thickness '
-                              .format(nm=strata.name, il=il, ilp1=il+1))
-            self.add_composite_par('wellDepth', res_depth)
+        if name2obj_dict['strata_type'] in types_strata_pars:
+            if 'wellDepth' not in self.pars and \
+                    'wellDepth' not in self.deterministic_pars:
+                res_depth = '{}.shale1Thickness '.format(strata.name)
+                for il in range(1, num_shale_layers):
+                    res_depth += ('+ {nm}.aquifer{il}Thickness + {nm}.shale{ilp1}Thickness '
+                                  .format(nm=strata.name, il=il, ilp1=il+1))
+                self.add_composite_par('wellDepth', res_depth)
+                
+        elif name2obj_dict['strata_type'] in types_strata_obs:
+            if 'wellDepth' in self.pars or 'wellDepth' in self.deterministic_pars:
+                warning_msg = strata.parameter_assignment_warning_msg().format(
+                    'wellDepth', 'shale1Depth')
+                
+                logging.warning(warning_msg)
+                    
+                if 'wellDepth' in self.pars:
+                    del self.pars['wellDepth']
+                
+                elif 'wellDepth' in self.deterministic_pars:
+                    del self.deterministic_pars['wellDepth']
+            
+            self.add_par_linked_to_obs('wellDepth', strata.linkobs['shale1Depth'])
 
         tz = self.thief_zone
         if 'depthRatio' in self.pars or 'depthRatio' in self.deterministic_pars:
@@ -548,46 +566,51 @@ class CementedWellboreWR(ComponentModel):
                                 'Please check your setup.'])
             logging.warning(warn_msg)
         else:
-            depth_ratio = '({nm}.aquifer{tz}Thickness/2'.format(nm=strata.name, tz=tz)
+            depth_ratio = '({nm}.aquifer{tz}Thickness/2'.format(
+                nm=strata.name, tz=tz)
             for il in range(tz+1, num_shale_layers):
                 depth_ratio += ' + {nm}.shale{il}Thickness + {nm}.aquifer{il}Thickness'.format(
                     nm=strata.name, il=il)
             depth_ratio += ' + {nm}.shale{nsl}Thickness)'.format(
                 nm=strata.name, nsl=num_shale_layers)
             depth_ratio += '/{selfm}.wellDepth'.format(selfm=self.name)
-            self.add_composite_par('depthRatio', depth_ratio)
+            
+            if name2obj_dict['strata_type'] in types_strata_pars:
+                self.add_composite_par('depthRatio', depth_ratio)
+                
+            elif name2obj_dict['strata_type'] in types_strata_obs:
+                self.add_par_linked_to_composite_obs('depthRatio', depth_ratio)
 
         # Setup the rest of the stratigraphy related parameters
         setup_data = {'aquifer': ['aquifer', self.leak_layer],
                       'thiefZone': ['aquifer', tz],
                       'reservoir': ['reservoir', '']}
+        
         for key, vals in setup_data.items():
             par_name = '{}Thickness'.format(key)
             if par_name not in self.pars and par_name not in self.deterministic_pars:
                 strata_par_name = '{}{}Thickness'.format(vals[0], vals[1])
-                connect = None
-                if strata_par_name in strata.pars:
-                    connect = strata.pars
-                elif strata_par_name in strata.deterministic_pars:
-                    connect = strata.deterministic_pars
-                elif strata_par_name in strata.default_pars:
-                    connect = strata.default_pars
-                if connect is None:
-                    strata_par_name = '{}Thickness'.format(vals[0])
-                    if strata_par_name in strata.pars:
-                        connect = strata.pars
-                    elif strata_par_name in strata.deterministic_pars:
-                        connect = strata.deterministic_pars
-                    elif strata_par_name in strata.default_pars:
-                        connect = strata.default_pars
-                    else:
-                        err_msg = ''.join([
-                            'Unable to find "{}" or "{}" parameters. Please ',
-                            'check setup of the cemented wellbore component ',
-                            'and stratigraphy.']).format(par_name, strata_par_name)
-                        logging.error(err_msg)
-                        raise KeyError(err_msg)
-                self.add_par_linked_to_par(par_name, connect[strata_par_name])
+                
+                if name2obj_dict['strata_type'] in types_strata_pars:
+                    connect = get_strat_param_dict_for_link(strata_par_name, strata)
+                    
+                    if connect is None:
+                        strata_par_name = '{}Thickness'.format(vals[0])
+                        
+                        connect = get_strat_param_dict_for_link(strata_par_name, strata)
+                        
+                        if connect is None:
+                            err_msg = ''.join([
+                                'Unable to find "{}" or "{}" parameters. Please ',
+                                'check setup of the cemented wellbore component ',
+                                'and stratigraphy.']).format(par_name, strata_par_name)
+                            logging.error(err_msg)
+                            raise KeyError(err_msg)
+                    
+                    self.add_par_linked_to_par(par_name, connect[strata_par_name])
+                    
+                elif name2obj_dict['strata_type'] in types_strata_obs:
+                    self.add_par_linked_to_obs(par_name, strata.linkobs[strata_par_name])
 
         # Make model connections
         if 'Connection' in component_data:
@@ -623,9 +646,9 @@ class CementedWellboreWR(ComponentModel):
         '+ {strata}.aquifer2Thickness + {strata}.aquifer1Thickness/2)/{selfm}.wellDepth')
 
 
-if __name__ == "__main__":
+def test_cemented_wellbore_wr_component():
     try:
-        from openiam import SimpleReservoir
+        from openiam import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: '+str(err))
 
@@ -638,27 +661,29 @@ if __name__ == "__main__":
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
-    sres.add_par('shale2Thickness', min=450.0, max=500., value=475.0)
-    sres.add_par('shale3Thickness', value=35.0, vary=False)
-    sres.add_par('aquifer1Thickness', value=45.0, vary=False)
-    sres.add_par('aquifer2Thickness', value=23.0, vary=False)
-    sres.add_par('reservoirThickness', value=55.0, vary=False)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('shale1Thickness', min=500.0, max=550., value=525.0)
+    ares.add_par('shale2Thickness', min=450.0, max=500., value=475.0)
+    ares.add_par('shale3Thickness', value=35.0, vary=False)
+    ares.add_par('aquifer1Thickness', value=45.0, vary=False)
+    ares.add_par('aquifer2Thickness', value=23.0, vary=False)
+    ares.add_par('reservoirThickness', value=55.0, vary=False)
+    ares.add_par('injRate', value=0.1, vary=False)
+    ares.add_par('reservoirRadius', value=1000, vary=False)
 
     # Add observations of reservoir component model
     # When add_obs method is called, system model automatically
     # (if no other options of the method is used) adds a list of observations
-    # with name sres.obsnm_0, sres.obsnm_1,.... The final index is determined by the
+    # with name ares.obsnm_0, ares.obsnm_1,.... The final index is determined by the
     # number of time points in system model time_array attribute.
     # For more information, see the docstring of add_obs of ComponentModel class.
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
-    sres.add_obs_to_be_linked('pressure')
-    sres.add_obs_to_be_linked('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
+    ares.add_obs_to_be_linked('pressure')
+    ares.add_obs_to_be_linked('CO2saturation')
 
     # Add cemented wellbore component
     cw = sm.add_component_model_object(CementedWellboreWR(name='cw', parent=sm))
@@ -666,43 +691,43 @@ if __name__ == "__main__":
     # Add parameters of cemented wellbore component
     cw.add_par('logWellPerm', min=-13.9, max=-12.0, value=-13.0)
     cw.add_par_linked_to_par('thiefZoneThickness',
-                             sres.deterministic_pars['aquifer1Thickness'])
+                             ares.deterministic_pars['aquifer1Thickness'])
     cw.add_par_linked_to_par('aquiferThickness',
-                             sres.deterministic_pars['aquifer2Thickness'])
+                             ares.deterministic_pars['aquifer2Thickness'])
     cw.add_par_linked_to_par('reservoirThickness',
-                             sres.deterministic_pars['reservoirThickness'])
+                             ares.deterministic_pars['reservoirThickness'])
 
     # Add keyword arguments of the cemented wellbore component model
-    cw.add_kwarg_linked_to_obs('pressure', sres.linkobs['pressure'])
-    cw.add_kwarg_linked_to_obs('CO2saturation', sres.linkobs['CO2saturation'])
+    cw.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
+    cw.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
 
     # Add composite parameters of cemented wellbore component
-    #print(sres.pars['shale2Thickness'].name,sres.deterministic_pars['shale3Thickness'].name)
-#    cw.add_composite_par('wellDepth', expr=sres.pars['shale1Thickness'].name+
-#        '+'+sres.pars['shale2Thickness'].name+
-#        '+'+sres.deterministic_pars['shale3Thickness'].name+
-#        '+'+sres.deterministic_pars['aquifer1Thickness'].name+
-#        '+'+sres.deterministic_pars['aquifer2Thickness'].name)
+    #print(ares.pars['shale2Thickness'].name, ares.deterministic_pars['shale3Thickness'].name)
+#    cw.add_composite_par('wellDepth', expr=ares.pars['shale1Thickness'].name+
+#        '+'+ares.pars['shale2Thickness'].name+
+#        '+'+ares.deterministic_pars['shale3Thickness'].name+
+#        '+'+ares.deterministic_pars['aquifer1Thickness'].name+
+#        '+'+ares.deterministic_pars['aquifer2Thickness'].name)
 #    cw.add_composite_par('depthRatio',
-#        expr='(' + sres.pars['shale2Thickness'].name +
-#        '+' + sres.deterministic_pars['shale3Thickness'].name +
-#        '+' + sres.deterministic_pars['aquifer2Thickness'].name +
-#        '+' + sres.deterministic_pars['aquifer1Thickness'].name + '/2)/' +
+#        expr='(' + ares.pars['shale2Thickness'].name +
+#        '+' + ares.deterministic_pars['shale3Thickness'].name +
+#        '+' + ares.deterministic_pars['aquifer2Thickness'].name +
+#        '+' + ares.deterministic_pars['aquifer1Thickness'].name + '/2)/' +
 #        cw.composite_pars['wellDepth'].name)
 #    cw.add_composite_par('initPressure',
-#        expr=sres.default_pars['datumPressure'].name +
+#        expr=ares.default_pars['datumPressure'].name +
 #        '+' + cw.composite_pars['wellDepth'].name + '*98/10' +
-#        '*' + sres.default_pars['brineDensity'].name)
+#        '*' + ares.default_pars['brineDensity'].name)
 
     # Shorter way to write the same thing as the commented code above
-    cw.add_composite_par('wellDepth', expr='sres.shale1Thickness' +
-                         '+sres.shale2Thickness + sres.shale3Thickness' +
-                         '+sres.aquifer1Thickness+ sres.aquifer2Thickness')
+    cw.add_composite_par('wellDepth', expr='ares.shale1Thickness' +
+                         '+ares.shale2Thickness + ares.shale3Thickness' +
+                         '+ares.aquifer1Thickness+ ares.aquifer2Thickness')
     cw.add_composite_par('depthRatio',
-                         expr='(sres.shale2Thickness+sres.shale3Thickness' +
-                         '+ sres.aquifer2Thickness + sres.aquifer1Thickness/2)/cw.wellDepth')
+                         expr='(ares.shale2Thickness+ares.shale3Thickness' +
+                         '+ ares.aquifer2Thickness + ares.aquifer1Thickness/2)/cw.wellDepth')
     cw.add_composite_par('initPressure',
-                         expr='sres.datumPressure + cw.wellDepth*cw.g*sres.brineDensity')
+                         expr='ares.datumPressure + cw.wellDepth*cw.g*ares.brineDensity')
 
     # Add observations of the cemented wellbore component
     cw.add_obs('CO2_aquifer1')
@@ -726,8 +751,8 @@ if __name__ == "__main__":
     # collect_observations_as_time_series of SystemModel class.
     CO2leakrates_aq1 = sm.collect_observations_as_time_series(cw, 'CO2_aquifer1')
     CO2leakrates_aq2 = sm.collect_observations_as_time_series(cw, 'CO2_aquifer2')
-    pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-    CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
+    pressure = sm.collect_observations_as_time_series(ares, 'pressure')
+    CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
     mass_CO2_aquifer2 = sm.collect_observations_as_time_series(cw, 'mass_CO2_aquifer2')
 
     # Print observations at all time points

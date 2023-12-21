@@ -1,5 +1,10 @@
 from .iam_base_classes import SystemModel, ComponentModel, SamplerModel, IAM_DIR
 from .stratigraphy_component import Stratigraphy
+from .dipping_stratigraphy_component import DippingStratigraphy
+# import of StratigraphyDataInterpolator should be placed before import 
+# of LookupTableStratigraphy
+from .stratigraphy_data_interpolator import StratigraphyDataInterpolator
+from .lookup_table_stratigraphy_component import LookupTableStratigraphy
 from .simple_reservoir_component import SimpleReservoir
 from .theis_reservoir_component import TheisReservoir
 from .analytical_reservoir_component import AnalyticalReservoir
@@ -48,13 +53,16 @@ from .monitoring_scheduler_component import (
 from .area_estimate_component import AreaEstimate
 
 
-__version__ = 'alpha_2.7.2-23.08.25'
+__version__ = 'alpha_2.8.1-23.12.15'
 
 __all__ = ['IAM_DIR',
            'SystemModel',
            'ComponentModel',
            'SamplerModel',
            'Stratigraphy',
+           'DippingStratigraphy',
+           'StratigraphyDataInterpolator',
+           'LookupTableStratigraphy',
            'SimpleReservoir',
            'TheisReservoir',
            'AnalyticalReservoir',

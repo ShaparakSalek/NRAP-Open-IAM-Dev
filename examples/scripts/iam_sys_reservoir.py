@@ -1,5 +1,5 @@
 '''
-Example illustrates system model containing only simple reservoir model.
+Example illustrates system model containing only analytical reservoir model.
 System model is run for an array of time points. Parameters of the reservoir
 model are defined as default, deterministic and stochastic. Plots of pressure
 and |CO2| saturation are returned as output.
@@ -18,7 +18,7 @@ from openiam import SystemModel
 
 
 if __name__=='__main__':
-    from openiam import SimpleReservoir
+    from openiam import AnalyticalReservoir
 
     # Create system model
     time_array = np.arange(0, 201)   # in days
@@ -26,24 +26,24 @@ if __name__=='__main__':
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
-    sres = sm.add_component_model_object(SimpleReservoir(name='sres', parent=sm))
+    ares = sm.add_component_model_object(AnalyticalReservoir(name='ares', parent=sm))
 
     # Add parameters of reservoir component model
-    sres.add_par('numberOfShaleLayers', value=3, vary=False)
-    sres.add_par('injRate', min=0.1, max=0.4, value=0.2)
-    sres.add_par('shale1Thickness', min=25.0, max=80., value=50.0)
-    sres.add_par('shale2Thickness', min=35.0, max=90., value=45.0)
+    ares.add_par('numberOfShaleLayers', value=3, vary=False)
+    ares.add_par('injRate', min=0.1, max=0.4, value=0.2)
+    ares.add_par('shale1Thickness', min=25.0, max=80., value=50.0)
+    ares.add_par('shale2Thickness', min=35.0, max=90., value=45.0)
 
     # Add observations of reservoir component model
-    sres.add_obs('pressure')
-    sres.add_obs('CO2saturation')
+    ares.add_obs('pressure')
+    ares.add_obs('CO2saturation')
 
     # Run system model using current values of its parameters
     sm.forward()
 
     # Assign observations of the model to pressure and CO2saturation variables
-    pressure = sm.collect_observations_as_time_series(sres, 'pressure')
-    CO2saturation = sm.collect_observations_as_time_series(sres, 'CO2saturation')
+    pressure = sm.collect_observations_as_time_series(ares, 'pressure')
+    CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
 
     # Print pressure and saturation
     print('pressure', pressure, sep='\n')

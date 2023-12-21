@@ -20,6 +20,22 @@ please perform the following actions:
   - do not forget to commit the changes.
 
 
+## [a2.8.1 - 2023-12-15]
+### Added
+  - New DippingStratigraphy, LookupTableStratigraphy, and 
+  StratigraphyDataInterpolator components.
+  - New parameter type within the SystemModel. The new parameters type is 
+  composite observation-linked parameters, which can be calculated as a 
+  function of parameters and/or observations.
+  - Added CFI and script examples demonstrating the use of the new components.
+### Updated
+  - Can now use workflows in the GUI.
+  - Updates to account for the new stratigraphy components. Unit thicknesses
+  and depths being produced as observations (instead of parameters) required
+  changes to many files.
+  - Updated the documentation with a section on workflows.
+  - AoR plot type now works with the TheisReservoir component.
+
 ## [a2.7.2 - 2023-08-25]
 ### Added
   - CFI: Added new section for workflows; examples illustrating AoR workflow

@@ -120,6 +120,9 @@ class DeepAlluviumAquifer(ComponentModel):
 
     * **pH_dz** [|m|] - height of plume below pH threshold (pH < 6.75).
 
+    For control file examples using the Deep Alluvium Aquifer, see *ControlFile_ex10* 
+    and *ControlFile_ex43*. For a script example, see *iam_sys_deepalluvium.py*.
+
     """
     def __init__(self, name, parent):
         """
@@ -387,7 +390,7 @@ class DeepAlluviumAquifer(ComponentModel):
                     aquifer_name=aq_name)])
 
 
-if __name__ == "__main__":
+def test_deep_alluvium_aquifer_component():
     # Create system model
     time_array = 365.25*np.arange(0.0, 2.0)
     sm_model_kwargs = {'time_array': time_array} # time is given in days

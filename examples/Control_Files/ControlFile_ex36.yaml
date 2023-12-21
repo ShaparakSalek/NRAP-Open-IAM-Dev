@@ -10,7 +10,8 @@
 # top_depth parameters of the GenericAquifer component are also set as
 # aquifer2Thickness and shale4Thickness. Because shale 4 is the top shale
 # (closest to the surface), shale4Thickness is equal to shale4Depth, which also
-# represents the top of aquifer 3.
+# represents the top of aquifer 3. If these parameters are not set by the user, 
+# however, they will automatically be linked to the Stratigraphy component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex36.yaml
@@ -21,7 +22,7 @@ ModelParams:
     EndTime: 50
     TimeStep: 1.0
     Analysis: forward
-    Components: [SimpleReservoir1, OpenWellbore1, GenericAquifer1]
+    Components: [AnalyticalReservoir1, OpenWellbore1, GenericAquifer1]
     OutputDirectory: output/output_ex36_{datetime}
     Logging: Debug
 #-------------------------------------------------
@@ -54,20 +55,26 @@ Stratigraphy:
         vary: False
         value: 150.0
 #-------------------------------------------------
-SimpleReservoir1:
-    Type: SimpleReservoir
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
     Parameters:
         injRate:
             value: 1
             vary: False
         logResPerm:
-            value: -10.15
+            value: -12.15
+            vary: False
+        reservoirRadius:
+            value: 10000
+            vary: False
+        brineResSaturation:
+            value: 0
             vary: False
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:
     Type: OpenWellbore
-    Connection: SimpleReservoir1
+    Connection: AnalyticalReservoir1
     Locations:
         grid:
             xmin: 500

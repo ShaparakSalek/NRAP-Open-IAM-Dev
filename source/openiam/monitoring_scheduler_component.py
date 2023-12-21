@@ -177,7 +177,6 @@ class MonitoringScheduler1(ComponentModel):
                         indices = generate_seq(max_num_cmpnts_to_monitor,
                                                array_to_be_returned=0)[0:num_indices]
                     indices = indices-1
-#                    print(common_indices)
                     cmpnts_indices = common_indices[indices]
 
                     # Update accumulator variable
@@ -555,26 +554,24 @@ class MonitoringScheduler3(ComponentModel):
         return out
 
 
-def test_case_monitoring_scheduler1():
+def test_monitoring_scheduler1():
     pass
 
 
-def test_case_monitoring_scheduler2():
+def test_monitoring_scheduler2():
     pass
 
 
-def test_case_monitoring_scheduler3():
+def test_monitoring_scheduler3():
     pass
 
 
-if __name__ == "__main__":
+def test_monitoring_scheduler_component(test_case=1):
     logging.basicConfig(level=logging.WARNING)
 
-    test_case = 3
-
-    test_to_run = {1: test_case_monitoring_scheduler1,
-                   2: test_case_monitoring_scheduler2,
-                   3: test_case_monitoring_scheduler3}
+    test_to_run = {1: test_monitoring_scheduler1,
+                   2: test_monitoring_scheduler2,
+                   3: test_monitoring_scheduler3}
 
     # Run corresponding test example
     test_to_run[test_case]()

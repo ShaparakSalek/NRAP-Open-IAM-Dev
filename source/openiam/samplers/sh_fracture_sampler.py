@@ -1110,9 +1110,9 @@ def test_scenario2():
     ax2.set_ylabel('y [m]')
     ax2.set_zlabel(r'k [$m^2$]')
 
-if __name__ == "__main__":
 
-    test = 1
+def test_sh_fracture_sampler(test=1):
+
     if test == 1:
         test_scenario1()
     elif test == 2:

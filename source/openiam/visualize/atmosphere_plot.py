@@ -86,9 +86,9 @@ class Plume():
 
 
 def make_plume_plots(plumes, time=None, alpha=0.2, sample=0, extent=None,
-                     analysis='lhs', figsize=(15, 10), genfontsize=18, 
-                     axislabelfontsize=24, titlefontsize=20, boldlabels=True, 
-                     savefig=None, title=None, receptors=None, yaml_input_dict=None, 
+                     analysis='lhs', figsize=(15, 10), genfontsize=18,
+                     axislabelfontsize=24, titlefontsize=20, boldlabels=True,
+                     savefig=None, title=None, receptors=None, yaml_input_dict=None,
                      res_comp_injX=None, res_comp_injY=None):
     """
     Takes in list of plume objects and plot them on a figure.
@@ -292,7 +292,7 @@ def make_plume_plots(plumes, time=None, alpha=0.2, sample=0, extent=None,
     ax.set_position([box.x0, box.y0 + box.height * 0.05,
                      box.width, box.height * 0.95])
 
-    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncol=ncol_number,
+    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncols=ncol_number,
               edgecolor=[0, 0, 0], loc='best', bbox_to_anchor=(0.75, -0.1),
               framealpha=0.67)
 
@@ -432,7 +432,7 @@ def get_plumes(sm, s, atm_comp, time_index=0, sample=0, analysis='lhs',
     return (plumes, extent)
 
 
-def map_plume_plot_single(plot_data, name, sm, s, satm, time_array, output_dir, 
+def map_plume_plot_single(plot_data, name, sm, s, satm, time_array, output_dir,
                           analysis='lhs', figsize=(15, 10), sample=0,
                           genfontsize=18, axislabelfontsize=24, titlefontsize=20,
                           boldlabels=True, savefig=None, extent=None, title=None):
@@ -789,7 +789,7 @@ def plot_grid_plumes(xy, plumes_grid, extent, savefig=None, time=None,
     ax.set_position([box.x0, box.y0 + box.height * 0.05,
                      box.width, box.height * 0.95])
 
-    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncol=ncol_number,
+    ax.legend(fancybox=False, fontsize=genfontsize - 2, ncols=ncol_number,
               edgecolor=[0, 0, 0], loc='best', bbox_to_anchor=(0.75, -0.1),
               framealpha=0.67)
 

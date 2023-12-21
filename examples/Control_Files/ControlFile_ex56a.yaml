@@ -2,8 +2,8 @@
 #
 # This example is similar to example 55c in that it mostly
 # uses the default settings for the AoR Workflow. This example
-# uses a SimpleReservoir component, however ('ReservoirComponentType:
-# SimpleReservoir' under 'Workflow: Options'). When the reservoir
+# uses a AnalyticalReservoir component, however ('ReservoirComponentType:
+# AnalyticalReservoir' under 'Workflow: Options'). When the reservoir
 # component is not a LookupTableReservoir and no specific wellbore
 # locations are given (under 'Options: WellboreOptions: Locations'),
 # the default setting is to use the 'grid' placement option (see
@@ -51,4 +51,4 @@ Stratigraphy:
 Workflow:
     Type: AoR
     Options:
-        ReservoirComponentType: SimpleReservoir
+        ReservoirComponentType: AnalyticalReservoir

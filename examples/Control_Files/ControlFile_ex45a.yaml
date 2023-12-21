@@ -3,7 +3,8 @@
 # This example demonstrates the use of the TheisReservoir component. Note that
 # this control file was created to be equivalent to the script example
 # iam_sys_theis_benchmark2.py. The TheisReservoir component needs entries
-# for injRates and injTimes.
+# for injRates and injTimes - these entries allow injection (or extraction) 
+# rates to vary over time.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../source/openiam/openiam_cf.py --file ControlFile_ex45a.yaml

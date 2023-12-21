@@ -88,6 +88,11 @@ class PlumeStability(ComponentModel):
     Above, {obs} determines the name of observation for which the plume stability
     metrics are to be calculated and for which the data is provided in the data files
     used as input for the component, e.g. **pressure**, **CO2saturation**, etc.
+
+    For a control file example using the Plume Stability component, see 
+    *ControlFile_ex16*. For script examples, see *iam_plume_stability_FEHM.py*, 
+    *iam_plume_stability_Kimb.py*, and *iam_plume_stability_Kimb_3d.py*.
+
     """
     def __init__(self, name, parent, file_directory=None,
                  variable_names=None, thresholds=None,
@@ -543,7 +548,8 @@ class PlumeStability(ComponentModel):
     def reset(self):
         pass
 
-if __name__ == "__main__":
+
+def test_plume_stability_component(option=2):
     # For multiprocessing in Spyder
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
@@ -557,7 +563,6 @@ if __name__ == "__main__":
                        '2. https://gitlab.com/NRAP/Kimberlina_data \n'])
         logging.error(msg)
 
-    option = 2
     if option == 1:
         num_years = 200
         # Time array different from time points provided in the data set
