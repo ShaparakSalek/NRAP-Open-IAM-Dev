@@ -31,7 +31,7 @@ Workflow:
     PlotInjectionSites: true
     ReservoirComponentType: LookupTableReservoir
     ReservoirOptions:
-      FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+      FileDirectory: data/reservoir/lookuptables/FutureGen2/1008_sims
       Interpolation2D: true
       ParameterFilename: parameters_and_filenames_trunc.csv
       Parameters:

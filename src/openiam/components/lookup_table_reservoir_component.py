@@ -1067,7 +1067,7 @@ def test_lookup_table_reservoir_component(test_case=1):
     ltres = sm.add_component_model_object(
         LookupTableReservoir(name='ltres', parent=sm, locX=loc_x, locY=loc_y))
     file_dir = os.path.join(
-        '..', 'components', 'reservoir', 'lookuptables', data_set_fldr)
+        '..', '..', '..', 'data', 'reservoir', 'lookuptables', data_set_fldr)
     ltres.build_and_link_interpolators(
         file_directory=file_dir, intr_family='reservoir',
         default_values={'salinity': 0.1, 'temperature': 50.0},

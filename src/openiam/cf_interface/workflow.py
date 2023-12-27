@@ -68,8 +68,7 @@ LOC_INPUT_ERR_MSG = ''.join([
     'requires the user to provide Location data for the wellbores. ',
     'This simulation cannot proceed.'])
 
-DEFAULT_LUTR_FILE_DIRECTORY = os.path.join(IAM_DIR, 'source', 'components',
-                                           'reservoir', 'lookuptables',
+DEFAULT_LUTR_FILE_DIRECTORY = os.path.join(IAM_DIR, 'data', 'reservoir', 'lookuptables',
                                            'FutureGen2', '1008_sims')
 
 DEFAULT_LUTR_ENTRIES = {

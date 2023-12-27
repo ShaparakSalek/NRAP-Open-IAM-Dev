@@ -18,7 +18,7 @@
 #    source/components/reservoir/lookuptables/FutureGen2/1008_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex55b.yaml
+#   python ../../../src/openiam/openiam_cf.py --file ControlFile_ex55b_jupyter.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------
@@ -54,7 +54,7 @@ Workflow:
         AutomatePlotsSetup: True
         ReservoirComponentType: LookupTableReservoir
         ReservoirOptions:
-            FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+            FileDirectory: data/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
             Interpolation2D: True

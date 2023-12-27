@@ -1,6 +1,6 @@
 
 import logging
-import openiam as iam
+import openiam.base as iam_base
 import numpy as np
 
 YAML_INPUT_WARNING_MSG = ''.join([
@@ -36,9 +36,9 @@ def get_parameter_names(component_type):
     time_array = 365.25 * np.arange(0.0, num_years+1)
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
-    dummy_sm = iam.SystemModel(model_kwargs=sm_model_kwargs)
+    dummy_sm = iam_base.SystemModel(model_kwargs=sm_model_kwargs)
 
-    comp_type = getattr(iam, component_type)
+    comp_type = getattr(iam_base, component_type)
 
     dummy_comp = dummy_sm.add_component_model_object(comp_type(
         name='dummy_comp', parent=dummy_sm))

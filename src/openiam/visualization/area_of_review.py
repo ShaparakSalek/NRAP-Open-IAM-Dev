@@ -531,7 +531,7 @@ def area_of_review_plot(yaml_data, model_data, output_names, sm, s,
                 strata_type=strata_type, aq_number=aq_number, brineDensityInput=brineDensityInput)
 
             if pressure_critP_check:
-                if critPressureInput == 'Calculated':
+                if isinstance(critPressureInput, str) and (critPressureInput == 'Calculated'):
                     if np.max(critPressure) == 0:
                         if not critP_error_print_check:
                             logging.warning(critP_warning_msg)
@@ -615,29 +615,32 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
 
             # It it's a wellbore component and critPressureInput is 'Calculated',
             # get the critical pressure
-            if critPressureInput == 'Calculated' and isinstance(
-                    output_component, (iam_base.OpenWellbore, iam_base.MultisegmentedWellbore,
-                                       iam_base.CementedWellbore, iam_base.CementedWellboreWR,
-                                       iam_base.GeneralizedFlowRate)):
-                if strata_type in types_strata_pars and critPressure is None:
-                    # If using uniform stratigraphy, only do this once
-                    critPressureVal = get_crit_pressure(
-                        output_component, sm=sm, yaml_data=yaml_data,
-                        calcCritPressureNoOW=calcCritPressureNoOW,
-                        aq_number=aq_number, brineDensityInput=brineDensityInput)
+            if isinstance(critPressureInput, str):  # comparison of numpy array with str throws an error for recent versions of numpy
+                if critPressureInput == 'Calculated' and isinstance(
+                        output_component, (iam_base.OpenWellbore,
+                                           iam_base.MultisegmentedWellbore,
+                                           iam_base.CementedWellbore,
+                                           iam_base.CementedWellboreWR,
+                                           iam_base.GeneralizedFlowRate)):
+                    if strata_type in types_strata_pars and critPressure is None:
+                        # If using uniform stratigraphy, only do this once
+                        critPressureVal = get_crit_pressure(
+                            output_component, sm=sm, yaml_data=yaml_data,
+                            calcCritPressureNoOW=calcCritPressureNoOW,
+                            aq_number=aq_number, brineDensityInput=brineDensityInput)
 
-                    critPressure = critPressureVal
+                        critPressure = critPressureVal
 
-                elif strata_type in types_strata_obs:
-                    critPressureVal = get_crit_pressure(
-                        output_component, sm=sm, yaml_data=yaml_data,
-                        calcCritPressureNoOW=calcCritPressureNoOW,
-                        aq_number=aq_number, brineDensityInput=brineDensityInput)
+                    elif strata_type in types_strata_obs:
+                        critPressureVal = get_crit_pressure(
+                            output_component, sm=sm, yaml_data=yaml_data,
+                            calcCritPressureNoOW=calcCritPressureNoOW,
+                            aq_number=aq_number, brineDensityInput=brineDensityInput)
 
-                    # Find the location index
-                    loc_ref = int(output_component.name.split('_')[-1])
+                        # Find the location index
+                        loc_ref = int(output_component.name.split('_')[-1])
 
-                    critPressure[loc_ref] = critPressureVal
+                        critPressure[loc_ref] = critPressureVal
 
             if output_nm in output_list[output_component]:
                 full_obs_nm = '.'.join([output_component.name, output_nm])
@@ -1220,7 +1223,7 @@ def plot_AoR_results(aq_number, x_loc, y_loc, results, yaml_data, model_data,
 
         if save_results:
             # Set up data for .csv file
-            if output_nm == 'pressure' and not critPressureInput is None:
+            if output_nm == 'pressure' and critPressureInput is not None:
                 results_formatted = np.empty(((len(x_loc) + 1), 5), dtype=list)
             else:
                 results_formatted = np.empty(((len(x_loc) + 1), 3), dtype=list)
