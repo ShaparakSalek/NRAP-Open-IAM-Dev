@@ -5,12 +5,13 @@ All notable changes to this project are documented in this file.
 of the tool is updated and changes are recorded in the current changelog,
 please perform the following actions:
   - update version of the tool in the following files:
-    - source/openiam/\__init\__.py
+    - src/openiam/\__init\__.py
+	- src/openiam/VERSION
     - documentation/user/source/conf.py
     - documentation/developer/source/conf.py
     - documentation/qaqc/source/conf.py
     - documentation/website/source/conf.py
-    - source/GUI/Dashboard.py
+    - src/openiam/gu_interface/Dashboard.py
     - replace image of front page of GUI with the one stating new version
     of the tool in the documentation.
   - recompile user and developer guides, and QAQC documents;
