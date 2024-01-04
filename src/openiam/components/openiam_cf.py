@@ -22,10 +22,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 
-SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(SOURCE_DIR)
-
-# import matk.ordereddict
 import openiam as iam
 import openiam.base as iam_base
 from openiam.components.iam_base_classes import IAM_DIR

@@ -18,11 +18,6 @@ from openiam.components.stratigraphy_component import Stratigraphy
 from openiam.components.analytical_reservoir_component import AnalyticalReservoir
 from openiam.components.iam_gridded_observation import DataInterpolator
 
-try:
-    from openiam import SystemModel
-except ImportError as err:
-    print('Unable to load IAM class module: '+str(err))
-
 
 if __name__ == "__main__":
     # Define logging level

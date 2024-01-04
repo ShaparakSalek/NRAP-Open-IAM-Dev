@@ -3,12 +3,12 @@ import os
 import sys
 import logging
 import numpy as np
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     import openiam.components.iam_base_classes as iam_bc
 except ImportError as err:
     print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
+
 
 DIP_DIRECTION_DEGREE_OPTIONS = [0, 90, 180, 270, 360]
 DIP_DIRECTION_OPTIONS = ['N', 'S', 'E', 'W', 'NE', 'SE', 'SW', 'NW']
@@ -30,6 +30,7 @@ DIP_DIRECTION_WARNING = ''.join([
     'not one of the available options ({}). The dipDirection will be set to ',
     '90 degrees clockwise from the direction of strike(when viewed in a ',
     'map-view figure).'])
+
 
 class DippingStratigraphy(iam_bc.ComponentModel):
     """

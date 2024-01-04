@@ -15,7 +15,6 @@ from scipy.spatial import Delaunay
 import pandas as pd
 
 np.set_printoptions(threshold=sys.maxsize)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from openiam.components.iam_gridded_observation import (interp_weights,

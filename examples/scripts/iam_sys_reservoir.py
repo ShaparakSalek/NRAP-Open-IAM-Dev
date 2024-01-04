@@ -16,6 +16,7 @@ import numpy as np
 from openiam.components.iam_base_classes import SystemModel
 from openiam.components.analytical_reservoir_component import AnalyticalReservoir
 
+
 if __name__=='__main__':
 
     # Create system model

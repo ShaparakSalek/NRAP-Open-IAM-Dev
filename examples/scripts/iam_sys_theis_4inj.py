@@ -12,7 +12,6 @@ import sys
 import os
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'src']))
 from openiam.components.iam_base_classes import SystemModel
 from openiam.components.theis_reservoir_component import TheisReservoir
 

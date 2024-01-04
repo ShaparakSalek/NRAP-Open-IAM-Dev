@@ -15,7 +15,6 @@ from re import sub
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.sep.join(['..',' ..', 'src']))
 from openiam.components.mesh2D import Mesh2D
 
 

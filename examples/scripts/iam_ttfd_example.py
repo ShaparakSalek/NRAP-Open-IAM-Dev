@@ -48,7 +48,7 @@ from openiam.components.iam_base_classes import SystemModel
 from openiam.components.analytical_reservoir_component import AnalyticalReservoir
 from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 from openiam.components.rate_to_mass_adapter import RateToMassAdapter
-from openiam.components.carbonate_aquifer_component import  CarbonateAquifer
+from openiam.components.carbonate_aquifer_component import CarbonateAquifer
 
 
 if __name__ == "__main__":
