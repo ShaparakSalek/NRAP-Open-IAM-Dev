@@ -130,6 +130,62 @@ class NRAPOpenIAM(tk.Tk):
             read_tab_pars = self.get_read_vars_method(componentTypeDictionary[i])
             d[choice] = read_tab_pars(choice)
 
+            if choice == 'Workflow':
+                for key in componentVars[choice]['Params'].keys():
+                    d[choice]['Parameters'][key] = componentVars[choice]['Params'][key].get()
+
+                # Change case of type
+                d[choice]['Type'] = d[choice].pop('type')
+
+                if d[choice]['Type'] == 'AoR':
+
+                    # Set up injection locations for plots if provided
+                    if 'InjectionLocations' in d[choice].keys():
+                        if len(d[choice]['InjectionLocations']['coordx']) == 1:
+                            d[choice]['Parameters']['InjectionCoordx'] = d[choice]['InjectionLocations']['coordx'][0]
+                            d[choice]['Parameters']['InjectionCoordy'] = d[choice]['InjectionLocations']['coordy'][0]
+                        else:
+                            d[choice]['Parameters']['InjectionCoordx'] = d[choice]['InjectionLocations']['coordx']
+                            d[choice]['Parameters']['InjectionCoordy'] = d[choice]['InjectionLocations']['coordy']
+                        d[choice].pop('InjectionLocations')
+
+                    # Change critical pressure setup of workflow and, if necessary, OpenWellbore component
+                    if d[choice]['Parameters']['CriticalPressureMPa']:
+                        d[choice]['Parameters']['CriticalPressureMPa'] = 'Calculated'
+                        if self.component_list['wellbore'][1].get() == 'Open Wellbore':
+                            d['OpenWellbore1']['Controls']['critPressureApproach'] = True
+                            d['OpenWellbore1']['Parameters'].pop('critPressure')
+                    else:
+                        crit_press = float(d[choice]['Parameters']['CriticalPressureMPa_no_calc'])
+                        d[choice]['Parameters']['CriticalPressureMPa'] = crit_press
+                        if self.component_list['wellbore'][1].get() == 'Open Wellbore':
+                            d['OpenWellbore1']['Controls']['critPressureApproach'] = True
+                            d['OpenWellbore1']['Controls']['enforceCritPressure'] = True
+                            d['OpenWellbore1']['Parameters']['critPressure']['value'] = crit_press*(10**6)
+                    d[choice]['Parameters'].pop('CriticalPressureMPa_no_calc')
+
+                    # Change brine density of components if necessary
+                    if self.component_list['reservoir'][1].get() == 'Analytical Reservoir' and \
+                      self.component_list['wellbore'][1].get() in ['Open Wellbore', 'Multisegmented Wellbore']:
+                        brine_density = float(d[choice]['Parameters']['BrineDensity'])
+                        d[choice]['Parameters']['BrineDensity'] = brine_density
+                        d[componentChoices[0]]['Parameters']['brineDensity']['value'] = brine_density
+                        d[componentChoices[1]]['Parameters']['brineDensity']['value'] = brine_density
+                        d[choice]['Parameters'].pop('BrineDensity')
+
+
+                    # Change wellbore number and location information
+                    # Number of wellbores
+                    d[self.component_list['wellbore'][0].get()]['number'] = d[choice]['Number']
+                    d[choice].pop('Number')
+
+                    # Location of wellbores
+                    d[self.component_list['wellbore'][0].get()]['Locations'] = d[choice]['WellboreLocations']
+                    d[choice].pop('WellboreLocations')
+
+
+                continue
+
             if componentTypeDictionary[i] == 'LookupTableReservoir':
                 continue
 
@@ -207,7 +263,7 @@ class NRAPOpenIAM(tk.Tk):
             # Enable automatic plot setup
             d['Workflow']['Options']['AutomatePlotsSetup'] = True
 
-            if d['Workflow']['type'] == 'AoR':
+            if d['Workflow']['Type'] == 'AoR':
                 d['Workflow']['Options']['ReservoirComponentType'] = componentTypeDictionary[0]
                 d['Workflow']['Options']['WellboreComponentType'] = componentTypeDictionary[1]
                 d['Workflow']['Options']['AquiferComponentType'] = componentTypeDictionary[2]
@@ -1360,31 +1416,42 @@ class NRAPOpenIAM(tk.Tk):
                                menu_type='workflow')
 
             if 'AoR' in component_list.keys():
+
+                # Set output from reservoir to be pressure and CO2 saturation
+                componentVars[compName.get()]['pressure'].set(1)
+                componentVars[compName.get()]['CO2saturation'].set(1)
+
+                # Get all widgets for reservoir outputs (can be rewritten when frames/widgets are renames)
                 get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
                                                       + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
                                                       + '.' + compName.get().lower() + '_tabType').winfo_children()[-1].winfo_children()
 
-                componentVars[compName.get()]['pressure'].set(1)
-                componentVars[compName.get()]['CO2saturation'].set(1)
-
+                # Disable all reservoir outputs (not changeable by user)
                 for each in get_widgets:
                     if type(each) is tk.Checkbutton:
                         each.configure(state='disabled')
 
+
+                # Set frame number for observation location input for each reservoir type
                 if compName.get() == 'LookupTableReservoir1':
                     res_xy_framenum = 2
                 elif compName.get() == 'AnalyticalReservoir1':
                     res_xy_framenum = 12
-                elif compName.get() == 'GenericReservoir1':
-                    res_xy_framenum = 7
-                elif compName.get() == 'TheisReservoir1':
-                    res_xy_framenum = 10
+                    brine_framenum = 4
 
+                # Disable observation location input for reservoir tab (taken care on the AoR Workflow tab)
                 for each in tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
                                               + compName.get().lower() + '_canvas' + '.' + compName.get().lower()
                                               + '_tabType' + '.!frame' + str(res_xy_framenum)
                                               + '.!frame').winfo_children():
                     if type(each) is tk.Entry:
+                        each.configure(state='disabled')
+
+                if compName.get() == 'AnalyticalReservoir1':
+                    brine_disable = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
+                                                            + compName.get().lower() + '_canvas' + '.' + compName.get().lower()
+                                                            + '_tabType' + '.!frame' + str(brine_framenum)).winfo_children()
+                    for each in brine_disable:
                         each.configure(state='disabled')
 
         if 'wellbore' in component_list.keys():
@@ -1401,19 +1468,52 @@ class NRAPOpenIAM(tk.Tk):
                 get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
                                                       + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
                                                       + '.' + compName.get().lower() + '_tabType').winfo_children()
+
+                # Disable Number of wellbores, Wellbore locations, and Use random wells options
+                if compType.get() == "Open Wellbore":
+                    loc_disable = [10, 11]
+                elif compType.get() == "Multisegmented Wellbore":
+                    loc_disable = [11, 12]
+                else:
+                    loc_disable = [5, 6]
+
+                for i, d in enumerate(loc_disable):
+                    if i == 0:
+                        get_widgets[d].winfo_children()[-1].configure(state='disabled')
+                    else:
+                        tmp_children = get_widgets[d].winfo_children()
+                        for tmp in tmp_children[1:3]:
+                            for entry in tmp.winfo_children():
+                                entry.configure(state='disabled')
+
                 if compType.get() == 'Open Wellbore':
+                    # Set the aquifer to leak to from the chosen aquifer
+                    componentVars[compName.get()]['LeakTo'].set(aqName.get())
+
+                    # Disable Critical Pressure Input
+                    get_widgets[8].winfo_children()[0].configure(state='disabled')
+                    get_widgets[8].winfo_children()[1].configure(state='disabled')
+
+                    # Disable LeakTo Options
                     get_widgets[10].winfo_children()[1].configure(state='disabled')
+
+                    # Set Output Options for AoR Output and Disable All Output Options
                     componentVars[compName.get()]['CO2_aquifer'].set(1)
                     componentVars[compName.get()]['brine_aquifer'].set(1)
                     for each in get_widgets[-1].winfo_children():
                         if type(each) is tk.Checkbutton:
                             each.configure(state='disabled')
                 else:
+                    # Set Output Options for AoR Output and Disable All Output Options
                     co2_aq = 'CO2_aquifer' + str(aqName.get()[-1])
                     brine_aq = 'brine_aquifer' + str(aqName.get()[-1])
                     if compType.get() == 'Multisegmented Wellbore':
                         componentVars[compName.get()]['outputs'][co2_aq].set(1)
                         componentVars[compName.get()]['outputs'][brine_aq].set(1)
+
+                        #Disable Brine Density Input
+                        for w in get_widgets[4].winfo_children():
+                            w.configure(state='disabled')
                     else:
                         componentVars[compName.get()][co2_aq].set(1)
                         componentVars[compName.get()][brine_aq].set(1)

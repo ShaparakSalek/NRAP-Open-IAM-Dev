@@ -94,15 +94,8 @@ def iam_workflow_setup(yaml_data, strata):
     user, so this function is designed to handle much of that effort.
     """
 
-    #change case of workflow type in case of captialization difference
-    try:
-        yaml_data['Workflow']['type'] = yaml_data['Workflow']['Type']
-        del yaml_data['Workflow']['Type']
-    except:
-        pass
-
-    if 'type' in yaml_data['Workflow']:
-        if yaml_data['Workflow']['type'] not in WORKFLOW_OPTIONS:
+    if 'Type' in yaml_data['Workflow']:
+        if yaml_data['Workflow']['Type'] not in WORKFLOW_OPTIONS:
             warning_msg = ''.join([
                 'A Workflow section was included in the .yaml file, but the Workflow ',
                 'Type provided (', yaml_data['Workflow']['Type'], ') was not ',

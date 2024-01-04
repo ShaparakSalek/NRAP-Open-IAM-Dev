@@ -91,6 +91,9 @@ AnalyticalReservoir1:
         brineResSaturation:
             value: 0.15
             vary: False
+        brineDensity:
+            value: 1075
+            vary: False
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
@@ -122,6 +125,9 @@ OpenWellbore1:
             vary: False
         brineSalinity:
             value: 0.2
+            vary: False
+        brineDensity:
+            value: 1075
             vary: False
         critPressure: 2.31e+07        # Because the critPressure parameter is specified, 
         # brineDensity: 1075          # the brineDensity parameter is not used here

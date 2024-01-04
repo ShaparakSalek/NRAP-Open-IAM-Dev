@@ -359,19 +359,26 @@ class Workflow_Page(tk.Frame):
             aquifers = ['aquifer{}'.format(ind) for ind in range(
                 1, componentVars['strata']['Params']['numberOfShaleLayers'].get())]
 
+            # WORKFLOW PAGE SETUP
             # If the chosen workflow is AoR
             if workflowType.find('Review') != -1:
 
-                # Get valid reservoir, wellbore, and aquifer names
+                # Get reservoir, wellbore, and aquifer names
                 reservoirCompNames = [n for n in COMPONENT_TYPES if n.find('Reservoir') != -1]
                 wellboreCompNames = [n for n in COMPONENT_TYPES if n.find('Wellbore') != -1]
                 aquiferCompNames = [n for n in COMPONENT_TYPES if n.find('Aquifer') != -1]
+
                 # Add FutureGen2 AZMI to aquifer components
                 aquiferCompNames.append('FutureGen2 AZMI')
 
+                # Remove unnecessary reservoirs and wellbores
+                reservoirCompNames.remove('Generic Reservoir')
+                reservoirCompNames.remove('Theis Reservoir')
+                wellboreCompNames.remove('Cemented Wellbore (WR)')
+
                 # Set default reservoir, wellbore, and aquifer
                 reservoirCompName.set(reservoirCompNames[1])
-                wellboreCompName.set(wellboreCompNames[3])
+                wellboreCompName.set(wellboreCompNames[2])
                 aquiferCompName.set(aquiferCompNames[2])
                 aquiferLayer.set(aquifers[-1])
 

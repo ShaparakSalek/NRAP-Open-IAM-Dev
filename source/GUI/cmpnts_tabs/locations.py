@@ -88,6 +88,104 @@ def read_locations_data(data, cmpnt_nm):
             data['number'] = len(data['Locations']['coordx'])
 
 
+def read_grid_locations_data(data, cmpnt_nm):
+    """ Read grid data located in the well/source location frames."""
+    data['WellboreLocations'] = {'grid': {}}
+
+    # Get the number of wells in x and y
+    try:
+        xsize = componentVars[cmpnt_nm]['Locations']['grid']['xsize'].get()
+    except:
+        messagebox.showerror('Error', ''.join([
+            'The number of locations in the '
+            'x-dimension for component {} was '
+            'not provided.']).format(cmpnt_nm))
+        return
+
+    if xsize < 1:
+        messagebox.showerror('Error', ''.join([
+            'The number of locations in the '
+            'x-dimension for component {} cannot '
+            'be less than 1. Please reenter']).format(cmpnt_nm))
+        return
+
+    try:
+        ysize = componentVars[cmpnt_nm]['Locations']['grid']['ysize'].get()
+    except:
+        messagebox.showerror('Error', ''.join([
+            'The number of locations in the '
+            'y-dimension for component {} was '
+            'not provided.']).format(cmpnt_nm))
+        return
+
+    if ysize < 1:
+        messagebox.showerror('Error', ''.join([
+            'The number of locations in the '
+            'y-dimension for component {} cannot '
+            'be less than 1. Please reenter.']).format(cmpnt_nm))
+        return
+
+    # Get total number of locations
+    num_locs = xsize*ysize
+    data['Number'] = num_locs
+
+    # Get minimum and maximum x and y locations and convert to float
+    try:
+        xmin = float(componentVars[cmpnt_nm]['Locations']['grid']['xmin'].get())
+    except:
+        messagebox.showerror('Error', ''.join([
+            'The minimum x-coordinate of the locations '
+            'for component {} was not provided.']).format(cmpnt_nm))
+        return
+
+    try:
+        xmax = float(componentVars[cmpnt_nm]['Locations']['grid']['xmax'].get())
+    except:
+        messagebox.showerror('Error', ''.join([
+            'The maximum x-coordinate of the locations '
+            'for component {} was not provided.']).format(cmpnt_nm))
+        return
+
+    try:
+        ymin = float(componentVars[cmpnt_nm]['Locations']['grid']['ymin'].get())
+    except:
+        messagebox.showerror('Error', ''.join([
+            'The minimum y-coordinate of the locations '
+            'for component {} was not provided.']).format(cmpnt_nm))
+        return
+
+    try:
+        ymax = float(componentVars[cmpnt_nm]['Locations']['grid']['ymax'].get())
+    except:
+        messagebox.showerror('Error', ''.join([
+            'The maximum y-coordinate of the locations '
+            'for component {} was not provided.']).format(cmpnt_nm))
+        return
+
+    if xmax <= xmin:
+        messagebox.showerror('Error', ''.join([
+            'The maximum x-coordinate of the locations '
+            'for component {} must be larger than '
+            'the minimum x-coordinate. Please reenter.']).format(cmpnt_nm))
+        return
+
+    if ymax <= ymin:
+        messagebox.showerror('Error', ''.join([
+            'The maximum y-coordinate of the locations '
+            'for component {} must be larger than '
+            'the minimum y-coordinate. Please reenter.']).format(cmpnt_nm))
+        return
+
+    data['WellboreLocations']['grid']['xmin'] = xmin
+    data['WellboreLocations']['grid']['xmax'] = xmax
+    data['WellboreLocations']['grid']['xsize'] = xsize
+    data['WellboreLocations']['grid']['ymin'] = ymin
+    data['WellboreLocations']['grid']['ymax'] = ymax
+    data['WellboreLocations']['grid']['ysize'] = ysize
+
+    return data
+
+
 def load_locations_data(controller, comp_data, cmpnt_nm):
     componentVars[cmpnt_nm]['number'].set(comp_data['number'])
     # if known locations were provided

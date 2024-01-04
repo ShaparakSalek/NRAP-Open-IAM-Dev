@@ -156,6 +156,7 @@ def main(yaml_filename, binary_file=False):
 
     if 'Analysis' not in model_data:
         model_data['Analysis'] = 'forward'
+        yaml_data['ModelParams']['Analysis'] = model_data['Analysis']
     if isinstance(model_data['Analysis'], str):
         analysis = model_data['Analysis'].lower()
         analysis_dict = {}
@@ -176,6 +177,7 @@ def main(yaml_filename, binary_file=False):
     csv_files_dir = os.path.join(out_dir, 'csv_files')
 
     model_data['OutputDirectory'] = out_dir
+    yaml_data['ModelParams']['OutputDirectory'] = model_data['OutputDirectory']
     logging_file_name = os.path.join(out_dir, 'IAM_log.log')
     analysis_log = os.path.join(out_dir, 'Analysis.log')
 
@@ -185,6 +187,7 @@ def main(yaml_filename, binary_file=False):
     # If logging level not specified, set default
     if 'Logging' not in model_data:
         model_data['Logging'] = 'Info'
+        yaml_data['ModelParams']['Logging'] = model_data['Logging']
     log_dict = {'All': logging.NOTSET,
                 'Debug': logging.DEBUG,
                 'Info': logging.INFO,
@@ -245,10 +248,12 @@ def main(yaml_filename, binary_file=False):
             num_years = model_data['EndTime']
         else:
             num_years = 1
+            yaml_data['ModelParams']['EndTime'] = num_years
         if 'TimeStep' in model_data:
             time_step = model_data['TimeStep']
         else:
             time_step = 1
+            yaml_data['ModelParams']['TimeStep'] = time_step
         time_array = 365.25 * np.arange(0.0, num_years + time_step, time_step)
 
     sm_model_kwargs = {'time_array': time_array}  # time is given in days
@@ -691,7 +696,7 @@ def main(yaml_filename, binary_file=False):
     setup_time = calc_start_time - start_time
     debug_msg = 'Model setup time: {}'.format(setup_time)
     logging.debug(debug_msg)
-    
+
     # Run Analysis
     if analysis == 'forward':
         results = sm.forward()

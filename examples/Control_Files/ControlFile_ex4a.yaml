@@ -81,7 +81,7 @@ OpenWellbore1:
     LeakTo: aquifer2
     Controls:
         critPressureApproach: True     # If set to True, uses a critical pressure in the calculation of leakage rates
-        enforceCritPressure: False     # If set to True, sets the critical pressure to the critPressure parameter instead of a calcualted critical pressure
+        enforceCritPressure: False     # If set to True, sets the critical pressure to the critPressure parameter instead of a calculated critical pressure
     Parameters:
         wellRadius:
             min: 0.03
