@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 from matplotlib import ticker
 from matplotlib import cm
 from matplotlib.lines import Line2D
-from matk.sampleset import percentile
+from openiam.matk.sampleset import percentile
 
 try:
     import openiam.base as iam_base

@@ -102,7 +102,7 @@ class SystemModel(matk.matk):
         # Added attribute obs_base_names to keep track on what the observations
         # will have a time index added to the end of name; it helps to deal with
         # these observations in system_model method.
-        self.obs_base_names = list()
+        self.obs_base_names = []
 
         # This flag indicates whether simulated values are associated with current parameters
         self._current = False
@@ -112,7 +112,8 @@ class SystemModel(matk.matk):
                 job_number=None, hostname=None, processor=None,
                 save_output=False, output_dir=None, output_sys_model=True,
                 output_component_models=True, data_flip=True,
-                gen_combined_output=True, gen_stats_file=True):
+                gen_combined_output=True, gen_stats_file=True,
+                relative_path_base_dir=None):
         """
         Run model with current values of parameters with options to save produced
         outputs and information about system model itself and its components.
@@ -129,14 +130,20 @@ class SystemModel(matk.matk):
             start_time = datetime.now()
             now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
 
+            # Check whether the relative path folder is provided
+            # For tools and workflows using NRAP-Open-IAM classes this folder
+            # might be needed to be different from IAM_DIR
+            if relative_path_base_dir is None:
+                relative_path_base_dir = IAM_DIR
+
             # Set output directory
-            if output_dir != None:
-                out_dir = os.path.join(IAM_DIR, output_dir)
+            if output_dir is not None:
+                out_dir = os.path.join(relative_path_base_dir, output_dir)
                 out_dir = out_dir.format(datetime=now)
                 if not os.path.exists(os.path.dirname(out_dir)):
                     os.mkdir(os.path.dirname(out_dir))
             else:
-                out_dir = os.path.join(IAM_DIR, 'output')
+                out_dir = os.path.join(relative_path_base_dir, 'output')
 
             if not os.path.exists(out_dir):
                 os.mkdir(out_dir)
@@ -178,7 +185,8 @@ class SystemModel(matk.matk):
     def lhs(self, name=None, siz=None, noCorrRestr=False, corrmat=None, seed=None,
             index_start=1, cpus=1, verbose=False, save_output=False,
             output_dir=None, output_sys_model=True, output_component_models=True,
-            data_flip=True, gen_combined_output=True, gen_stats_file=True):
+            data_flip=True, gen_combined_output=True, gen_stats_file=True,
+            relative_path_base_dir=None):
         """
         Run model with current values of parameters with options to save produced
         outputs and information about system model itself and its components.
@@ -195,14 +203,20 @@ class SystemModel(matk.matk):
             start_time = datetime.now()
             now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
 
+            # Check whether the relative path folder is provided
+            # For tools and workflows using NRAP-Open-IAM classes this folder
+            # might be needed to be different from IAM_DIR
+            if relative_path_base_dir is None:
+                relative_path_base_dir = IAM_DIR
+
             # Set output directory
-            if output_dir != None:
-                out_dir = os.path.join(IAM_DIR, output_dir)
+            if output_dir is not None:
+                out_dir = os.path.join(relative_path_base_dir, output_dir)
                 out_dir = out_dir.format(datetime=now)
                 if not os.path.exists(os.path.dirname(out_dir)):
                     os.mkdir(os.path.dirname(out_dir))
             else:
-                out_dir = os.path.join(IAM_DIR, 'output')
+                out_dir = os.path.join(relative_path_base_dir, 'output')
 
             if not os.path.exists(out_dir):
                 os.mkdir(out_dir)
@@ -244,7 +258,8 @@ class SystemModel(matk.matk):
 
     def parstudy(self, nvals=2, name=None, cpus=1, verbose=False, save_output=False,
                  output_dir=None, output_sys_model=True, output_component_models=True,
-                 data_flip=True, gen_combined_output=True, gen_stats_file=True):
+                 data_flip=True, gen_combined_output=True, gen_stats_file=True,
+                 relative_path_base_dir=None):
         """
         Run parameter study for system model with current values of parameters
         with options to save produced outputs and information about system model
@@ -261,14 +276,20 @@ class SystemModel(matk.matk):
             start_time = datetime.now()
             now = start_time.strftime('%Y-%m-%d_%H.%M.%S')
 
+            # Check whether the relative path folder is provided
+            # For tools and workflows using NRAP-Open-IAM classes this folder
+            # might be needed to be different from IAM_DIR
+            if relative_path_base_dir is None:
+                relative_path_base_dir = IAM_DIR
+
             # Set output directory
-            if output_dir != None:
-                out_dir = os.path.join(IAM_DIR, output_dir)
+            if output_dir is not None:
+                out_dir = os.path.join(relative_path_base_dir, output_dir)
                 out_dir = out_dir.format(datetime=now)
                 if not os.path.exists(os.path.dirname(out_dir)):
                     os.mkdir(os.path.dirname(out_dir))
             else:
-                out_dir = os.path.join(IAM_DIR, 'output')
+                out_dir = os.path.join(relative_path_base_dir, 'output')
 
             if not os.path.exists(out_dir):
                 os.mkdir(out_dir)
@@ -597,7 +618,7 @@ class SystemModel(matk.matk):
         order[comp1_idx], order[comp2_idx] = order[comp2_idx], order[comp1_idx]
 
         # Pass reordered list to reorder_component_models method
-        self.reorder_component_models(self, order)
+        self.reorder_component_models(order)
 
     def put_in_front_of_component(self, comp1, comp2):
         """
@@ -624,7 +645,7 @@ class SystemModel(matk.matk):
         order.insert(comp1_idx, comp2)
 
         # Pass reordered list to reorder_component_models method
-        self.reorder_component_models(self, order)
+        self.reorder_component_models(order)
 
     def single_step_model(self, pardict=None, to_reset=False, sm_kwargs=None,
                           job_number=None):
@@ -646,7 +667,7 @@ class SystemModel(matk.matk):
         """
         # If parameter dictionary is not provided as an argument get it from self.pars
         if pardict is None:
-            pardict = dict([(k, par.value) for k, par in list(self.pars.items())])
+            pardict = {k: par.value for k, par in list(self.pars.items())}
 
         # Initialize output of single_step_model
         total_out = {}
@@ -677,17 +698,17 @@ class SystemModel(matk.matk):
         for cm in self.component_models.values():
             # Add default parameter values to aeval
             for k, dpar in cm.default_pars.items():
-                aeval.symtable[sub('\.', '_', dpar.name)] = dpar.value
+                aeval.symtable[sub(r'\.', '_', dpar.name)] = dpar.value
             # Add deterministic parameter values to aeval.  Deterministic
             # parameters should go after default parameters since their names coincide.
             for k, determ_par in cm.deterministic_pars.items():
-                aeval.symtable[sub('\.', '_', determ_par.name)] = determ_par.value
+                aeval.symtable[sub(r'\.', '_', determ_par.name)] = determ_par.value
 
         # Add pardict (stochastic) parameters into aeval. Stochastic
         # parameters should go after default and deterministic parameters
         # since their names coincide.
         for k, v in pardict.items():
-            aeval.symtable[sub('\.', '_', k)] = v
+            aeval.symtable[sub(r'\.', '_', k)] = v
 
         # Iterate over all component models of the given system model.
         for cm in self.component_models.values():
@@ -724,9 +745,9 @@ class SystemModel(matk.matk):
 
             # Determine composite parameters
             for k, comp_par in cm.composite_pars.items():
-                cm.composite_pars[k].value = aeval(sub('\.', '_', comp_par.expr))
+                cm.composite_pars[k].value = aeval(sub(r'\.', '_', comp_par.expr))
                 # Add composite parameter value to aeval
-                aeval.symtable[sub('\.', '_', comp_par.name)] = comp_par.value
+                aeval.symtable[sub(r'\.', '_', comp_par.name)] = comp_par.value
                 pars[k] = comp_par.value
 
             # For any components that are not handled below, add their observations
@@ -734,7 +755,7 @@ class SystemModel(matk.matk):
             if (cm.run_frequency == 1 and not to_reset):
                 for k, lobs in cm.linkobs.items():
                     if self.component_models[cm.name].linkobs[k].sim is not None:
-                        aeval.symtable[sub('\.', '_', self.component_models[
+                        aeval.symtable[sub(r'\.', '_', self.component_models[
                             cm.name].linkobs[k].name)] = self.component_models[
                                 cm.name].linkobs[k].sim
 
@@ -748,13 +769,13 @@ class SystemModel(matk.matk):
                     if lobs_nm in self.component_models[lobs_cm].linkobs:
                         pars[k] = self.component_models[lobs_cm].linkobs[lobs_nm].sim
                         # Add the observation-linked parameter to the interpreter
-                        aeval.symtable[sub('\.', '_', cm.name + '.' + k)] = \
+                        aeval.symtable[sub(r'\.', '_', cm.name + '.' + k)] = \
                             self.component_models[lobs_cm].linkobs[lobs_nm].sim
 
                 # Determine composite observation-linked parameters
                 for k, compobsl_par in cm.compositeobslinked_pars.items():
                     cm.compositeobslinked_pars[k].value = aeval(
-                        sub('\.', '_', compobsl_par.expr))
+                        sub(r'\.', '_', compobsl_par.expr))
                     if not compobsl_par.value:
                         warning_msg = ''.join([
                             'The composite observation-linked parameter {} '.format(
@@ -772,7 +793,7 @@ class SystemModel(matk.matk):
                             'used for this composite observation-linked parameter.'])
                         logging.warning(warning_msg)
                     # Add composite observation-linked parameter value to aeval
-                    aeval.symtable[sub('\.', '_', compobsl_par.name)] = compobsl_par.value
+                    aeval.symtable[sub(r'\.', '_', compobsl_par.name)] = compobsl_par.value
                     pars[k] = compobsl_par.value
 
                 # Determine keyword parameters that obtain their values from observations
@@ -819,7 +840,7 @@ class SystemModel(matk.matk):
                 # Determine keyword parameters that obtain their values
                 # from collection of observations
                 for k, lkwargs_list in cm.collection_linked_kwargs.items():
-                    cm.model_kwargs[k] = list()
+                    cm.model_kwargs[k] = []
                     for lkwargs in lkwargs_list:
                         lkwargs_cm, lkwargs_nm = lkwargs.split('.')
                         if lkwargs_nm in self.component_models[lkwargs_cm].linkobs:
@@ -898,7 +919,7 @@ class SystemModel(matk.matk):
                 # the loop, add the observations of this component to the interpreter.
                 for k, lobs in cm.linkobs.items():
                     if self.component_models[cm.name].linkobs[k].sim is not None:
-                        aeval.symtable[sub('\.', '_', self.component_models[
+                        aeval.symtable[sub(r'\.', '_', self.component_models[
                             cm.name].linkobs[k].name)] = self.component_models[
                                 cm.name].linkobs[k].sim
 
@@ -1175,7 +1196,7 @@ class ComponentModel():
         # is not meant to be used by the component class itself.
         # The attribute is assigned a value after the instance of the class
         # is created.
-        self.details = dict()
+        self.details = {}
 
         # Parameters
         self.default_pars = OrderedDict()
@@ -1203,15 +1224,15 @@ class ComponentModel():
         self.local_obs = OrderedDict()
 
         # Record of gridded observations
-        self.grid_obs_keys = list() # empty list means there are no gridded observations
+        self.grid_obs_keys = [] # empty list means there are no gridded observations
 
         # Added attribute obs_base_names to keep track on what observations
         # will have a time index added to the end of name
-        self.obs_base_names = list()
+        self.obs_base_names = []
 
         # Parameters and temporal inputs boundaries if applicable
-        self.pars_bounds = dict()
-        self.temp_data_bounds = dict()
+        self.pars_bounds = {}
+        self.temp_data_bounds = {}
 
         # Set the working directory index for parallel runs
         self.workdir_index = 0
@@ -1386,14 +1407,14 @@ class ComponentModel():
                 else:
                     err_msg = ''.join(['Incompatible combination of keyword parameters ',
                                     'constr_type and loc_ind, or wrong types used.'])
-                    raise Exception(err_msg)
+                    raise TypeError(err_msg)
             else:
                 err_msg = ''.join(['The location index and contruction type ',
                                    'of the gridded observation {} should be ',
                                    'specified for parameter {} to be properly ',
                                    'linked to it.']).format(obslink.name,
                                                             name)
-                raise Exception(err_msg)
+                raise KeyError(err_msg)
 
     def add_gridded_par(self, name, interpolator):
         """
@@ -1535,7 +1556,7 @@ class ComponentModel():
                             all(isinstance(item, tuple) for item in kwargs['loc_ind'])))):
                     self.grid_obs_linked_kwargs[name]['loc_ind'] = kwargs['loc_ind']
                 else:
-                    raise Exception(''.join([
+                    raise TypeError(''.join([
                         'Incompatible combination of keyword parameters ',
                         'constr_type and loc_ind, or wrong types used.']))
             else:
@@ -1552,7 +1573,7 @@ class ComponentModel():
         :type obslink_list: list of Observation class objects
 
         """
-        self.collection_linked_kwargs[name] = list()
+        self.collection_linked_kwargs[name] = []
         for obslink in obslink_list:
             self.collection_linked_kwargs[name].append(obslink.name)
 
@@ -1828,24 +1849,24 @@ class ComponentModel():
             raise ValueError('Name of local observation cannot coincide with '+
                              'the name of the gridded observation. '+
                              'Possible names (among others) are ' + name +'_locind_###.')
+
+        # Primitive check for consistency between provided loc_ind and constr_type
+        if (((constr_type == 'array') and (isinstance(loc_ind, int))) or
+                ((constr_type == 'matrix') and (isinstance(loc_ind, tuple)))):
+
+            self.add_obs(name, index=index, sim=sim, weight=weight, value=value)
+
+            # Check whether any local observations are already created
+            if grid_obs_name not in self.local_obs:
+                # Set the corresponding entry of the ordered dictionary
+                self.local_obs.__setitem__(grid_obs_name, {})
+
+            # Since the local observations come from the same component as gridded_obs
+            self.local_obs[grid_obs_name][name] = loc_ind
         else:
-            # Primitive check for consistency between provided loc_ind and constr_type
-            if (((constr_type == 'array') and (isinstance(loc_ind, int))) or
-                    ((constr_type == 'matrix') and (isinstance(loc_ind, tuple)))):
-
-                self.add_obs(name, index=index, sim=sim, weight=weight, value=value)
-
-                # Check whether any local observations are already created
-                if grid_obs_name not in self.local_obs:
-                    # Set the corresponding entry of the ordered dictionary
-                    self.local_obs.__setitem__(grid_obs_name, dict())
-
-                # Since the local observations come from the same component as gridded_obs
-                self.local_obs[grid_obs_name][name] = loc_ind
-            else:
-                raise Exception(''.join([
-                    'Incompatible combination of input parameters ',
-                    'constr_type and loc_ind, or wrong types used.']))
+            raise TypeError(''.join([
+                'Incompatible combination of input parameters ',
+                'constr_type and loc_ind, or wrong types used.']))
 
     def check_input_parameters(self, p):
         """
@@ -1854,7 +1875,6 @@ class ComponentModel():
         :param p: input parameters of component model
         :type p: dict
         """
-        import logging
         debug_msg = 'Input parameters of {name} component are {p}.'.format(
             name=self.name, p=p)
         logging.debug(debug_msg)
@@ -1955,12 +1975,12 @@ class SamplerModel(ComponentModel):
                 self.name)
             logging.error(err_msg)
             raise TypeError(err_msg)
-        else:
-            if seed <= 0:
-                err_msg = 'Parameter seed of component {} is less or equal to zero.'.format(
-                    self.name)
-                logging.error(err_msg)
-                raise ValueError(err_msg)
+
+        if seed <= 0:
+            err_msg = 'Parameter seed of component {} is less or equal to zero.'.format(
+                self.name)
+            logging.error(err_msg)
+            raise ValueError(err_msg)
 
 
     def sample(self, p, **kwargs):
