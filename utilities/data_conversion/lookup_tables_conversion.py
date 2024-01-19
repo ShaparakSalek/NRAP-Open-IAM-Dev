@@ -64,21 +64,21 @@ if __name__ == '__main__':
     # 1: Kimberlina 54 sims
     # 2: FutureGen2 1008 sims
     # 3: Kimberlina 200 sims
-    test_case = 1  
+    test_case = 1
 
     if test_case == 1:
 
-        file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+        file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                       'lookuptables', 'Kimb_54_sims'])
         time_file = 'time_points.csv'
         parameter_filename = 'parameters_and_filenames.csv'
     elif test_case == 2:
-        file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+        file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                       'lookuptables', 'FutureGen2', '1008_sims'])
         time_file = 'time_points.csv'
         parameter_filename = 'parameters_and_filenames.csv'
     elif test_case == 3:
-        file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+        file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                       'lookuptables', 'Kimb_closed_200_sims'])
         time_file = 'time_points.csv'
         parameter_filename = 'parameters_and_filenames.csv'
