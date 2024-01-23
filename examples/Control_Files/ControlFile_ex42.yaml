@@ -59,6 +59,9 @@ AnalyticalReservoir1:
         brineResSaturation:
             value: 0.075
             vary: False
+        brineDensity:
+            value: 1010
+            vary: False
     Outputs: [pressure, CO2saturation, mass_CO2_reservoir]
 #-------------------------------------------------
 MultisegmentedWellbore1:
@@ -77,6 +80,9 @@ MultisegmentedWellbore1:
             value: -13.5
             min: -14.0
             max: -13.0
+        brineDensity:
+            value: 1010
+            vary: False
     Outputs: [CO2_aquifer1, CO2_aquifer2, CO2_atm,
               brine_aquifer1, brine_aquifer2, brine_atm]
 #-------------------------------------------------

@@ -18,10 +18,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as clrs
 
 from openiam.matk.sampleset import percentile, mean
-from .label_setup import (LEGEND_DICT, Y_LABEL_DICT, Y_LABEL_SPLIT_DICT,
-                          Y_LABEL_2ROWS_DICT, Y_LABEL_2ROWS_SPLIT_DICT,
-                          TITLE_DICT, TITLE_SPLIT_DICT)
-
+from .label_setup import (LEGEND_DICT, Y_LABEL_DICT, Y_LABEL_SUBPLOT_DICT, 
+                          Y_LABEL_SPLIT_DICT, Y_LABEL_2ROWS_DICT, 
+                          Y_LABEL_2ROWS_SUBPLOT_DICT, Y_LABEL_2ROWS_SPLIT_DICT,
+                          TITLE_DICT, TITLE_SUBPLOT_DICT, TITLE_SPLIT_DICT)
 
 # Constants used to adjust figure formatting
 DEFAULT_FIG_WIDTH = 13
@@ -102,18 +102,14 @@ def time_series_plot(output_names, sm, s, plot_data, output_list, name='Figure 1
 
     :param output_list: Dictionary mapping component models to observations
     Examples:
-        This dictionary only includes pressure from a SimpleReservoir named sres.
-        output_list={sres: 'pressure'}
+        This dictionary only includes pressure from an AnalyticalReservoir named ares.
+        output_list={ares: 'pressure'}
 
-        This dictionary includes pressure from a SimpleReservoir named sres as well
-        as the mass of CO2 leaked to aquifer 1. The CO2 mass comes from a RateToMassAdapter
-        named adapt.
-        output_list={sres: 'pressure', adapt: 'mass_CO2_aquifer1'}
-
-        This dictionary includes pressure from a SimpleReservior named sres as well
+        This dictionary includes pressure from an AnalyticalReservior named ares as well
         as well as the CO2 leakage rates to aquifers 1 and 2. The CO2 leakage rates
         come from a MultisegmentedWellbore named ms.
-        output_list={sres: 'pressure', ms: ['CO2_aquifer1', 'CO2_aquifer2']}
+        output_list = {ares: ['pressure', 'CO2saturation'], 
+                       ms: ['CO2_aquifer1', 'CO2_aquifer2']}
     :type output_list: dict
 
     :param name: Figure Name to be used/created.
@@ -874,7 +870,7 @@ def adjust_x_label(ax, fig, fig_setup, subplots_data):
     Adjust font of x-label based on figure size.
     """
     h_xlabel = ax.set_xlabel(
-        'Time, t [years]', fontsize=fig_setup['xaxis_font_size'],
+        'Time, t (years)', fontsize=fig_setup['xaxis_font_size'],
         fontweight=fig_setup['label_font_weight'],
         labelpad=fig_setup['axis_label_pad'])
 
@@ -887,7 +883,7 @@ def adjust_x_label(ax, fig, fig_setup, subplots_data):
             if 0.95 * fig_setup['xaxis_font_size'] >= MIN_FONT_SIZE:
                 fig_setup['xaxis_font_size'] = 0.95 * fig_setup['xaxis_font_size']
                 h_xlabel = ax.set_xlabel(
-                    'Time, t [years]', fontsize=fig_setup['xaxis_font_size'],
+                    'Time, t (years)', fontsize=fig_setup['xaxis_font_size'],
                     fontweight=fig_setup['label_font_weight'],
                     labelpad=fig_setup['axis_label_pad'])
             else:
@@ -903,7 +899,12 @@ def adjust_y_label(obs_name, cmpnt_name, ax, fig, fig_setup, subplots_data, useM
     Adjust font of y-label based on figure size.
     """
     # Get y-label associated with given observation
-    y_label, out_flag = get_label(obs_name, Y_LABEL_DICT, Y_LABEL_SPLIT_DICT)
+    y_label_dict = Y_LABEL_DICT
+    if not subplots_data['single_plot']:
+        y_label_dict = Y_LABEL_SUBPLOT_DICT
+    
+    y_label, out_flag = get_label(obs_name, y_label_dict, Y_LABEL_SPLIT_DICT)
+    
     if out_flag != 1:
         y_label = '{}.{}'.format(cmpnt_name, obs_name)
 
@@ -918,8 +919,13 @@ def adjust_y_label(obs_name, cmpnt_name, ax, fig, fig_setup, subplots_data, useM
         height_frac, _ = width_and_depth_frac(fig, h_ylabel, subplots_data)
         # If the ylabel is too long relative to the figure, use labels with two rows
         if height_frac > MAX_YLABEL_HEIGHT_FRAC:
+            y_label_dict = Y_LABEL_2ROWS_DICT
+            if not subplots_data['single_plot']:
+                y_label_dict = Y_LABEL_2ROWS_SUBPLOT_DICT
+            
             y_label, _ = get_label(
-                obs_name, Y_LABEL_2ROWS_DICT, Y_LABEL_2ROWS_SPLIT_DICT)
+                obs_name, y_label_dict, Y_LABEL_2ROWS_SPLIT_DICT)
+            
             h_ylabel = ax.set_ylabel(y_label,
                                      fontsize=fig_setup['yaxis_font_size'],
                                      fontweight=fig_setup['label_font_weight'],
@@ -955,7 +961,13 @@ def get_title(obs_name, cmpnt_name, subplots_data, loc_ind):
 
     # This checks if the name includes a number like "_000," which indicates a location
     else:
-        title_label, _ = get_label(obs_name, TITLE_DICT, TITLE_SPLIT_DICT)
+        title_dict = TITLE_DICT
+        if not subplots_data['single_plot']:
+            title_dict = TITLE_SUBPLOT_DICT
+        
+        title_label, _ = get_label(
+            obs_name, title_dict, TITLE_SPLIT_DICT)
+        
         if loc_ind != -1:  # -1 means no location in component name
             # If it's a single plot, the results plotted could represent multiple locations.
             # In that scenario, you shouldn't have one location displayed in the title.

@@ -1,0 +1,194 @@
+# OpenIAM Control File Example ex59c
+#
+# This example is similar to control file example 59a, but it sets the values for certain
+# Bowtie whiskers using pre-made .csv files. The Bowtie plot type is meant to be flexible 
+# and capable of representing different kinds of risks. A whisker on the Bowtie figure
+# could represent, for example, the risk that the injection operation could activate a 
+# fault. Because NRAP-Open-IAM does not currently have components to simulate that behavior, 
+# the required results could be taken from another software product (e.g., Operational 
+# Forecasting of Induced Seismicity, ORION) and set up for use in the Bowtie plot created 
+# by NRAP-Open-IAM. When reading pre-made files into a Bowtie plot, the 'Contributors' or
+# 'Consequences' .csv files (here, located in examples/Control_Files/input_data/ex59c) 
+# should include the following columns: 'ReadResults', 'FileDirectory', 'FileName', 
+# 'Analysis', 'Realizations', and 'Units'.
+#
+# The 'ReadResults' column specifies whether the results for each field are read from
+# pre-made files. Enter values of 1 and 0 for yes and no, respectively. For any rows that 
+# are to have values read from pre-made files, the path to the file is entered under 
+# 'FileDirectory'. The name of the file is entered under 'FileName'. In this example, the 
+# 'Consequences.csv' file includes a field for the metric 'Cost ($)'. The 'ComponentNameList'
+# entry for this field is 'CostModel', and the 'Label' is 'Cost of Remedial Response Plans'. 
+# Note that the 'CostModel' referred to here is not a real model; the data used here were 
+# created just for this example. The 'Analysis' entry specifies whether the data are from a 
+# deterministic simulation ('forward') or a stochastic simulation ('lhs' or 'parstudy'). This 
+# input informs the code how the pre-made .csv files will be formatted. If the 'Analysis' is set
+# to 'forward', then two columns will be expected in the pre-made file: one column for time 
+# (labeled as 'Time (days)') and one column for the values over time. The label for the values 
+# (i.e., entry in the first row in the column containing the values) should be the component 
+# name, a period, and the metric name (e.g., 'CostModel.Cost'). If the 'Analysis' field specifies 
+# that the results come from a stochastic simulation, then the number of realizaztions for that 
+# field can be specified under the 'Realizations' field. In this case, the pre-made files are expected
+# expected to contain columns for 'Time (days)' and 'Realization 0' through 'Realization N-1', 
+# where N is the total number of realizations.
+#
+# In order to have stochastic simulation results from another program align with those from 
+# NRAP-Open-IAM, it is possible to take the output files saved by NRAP-Open-IAM (enabled by having 
+# 'GenerateOutputFiles' as 'True' under 'ModelParams') and use them as input to the model generating 
+# the results entered through pre-made files. That possibility would depend on the capabilities of the 
+# model being used, however. In this example, the costs entered in the CostModel.Cost.csv file were made 
+# to scale with the size of TDS plume volumes saved by simulation 59a. In fact, almost all of the 
+# output shown in the Bowtie figure made by this example come from .csv files produced by a control file 
+# example with this setup (59a or 59c). The setup of the simulation used was the same, but the results 
+# will be slightly different from due to the differences in parameter value sampling in stochastic 
+# simulations. Only the whisker for 'CO2 Released into the Atmosphere' is made to use the results from 
+# this example ('ReadResults' is entered as 0 for that field). The .csv file containing the CO2_atm 
+# output needed for that field are contained in the directory used (examples/Control_Files/input_data/ex59c), 
+# however, so that field could also be based on pre-made results by setting 'ReadResults' to 1.
+#
+# The Bowtie plot type also allows the user to specify the units for the values contained in the files - this 
+# input is provided through the 'Units' column in the 'Contributors' and 'Consequences' input files. If the 
+# metric type used is recognized by NRAP-Open-IAM, then the 'Units' column can be entered as 'None'. The 
+# correct units will be automatically recognized. Because 'Cost' is not an output type in NRAP-Open-IAM, the 
+# 'Cost of Remedial Response Plans' field is given a 'Unit' entry of '$'.
+#
+# When importing results into a Bowtie plot, the user can also specify the analysis type for those results. For 
+# example, the NRAP-Open-IAM results might be stochastic (LHS analysis) but it is possible that another model 
+# used might be unable to perform a similar stochastic analysis. In this example, one of the 'Consequences' 
+# fields used is labeled 'Financial Penalties'. The 'Penalty' metric contained in the file 'CostModel.Penalty.csv' 
+# was made up for this example. Importantly, the metric was made to have only one realization and 'Analysis' field 
+# for that metric is set to 'forward' in the 'Consequences.csv' input file. Any metrics imported into a Bowtie plot 
+# should still align with the times used in the model, however (i.e., one value entered for every time step, starting 
+# from 0 and extending to EndTime). If the user only wanted to display a single value, then that value should be 
+# repeated for every time step. If the metric has a forward (determinsitic) analysis type, then the column for that 
+# metric should be labeled as ComponentName.Metric (e.g., 'CostModel.Penalty').
+#
+# If a field uses values taken directly from NRAP-Open-IAM, then the following fields should be entered as 
+# 'None': 'FileDirectory', 'FileName', 'Analysis', 'Realizations', and 'Units'. The 'ReadResults' field should 
+# be entered as 0.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex59c.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 25
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 50
+    Components: [AnalyticalReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex59c_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value: 750.0
+        vary: False
+    shale2Thickness:
+        value: 950.0
+        vary: False
+    shale3Thickness:
+        value: 365
+        vary: False
+    aquifer1Thickness:
+        vary: False
+        value: 85
+    aquifer2Thickness:
+        vary: False
+        value: 85
+    reservoirThickness:
+        vary: False
+        value: 150
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    Parameters:
+        injRate:
+            value: 0.0025
+            vary: False
+        logResPerm:
+            min: -13.15
+            max: -12.15
+            value: -12.65
+        reservoirRadius:
+            value: 25000
+            vary: False
+        brineResSaturation:
+            min: 0.01
+            max: 0.15
+            value: 0.075
+        brineDensity:
+            value: 1190
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: AnalyticalReservoir1
+    Number: 1
+    LeakTo: aquifer2
+    Locations:
+        coordx: [7071.07]     # 10,000 km from the injection site
+        coordy: [7071.07]
+    Controls:
+        critPressureApproach: True
+        enforceCritPressure: False
+    Parameters:
+        wellRadius:
+            value: 0.025
+            vary: False
+        logReservoirTransmissivity:
+            min: -11.25
+            max: -10.25
+            value: -10.75
+        logAquiferTransmissivity:
+            min: -11.25
+            max: -10.25
+            value: -10.75
+        brineSalinity:
+            min: 0.10
+            max: 0.20
+            value: 0.15
+        brineDensity:
+            value: 1190
+            vary: False
+    Outputs: [CO2_aquifer, brine_aquifer, CO2_atm, brine_atm]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        # Parameters aqu_thick (85 m) and depth (450 m) are linked
+        # to stratigraphy and don't require to be setup explicitily unless
+        # different value of the parameter is required.
+        por:
+            min: 0.10
+            max: 0.18
+            value: 0.14
+        log_permh:
+            min: -11.75
+            max: -11.2
+            value: -11.5
+        log_aniso:
+            value: 0.3
+            vary: False
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
+#-------------------------------------------------
+Plots:
+    Bowtie_Figure:
+        Bowtie:
+            Contributors: examples/Control_Files/input_data/ex59c/Contributors.csv
+            Consequences: examples/Control_Files/input_data/ex59c/Consequences.csv
+            TopEventLabel: Unwanted Fluid Migration from the Reservoir

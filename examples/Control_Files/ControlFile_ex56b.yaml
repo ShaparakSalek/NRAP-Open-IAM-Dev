@@ -122,6 +122,7 @@ Workflow:
                 logResPerm: -12.15
                 reservoirRadius: 15000
                 brineResSaturation: 0.05
+                brineDensity: 1050
         AquiferName: aquifer2     # the wellbores will leak to this aquifer
         WellboreOptions:
             Locations:

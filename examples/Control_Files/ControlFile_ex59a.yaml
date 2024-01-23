@@ -1,0 +1,194 @@
+# OpenIAM Control File Example ex59a
+#
+# This example demonstrates the use of the Bowtie plot type. Here, the name of the 
+# Bowtie plot is 'Bowtie_Figure', which is entered under the 'Plots' section. This 
+# figure is then specified as a Bowtie plot by having 'Bowtie' indented under the 
+# plot name. Different options for the Bowtie plot are then entered under 'Bowtie'.
+#
+# The Bowtie plot is meant to aid in risk assessment. Specifically, it considers the 
+# factors that could contribute to a top event risk (i.e., worst-case scneario at the 
+# site). The top event considered here is 'Unwanted Fluid Migration from the Reservoir', 
+# which is entered with the 'TopEventLabel' entry under 'Bowtie'. A Bowtie figure has 
+# lines or 'whiskers' extending to the left and right of the top event label at the 
+# center of the figure. The whiskers extending to the left represent the contributing 
+# factors (e.g., unwanted fluid migration could occur due to leakage along a legacy well). 
+# The whiskers extending to the right represent the potential consequences of the top 
+# event (e.g., ground water is contaminated, CO2 is released to the atmosphere, and 
+# the project loses support). The input for these whiskers are provided with .csv files. 
+# The paths to the files are entered with the 'Contributors' and 'Consequences' entries 
+# under 'Bowtie'. In this example, each file has the following columns: 'Index', 
+# 'ComponentNameList', 'Metrics', 'Threshold', and 'Label'. Each row represents one of the 
+# whiskers, where the 'Label' input is the text shown for that whisker. For example, 
+# one of the 'Contributors' whiskers is labeled 'Brine Leakage Along a Legacy Well'. The 
+# legacy well referred to here is the well represented by the OpenWellbore1 component.
+# The 'ComponentNameList' comlumn specifies which component is to be used for the whisker's 
+# results. The 'Brine Leakage Along a Legacy Well' whisker has 'OpenWellbore1' entered for 
+# the 'ComponentNameList' column. The 'Metric' column specifies the output type to use; the 
+# brine leakage column has 'brine_aquifer' entered for the 'Metric' column. Note that 
+# this output type must be produced by the corresponding component. The 'Threshold' column 
+# specifies the threshold used to assess the metric. The Bowtie figure will show a probability 
+# value for each whisker; this probability is the fraction of realizations in which the metric 
+# was greater than or equal to the corresponding threshold. If the analysis type is forward 
+# (a deterministic simulation), then the probabilities will always be either 0 % or 100 %.
+# One of the other contributor whiskers is labelled 'CO2 Leakage Along a Legacy Well', with 
+# the corresponding metric being 'CO2_aquifer'. The 'Consequences' whiskers include 
+# 'CO2 Released Into the Atmosphere', 'TDS Plumes in the USDW', and 'pH Plumes in the USDW'. 
+# The CO2 released to the atmosphere is quantified with the 'CO2_atm' output from OpenWellbore1, 
+# while the plume whiskers use the 'TDS_volume' and 'pH_volume' outputs from the FutureGen2Aquifer1 
+# component. While leakage rates can increase and decrease over time, the probability shown 
+# will reflect whether the leakage rates were ever greater than or equal to the threshold used 
+# (1.0e-6 kg/s) during the entire simulation. Some risks cannot be quantified with NRAP-Open-IAM. 
+# For example, there is currently no component in NRAP-Open-IAM that can quantify whether leakage 
+# is likely to occur along the injector well itself. In this case, such a risk can be judged through 
+# expert elicitation. The 'Contributors' whiskers include the risks 'Migration Along an MMV Well' and 
+# 'Migration 'Along an Injector'. The 'ComponentNameList' entries for these risks are entered as 
+# 'Expert Panel'. This indicates that the risk was evaluated with a qualitative, wholistic review 
+# by a panel of experts. In this case, the site operators should present a panel of experts with 
+# documents detailing the design and installation of the MMV and injection well, the planned 
+# injection  operation, and the characteristics of the site. The documents should prove to the experts 
+# that these wells do not represent a leakage risk. The 'Metrics' entry for the corresponding row 
+# indicates the finding of the panel. The expected inputs for an expert panel review are 'Extremely Unlikely', 
+# 'Unlikely', 'Inconclusive', 'Likely', or 'Extremely Likely'. For example, if the expert panel finds 
+# that there is enough evidence to prove that that the wells will not serve as leakage pathways, then 
+# the panel could return findings of 'Unlikely' or 'Extremely Unlikely'. Any text can be entered for 
+# this field, however, and it will be displayed directly on the Bowtie figure as entered. Because 
+# these risks have a qualitative review, the thresholds are entered as 'None'.
+#
+# The brine leakage risks considered here (OpenWellbore1) are significant, resulting in TDS plumes in 
+# the aquifer considered (referred to as the USDW, underground source of drinking water). Because of 
+# the high probability of impacts to the USDW, the Bowtie figure shows an expert judgement of 
+# 'Loss of Project Support' as being 'Extremely Likely'. In this scenario, a legacy well like OpenWellbore1 
+# should be sufficiently plugged and remediated before the planned injection operation can continue.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex59a.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 25
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 50
+    Components: [AnalyticalReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex59a_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value:  750.0
+        vary: False
+    shale2Thickness:
+        value:  950.0
+        vary: False
+    shale3Thickness:
+        value: 365
+        vary: False
+    aquifer1Thickness:
+        vary: False
+        value: 85
+    aquifer2Thickness:
+        vary: False
+        value: 85
+    reservoirThickness:
+        vary: False
+        value:  150
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    Parameters:
+        injRate:
+            value: 0.0025
+            vary: False
+        logResPerm:
+            min: -12.25
+            max: -12.0
+            value: -12.125
+        reservoirRadius:
+            value: 25000
+            vary: False
+        brineResSaturation:
+            min: 0.01
+            max: 0.15
+            value: 0.075
+        brineDensity:
+            value: 1010
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: AnalyticalReservoir1
+    Number: 1
+    LeakTo: aquifer2
+    Locations:
+        coordx: [2121.32]     # 3 km from the injection site
+        coordy: [2121.32]
+    Controls:
+        critPressureApproach: True
+        enforceCritPressure: False
+    Parameters:
+        wellRadius:
+            value: 0.025
+            vary: False
+        logReservoirTransmissivity:
+            min: -11.25
+            max: -10.25
+            value: -10.75
+        logAquiferTransmissivity:
+            min: -11.25
+            max: -10.25
+            value: -10.75
+        brineSalinity:
+            min: 0.10
+            max: 0.20
+            value: 0.15
+        brineDensity:
+            value: 1010
+            vary: False
+    Outputs: [CO2_aquifer, brine_aquifer, CO2_atm, brine_atm]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        # Parameters aqu_thick (85 m) and depth (450 m) are linked
+        # to stratigraphy and don't require to be setup explicitily unless
+        # different value of the parameter is required.
+        por:
+            min: 0.10
+            max: 0.18
+            value: 0.14
+        log_permh:
+            min: -11.75
+            max: -11.2
+            value: -11.5
+        log_aniso:
+            value: 0.3
+            vary: False
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
+#-------------------------------------------------
+Plots:
+    Reservoir_Conditions:
+        TimeSeriesStats: [pressure, CO2saturation]
+    Brine_and_CO2_Leakage:
+        TimeSeriesStats: [brine_aquifer, CO2_aquifer]
+    pH_and_TDS_Plumes:
+        TimeSeriesStats: [pH_volume, TDS_volume]
+    Bowtie_Figure:
+        Bowtie:
+            Contributors: examples/Control_Files/input_data/ex59a/Contributors.csv
+            Consequences: examples/Control_Files/input_data/ex59a/Consequences.csv
+            TopEventLabel: Unwanted Fluid Migration from the Reservoir

@@ -2,7 +2,7 @@
 #
 # This example illustrates a system model with an analytical reservoir
 # component providing pressure and CO2 saturation inputs for cemented
-# wellbore (wr) components. In the setup the stratigraphy has 4 shale layers
+# wellbore components. In the setup the stratigraphy has 4 shale layers
 # and 3 aquifer layers. To distinguish between the aquifers two options
 # are available for user in the setup of the cemented wellbore components.
 # The option 'LeakTo' allows to specify which of the aquifers is considered
@@ -51,7 +51,7 @@ Reservoir:
               CO2saturation]
 #-------------------------------------------------
 Wellbore1:
-    Type: CementedWellboreWR
+    Type: CementedWellbore
     Connection: Reservoir
     LeakTo: aquifer3     # the option available for systems with more than 2 aquifers
     ThiefZone: aquifer1  # the option available for systems with more than 2 aquifers

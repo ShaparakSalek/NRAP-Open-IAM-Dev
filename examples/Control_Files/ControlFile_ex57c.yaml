@@ -64,6 +64,7 @@ Workflow:
                 logResPerm: -13
                 reservoirRadius: 3000
                 brineResSaturation: 0.075
+                brineDensity: 1010
         WellboreComponentType: OpenWellbore
         WellboreOptions:
             Locations:

@@ -1,0 +1,7 @@
+Index,ComponentNameList,Metrics,ThresholdValues,Label
+0,MSW1,brine_aquifer1,1.00E-06,Brine Leakage into the Thief Zone
+1,MSW1,CO2_aquifer1,1.00E-06,CO$_2$ Leakage into the Thief Zone
+2,MSW1,brine_aquifer2,1.00E-06,Brine Leakage into the USDW
+3,MSW1,CO2_aquifer2,1.00E-06,CO$_2$ Leakage into the USDW
+4,Expert Panel,Extremely Unlikely,None,Migration Along a MMV Well
+5,Expert Panel,Extremely Unlikely,None,Migration Along an Injector

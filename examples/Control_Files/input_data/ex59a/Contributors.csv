@@ -1,0 +1,5 @@
+Index,ComponentNameList,Metrics,ThresholdValues,Label
+0,OpenWellbore1,brine_aquifer,1.00E-06,Brine Leakage Along a Legacy Well
+1,OpenWellbore1,CO2_aquifer,1.00E-06,CO$_2$ Leakage Along a Legacy Well
+2,Expert Panel,Extremely Unlikely,None,Migration Along an MMV Well
+3,Expert Panel,Extremely Unlikely,None,Migration Along an Injector

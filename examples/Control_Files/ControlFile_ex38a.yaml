@@ -71,6 +71,9 @@ AnalyticalReservoir1:
         brineResSaturation:
             value: 0.05
             vary: False
+        brineDensity:
+            value: 1025
+            vary: False
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
 OpenWellbore1:

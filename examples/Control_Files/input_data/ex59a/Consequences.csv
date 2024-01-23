@@ -1,0 +1,6 @@
+Index,ComponentNameList,Metrics,ThresholdValues,Label
+2,FutureGen2Aquifer1,TDS_volume,1,TDS Plumes in the USDW
+3,FutureGen2Aquifer1,pH_volume,1,pH Plumes in the USDW
+4,OpenWellbore1,CO2_atm,1.00E-06,CO$_2$ Released Into Atmosphere
+5,Expert Panel,Unlikely,None,Hydrocarbon Resources Impacted
+6,Expert Panel,Extremely Likely,None,Loss of Project Support

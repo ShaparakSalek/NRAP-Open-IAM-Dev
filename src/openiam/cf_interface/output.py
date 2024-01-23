@@ -44,7 +44,7 @@ def extract_data(s, output_list, results, time_array, data_flip):
     # Number of realizations
     num_reals = len(s.indices)
     real_labels = ['Time (days)'] + \
-        ["Realization {}".format(ind) for ind in range(1, num_reals + 1)]
+        ["Realization {}".format(ind) for ind in range(num_reals)]
 
     # Number of time points
     if time_array is not None:

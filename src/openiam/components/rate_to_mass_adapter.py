@@ -108,12 +108,8 @@ class RateToMassAdapter(iam_bc.ComponentModel):
         :returns: None
         """
         strata = name2obj_dict['strata']
-        if 'numberOfShaleLayers' in strata.deterministic_pars:
-            num_shale_layers = strata.deterministic_pars['numberOfShaleLayers'].value
-        elif 'numberOfShaleLayers' in strata.default_pars:
-            num_shale_layers = strata.default_pars['numberOfShaleLayers'].value
-        else:
-            num_shale_layers = 3
+        
+        num_shale_layers = strata.get_num_shale_layers()
 
         well = name2obj_dict[component_data['Connection']]
         well.add_obs_to_be_linked('CO2_aquifer1')

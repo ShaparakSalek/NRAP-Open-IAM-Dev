@@ -19,7 +19,7 @@ RADIAL_OBS_FIG_SIZE = (10, 8)
 GRIDDED_METRIC_FIG_SIZE = (10, 8)
 ATM_SINGLE_FIG_SIZE = (15, 10)
 ATM_ENSEMBLE_FIG_SIZE = (15, 10)
-
+BOWTIE_FIG_SIZE = (15, 10)
 
 def process_plots(yaml_data, model_data, sm, s, output_list, analysis,
                   time_array, components, locations):
@@ -142,6 +142,14 @@ def process_plots(yaml_data, model_data, sm, s, output_list, analysis,
                 yaml_data, model_data, sm, s,
                 output_dir, name=p, analysis=analysis, savefig=save_filename,
                 figsize=tuple(plots[p].get('figsize', GRIDDED_METRIC_FIG_SIZE)),
+                genfontsize=12, axislabelfontsize=14, titlefontsize=14,
+                boldlabels=True)
+        
+        if 'Bowtie' in plots[p]:
+            iam_vis.bowtie_plot(
+                yaml_data, model_data, sm, s, output_list, locations,
+                output_dir, name=p, analysis=analysis,
+                figsize=tuple(plots[p].get('figsize', BOWTIE_FIG_SIZE)),
                 genfontsize=12, axislabelfontsize=14, titlefontsize=14,
                 boldlabels=True)
 

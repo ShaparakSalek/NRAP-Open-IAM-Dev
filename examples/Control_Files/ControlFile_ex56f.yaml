@@ -58,6 +58,7 @@ Workflow:
                 logResPerm: -14.5
                 reservoirRadius: 75000
                 brineResSaturation: 0.01
+                brineDensity: 1150
         WellboreComponentType: MultisegmentedWellbore
         WellboreOptions:
             Parameters:
@@ -69,5 +70,6 @@ Workflow:
                 CO2Density: 775.0
                 brineViscosity: 3.0e-5
                 CO2Viscosity: 6.6e-5
+                brineDensity: 1150
         AquiferName: aquifer1
         AquiferComponentType: FutureGen2Aquifer

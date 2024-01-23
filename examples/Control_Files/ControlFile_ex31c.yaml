@@ -1,8 +1,9 @@
 # OpenIAM Control File Example 31c
 #
-# This example is similar to Control File Example 31a, but it demonstrates
-# the use of the AoR plot type with Latin Hypercube Sampling (lhs). The AoR
-# figures created specify the number of lhs samples used.
+# This example is similar to Control File Example 31a, but it uses a specified 
+# critical pressure (23.8 MPa) and it demonstrates the use of the AoR plot type 
+# with Latin Hypercube Sampling (lhs). The AoR figures created specify the number 
+# of lhs samples used. In this example, the logAquiferTransmissivity parameter is varied.
 #
 # Note that when using a large number of OpenWellbore components, as shown here
 # with the grid placement option, simulations using lhs can require a large
@@ -65,13 +66,16 @@ AnalyticalReservoir1:
             value: 0.33
             vary: False
         logResPerm:
-            value: -11.0
+            value: -12.15
             vary: False
         reservoirRadius:
             value: 30000
             vary: False
         brineResSaturation:
             value: 0.175
+            vary: False
+        brineDensity:
+            value: 1075
             vary: False
     Outputs: [pressure,
               CO2saturation]
@@ -90,7 +94,8 @@ OpenWellbore1:
             ymax: 25000
             ysize: 6
     Controls:
-        critPressureApproach: True
+        critPressureApproach: True    # To use the critPressure parameter, critPressureApproach needs to be set to True. Using False would cause it to not use a critical pressure at all (calculated or specified with critPressure).
+        enforceCritPressure: True     # Setting this to True makes the OpenWellbore use the critPressure parameter instead of a calculated critical pressure.
     Parameters:
         wellRadius:
             value: 0.05
@@ -105,9 +110,10 @@ OpenWellbore1:
         brineSalinity:
             value: 0.2
             vary: False
-        brineDensity:
+        brineDensity:                 # the brineDensity parameter is not used by the OpenWellbore when critPressure is specified
             value: 1075
             vary: False
+        critPressure: 2.38e+07        # Because the critPressure parameter is specified, 
         # If critPressureApproach is set to True and enforceCritPressure
         # is left at the default of False, the parameters wellTop, reservoirDepth,
         # and brineDensity are used to calculate critical pressure.
@@ -144,7 +150,7 @@ Plots:
         AoR: [pressure]
         PlotInjectionSites: True
         FigureDPI: 200
-        CriticalPressureMPa: Calculated
+        CriticalPressureMPa: 23.8
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

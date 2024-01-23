@@ -58,8 +58,8 @@ DippingStratigraphy:
 AnalyticalReservoir1:
     Type: AnalyticalReservoir
     Parameters:
-        injRate: 10
-        logResPerm: -12
+        injRate: 3
+        logResPerm: -14
         brineDensity: 1030.9
         CO2Density: 775.0
         brineViscosity: 7.5e-4

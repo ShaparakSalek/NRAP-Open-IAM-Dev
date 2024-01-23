@@ -1,0 +1,7 @@
+Index,ComponentNameList,Metrics,ThresholdValues,ReadResults,FileDirectory,FileName,Analysis,Realizations,Label
+0,"MSW1_000, MSW1_001","brine_aquifer1, brine_aquifer1",1.00E-04,1,examples/Control_Files/input_data/ex60b/,"MSW1_000.brine_aquifer1.csv, MSW1_001.brine_aquifer1.csv",lhs,30,Brine Leakage into the Thief Zone
+1,"MSW1_000, MSW1_001","CO2_aquifer1, CO2_aquifer1",1.00E-04,1,examples/Control_Files/input_data/ex60b/,"MSW1_000.CO2_aquifer1.csv, MSW1_001.CO2_aquifer1.csv",lhs,30,CO$_2$ Leakage into the Thief Zone
+2,"MSW1_000, MSW1_001","brine_aquifer2, brine_aquifer2",1.00E-04,1,examples/Control_Files/input_data/ex60b/,"MSW1_000.brine_aquifer1.csv, MSW1_001.brine_aquifer1.csv",lhs,30,Brine Leakage into the USDW
+3,"MSW1_000, MSW1_001","CO2_aquifer2, CO2_aquifer2",1.00E-04,1,examples/Control_Files/input_data/ex60b/,"MSW1_000.brine_aquifer1.csv, MSW1_001.brine_aquifer1.csv",lhs,30,CO$_2$ Leakage into the USDW
+4,Expert Panel,Extremely Unlikely,None,0.00E+00,None,None,None,None,Migration Along a MMV Well
+5,Expert Panel,Extremely Unlikely,None,0.00E+00,None,None,None,None,Migration Along an Injector

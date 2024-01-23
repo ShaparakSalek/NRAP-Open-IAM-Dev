@@ -1,0 +1,134 @@
+# OpenIAM Control File Example ex59d
+#
+# This example is similar to control file example 59a, but it uses the forward analysis 
+# type. Because it runs a deterministic model, the probabilities shown in the Bowtie 
+# plot will either be 0 % or 100 %. For stochastic simulations, the probabilities shown 
+# reflect the proportion of realizations in which a threshold is surpassed - in a forward 
+# model, there is only one realization. Additionally, this simulation uses three well 
+# locations. When data for multiple well locations are used in a Bowtie plot, the results 
+# will be shown as a range of minimum value to maximum value. The probability shown will 
+# reflect all of the locations used. For example, if the threshold is exceeded at only one 
+# well location in this example, the probability would still be 100 %. When checking if 
+# the values surpass a threshold, the probabilities shown indicate if the threshold was 
+# surpassed at any of the locations.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex59d.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 25
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [AnalyticalReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex59d_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value:  750.0
+        vary: False
+    shale2Thickness:
+        value:  950.0
+        vary: False
+    shale3Thickness:
+        value: 365
+        vary: False
+    aquifer1Thickness:
+        vary: False
+        value: 85
+    aquifer2Thickness:
+        vary: False
+        value: 85
+    reservoirThickness:
+        vary: False
+        value:  150
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    Parameters:
+        injRate:
+            value: 0.0025
+            vary: False
+        logResPerm:
+            value: -12.125
+            vary: False
+        reservoirRadius:
+            value: 25000
+            vary: False
+        brineResSaturation:
+            value: 0.075
+            vary: False
+        brineDensity:
+            value: 1010
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: AnalyticalReservoir1
+    Number: 3
+    LeakTo: aquifer2
+    Locations:
+        coordx: [2121.32, 6363.96, 8485.28]     # 3, 9, and 12 km from the injection site
+        coordy: [2121.32, 6363.96, 8485.28]
+    Controls:
+        critPressureApproach: True
+        enforceCritPressure: False
+    Parameters:
+        wellRadius:
+            value: 0.025
+            vary: False
+        logReservoirTransmissivity:
+            value: -10.75
+            vary: False
+        logAquiferTransmissivity:
+            value: -10.75
+            vary: False
+        brineSalinity:
+            value: 0.15
+            vary: False
+        brineDensity:
+            value: 1010
+            vary: False
+    Outputs: [CO2_aquifer, brine_aquifer, CO2_atm, brine_atm]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        por:
+            value: 0.14
+            vary: False
+        log_permh:
+            value: -11.5
+            vary: False
+        log_aniso:
+            value: 0.3
+            vary: False
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
+#-------------------------------------------------
+Plots:
+    Reservoir_Conditions:
+        TimeSeriesStats: [pressure, CO2saturation]
+    Brine_and_CO2_Leakage:
+        TimeSeriesStats: [brine_aquifer, CO2_aquifer]
+    pH_and_TDS_Plumes:
+        TimeSeriesStats: [pH_volume, TDS_volume]
+    Bowtie_Figure:
+        Bowtie:
+            Contributors: examples/Control_Files/input_data/ex59a/Contributors.csv
+            Consequences: examples/Control_Files/input_data/ex59a/Consequences.csv
+            TopEventLabel: Unwanted Fluid Migration from the Reservoir

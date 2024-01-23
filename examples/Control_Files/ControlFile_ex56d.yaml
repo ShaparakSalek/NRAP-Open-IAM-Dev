@@ -65,6 +65,7 @@ Workflow:
                     value: -13.0
                 reservoirRadius: 75000
                 brineResSaturation: 0.01
+                brineDensity: 1050
         AquiferName: aquifer2                 # the wellbores will leak to this aquifer
         WellboreOptions:                      # Uses the default locations, the grid options with x and y ranging from 
             Parameters:                       # -50 km to 50 km (xsize and ysize of 6)
@@ -72,4 +73,5 @@ Workflow:
                 logReservoirTransmissivity: -10.97
                 logAquiferTransmissivity: -10.0
                 brineSalinity: 0.2
+                brineDensity: 1050
         AquiferComponentType: FutureGen2Aquifer

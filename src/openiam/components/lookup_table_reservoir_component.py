@@ -505,6 +505,9 @@ class LookupTableReservoir(iam_bc.ComponentModel):
                         weights = [1.0/nv for v in values]
                 else:
                     weights = component_data['Parameters'][par_name]['Weights']
+                
+                # The weights should not be integers
+                weights = [float(wght) for wght in weights]
 
                 self.add_par(par_name, value=values[0],
                              vary=True, discrete_vals=(values, weights))

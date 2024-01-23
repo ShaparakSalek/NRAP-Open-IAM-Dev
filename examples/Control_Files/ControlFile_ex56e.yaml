@@ -62,6 +62,7 @@ Workflow:
                 logResPerm: -13.5
                 reservoirRadius: 75000
                 brineResSaturation: 0.01
+                brineDensity: 1150
         WellboreComponentType: MultisegmentedWellbore
         WellboreOptions:
             Parameters:

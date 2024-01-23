@@ -1,0 +1,68 @@
+# OpenIAM Control File Example ex60b
+#
+# This example is similar to control file example 60a, but this example reads all 
+# values for the Bowtie plot from pre-made .csv files. No components are included 
+# in the Components list under ModelParams. The files used here (contained in 
+# examples/Control_Files/input_data/ex60b/) were produced by example 60a. Because 
+# multiple well locations were used in example 60a, the 'ComponentNameList' and 'FileName' 
+# entries in the input files have multiple entries. For example, the 'ComponentNameList' 
+# entry for the 'Brine Leakage into the Thief Zone' risk is 'MSW1_000, MSW1_001'. These 
+# names correspond with the first ('_000') and second ('_001') well locations provided 
+# in example 60a ((x, y) values of (37478.0 m, 48333.0 m) and (37555.0 m, 48999.0 m)).
+# The 'FileName' entry is 'MSW1_000.brine_aquifer1.csv, MSW1_001.brine_aquifer1.csv'. 
+# Here, a comma is used to separate the different items in each entry. More locations 
+# can be included by adding more to the 'ComponentNameList' and 'FileName' entries.
+#
+# The purpose of this example is to demonstrate that the Bowtie plot can be run by 
+# itself. A simulation can take a long time - if the user wants to change the Bowtie 
+# plot, running the whole simulation again can be unnecessary. Even without the 
+# components defined here, the control file should still be include a stratigraphy 
+# component (the 'Stratigraphy' section below).
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex60b.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 30
+    Components: []
+    OutputDirectory: 'output/output_ex60b_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 525.0
+    shale2Thickness:
+        vary: False
+        value: 475.0
+    shale3Thickness:
+        vary: False
+        value: 11.2
+    aquifer1Thickness:
+        vary: False
+        value: 1.4
+    aquifer2Thickness:
+        vary: False
+        value: 19.2
+    reservoirThickness:
+        vary: False
+        value: 51.2
+#-------------------------------------------------
+Plots:
+    Bowtie_Figure:
+        Bowtie:
+            Contributors: examples/Control_Files/input_data/ex60b/Contributors.csv
+            Consequences: examples/Control_Files/input_data/ex60b/Consequences.csv
+            TopEventLabel: Unwanted Fluid Migration from the Reservoir
