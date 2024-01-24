@@ -13,7 +13,7 @@
 # 3. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
 #
 # The downloaded data set should be placed here:
-#    source/components/reservoir/lookuptables/Kimb_54_sims
+#    data/reservoir/lookuptables/Kimb_54_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #  python ../../source/openiam/openiam_cf.py --file ControlFile_ex60a.yaml
@@ -55,7 +55,7 @@ Stratigraphy:
 #-------------------------------------------------
 LUTR1:
     Type: LookupTableReservoir
-    FileDirectory: source/components/reservoir/lookuptables/Kimb_54_sims
+    FileDirectory: data/reservoir/lookuptables/Kimb_54_sims
     TimeFile: time_points.csv
     ParameterFilename: parameters_and_filenames.csv
     Parameters:
@@ -72,9 +72,9 @@ MSW1:
         coordy: [48333.0, 48999.0]
     Parameters:
         logWellPerm:
-            min: -21.0
-            max: -19.0
-            value: -20.0
+            min: -20.95
+            max: -18.95
+            value: -19.95
         logAquPerm:
             min: -12.5
             max: -11.5
@@ -91,9 +91,9 @@ FGenAq1:
             value: 0.13
             vary: False
         log_permh:
-            min: -12.5
-            max: -11.5
-            value: -12.0
+            min: -12.0
+            max: -11.0
+            value: -11.5
         log_aniso:
             value: 0.3
             vary: False

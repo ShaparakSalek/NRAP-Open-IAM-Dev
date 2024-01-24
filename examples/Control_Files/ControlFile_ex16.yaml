@@ -31,7 +31,7 @@
 # 2. https://gitlab.com/NRAP/Kimberlina_data
 #
 # The downloaded data set should be placed here:
-#    source/components/reservoir/lookuptables/Kimb_54_sims
+#    data/reservoir/lookuptables/Kimb_54_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
 #   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex16.yaml
@@ -63,7 +63,7 @@ Stratigraphy:
 #-------------------------------------------------
 PlumeStabilityCmpnt:
     Type: PlumeStability
-    FileDirectory: source/components/reservoir/lookuptables/Kimb_54_sims
+    FileDirectory: data/reservoir/lookuptables/Kimb_54_sims
     TimeFile: time_points.csv
     ParameterFilename: parameters_and_filenames.csv
     Variables: [pressure, CO2saturation]

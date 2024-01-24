@@ -94,6 +94,11 @@ DATA_LOADING_ERR_MSG = ''.join([
     'read results from the file {}. The code was searching for data in a column ', 
     'labeled {}. The column was expected to have {} rows{}. Check your input.'])
 
+TIME_LIST_ERR_MSG = ''.join([
+    'The TimeList entry provided ({}, type: {}) for the Bowtie figure {} was not ', 
+    'one of the expected input types. TimeList is expected to be "All" (for all ', 
+    'times) or a list of times in years (e.g., [5, 10, 15, 20]). Check your ', 
+    'input. The final model time will be used.'])
 
 def bowtie_plot(yaml_data, model_data, sm, s, output_list, locations, output_dir, 
                 name='Bowtie_Figure1', analysis='lhs', figsize=(12, 8), figdpi=100, 
@@ -269,7 +274,10 @@ def evaluate_input_val(key, value):
     generally meant to be taken as numeric values rather than strings.
     """
     if key in NUMERIC_COLS:
-        return eval(value)
+        try:
+            return eval(value)
+        except:
+            return None
     elif value in ['None', 'none']:
         return None
     elif value in ['False', 'FALSE', 'false']:
@@ -277,7 +285,12 @@ def evaluate_input_val(key, value):
     elif value in ['True', 'TRUE', 'true']:
         return True
     else:
-        return value
+        if isinstance(value, str):
+            return value
+        elif np.isnan(value):
+            return None
+        else:
+            return value
 
 
 def get_optional_bowtie_input(name, bowtie_input, metric_list, bowtie_input_type, 
@@ -286,8 +299,8 @@ def get_optional_bowtie_input(name, bowtie_input, metric_list, bowtie_input_type
     Checks the input file for a given entry type. If present, those inputs are 
     returned. Otherwise, the funciton returns a list of None values.
     """
-    
     input_list = [None] * len(metric_list)
+    
     if optional_input_type in bowtie_input:
         input_list = bowtie_input[optional_input_type]
         
@@ -710,14 +723,31 @@ def make_bowtie_figure(name, output_dir, contribs, conseqs, results_contribs,
     Produces a bowtie figure.
     """
     if not selected_times is None:
-        if selected_times == 'All':
-            selected_times = np.arange(0, len(time_array)).tolist()
-        else:
+        if isinstance(selected_times, (list, np.ndarray)):
             time_indices = []
+            
             for time in selected_times:
                 time_abs_diff = np.abs(time_array - time)
                 closest_time_index = np.argmin(time_abs_diff)
                 time_indices.append(closest_time_index)
+            
+        elif isinstance(selected_times, str):
+            if selected_times == 'All':
+                selected_times = np.arange(0, len(time_array)).tolist()
+            else:
+                err_msg = TIME_LIST_ERR_MSG.format(
+                    selected_times, type(selected_times), name)
+                
+                logging.error(err_msg)
+                
+                time_indices = [len(time_array) - 1]
+        else:
+            err_msg = TIME_LIST_ERR_MSG.format(
+                selected_times, type(selected_times), name)
+            
+            logging.error(err_msg)
+            
+            time_indices = [len(time_array) - 1]
     else:
         time_indices = [len(time_array) - 1]
     
