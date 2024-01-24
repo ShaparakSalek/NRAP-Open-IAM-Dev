@@ -5,9 +5,8 @@
 # simulation was used (the file name in the first row of the parameters_and_filenames.csv 
 # file) because the index parameter was specified as 1. Here, all 54 simulations are 
 # used by having indices of 1 to 54. The 'Weights' are all equal to 1, so each simulation 
-# receives an equal weighting. The reservoir conditions used here therefore represent 
-# the average of all 54 reservoir simulations. The incorporation of data from multiple 
-# reservoir simulations can improve the incorporation of uncertainty in a Bowtie figure.
+# receives an equal weighting. The incorporation of data from multiple reservoir 
+# simulations can improve the incorporation of uncertainty in a Bowtie figure.
 #
 # The use of the LookupTableReservoir in this example requires the additional
 # Kimberlina data set. The Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
@@ -88,9 +87,9 @@ MSW1:
         coordy: [48333.0, 48999.0]
     Parameters:
         logWellPerm:
-            min: -21.0
-            max: -19.0
-            value: -20.0
+            min: -20.95
+            max: -18.95
+            value: -19.95
         logAquPerm:
             min: -12.5
             max: -11.5
