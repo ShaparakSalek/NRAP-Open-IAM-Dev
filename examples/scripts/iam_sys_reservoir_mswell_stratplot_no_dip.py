@@ -23,13 +23,12 @@ import os
 import numpy as np
 import random
 import datetime
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
-                     MultisegmentedWellbore)
-
-import openiam as iam
-import openiam.visualize as iam_vis
+from openiam.components.iam_base_classes import SystemModel, IAM_DIR
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+import openiam.visualization as iam_vis
 
 
 if __name__ == "__main__":
@@ -61,7 +60,7 @@ if __name__ == "__main__":
     # Set up the dictionaries required by stratigraphy_plot()
     model_data = dict()
     model_data['OutputDirectory'] = os.path.join(
-        iam.IAM_DIR, 'output', 'stratplot_example_no_dip_'
+        IAM_DIR, 'output', 'stratplot_example_no_dip_'
         + str(datetime.date.today()))
 
     yaml_data = dict()
@@ -129,9 +128,9 @@ if __name__ == "__main__":
     strata[-1].add_par('aquifer2Thickness', value=aquifer2Thickness, vary=False)
     strata[-1].add_par('reservoirThickness', value=reservoirThickness, vary=False)
     strata[-1].add_par('datumPressure', value=datumPressure, vary=False)
-    
+
     composite_depth_pars = strata[-1].get_composite_depth_names()
-    
+
     for comp_depth in composite_depth_pars:
         par_expr = strata[-1].get_depth_expr(comp_depth)
         strata[-1].add_composite_par(comp_depth, par_expr)

@@ -6,14 +6,7 @@ from sys import platform
 import numpy as np
 import matplotlib.pyplot as plt
 
-try:
-    from openiam import SystemModel
-except:
-    try:
-        sys.path.append(os.sep.join(['..', '..', 'source']))
-        from openiam import SystemModel
-    except ImportError as err:
-        print('Unable to load IAM class module: '+str(err))
+from openiam.components.iam_base_classes import SystemModel
 currentWorkDir = os.getcwd()
 
 

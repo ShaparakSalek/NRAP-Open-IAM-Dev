@@ -7,12 +7,8 @@
 # The carbonate aquifer component is then used to calculate the pH and TDS plume
 # volumes in aquifers 1 and 2 resulting from CO2 and brine leakage, respectively.
 #
-# To run this file, use the command (\ for Windows and / for Mac or Linux)
-#   python ../source/openiam/openiam_cf.py --file ControlFile_ex13.yaml
-# in the folder examples/Control_Files,
-# or command
-#   python openiam_cf.py --file ../../examples/Control_Files/ControlFile_ex13.yaml
-# in the folder source/openiam.
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex13.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

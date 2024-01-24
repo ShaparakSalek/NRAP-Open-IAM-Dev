@@ -22,12 +22,12 @@
 # https://edx.netl.doe.gov/dataset/futuregen-2-0-1008-simulation-reservoir-lookup-table
 #
 # The downloaded data set should be placed here:
-#    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#    data/reservoir/lookuptables/FutureGen2/1008_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex40.yaml
+#   python ../../../src/openiam/components/openiam_cf.py --file ControlFile_ex40_jupyter.yaml
 #
-# Last Modified: June, 2023
+# Last Modified: December, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 15.
@@ -55,7 +55,7 @@ Stratigraphy:
 #-------------------------------------------------
 LookupTableReservoir1:
     Type: LookupTableReservoir
-    FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+    FileDirectory: data/reservoir/lookuptables/FutureGen2/1008_sims
     TimeFile: time_points.csv
     ParameterFilename: parameters_and_filenames_trunc.csv
     Parameters:

@@ -14,14 +14,14 @@
 # value will be used. When the wellbore component does not have a brine density parameter 
 # (e.g., CementedWellbore), the brine density used in a pressure AoR plot can be 
 # specified through the BrineDensity entry. Under the AoR plot Pressure_Plot_CritP_Calc, 
-# the brine density is given as 1100 kg/(m^3) ('BrineDensity: 1100'). If a calculated 
+# the brine density is given as 1010 kg/(m^3) ('BrineDensity: 1010'). If a calculated 
 # critical pressure was used, the wellbore component does not have a brine density 
 # parameter, and no value was provided with the BrineDensity entry, then a default 
-# brine density of 1012 kg/(m^3) would be used. The log for the simulation (IAM_log.log) 
+# brine density of 1045 kg/(m^3) would be used. The log for the simulation (IAM_log.log) 
 # would include a warning that the default brine density was used, however.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31e.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31e.yaml
 #
 # Last Modified: August, 2023
 #-------------------------------------------------
@@ -72,6 +72,9 @@ AnalyticalReservoir1:
             vary: False
         brineResSaturation:
             value: 0.175
+            vary: False
+        brineDensity:
+            value: 1010
             vary: False
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
@@ -126,13 +129,13 @@ Plots:
         FigureDPI: 200
         SaveCSVFiles: True
         CriticalPressureMPa: Calculated
-        BrineDensity: 1100             # BrineDensity is given in kg/(m^3) - this input is used to calculate critical pressure.
+        BrineDensity: 1010             # BrineDensity is given in kg/(m^3) - this input is used to calculate critical pressure.
     Pressure_Plot_CritP_Given:
         AoR: [pressure]
         PlotInjectionSites: True
         FigureDPI: 200
         SaveCSVFiles: True
-        CriticalPressureMPa: 11.1      # For this plot, critical pressure is specified - not calculated based on depths and brine density
+        CriticalPressureMPa: 10.55     # For this plot, critical pressure is specified - not calculated based on depths and brine density
     Plot2:
         AoR: [CO2saturation]
     Plot3:

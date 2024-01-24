@@ -12,17 +12,17 @@ import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, ReservoirDataInterpolator,
-                     LookupTableReservoir)
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components',
-                                  'reservoir', 'lookuptables', 'Test_3d'])
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
+                                  'lookuptables', 'Test_3d'])
 
     # Define keyword arguments of the system model
     num_years = 20

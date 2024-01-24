@@ -9,9 +9,9 @@ import os
 import logging
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.generic_reservoir_component import GenericReservoir
 
-from openiam import SystemModel, GenericReservoir
 
 if __name__ == "__main__":
     # For multiprocessing in Spyder

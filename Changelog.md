@@ -5,12 +5,13 @@ All notable changes to this project are documented in this file.
 of the tool is updated and changes are recorded in the current changelog,
 please perform the following actions:
   - update version of the tool in the following files:
-    - source/openiam/\__init\__.py
+    - src/openiam/\__init\__.py
+	- src/openiam/VERSION
     - documentation/user/source/conf.py
     - documentation/developer/source/conf.py
     - documentation/qaqc/source/conf.py
     - documentation/website/source/conf.py
-    - source/GUI/Dashboard.py
+    - src/openiam/gu_interface/Dashboard.py
     - replace image of front page of GUI with the one stating new version
     of the tool in the documentation.
   - recompile user and developer guides, and QAQC documents;
@@ -29,7 +30,8 @@ please perform the following actions:
   function of parameters and/or observations.
   - Added CFI and script examples demonstrating the use of the new components.
 ### Updated
-  - Can now use workflows in the GUI.
+  - NRAP-Open-IAM is now can be installed with pip
+  - Setup of workflows is possible in the GUI.
   - Updates to account for the new stratigraphy components. Unit thicknesses
   and depths being produced as observations (instead of parameters) required
   changes to many files.

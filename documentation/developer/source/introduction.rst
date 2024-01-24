@@ -13,7 +13,7 @@ Phase I NRAP-IAM-CS :cite:`PawarEtAl2016`, :cite:`StaufferEtAl2015`. Based on th
 general-purpose design, a core-functionality prototype version of the NRAP-Open-IAM
 was developed and tested.
 
-In NRAP Phase II researchers are developing an integrated assessment
+In NRAP Phases II and III researchers are developing an integrated assessment
 model that will incorporate workflows for containment assurance,
 monitoring design, post-injection site care, assessment of model concordance to measured field data,
 evaluation of the performance of mitigation alternatives, and updating of

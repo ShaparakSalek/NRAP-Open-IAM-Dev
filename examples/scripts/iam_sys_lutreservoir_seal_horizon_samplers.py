@@ -3,15 +3,19 @@ import sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, ReservoirDataInterpolator,
-                     LookupTableReservoir, SealHorizon,
-                     SHThicknessSampler, SHPermeabilitySampler)
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.components.seal_horizon_component import SealHorizon
+from openiam.components.samplers.sh_thickness_sampler import SHThicknessSampler
+from openiam.components.samplers.sh_permeability_sampler import SHPermeabilitySampler
+
 
 if __name__ == "__main__":
 
     # Setup location of lookup table data set
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):

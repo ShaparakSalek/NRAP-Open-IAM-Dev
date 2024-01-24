@@ -11,7 +11,7 @@
 # This example uses a modified version of the file Reservoir_data_sim01.csv from the
 # Kimberlina data set (https://gitlab.com/NRAP/Kimberlina_data). The file
 # was placed in the following location:
-#     source/components/reservoir/lookuptables/Test_metrics
+#     data/reservoir/lookuptables/Test_metrics
 #
 # The file from the Kimberlina data set was modified to include columns
 # for the fields genericMetric_1 through genericMetric_10 (corresponding
@@ -33,7 +33,7 @@
 # space and time.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex28.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex28.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -78,7 +78,7 @@ Stratigraphy:
 #-------------------------------------------------
 LookupTableReservoir1:
     Type: LookupTableReservoir
-    FileDirectory: source/components/reservoir/lookuptables/Test_metrics
+    FileDirectory: data/reservoir/lookuptables/Test_metrics
     TimeFile: time_points.csv
     # This is one of the modified files mentioned in the description above
     ParameterFilename: parameters_and_filenames_read_genericMetric.csv

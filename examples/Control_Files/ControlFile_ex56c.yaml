@@ -22,7 +22,7 @@
 # the critPressure parameter.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56c.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex56c.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------
@@ -75,6 +75,7 @@ Workflow:
                 logResPerm: -13.0
                 reservoirRadius: 15000
                 brineResSaturation: 0.05
+                brineDensity: 1050
         AquiferName: aquifer2                 # the wellbores will leak to this aquifer
         WellboreOptions:                      # You do not have to include the 'Controls' section (containing 'critPressureApproach' and 'enforceCritPressure')
             Locations:                        # under 'WellboreOptions'. Those entries are set automatically because of the CriticalPressureMPa entry.

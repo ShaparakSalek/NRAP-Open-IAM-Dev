@@ -23,7 +23,7 @@
 # values of x = 0 m and y = 0 m will be used.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex33a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex33a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -66,6 +66,9 @@ AnalyticalReservoir1:
             vary: False
         brineResSaturation:
             value: 0.075
+            vary: False
+        brineDensity:
+            value: 1025
             vary: False
     Outputs: [pressure,
               CO2saturation]

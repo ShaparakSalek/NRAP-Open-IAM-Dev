@@ -1,19 +1,19 @@
 # OpenIAM Control File Example 47
 #
-# This example demonstrate the use of the AoR plot type in a simulation using 
-# a TheisReservoir component. The TheisReservoir component only produces 
-# pressure values, so only use the AoR plot type with the pressure metric. 
+# This example demonstrate the use of the AoR plot type in a simulation using
+# a TheisReservoir component. The TheisReservoir component only produces
+# pressure values, so only use the AoR plot type with the pressure metric.
 # If CO2saturation output is requested from the TheisReservoir, it will produce
-# CO2saturation values of zero. Therefore, do not attempt to create AoR plots 
+# CO2saturation values of zero. Therefore, do not attempt to create AoR plots
 # showing the CO2saturation values from a TheisReservoir component.
 #
-# When creating an AoR plot with the pressure output of a TheisReservoir component, 
-# the CriticalPressureMPa input should not be set to 'Calculated'. Instead, the 
-# user should specify a critical pressure in MPa (e.g., 'CriticalPressureMPa: 18.0' 
+# When creating an AoR plot with the pressure output of a TheisReservoir component,
+# the CriticalPressureMPa input should not be set to 'Calculated'. Instead, the
+# user should specify a critical pressure in MPa (e.g., 'CriticalPressureMPa: 18.0'
 # for 18 MPa).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex47.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex47.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

@@ -9,7 +9,7 @@
 # component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex53b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex53b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

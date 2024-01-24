@@ -372,7 +372,7 @@ section is shown (the ``ModelParams`` and ``Stratigraphy`` sections are not show
         CriticalPressureMPa: Calculated
         ReservoirComponentType: LookupTableReservoir
         ReservoirOptions:
-            FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+            FileDirectory: data/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
             Interpolation2D: False
@@ -381,7 +381,7 @@ section is shown (the ``ModelParams`` and ``Stratigraphy`` sections are not show
         WellboreComponentType: OpenWellbore
         WellboreOptions:
             Locations:
-                file: source/components/reservoir/lookuptables/FutureGen2/1008_sims/fg1.csv
+                file: data/reservoir/lookuptables/FutureGen2/1008_sims/fg1.csv
                 read_z_values: True
                 thin_point_density: True
                 min_x_spacing: 10000

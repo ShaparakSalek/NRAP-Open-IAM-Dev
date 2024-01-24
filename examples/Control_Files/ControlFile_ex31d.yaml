@@ -30,7 +30,7 @@
 # pressure has been exceeded.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31d.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31d.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -44,7 +44,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex31d_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
-    Logging: Debug
+    Logging: Error
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
@@ -83,6 +83,9 @@ AnalyticalReservoir1:
             vary: False
         brineResSaturation:
             value: 0.175
+            vary: False
+        brineDensity:
+            value: 1075
             vary: False
     Outputs: [pressure,
               CO2saturation]

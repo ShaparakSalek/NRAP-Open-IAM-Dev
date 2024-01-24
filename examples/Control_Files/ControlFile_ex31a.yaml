@@ -72,8 +72,12 @@
 # for the use of the 'CriticalPressureMPa: Calculated' option in lhs or
 # parstudy simulations (see Control File example 31d).
 #
+# In this example, all of the pressure exceed the critical pressure calculated. 
+# Therefore, the site operators would have to thoroughly survey the area for 
+# unplugged legacy wells.
+#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -85,6 +89,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex31a_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
     Logging: Debug
 #-------------------------------------------------
 Stratigraphy:

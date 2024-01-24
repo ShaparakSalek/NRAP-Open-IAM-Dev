@@ -18,13 +18,15 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.open_wellbore_component import OpenWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.carbonate_aquifer_component import CarbonateAquifer
 
-from openiam import (SystemModel, AnalyticalReservoir, OpenWellbore,
-                     CarbonateAquifer, RateToMassAdapter)
-from openiam.visualize import (correlations_at_time, time_series_sensitivities,
-                               multi_sensitivities_barplot,
-                               simple_sensitivities_barplot)
+from openiam.visualization import (correlations_at_time, time_series_sensitivities,
+                                   multi_sensitivities_barplot,
+                                   simple_sensitivities_barplot)
 
 
 if __name__ == "__main__":

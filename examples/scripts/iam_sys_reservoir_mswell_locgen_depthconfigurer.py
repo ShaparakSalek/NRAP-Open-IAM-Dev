@@ -32,11 +32,12 @@ from matplotlib import cm
 from matplotlib import ticker
 from matplotlib.lines import Line2D
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-
-from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
-                     MultisegmentedWellbore, LocationGenerator,
-                     WellDepthRiskConfigurer)
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.location_generator import LocationGenerator
+from openiam.components.configurer_component import WellDepthRiskConfigurer
 
 
 def get_distance_from_site_km(sm, comp_ref, injection_x_m, injection_y_m):

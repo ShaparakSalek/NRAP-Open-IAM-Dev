@@ -6,12 +6,8 @@
 # Additionally, this example uses a forward analysis type (deterministic)
 # instead of Latin Hypercube Sampling (lhs, stochastic).
 #
-# To run this file, use the command (\ for Windows and / for Mac or Linux)
-#   python openiam_cf.py --file ../../examples/Control_Files/ControlFile_ex7b.yaml
-# in the folder source/openiam,
-# or command
-#   python ../source/openiam/openiam_cf.py --file ControlFile_ex7b.yaml
-# in the folder examples/Control_Files.
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex7b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

@@ -14,7 +14,7 @@
 # however, they will automatically be linked to the Stratigraphy component.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex36.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex36.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -69,6 +69,9 @@ AnalyticalReservoir1:
             vary: False
         brineResSaturation:
             value: 0
+            vary: False
+        brineDensity:
+            value: 1025
             vary: False
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------

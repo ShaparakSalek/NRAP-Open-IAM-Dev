@@ -47,7 +47,7 @@
 # see control files 54a-54d.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex25.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex25.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

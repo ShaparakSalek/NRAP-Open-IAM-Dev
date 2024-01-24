@@ -21,8 +21,7 @@ import argparse     # argparse module makes it easy to write command-line interf
 import numpy as np
 import random
 
-sys.path.insert(0,os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel
+from openiam.components.iam_base_classes import SystemModel
 
 # The following line creates a parser to parse arguments from the command line to the code.
 parser = argparse.ArgumentParser(description='Run examples.')

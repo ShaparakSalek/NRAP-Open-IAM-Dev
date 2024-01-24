@@ -13,24 +13,26 @@ Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following pla
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/Kimb_54_sims
+    data/reservoir/lookuptables/Kimb_54_sims
 """
 import sys
 import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, ReservoirDataInterpolator,
-                     LookupTableReservoir, MultisegmentedWellbore,
-                     LocationGenerator)
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.location_generator import LocationGenerator
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.ERROR)
     __spec__ = None
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):

@@ -35,10 +35,10 @@
 # https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam/resource/71aeb591-1609-430b-8392-4d75ee84750c
 #
 # The downloaded data set should be placed here:
-#    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+#    data/reservoir/lookuptables/FutureGen2/1008_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex57a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex57a.yaml
 #
 # Last Modified: September, 2023
 #-------------------------------------------------
@@ -83,7 +83,7 @@ Workflow:
         FigureDPI: 300
         ReservoirComponentType: LookupTableReservoir
         ReservoirOptions:
-            FileDirectory: source/components/reservoir/lookuptables/FutureGen2/1008_sims
+            FileDirectory: data/reservoir/lookuptables/FutureGen2/1008_sims
             TimeFile: time_points.csv
             ParameterFilename: parameters_and_filenames_trunc.csv
             Interpolation2D: True

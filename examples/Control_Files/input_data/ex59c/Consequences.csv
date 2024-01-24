@@ -1,0 +1,8 @@
+Index,ComponentNameList,Metrics,ThresholdValues,ReadResults,FileDirectory,FileName,Analysis,Realizations,Units,Label
+0,FutureGen2Aquifer1,TDS_volume,1,1,examples/Control_Files/input_data/ex59c/,FutureGen2Aquifer1_000.TDS_volume.csv,lhs,50,None,TDS Plumes in the USDW
+1,FutureGen2Aquifer1,pH_volume,1,1,examples/Control_Files/input_data/ex59c/,FutureGen2Aquifer1_000.pH_volume.csv,lhs,50,None,pH Plumes in the USDW
+2,OpenWellbore1,CO2_atm,1.00E-06,0,None,None,None,None,None,CO$_2$ Released Into Atmosphere
+3,CostModel,Cost,0.00E+00,1,examples/Control_Files/input_data/ex59c/,CostModel.Cost.csv,lhs,50,USD,Cost of Remedial Response Plans
+4,CostModel,Penalty,0.00E+00,1,examples/Control_Files/input_data/ex59c/,CostModel.Penalty.csv,forward,1,USD,Financial Penalties
+5,Expert Panel,Unlikely,None,0,None,None,None,None,None,Hydrocarbon Resources Impacted
+6,Expert Panel,Extremely Likely,None,0,None,None,None,None,None,Loss of Project Support

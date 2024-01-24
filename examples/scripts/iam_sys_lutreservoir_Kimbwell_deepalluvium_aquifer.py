@@ -9,7 +9,7 @@ can be downloaded from one of the following places:
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/Kimb_closed_200_sims
+    data/reservoir/lookuptables/Kimb_closed_200_sims
 
 Example of run:
 $ python iam_sys_lutreservoir_Kimbwell_deepalluvium_aquifer.py
@@ -19,9 +19,12 @@ import sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, ReservoirDataInterpolator, LookupTableReservoir,
-                     KimberlinaWellbore, DeepAlluviumAquiferML)
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.components.kimberlina_wellbore_component import KimberlinaWellbore
+from openiam.components.deep_alluvium_aquifer_ml_component import DeepAlluviumAquiferML
 
 
 if __name__ == '__main__':
@@ -36,7 +39,7 @@ if __name__ == '__main__':
     # Create system model
     sm = SystemModel(model_kwargs=sm_model_kwargs)
 
-    data_folder = os.path.join('..', '..', 'source', 'components', 'reservoir',
+    data_folder = os.path.join('..', '..', 'data', 'reservoir',
                                'lookuptables', 'Kimb_closed_200_sims')
     if not os.path.exists(os.sep.join([data_folder, 'Reservoir_data_sim0001.csv'])):
         msg = ''.join(['\nKimberlina data set can be downloaded ',

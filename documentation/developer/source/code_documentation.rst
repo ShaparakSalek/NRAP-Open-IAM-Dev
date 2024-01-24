@@ -94,7 +94,7 @@ module docstring will be compiled for the document.
 
 **Cemented Wellbore Component Docstring Output**
 
-.. automodule:: openiam.CementedWellbore
+.. automodule:: openiam.base.CementedWellbore
 
 ----
 

@@ -13,8 +13,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel
+from openiam.components.iam_base_classes import SystemModel
+
 
 def comp_model1(p, x=None, y=None, time_point=0.0):
     # Check whether keyword arguments x and y were provided

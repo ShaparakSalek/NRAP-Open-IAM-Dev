@@ -22,13 +22,15 @@ import random
 import datetime
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-
-from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
-                     MultisegmentedWellbore, RateToMassAdapter, FutureGen2AZMI)
+from openiam.components.iam_base_classes import SystemModel, IAM_DIR
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.futuregen2_azmi_component import FutureGen2AZMI
 
 import openiam as iam
-import openiam.visualize as iam_vis
+import openiam.visualization as iam_vis
 
 
 if __name__ == "__main__":
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     # Set up the dictionaries required by stratigraphy_plot()
     model_data = dict()
     model_data['OutputDirectory'] = os.path.join(
-        iam.IAM_DIR, 'output', 'ttfdplot_example_no_dip_'
+        IAM_DIR, 'output', 'ttfdplot_example_no_dip_'
         + str(datetime.date.today()))
 
     yaml_data = dict()

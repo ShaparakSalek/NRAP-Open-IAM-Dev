@@ -47,7 +47,7 @@
 # number of realizations (i.e., the LHS samples set by 'siz' under analysis).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex39a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex39a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

@@ -12,7 +12,7 @@
 # In this example, the parameters reservoirPressureMult and logWellPerm are varied.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex52b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex52b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

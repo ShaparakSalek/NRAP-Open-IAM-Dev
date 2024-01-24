@@ -11,15 +11,13 @@ import os
 import random
 import numpy as np
 
-
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
 
 
 if __name__ == "__main__":
     # For multiprocessing in Spyder
     __spec__ = None
-    from openiam import MultisegmentedWellbore
 
     # Define keyword arguments of the system model
     num_years = 5

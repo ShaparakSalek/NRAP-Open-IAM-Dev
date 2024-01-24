@@ -6,7 +6,7 @@
 # Hypercube Sampling (lhs) across 30 realizations (siz: 30).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex2.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex2.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -20,6 +20,7 @@ ModelParams:
     Components: [AnalyticalReservoir1, msw1]
     OutputDirectory: output/output_ex2_{datetime}
     OutputType: 1  # 0 - row-wise; 1 - column-wise
+    GenerateLocationsFiles: False
     GenerateOutputFiles: True
     GenerateCombOutputFile: False
     GenerateStatFiles: True

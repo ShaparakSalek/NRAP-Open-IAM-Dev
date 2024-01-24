@@ -4,7 +4,7 @@
 # The analysis type was changed to forward to reduce the simulation's run time.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56d.yaml
+#   python ../../../src/openiam/openiam_cf.py --file ControlFile_ex56d_jupyter.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------

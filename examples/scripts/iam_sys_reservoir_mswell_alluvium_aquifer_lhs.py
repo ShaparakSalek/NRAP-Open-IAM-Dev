@@ -9,13 +9,17 @@ alluvium aquifer model. Plots of relevant observations are created.
 Example of run:
 $ python iam_sys_reservoir_mswell_aquifer_lhs.py
 '''
-
-import sys,os
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+import os
+import sys
 import numpy as np
-from openiam import SystemModel, AnalyticalReservoir
-from openiam import MultisegmentedWellbore, AlluviumAquifer, RateToMassAdapter
 import matplotlib.pyplot as plt
+
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.stratigraphy_component import Stratigraphy
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.alluvium_aquifer_component import AlluviumAquifer
 
 
 if __name__ == "__main__":

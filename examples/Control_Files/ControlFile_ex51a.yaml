@@ -1,18 +1,14 @@
 # OpenIAM Control File Example 51a
 #
 # This example illustrates a system model with an analytical reservoir component
-# providing pressure and CO2 saturation inputs for cemented wellbore (wr) components.
+# providing pressure and CO2 saturation inputs for cemented wellbore components.
 # The setup is standard in a sense that aquifer 1 (deeper one) is a thief zone;
 # while aquifer 2 (under shale 3) is a shallow aquifer.
 # The example also illustrates the setup for a random placement of wells within
 # a specified domain (inputs under the 'RandomLocDomain' entry').
 #
-# The CementedWellboreWR component accepts a wider range (wr) of parameter values
-# in comparison with the CementedWellbore component - CementedWellboreWR is an updated
-# version of the CementedWellbore component.
-#
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex51a.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex51a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -48,7 +44,7 @@ Reservoir:
               CO2saturation]
 #-------------------------------------------------
 Wellbore:
-    Type: CementedWellboreWR
+    Type: CementedWellbore
     Connection: Reservoir
     Number: 6
     Locations:

@@ -5,7 +5,7 @@ as ouput the pressure data in h5 file format accepted by ORION.
 The included method test_Decatur_scenario uses Decatur example lookup table
 data for the testing purposes. The three required data files
 (parameters_and_filenames.csv, Reservoir_data_decatur.csv, and time_points.csv)
-should be placed in the folder source/components/reservoir/lookuptables/Decatur.
+should be placed in the folder data/reservoir/lookuptables/Decatur.
 
 If you're an NRAP-Open-IAM developer the needed data files
 can be found on the developer's workspace on EDX "NRAP-Open-IAM Data Sharing":
@@ -19,10 +19,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from orion.utilities import hdf5_wrapper
-sys.path.insert(0, os.sep.join(['..', '..', '..', 'source']))
 
-from openiam import IAM_DIR, SystemModel, ReservoirDataInterpolator, LookupTableReservoir
-from matk import pyDOE
+sys.path.insert(0, os.sep.join(['..', '..', '..', '..', 'src']))
+from openiam.components.iam_base_classes import IAM_DIR, SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.matk import pyDOE
 
 DEFAULT_OUTPUT_DIR = os.sep.join([IAM_DIR, 'output', 'orion_data'])
 
@@ -190,7 +192,7 @@ def create_lutr_comp_setup(time_points, coord_x, coord_y, coord_z,
 
 
 def test_Decatur_scenario(test=2):
-    file_directory = os.sep.join(['..', '..', '..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', '..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Decatur'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_decatur.csv'])):

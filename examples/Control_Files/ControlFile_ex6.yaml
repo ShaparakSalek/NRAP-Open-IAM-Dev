@@ -18,10 +18,10 @@
 # 3. https://edx.netl.doe.gov/dataset/nrap-open-source-iam
 #
 # The downloaded data set should be placed here:
-#    source/components/reservoir/lookuptables/Kimb_54_sims
+#    data/reservoir/lookuptables/Kimb_54_sims
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../source/openiam/openiam_cf.py --file ControlFile_ex6.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex6.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -62,7 +62,7 @@ Stratigraphy:
 #-------------------------------------------------
 LUTReservoir1:
     Type: LookupTableReservoir
-    FileDirectory: source/components/reservoir/lookuptables/Kimb_54_sims
+    FileDirectory: data/reservoir/lookuptables/Kimb_54_sims
     TimeFile: time_points.csv
     ParameterFilename: parameters_and_filenames.csv
     Parameters:

@@ -10,7 +10,7 @@ Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following pla
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded (unzipped) data set should be placed here:
-    source/components/reservoir/lookuptables/Kimb_54_sims
+    data/reservoir/lookuptables/Kimb_54_sims
 
 This example also requires that you have SOSAT package installed.
 You can install SOSAT by running this command on the terminal:
@@ -33,13 +33,14 @@ from SOSAT.constraints import FaultConstraint
 from SOSAT.constraints import FaultingRegimeConstraint, SU
 from SOSAT.risk_analysis import CriticalFaultActivation
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel, LookupTableReservoir
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+
 
 if __name__ == "__main__":
 
     # Setup location of lookup table data set
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):

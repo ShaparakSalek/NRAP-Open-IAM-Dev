@@ -6,12 +6,8 @@
 # and both CO2 and brine leakage rates go to zero. Here, the parameter mitigationTime
 # is set to 45 years.
 #
-# To run this file, use the command (\ for Windows and / for Mac or Linux)
-#   python ../source/openiam/openiam_cf.py --file ControlFile_ex12.yaml
-# in the folder examples/Control_Files,
-# or command
-#   python openiam_cf.py --file ../../examples/Control_Files/ControlFile_ex12.yaml
-# in the folder source/openiam.
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex12.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------

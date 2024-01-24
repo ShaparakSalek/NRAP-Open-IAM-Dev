@@ -16,9 +16,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-
-from openiam import SystemModel, AnalyticalReservoir, OpenWellbore, AtmosphericROM
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.open_wellbore_component import OpenWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.atmRom_component import AtmosphericROM
 
 
 if __name__ == "__main__":

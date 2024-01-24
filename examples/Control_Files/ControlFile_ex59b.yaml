@@ -1,0 +1,149 @@
+# OpenIAM Control File Example ex59b
+#
+# This example is similar to control file example 59a. This example also demonstrates 
+# the use of the Bowtie plot type. Unlike that example, however, this example uses the 
+# 'TimeList' entry. This entry allows the user to specify the simulation times (in years) 
+# to use for the results displayed in the figure. The model times that are closest to each 
+# value in 'TimeList' will be used. Here, 'TimeList' is given as '[5, 10, 15, 20, 25]'. 
+# If the user only wanted to focus on one model time (e.g., 10 years) , 'TimeList' could 
+# be given as 'TimeList: [10]'. If TimeList is not given, then the default approach is to 
+# use the final model time (here, 25 years). Control file example 59a focuses on t = 25 years. 
+# The 'Contributors' and 'Consequences' whiskers on the Bowtie show the values plus/minus 
+# standard deviation at the model time considered. The probabilities shown, however, reflect
+# the model time considered and all previous model times. For example, if the brine leakage 
+# rate at t = 25 years is below the threshold used, the probability will still show if the 
+# brine leakage rate exceeded the threshold at an earlier model time (e.g., t = 10 years).
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex59b.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 25
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 50
+    Components: [AnalyticalReservoir1, OpenWellbore1, FutureGen2Aquifer1]
+    OutputDirectory: 'output/output_ex59b_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        value:  750.0
+        vary: False
+    shale2Thickness:
+        value:  950.0
+        vary: False
+    shale3Thickness:
+        value: 365
+        vary: False
+    aquifer1Thickness:
+        vary: False
+        value: 85
+    aquifer2Thickness:
+        vary: False
+        value: 85
+    reservoirThickness:
+        vary: False
+        value:  150
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    Parameters:
+        injRate:
+            value: 0.0025
+            vary: False
+        logResPerm:
+            min: -12.25
+            max: -12.0
+            value: -12.125
+        reservoirRadius:
+            value: 25000
+            vary: False
+        brineResSaturation:
+            min: 0.01
+            max: 0.15
+            value: 0.075
+        brineDensity:
+            value: 1010 # 1190
+            vary: False
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: AnalyticalReservoir1
+    Number: 1
+    LeakTo: aquifer2
+    Locations:
+        coordx: [2121.32]     # 3 km from the injection site
+        coordy: [2121.32]
+    Controls:
+        critPressureApproach: True
+        enforceCritPressure: False
+    Parameters:
+        wellRadius:
+            value: 0.025
+            vary: False
+        logReservoirTransmissivity:
+            min: -11.25
+            max: -10.25
+            value: -10.75
+        logAquiferTransmissivity:
+            min: -11.25
+            max: -10.25
+            value: -10.75
+        brineSalinity:
+            min: 0.10
+            max: 0.20
+            value: 0.15
+        brineDensity:
+            value: 1010 # 1190
+            vary: False
+    Outputs: [CO2_aquifer, brine_aquifer, CO2_atm, brine_atm]
+#-------------------------------------------------
+FutureGen2Aquifer1:
+    Type: FutureGen2Aquifer
+    Connection: OpenWellbore1
+    AquiferName: aquifer2
+    Parameters:
+        # Parameters aqu_thick (85 m) and depth (450 m) are linked
+        # to stratigraphy and don't require to be setup explicitily unless
+        # different value of the parameter is required.
+        por:
+            min: 0.10
+            max: 0.18
+            value: 0.14
+        log_permh:
+            min: -11.75
+            max: -11.2
+            value: -11.5
+        log_aniso:
+            value: 0.3
+            vary: False
+        rel_vol_frac_calcite:
+            value: 0.01
+            vary: False
+    Outputs: [pH_volume, TDS_volume]
+#-------------------------------------------------
+Plots:
+    Reservoir_Conditions:
+        TimeSeriesStats: [pressure, CO2saturation]
+    Brine_and_CO2_Leakage:
+        TimeSeriesStats: [brine_aquifer, CO2_aquifer]
+    pH_and_TDS_Plumes:
+        TimeSeriesStats: [pH_volume, TDS_volume]
+    Bowtie_Figure:
+        Bowtie:
+            Contributors: examples/Control_Files/input_data/ex59a/Contributors.csv
+            Consequences: examples/Control_Files/input_data/ex59a/Consequences.csv
+            TopEventLabel: Unwanted Fluid Migration from the Reservoir
+            TimeList: [5, 10, 15, 20, 25]

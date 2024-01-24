@@ -13,7 +13,7 @@ FutureGen 2.0 data set can be downloaded from the following source:
 https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/FutureGen2/1008_sims
+    data/reservoir/lookuptables/FutureGen2/1008_sims
 
 Usage examples:
 $ python iam_sys_lutreservoir_mswell_futuregen_dream.py --run 1 --metric Pressure
@@ -34,10 +34,13 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import (SystemModel, ReservoirDataInterpolator, LookupTableReservoir,
-                     MultisegmentedWellbore, FutureGen2AZMI, FutureGen2Aquifer,
-                     RateToMassAdapter)
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.futuregen2_aquifer_component import FutureGen2Aquifer
+from openiam.components.futuregen2_azmi_component import FutureGen2AZMI
 
 
 if __name__ == "__main__":
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     # For multiprocessing in Spyder
     __spec__ = None
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'FutureGen2', '1008_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'fg1.csv'])):

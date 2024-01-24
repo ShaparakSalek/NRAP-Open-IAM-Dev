@@ -18,27 +18,30 @@
 # OpenWellbore will be placed on the injection site itself. These conditions
 # cause the pressure results at that OpenWellbore to go to infinity. Regardless,
 # the OpenWellbore is hypothetical and the AoR plot code is set up to exclude
-# such a result.
+# such a result. The simulation will print warning statements during the model
+# run, but the simulation will finish and the infinite pressures will be excluded
+# from the AoR plots.
 #
 # Additionally, this example shows how to set the critical pressure of an OpenWellbore 
 # component to a specific value. This example uses the same stratigraphy from example 
-# 31a, and with the brineDensity value used in that example (1015 kg/(m^3)) the 
-# calculated critical pressure is 22.78 MPa. Instead of using that calculated critical 
-# pressure, this example enforces a lower critical pressure of 22.07 MPa. To enforce a 
+# 31a, and with the brineDensity value used in that example (1075 kg/(m^3)) the
+# calculated critical pressure is 23.2 MPa. Instead of using that calculated critical
+# pressure, this example enforces a higher critical pressure of 23.8 MPa. To enforce a
 # critical pressure, set both 'critPressureApproach' and 'enforceCritPressure' to True 
 # (these entries are under 'Controls'). Then provide the 'critPressure' parameter under 
-# the 'Parameters' section. With a lower critical pressure used here, the leakage rates 
-# are increased.
+# the 'Parameters' section. With the higher critical pressure used here, the critical
+# pressure is only exceeded is a ~5 km radius near the injection site (rather than all
+# pressures exceeding the critical pressure).
 #
 # Setting the critical pressure for the OpenWellbore component does not automatically 
 # change the critical pressure used in the AoR plot examining reservoir pressures, 
 # however. An AoR plot that examines reservoir pressures only examines output from the
 # reservoir component. To maintain a uniform treatment of critical pressure, the critical 
 # pressure used in the AoR plot can be specified with the 'CriticalPressureMPa' entry 
-# under the plot name (under Plot1, 'CriticalPressureMPa: 22.07' for 22.07 MPa).
+# under the plot name (under Plot1, 'CriticalPressureMPa: 23.8' for 23.8 MPa).
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex31b.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31b.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
@@ -51,7 +54,7 @@ ModelParams:
     OutputDirectory: 'output/output_ex31b_{datetime}'
     GenerateOutputFiles: False
     GenerateCombOutputFile: False
-    Logging: Debug
+    Logging: Error
 #-------------------------------------------------
 Stratigraphy:
     numberOfShaleLayers:
@@ -126,11 +129,8 @@ OpenWellbore1:
         brineSalinity:
             value: 0.2
             vary: False
-        brineDensity:
-            value: 1075
-            vary: False
-        critPressure: 2.31e+07        # Because the critPressure parameter is specified, 
-        # brineDensity: 1075          # the brineDensity parameter is not used here
+        critPressure: 2.38e+07        # Because the critPressure parameter is specified,
+        # brineDensity: 1075          # the brineDensity parameter is not used by the OpenWellbore when critPressure is specified
         # Parameters wellTop (450 m) and reservoirDepth (2235 m) are linked
         # to stratigraphy (if the LeakTo parameter is set up to the right aquifer)
         # and don't need to be set explicitly unless different values
@@ -163,7 +163,7 @@ Plots:
         PlotInjectionSites: True
         FigureDPI: 200
         SaveCSVFiles: True
-        CriticalPressureMPa: 23.1      # Set as 23.1 MPa to be consistent with the OpenWellbore component's critPressure parameter
+        CriticalPressureMPa: 23.8      # Set as 23.8 MPa to be consistent with the OpenWellbore component's critPressure parameter
     Plot2:
         AoR: [CO2saturation]
         PlotInjectionSites: True

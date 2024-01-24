@@ -8,7 +8,7 @@ Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following pla
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/Kimb_54_sims
+    data/reservoir/lookuptables/Kimb_54_sims
 '''
 import sys
 import os
@@ -16,15 +16,15 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.plume_stability_component import PlumeStability
 
-from openiam import SystemModel, PlumeStability
 
 if __name__ == '__main__':
     # For multiprocessing in Spyder
     __spec__ = None
     logging.basicConfig(level=logging.WARNING)
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):

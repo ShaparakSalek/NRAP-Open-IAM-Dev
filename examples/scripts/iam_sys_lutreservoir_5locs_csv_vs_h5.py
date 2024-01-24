@@ -9,7 +9,7 @@ Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following pla
 2. https://gitlab.com/NRAP/Kimberlina_data
 
 The downloaded data set should be placed here:
-    source/components/reservoir/lookuptables/Kimb_54_sims
+    data/reservoir/lookuptables/Kimb_54_sims
 
 """
 
@@ -19,10 +19,11 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
+from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
 
-from openiam import SystemModel, ReservoirDataInterpolator, LookupTableReservoir
-from matk import pyDOE
+from openiam.matk import pyDOE
 
 def create_system_model(well_xys, time_array, option='csv'):
     """
@@ -56,13 +57,13 @@ def create_system_model(well_xys, time_array, option='csv'):
     if option == 'csv':
         signature_data = np.genfromtxt(
             os.path.join(
-                '..', '..', 'source', 'components', 'reservoir',
+                '..', '..', 'data', 'reservoir',
                 'lookuptables', 'Kimb_54_sims', 'parameters_and_filenames.csv'),
             delimiter=",", dtype='str')
     else:
         signature_data = np.genfromtxt(
             os.path.join(
-                '..', '..', 'source', 'components', 'reservoir',
+                '..', '..', 'data', 'reservoir',
                 'lookuptables', 'Kimb_54_sims', 'parameters_and_filenames_h5.csv'),
             delimiter=",", dtype='str')
 
@@ -88,7 +89,7 @@ def create_system_model(well_xys, time_array, option='csv'):
                 ReservoirDataInterpolator(
                     name='int'+str(ind+1), parent=sm,
                     header_file_dir=os.path.join(
-                        '..', '..', 'source', 'components', 'reservoir',
+                        '..', '..', 'data', 'reservoir',
                         'lookuptables', 'Kimb_54_sims'),
                     time_file='time_points.csv',
                     data_file='Reservoir_data_sim{ind1:02}.{f_ext}'.format(
@@ -100,7 +101,7 @@ def create_system_model(well_xys, time_array, option='csv'):
                 ReservoirDataInterpolator(
                     name='int'+str(ind+1), parent=sm,
                     header_file_dir=os.path.join(
-                        '..', '..', 'source', 'components', 'reservoir',
+                        '..', '..', 'data', 'reservoir',
                         'lookuptables', 'Kimb_54_sims'),
                     time_file='time_points.csv',
                     data_file='Reservoir_data_sim{ind1:02}.{f_ext}'.format(
@@ -138,7 +139,7 @@ def create_system_model(well_xys, time_array, option='csv'):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
 
-    file_directory = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    file_directory = os.sep.join(['..', '..', 'data', 'reservoir',
                                   'lookuptables', 'Kimb_54_sims'])
 
     if not os.path.exists(os.sep.join([file_directory, 'Reservoir_data_sim01.csv'])):

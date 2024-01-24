@@ -1,0 +1,86 @@
+# OpenIAM Control File Example 58d
+#
+# This example demonstrates the use of the LeakageAssessment workflow in
+# a simulation where six wellbores are used. Two of these wellbores have 
+# fixed Locations, while four are placed at random locations. To use 
+# random wellbore locations, include the 'RandomLocDomain' entry under 
+# 'WellboreOptions'. The 'Number' entry must also be provided. Because the 
+# 'coordx' and 'coordy' entries under 'Locations' only include two values, 
+# the four remaining wellbores are given random locations within the 
+# domain defined by the 'RandomLocDomain' input.
+#
+# To have the simulation save the random locations generated for the wellbores, 
+# set 'GenerateLocationsFiles' to True under the 'ModelParams' section. This option
+# will cause the simulation to save the wellbore locations to a .csv file in the 
+# 'csv' folder within the specified output directory. If not entered, the default 
+# setting for 'GenerateLocationsFiles' is True.
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex58d.yaml
+#
+# Last Modified: September, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 30
+    TimeStep: 1.0
+    Analysis: forward
+    Components: []
+    OutputDirectory: 'output/output_ex58d_{datetime}'
+    GenerateLocationsFiles: True
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 250.0
+    shale2Thickness:
+        vary: False
+        value: 250.0
+    shale3Thickness:
+        vary: False
+        value: 250.0
+    aquifer1Thickness:
+        vary: False
+        value: 100.0
+    aquifer2Thickness:
+        vary: False
+        value: 100.0
+    reservoirThickness:
+        vary: False
+        value: 30.0
+#-------------------------------------------------
+Workflow:
+    Type: LeakageAssessment
+    Options:
+        PlotType: TimeSeries
+        ReservoirComponentType: AnalyticalReservoir
+        ReservoirOptions:
+            InjectionWell:
+                coordx: 0
+                coordy: 0
+            Parameters:
+                injRate: 0.5
+                reservoirRadius: 5000      # The wellbore locations used should not be beyond the radius of the AnalyticalReservoir
+                logResPerm: -13.5
+                brineDensity: 1100
+                brineResSaturation: 0.075
+        WellboreComponentType: OpenWellbore
+        WellboreOptions:
+            Number: 6                      # Because only two locations are specified under 'Locations', four locations will be randomly generated
+            RandomLocDomain:
+                xmin: -2000
+                xmax: 2000
+                ymin: -2000
+                ymax: 2000
+            Locations:                     # These two locations are 0.5 km and 1 km from the injection site at x = 0 m, y = 0 m
+                coordx: [353.53, -707.11]
+                coordy: [353.53, -707.11]
+            Parameters:
+                wellRadius: 0.05
+                brineDensity: 1100
+        AquiferName: aquifer2

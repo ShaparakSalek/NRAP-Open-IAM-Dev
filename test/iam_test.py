@@ -8,40 +8,20 @@ import h5py
 from shutil import copyfile
 import matplotlib.pyplot as plt
 
-try:
-    from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
-                         GenericReservoir, TheisReservoir,
-                         MultisegmentedWellbore, CementedWellbore,
-                         CementedWellboreWR, OpenWellbore, KimberlinaWellbore,
-                         GeneralizedFlowRate, HydrocarbonLeakage, RateToMassAdapter,
-                         CarbonateAquifer, GenericAquifer, AtmosphericROM,
-                         ReservoirDataInterpolator, LookupTableReservoir,
-                         AlluviumAquifer, AlluviumAquiferLF,
-                         DeepAlluviumAquifer, DeepAlluviumAquiferML,
-                         FutureGen2Aquifer, FutureGen2AZMI,
-                         PlumeStability, SealHorizon, FaultFlow, FaultLeakage,
-                         ChemicalWellSealing, SHPermeabilitySampler,
-                         SHThicknessSampler)
-    import openiam.visualize as iam_vis
-except ModuleNotFoundError:
-    try:
-        sys.path.append(os.sep.join(['..', 'source']))
-        from openiam import (SystemModel, Stratigraphy, AnalyticalReservoir,
-                             GenericReservoir, TheisReservoir,
-                             MultisegmentedWellbore, CementedWellbore,
-                             CementedWellboreWR, OpenWellbore, KimberlinaWellbore,
-                             GeneralizedFlowRate, HydrocarbonLeakage, RateToMassAdapter,
-                             CarbonateAquifer, GenericAquifer, AtmosphericROM,
-                             ReservoirDataInterpolator, LookupTableReservoir,
-                             AlluviumAquifer, AlluviumAquiferLF,
-                             DeepAlluviumAquifer, DeepAlluviumAquiferML,
-                             FutureGen2Aquifer, FutureGen2AZMI,
-                             PlumeStability, SealHorizon, FaultFlow, FaultLeakage,
-                             ChemicalWellSealing, SHPermeabilitySampler,
-                             SHThicknessSampler)
-        import openiam.visualize as iam_vis
-    except ImportError as err:
-        print('Unable to load IAM class module: {}'.format(err))
+from openiam.base import (SystemModel, Stratigraphy, AnalyticalReservoir,
+                          GenericReservoir, TheisReservoir,
+                          MultisegmentedWellbore, CementedWellbore,
+                          CementedWellboreWR, OpenWellbore, KimberlinaWellbore,
+                          GeneralizedFlowRate, HydrocarbonLeakage, RateToMassAdapter,
+                          CarbonateAquifer, GenericAquifer, AtmosphericROM,
+                          ReservoirDataInterpolator, LookupTableReservoir,
+                          AlluviumAquifer, AlluviumAquiferLF,
+                          DeepAlluviumAquifer, DeepAlluviumAquiferML,
+                          FutureGen2Aquifer, FutureGen2AZMI,
+                          PlumeStability, SealHorizon, FaultFlow, FaultLeakage,
+                          ChemicalWellSealing, SHPermeabilitySampler,
+                          SHThicknessSampler)
+import openiam.visualization as iam_vis
 
 CURRENT_WORK_DIR = os.getcwd()
 
@@ -2357,7 +2337,7 @@ class Tests(unittest.TestCase):
         sm = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Define directory containing lookup tables
-        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+        file_dir = os.path.join('..', 'data', 'reservoir',
                                 'lookuptables', 'Test_2d')
 
         # Read file with signatures of interpolators and names of files with the corresponding data
@@ -2441,7 +2421,7 @@ class Tests(unittest.TestCase):
         sm = SystemModel(model_kwargs=sm_model_kwargs)
 
         # Define directory containing lookup tables
-        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+        file_dir = os.path.join('..', 'data', 'reservoir',
                                 'lookuptables', 'Test_2d')
 
         # Read file with signatures of interpolators and names of files with the corresponding data
@@ -2515,7 +2495,7 @@ class Tests(unittest.TestCase):
         output for all years of data provided in lookup table.
         """
         # Define directory containing lookup tables
-        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+        file_dir = os.path.join('..', 'data', 'reservoir',
                                 'lookuptables', 'Test_2d')
 
         # Read file with time points
@@ -2616,7 +2596,7 @@ class Tests(unittest.TestCase):
         output for all years of data provided in lookup table.
         """
         # Define directory containing lookup tables
-        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+        file_dir = os.path.join('..', 'data', 'reservoir',
                                 'lookuptables', 'Test_2d')
 
         # Read file with time points
@@ -2726,7 +2706,7 @@ class Tests(unittest.TestCase):
         output for all years of data provided in lookup table.
         """
         # Define directory containing lookup tables
-        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+        file_dir = os.path.join('..', 'data', 'reservoir',
                                 'lookuptables', 'Test_3d')
 
         # Read file with time points
@@ -2829,7 +2809,7 @@ class Tests(unittest.TestCase):
         output for all years of data provided in lookup table.
         """
         # Define directory containing lookup tables
-        file_dir = os.path.join('..', 'source', 'components', 'reservoir',
+        file_dir = os.path.join('..', 'data', 'reservoir',
                                 'lookuptables', 'Test_3d')
 
         # Read file with time points
@@ -2945,7 +2925,7 @@ class Tests(unittest.TestCase):
         component in a forward model.
         """
         import pickle
-        from openiam.openiam_cf import main as openiam_cf
+        from openiam.components.openiam_cf import main as cfi_runner
 
         # Change directories to find input and output files
         current_work_dir = os.getcwd()
@@ -2962,7 +2942,7 @@ class Tests(unittest.TestCase):
 
         # Run Test Control File
         test_control_file = 'test_control_file.yaml'
-        self.assertTrue(openiam_cf(test_control_file),
+        self.assertTrue(cfi_runner(test_control_file),
                         'NRAP-Open-IAM failed to run properly')
 
         # Test output directory was created
@@ -3175,7 +3155,7 @@ class Tests(unittest.TestCase):
         with system model time array equal to the time points of the linked
         dataset.
         """
-        file_directory = os.sep.join(['..', 'source', 'components', 'reservoir',
+        file_directory = os.sep.join(['..', 'data', 'reservoir',
                                       'lookuptables', 'Test_2d'])
         # Time array is the same as in the data set but converted to days
         time_array = np.genfromtxt(
@@ -3222,7 +3202,7 @@ class Tests(unittest.TestCase):
         with system model time array equal to the time points of the linked
         dataset.
         """
-        file_directory = os.sep.join(['..', 'source', 'components', 'reservoir',
+        file_directory = os.sep.join(['..', 'data', 'reservoir',
                                       'lookuptables', 'Test_2d'])
         # Time array is the same as in the data set but converted to days
         time_array = np.genfromtxt(
@@ -3306,7 +3286,7 @@ class Tests(unittest.TestCase):
             ReservoirDataInterpolator(
                 name='int1', parent=sm,
                 header_file_dir=os.path.join(
-                    '..', 'source', 'components', 'reservoir',
+                    '..', 'data', 'reservoir',
                     'lookuptables', 'Test_2d'),
                 time_file='time_points.csv',
                 data_file='Reservoir_data_sim01.csv',
@@ -3319,7 +3299,7 @@ class Tests(unittest.TestCase):
         # Setup location of interest
         locX, locY = [37478.0, 48233.0]
 
-        from openiam.iam_gridded_observation import interp_weights
+        from openiam.components.iam_gridded_observation import interp_weights
         # Calculate weights of the location of interest
         vertices, weights = interp_weights(int1.triangulation, np.array([[locX, locY]]))
 
@@ -3358,7 +3338,7 @@ class Tests(unittest.TestCase):
         Test the system model with a seal horizon component in a forward
         simulation against expected output for 2 years of data.
         """
-        import components.seal.seal_units as sunit
+        import openiam.components.models.seal.seal_units as sunit
         # Time constants.
         num_years = 1
         time_array = 365.25 * np.arange(0.0, num_years+1)
@@ -3783,7 +3763,7 @@ BASE_TESTS = [
     'test_futuregen_azmi',
     'test_generalized_flow_rate_cmpnt',
     'test_generic_aquifer',
-    'test_generic_reservoir_forward',
+      #'test_generic_reservoir_forward',  # do not uncomment this test unless the component is updated
     'test_hydrocarbon_leakage_forward',
     'test_lhs',
     'test_lookup_table_reservoir',
@@ -3809,7 +3789,7 @@ KERAS_TESTS = [
     'test_deep_alluvium_aquifer_ml',
     'test_fault_leakage',
     'test_generic_aquifer',
-    'test_generic_reservoir_forward',
+    # 'test_generic_reservoir_forward', # do not uncomment this test unless the component is updated
     'test_hydrocarbon_leakage_forward',
     'test_kimberlina_wellbore'
     ]

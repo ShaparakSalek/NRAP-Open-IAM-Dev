@@ -13,10 +13,12 @@ $ python iam_sys_analytical_mswell_generic.py
 import sys
 import os
 import numpy as np
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
-from openiam import (SystemModel, AnalyticalReservoir,
-                     MultisegmentedWellbore, GenericAquifer, RateToMassAdapter)
+from openiam.components.iam_base_classes import SystemModel
+from openiam.components.analytical_reservoir_component import AnalyticalReservoir
+from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.rate_to_mass_adapter import RateToMassAdapter
+from openiam.components.generic_aquifer_component import GenericAquifer
 
 
 if __name__ == "__main__":

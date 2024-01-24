@@ -909,7 +909,7 @@ and observations to the component models.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_par
+.. automethod:: openiam.base.ComponentModel.add_par
 
 ----
 
@@ -939,7 +939,7 @@ i.e. stochastic parameters of all components.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_default_par
+.. automethod:: openiam.base.ComponentModel.add_default_par
 
 ----
 
@@ -990,7 +990,7 @@ and are not available for the processing once the simulation is complete.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_obs
+.. automethod:: openiam.base.ComponentModel.add_obs
 
 ----
 
@@ -1002,7 +1002,7 @@ If the component model is supposed to return a structured (or "gridded") observa
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_grid_obs
+.. automethod:: openiam.base.ComponentModel.add_grid_obs
 
 ----
 
@@ -1035,7 +1035,7 @@ scalar (not an array) the system model keeps track of the observation.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_local_obs
+.. automethod:: openiam.base.ComponentModel.add_local_obs
 
 ----
 
@@ -1057,7 +1057,7 @@ observation assigned by the user. For example, ::
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_obs_to_be_linked
+.. automethod:: openiam.base.ComponentModel.add_obs_to_be_linked
 
 ----
 
@@ -1096,7 +1096,7 @@ value as an already defined parameter.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_par_linked_to_par
+.. automethod:: openiam.base.ComponentModel.add_par_linked_to_par
 
 ----
 
@@ -1131,7 +1131,7 @@ depends on should be added with the ``add_obs_to_be_linked`` method.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_par_linked_to_obs
+.. automethod:: openiam.base.ComponentModel.add_par_linked_to_obs
 
 ----
 
@@ -1153,7 +1153,7 @@ expression which may contain references to parameters of the same and/or other c
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_composite_par
+.. automethod:: openiam.base.ComponentModel.add_composite_par
 
 ----
 
@@ -1216,7 +1216,7 @@ parameters as a function of other parameters.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_par_linked_to_composite_obs
+.. automethod:: openiam.base.ComponentModel.add_par_linked_to_composite_obs
 
 ----
 
@@ -1327,7 +1327,7 @@ in time in a predetermined way, one can use method ``add_dynamic_kwarg``.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_dynamic_kwarg
+.. automethod:: openiam.base.ComponentModel.add_dynamic_kwarg
 
 ----
 
@@ -1353,7 +1353,7 @@ of one component to the observation of another component.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_kwarg_linked_to_obs
+.. automethod:: openiam.base.ComponentModel.add_kwarg_linked_to_obs
 
 ----
 
@@ -1431,7 +1431,7 @@ and passed in this form to the corresponding component.
 
 ----
 
-.. automethod:: openiam.ComponentModel.add_kwarg_linked_to_collection
+.. automethod:: openiam.base.ComponentModel.add_kwarg_linked_to_collection
 
 ----
 

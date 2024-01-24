@@ -11,7 +11,7 @@
 # xmax and ymax values of 50 km, and xsize and ysize values of 6.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../source/openiam/openiam_cf.py --file ControlFile_ex56a.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex56a.yaml
 #
 # Last Modified: July, 2023
 #-------------------------------------------------

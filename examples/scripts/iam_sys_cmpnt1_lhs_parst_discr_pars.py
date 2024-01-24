@@ -6,8 +6,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
-from openiam import SystemModel
+from openiam.components.iam_base_classes import SystemModel
 
 
 if __name__ == '__main__':
