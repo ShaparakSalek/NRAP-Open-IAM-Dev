@@ -229,8 +229,8 @@ if __name__ == "__main__":
             locY=well_y_values[locRef], injX=injectionX, injY=injectionY)))
 
         # Add parameters of reservoir component model
-        ares[-1].add_par('injRate', value=3.7, vary=False)
-        ares[-1].add_par('logResPerm', value=-12, vary=False)
+        ares[-1].add_par('injRate', value=3.3, vary=False)
+        ares[-1].add_par('logResPerm', value=-15, vary=False)
         ares[-1].add_par('reservoirRadius', value=4500.0, vary=False)
         ares[-1].add_par('brineDensity', value=1030.9, vary=False)
         ares[-1].add_par('CO2Density', value=775.0, vary=False)
@@ -261,8 +261,8 @@ if __name__ == "__main__":
         # Add parameters of multisegmented wellbore component model
         ms[-1].add_par('wellRadius', value=0.1, vary=False)
         ms[-1].add_par('logWellPerm', value=-11.0, vary=False)
-        ms[-1].add_par('logAqu1Perm', value=-13.0, vary=False)
-        ms[-1].add_par('logAqu2Perm', value=-13.0, vary=False)
+        ms[-1].add_par('logAqu1Perm', value=-11.0, vary=False)
+        ms[-1].add_par('logAqu2Perm', value=-11.0, vary=False)
         ms[-1].add_par('brineDensity', value=1030.9, vary=False)
         ms[-1].add_par('CO2Density', value=775, vary=False)
         ms[-1].add_par('brineViscosity', value=7.5e-4, vary=False)

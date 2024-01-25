@@ -1021,6 +1021,9 @@ class DippingStratigraphy(iam_bc.ComponentModel):
             del additional_depth_increase
             shaleThickness = self.pars_bounds['shaleThickness'][1]
 
+        if isinstance(shaleThickness, (list, np.ndarray)):
+            shaleThickness = shaleThickness[0]
+
         shaleThicknessListUpdated[-1] = shaleThickness
 
         # Now, go from the highest aquifer to the lowest shale so that required
@@ -1095,6 +1098,7 @@ class DippingStratigraphy(iam_bc.ComponentModel):
 
             shaleThicknessListUpdated[shaleRef] = shaleThickness
         # End of loop through shales and aquifers
+        
         del shaleThicknessList, aquiferThicknessList
 
         if reservoirThicknessUpdated < self.pars_bounds['reservoirThickness'][0]:
