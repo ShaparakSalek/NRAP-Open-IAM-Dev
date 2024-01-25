@@ -33,20 +33,21 @@ from openiam.gu_interface.dictionarydata import (
     d, APP_SIZE, TAB_SIZE, componentVars, componentChoices,
     componentTypeDictionary, connectionsDictionary,
     DISTRIBUTION_OPTIONS, connections, connectionTypes,
-    COMPONENT_TYPES, ANALYSIS_TYPES, WORKFLOW_TYPES,
+    COMPONENT_TYPES, ANALYSIS_TYPES,
     DISTRIBUTION_MENU_WIDTH, DISTRIBUTION_ARG_LABEL_WIDTH,
     DISTRIBUTION_ARG_TEXTFIELD_WIDTH, PARAMETER_LABEL_WIDTH,
     GFR_PARAMETER_LABEL_WIDTH, STRATA_PARAMETER_LABEL_WIDTH,
     FL_PARAMETER_LABEL_WIDTH,
     MODEL_TAB_LABEL_WIDTH2, MODEL_TAB_LABEL_WIDTH3,
     MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH,
-    DISTRIBUTION_PARS_LABELS, DISTRIBUTION_PARS_SETUPS)
+    DISTRIBUTION_PARS_LABELS, DISTRIBUTION_PARS_SETUPS,
+    workflowVars, WORKFLOW_TYPES)
 
 from openiam.gu_interface.cmpnts_tabs import (
     src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
     cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
-    aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab, AOR_wf_tab,
-    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, locations)
+    aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
+    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, locations)
 from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
 from openiam.components.iam_base_classes import IAM_DIR
@@ -1276,7 +1277,7 @@ class NRAPOpenIAM(tk.Tk):
 
             for _, dyn_data_el in enumerate(dyn_data):
                 dyn_data_vars.append(StringVar())
-                inp_data_file_path = os.path.join(IAM_DIR, dyn_data_el)
+                inp_data_file_path = os.path.join(CODE_DIR, dyn_data_el)
                 if os.path.isfile(inp_data_file_path):
                     dyn_data_vars[-1].set(dyn_data_el)
                 else:

@@ -10,22 +10,18 @@ from tkinter import ttk
 from tkinter import StringVar
 from tkinter import BooleanVar
 
-from dictionarydata import componentVars, componentChoices
-from dictionarydata import workflowVars, workflowChoices
-from dictionarydata import connectionsDictionary, componentTypeDictionary
-from dictionarydata import DISTRIBUTION_OPTIONS
+from openiam.gu_interface.dictionarydata import (
+    componentVars, componentChoices, workflowVars, workflowChoices, connectionsDictionary, componentTypeDictionary,
+    DISTRIBUTION_OPTIONS, LABEL_FONT, PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH, DISTRIBUTION_ARG_LABEL_WIDTH,
+    DISTRIBUTION_ARG_TEXTFIELD_WIDTH, OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX
+    )
 
-from dictionarydata import LABEL_FONT
-from dictionarydata import (PARAMETER_LABEL_WIDTH, DISTRIBUTION_MENU_WIDTH,
-                            DISTRIBUTION_ARG_LABEL_WIDTH,
-                            DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                            OUTPUT_LABEL_WIDTH1, PARAMETER_FRAME_PADX, CB_PADX)
+from openiam.gu_interface.cmpnts_tabs.locations import (
+    add_inj_well_frame_widgets, add_obs_locs_frame_widgets, read_obs_locations_data, read_grid_locations_data
+    )
 
-from cmpnts_tabs.locations import (add_inj_well_frame_widgets,
-                                   add_obs_locs_frame_widgets,
-                                   read_obs_locations_data)
-from cmpnts_tabs.commons import commons_read_tab_vars
-from cmpnts_tabs.parameter_entry import ParameterEntry
+from openiam.gu_interface.cmpnts_tabs.commons import commons_read_tab_vars
+from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
 LABEL_WIDTH = 17
 

@@ -404,7 +404,7 @@ def add_inj_well_frame_widgets(controller, cmpnt_nm, cmpnt_type, frame, tool_tip
     if cmpnt_type in ['SimpleReservoir', 'AnalyticalReservoir', 'GenericReservoir']:
         inj_well_label_text = "Injection well location:"
         arg_labels = ['x-coordinate [m]:', 'y-coordinate [m]:']
-        tool_tip_text =  'Enter {}-coordinate of injection well.'
+        tool_tip_text = 'Enter {}-coordinate of injection well.'
 
     elif cmpnt_type =='TheisReservoir':
         inj_well_label_text = "Injection well location(s):"

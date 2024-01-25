@@ -12,9 +12,9 @@ from tkinter import messagebox
 import Pmw
 
 from openiam.gu_interface.OpenIAM_Page import OpenIAM_Page
+from openiam.gu_interface.Workflow_Page import Workflow_Page
 from openiam.gu_interface.PostProcessor_Page import PostProcessor_Page
 from openiam.gu_interface.dictionarydata import LABEL_FONT
-from openiam.gu_interface.Workflow_Page import Workflow_Page
 
 from openiam.components.iam_base_classes import IAM_DIR
 
