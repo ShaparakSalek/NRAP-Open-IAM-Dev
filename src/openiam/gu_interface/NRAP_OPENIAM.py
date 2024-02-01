@@ -27,6 +27,7 @@ from openiam.gu_interface.Disclaimer import Disclaimer_Page
 from openiam.gu_interface.Dashboard import Dashboard_Page
 from openiam.gu_interface.OpenIAM_Page import OpenIAM_Page, disable_time_frame_widgets
 from openiam.gu_interface.PostProcessor_Page import PostProcessor_Page
+from openiam.components.openiam_cf import main
 
 from openiam.gu_interface.dictionarydata import (
     d, APP_SIZE, TAB_SIZE, componentVars, componentChoices,
@@ -1372,13 +1373,10 @@ class NRAPOpenIAM(tk.Tk):
         self.runSim_button.config(state="disabled")
         self.populate_dictionary(ask_to_save=False)
 
+        # This should work both in Spyder console and commmand prompt
+        # In this way Spyder doesn't need to know where python is
         filename = self.sim_file
-        run_file = os.path.join(IAM_DIR, 'src', 'openiam', 'components', 'openiam_cf.py')
-        # Add quotation marks around path to the control file to avoid problems
-        # with spaces in paths
-        run_command = 'python "{0}" --file "{1}" --binary True'.format(
-            run_file, filename)
-        os.system(run_command)
+        run_flag = main(filename, True)
 
         self.runSim_button.config(state="enabled")
         self.runSim_button.config(text="RUN SIMULATION")
