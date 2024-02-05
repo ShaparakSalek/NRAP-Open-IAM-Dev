@@ -505,7 +505,7 @@ class LookupTableReservoir(iam_bc.ComponentModel):
                         weights = [1.0/nv for v in values]
                 else:
                     weights = component_data['Parameters'][par_name]['Weights']
-                
+
                 # The weights should not be integers
                 weights = [float(wght) for wght in weights]
 
@@ -994,7 +994,13 @@ class LookupTableReservoir(iam_bc.ComponentModel):
                 self.initial_pressure = interpr_out['pressure']
             for nm in interpr_out:
                 out[nm] = interpr_out[nm]
-            out['initial_pressure'] = self.initial_pressure
+            # For cases where individual time points are requested
+            # from the simulation_model method and initial pressure was
+            # not calculated at the init_time_point
+            try:
+                out['initial_pressure'] = self.initial_pressure
+            except AttributeError:
+                out['initial_pressure'] = interpr(init_time_point)['pressure']
         else:
             if self.num_points == 1:
                 interpr_out = interpr(
