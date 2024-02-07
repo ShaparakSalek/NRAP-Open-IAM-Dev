@@ -436,6 +436,7 @@ def test_multisegmented_wellbore_component():
     import matplotlib.pyplot as plt
     __spec__ = None
 
+    print('flag1')
     logging.basicConfig(level=logging.WARNING)
     # Define keyword arguments of the system model
     isUQAnalysisOn = 0 # 0: one forward run, 1: stochastic runs

@@ -5,7 +5,6 @@ import os
 import numpy as np
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import os.path
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -37,32 +36,31 @@ class FluidModels:
         import joblib
         
         self.BasicPath0 = BasicPath
-        self.CO2FluidModel = joblib.load(os.path.join(self.BasicPath0,
-                                  'CO2Fluid','MultipleFluidProps_CO2.joblib'))
-        self.CO2_scalerX = load(open(os.path.join(self.BasicPath0,'CO2Fluid',
-                                                  'scaler_x1_scaler.pkl'), 'rb'))
-        self.CO2_scalerY = load(open(os.path.join(self.BasicPath0,'CO2Fluid',
-                                                  'scaler_y1_scaler.pkl'), 'rb'))
-
+       
         self.BrineFluidModel = joblib.load(os.path.join(self.BasicPath0,
                             'BrineFluid','MultipleFluidProps_Brine.joblib'))
         self.Brine_scalerX = load(open(os.path.join(self.BasicPath0,'BrineFluid',
                                                      'scaler_x1_scaler.pkl'), 'rb'))
         self.Brine_scalerY = load(open(os.path.join(self.BasicPath0,'BrineFluid',
                                                      'scaler_y1_scaler.pkl'), 'rb'))
+        
+        import CoolProp.CoolProp
+        self.CO2FluidModelTesting = CoolProp.CoolProp
 
     def CO2Model(self,Temp_C,P_MPA):
-        
+           
         FluidProps = pd.DataFrame(columns=["Temp,C","Press,MPa"])    
         FluidProps["Temp,C"]    = Temp_C
         FluidProps["Press,MPa"] = P_MPA
         
-        x_data_bot    = self.CO2_scalerX.transform(FluidProps)
-        y_reduced_bot = self.CO2FluidModel.predict(x_data_bot)
-        yPred         = self.CO2_scalerY.inverse_transform(y_reduced_bot)
-        
+        yPred = np.ndarray((FluidProps.shape[0],2))
+        for ii in range(len(FluidProps["Temp,C"])):
+            viscosity_ii = self.CO2FluidModelTesting.PropsSI("V", "T", FluidProps["Temp,C"][ii]+273.15, "P", FluidProps["Press,MPa"][ii]*1e6, 'CarbonDioxide') # "Pa-s", viscosity
+            density_ii = self.CO2FluidModelTesting.PropsSI("D", "T", FluidProps["Temp,C"][ii]+273.15, "P", FluidProps["Press,MPa"][ii]*1e6, 'CarbonDioxide') # "kg/m^3", density
+            yPred[ii,:] = [density_ii,viscosity_ii]
+           
         return yPred
-    
+       
     def BrineModel(self,Temp_C,P_MPA,Salinity):
         
         FluidProps = pd.DataFrame(columns=["Temp,C","Press,MPa","Salinity"])    
@@ -79,83 +77,39 @@ class FluidModels:
     
 class DLCaprockSegmentModels():
     """        
-    Classification & Regression Model for shale segments
     S.Baek, DH Bacon, NJ Huerta,Int. J. Greenh. Gas Control.126,103903,2023
     """
     
     def __init__(self,componentPath):
         
-        from tensorflow.keras.models import load_model
-        from pickle import load
-        import autokeras as ak
         import time
         import logging
-        logging.getLogger("tensorflow").setLevel(logging.ERROR)
+        import joblib
         
-        TargetVars = [
-                    'BrineClassification','BrineRegressionLarge',
-                    'BrineRegressionSmall','BrineRegressionNegative',
-                    'CO2Classification','CO2Regression',
-                    'SaturationRegression'] # PressureRegression
-
+        TargetVars = ['BrineRegression',
+                      'CO2Regression',
+                      'SaturationRegression',]
+        
         t1 = time.time()
         for TargetVar in TargetVars:
             t0 = time.time()
-
-            ScalerXfilepath = os.path.join(componentPath,TargetVar,
-                                            'scaler_x1_scaler.pkl')
-            ScalerYfilepath = os.path.join(componentPath,TargetVar,
-                                            'scaler_y1_scaler.pkl') 
-                
-            if TargetVar == 'BrineClassification':
-                self.x_scaler_BC = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_BC = load(open(ScalerYfilepath, 'rb'))
-                self.model_BC = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
-            elif TargetVar == 'BrineRegressionLarge':
-                self.x_scaler_BRL = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_BRL = load(open(ScalerYfilepath, 'rb'))
-                self.model_BRL = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
-            elif TargetVar == 'BrineRegressionSmall':
-                self.x_scaler_BRS = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_BRS = load(open(ScalerYfilepath, 'rb'))
-                self.model_BRS = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
-            elif TargetVar == 'BrineRegressionNegative':
-                self.x_scaler_BRN = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_BRN = load(open(ScalerYfilepath, 'rb'))
-                self.model_BRN = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
-            elif TargetVar == 'CO2Classification':
-                self.x_scaler_CC = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_CC = load(open(ScalerYfilepath, 'rb'))
-                self.model_CC = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
+            if TargetVar == 'BrineRegression':
+                self.model_rf_qB = joblib.load(open(os.path.join(
+                    componentPath,TargetVar,'RFmodel_lb_3_depth_20_132.joblib'), 'rb'))
             elif TargetVar == 'CO2Regression':
-                self.x_scaler_CR = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_CR = load(open(ScalerYfilepath, 'rb'))
-                self.model_CR = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
-            elif TargetVar == 'PressureRegression':
-                self.x_scaler_PR = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_PR = load(open(ScalerYfilepath, 'rb'))
-                self.model_PR = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
+                self.model_rf_qC = joblib.load(open(os.path.join(
+                    componentPath,TargetVar,'RFmodel_lb_3_depth_20_132.joblib'), 'rb'))
             elif TargetVar == 'SaturationRegression':
-                self.x_scaler_SR = load(open(ScalerXfilepath, 'rb'))
-                self.y_scaler_SR = load(open(ScalerYfilepath, 'rb'))
-                self.model_SR = load_model(os.path.join(componentPath,TargetVar),
-                                           custom_objects=ak.CUSTOM_OBJECTS)
+                self.model_rf_sC = joblib.load(open(os.path.join(
+                    componentPath,TargetVar,'RFmodel_lb_3_depth_20_132.joblib'), 'rb'))
                 
-            # print('* loading dl models: {:.0f} secs'.format(time.time()-t0))    
+            # print('* loading dl models: {:.0f} secs'.format(time.time()-t0))      
         
-        print('** total loading dl models: {:.0f} secs'.format(time.time()-t1))    
+        # print('** total loading dl models: {:.0f} secs'.format(time.time()-t1))    
         
 class DLAquiferSegmentModels():
     """        
-    Time series regression Model for aquifer segments
-    S.Baek & Maruti working on.
+    S.Baek & Maruti working on. Aquifer segment model
     """
     
     def __init__(self,componentPath):
@@ -164,122 +118,144 @@ class DLAquiferSegmentModels():
         import logging
         # from sklearn.ensemble import RandomForestRegressor
         import joblib
-        # logging.getLogger("tensorflow").setLevel(logging.ERROR)
         
-        TargetVars = [
-                    'BrineRegression',
-                    'CO2Regression',
-                    'SaturationRegression',]
-
+        TargetVars = ['BrineRegression',
+                      'CO2Regression',
+                      'SaturationRegression',]
+       
         t1 = time.time()
         for TargetVar in TargetVars:
             t0 = time.time()
-
-            # No scaler                
         
             if TargetVar == 'BrineRegression':
                 self.model_rf_qB = joblib.load(open(os.path.join(
-                    componentPath,TargetVar,'RFmodel_100_lb_3_depth_22.joblib'), 'rb'))
+                    componentPath,TargetVar,'RFmodel_lb_3_depth_28_132.joblib'), 'rb'))
             elif TargetVar == 'CO2Regression':
                 self.model_rf_qC = joblib.load(open(os.path.join(
-                    componentPath,TargetVar,'RFmodel_lb_3_depth_24.joblib'), 'rb'))
+                    componentPath,TargetVar,'RFmodel_lb_3_depth_24_132.joblib'), 'rb'))
             elif TargetVar == 'SaturationRegression':
                 self.model_rf_sC = joblib.load(open(os.path.join(
-                    componentPath,TargetVar,'RFmodel_50_S_RF_global_2.joblib'), 'rb'))
+                    componentPath,TargetVar,'RFmodel_lb_3_depth_40_132.joblib'), 'rb'))
                 
             # print('* loading dl models: {:.0f} secs'.format(time.time()-t0))    
         
-        print('** total loading dl models: {:.0f} secs'.format(time.time()-t1))    
+        # print('** total loading dl models: {:.0f} secs'.format(time.time()-t1))    
         
         
-class MultisegmentedWellbore(ComponentModel):
+class AIMultisegmentedWellbore(iam_bc.ComponentModel):
     """
     The Multisegmented Wellbore component estimates the leakage rates of brine and
     |CO2| along wells in the presence of overlying aquifers or thief zones.
     
-    ## Nate can you revise below?
+    ## 
+    
+    Nate, can you revise below?
+    
     (as-is) The model is based on work of Nordbotten et al.,
     :cite:`N2009`. Further reading can be found in :cite:`N2011a`.
     
-    (to-be) The model is based on work of Baek et al.(2021):cite: 'N2021'.
+    (to-be) The model is based on work of Baek et al.(2021 and 2023)
+            :cite: 'N2021'.'N2023'
     
     'N2021' is:
     S. Baek, D. H. Bacon and N. J. Huerta. 2021. NRAP-Open-IAM Multisegmented 
     Wellbore Reduced-Order Model. PNNL-32364, https://doi.org/10.2172/1840652
+    
+    'N2023' is:
+    S.Baek, DH Bacon, NJ Huerta,Enabling site-specific well leakage risk 
+    estimation during geologic carbon sequestration using a modular 
+    deep-learning-based wellbore leakage model.
+    Int. J. Greenh. Gas Control.126,103903,2023
+    
     ##
     
-    The model is focused on flow across relatively large distances and does not take
-    into account discrete features of the flow paths such as fractures, cracks,
-    etc. It assumes that leakage is occurring in the annulus between the
-    outside of the casing and borehole. This area is assigned an “effective”
-    permeability of the flow path. The permeability is applied over a length
-    along the well that corresponds to the thickness of a shale formation.
-    Each well is characterized by an effective permeability assigned to each
-    segment of the well that crosses an individual formation. For example, if
-    a well crosses N permeable formations, then it is characterized by
-    N different permeability values. The model utilizes the one-dimensional
-    multiphase version of Darcy’s law to represent flow along a leaky well.
-
     In the NRAP-Open-IAM control file, the type name for the Multisegmented
     Wellbore component is ``MultisegmentedWellbore``. The description
     of the component's parameters are provided below. Names of the component
     parameters coincide with those used by ``model`` method of the
     ``MultisegmentedWellbore`` class.
+        Nate, it will leave this to you.
+    
+    * **logWellPerm** [|log10| |m^2|] (-101 to -12.3) - logarithm of well (vertical) 
+      permeability passing through shale (default: -13). Logarithm of well 
+      permeability passing through shale 1, for example, can be defined by 
+      **logWell1Perm**. Permeability of the well along the shale layers not defined by user will be assigned a default value.
 
-    * **logWellPerm** [|log10| |m^2|] (-101 to -9) - logarithm of well permeability
-      along shale layer (default: -13). Logarithm of well permeability along shale 3,
-      for example, can be defined by **logWell3Perm**. Permeability of the well
-      along the shale layers not defined by user will be assigned a default value.
+    * **logAquPerm** [|log10| |m^2|] (-16 to -12.3) - logarithm of well (vertical) 
+      permeability passing through aquifer (default: -13). Logarithm of well 
+      permeability passing through aquifer 1, for example, can be defined by 
+      **logAqu1Perm**.  Permeability of the well along the aquifer layers not
+      defined by user will be assigned a default value.
 
-    * **logAquPerm** [|log10| |m^2|] (-17 to -9) - logarithm of aquifer
-      permeability (default: -12). Logarithm of aquifer 1 permeability, for example,
-      can be defined by **logAqu1Perm**. Aquifer permeability not defined by user will
-      be assigned a default value.
+    * **logAquiferHPerm** [|log10| |m^2|] (-14 to -12) - logarithm of aquifer
+      horizontal permeability (default: -13). Logarithm of aquifer 1  horizontal
+      permeability, for example, can be defined by **logAquifer1HPerm**. 
+      Aquifer horizontal permeability not defined by user will be assigned a default value.
+      
+    * **logAquiferVPerm** [|log10| |m^2|] (-15 to -12.3) - logarithm of aquifer
+      vertical permeability  (default: -13). Logarithm of aquifer 1 vertical
+      permeability, for example, can be defined by **logAquifer1VPerm**. 
+      Aquifer vertical permeability not defined by user will be assigned a default value.
 
-    * **brineDensity** [|kg/m^3|] (900 to 1500) - density of brine phase
-      (default: 1000)
+    * **brineDensity** [|kg/m^3|] (900 to 1400) - density of brine phase
+      (default: 1000). Not in use but necessary for a placeholder.
 
-    * **CO2Density** [|kg/m^3|] (100 to 1000) - density of |CO2| phase
-      (default: 479)
+    * **CO2Density** [|kg/m^3|] (20 to 1000) - density of |CO2| phase
+      (default: 479). Not in use but necessary for a placeholder.
 
     * **brineViscosity** [|Pa*s|] (1.0e-4 to 5.0e-3) - viscosity of brine phase
-      (default: 2.535e-3)
+      (default: 2.535e-3). Not in use but necessary for a placeholder.
 
     * **CO2Viscosity** [|Pa*s|] (1.0e-6 to 1.0e-4)  - viscosity of |CO2| phase
-      (default: 3.95e-5)
+      (default: 3.95e-5). Not in use but necessary for a placeholder.
 
     * **aquBrineResSaturation** [-] (0 to 0.99) - residual saturation of brine phase
       in each aquifer (default: 0.0). For example, the residual brine saturation
-      of aquifer2 can be defined by **aqu2BrineResSaturation**; otherwise, aquifer
+      of aquifer1 can be defined by **aqu1BrineResSaturation**; otherwise, aquifer
       layers for which the residual brine saturation is not defined will be
-      assigned a default value.   CHECK: brineResSatAquifer
+      assigned a default value.
 
-    * **compressibility** [|Pa^-1|] (1.0e-13 to 1.0e-8) - compressibility of brine
-      and |CO2| phases (assumed to be the same for both phases) (default: 5.1e-11)
-
-    * **wellRadius** [|m|] (0.01 to 0.5) - radius of leaking well (default: 0.05)
+    * **compressibility** [|Pa^-1|] (1.0e-13 to 1.0e-8) - total compressibility 
+      (default: 5.1e-11). Necessary for analytical calculation in the initial timesteps. The default value is enough if it is not known.
+        SB, needs improvement in the next version
+    
+    * **wellRadius** [|m|] (0.03 to 0.042) - radius of leaking well (default: 0.03)
+        SB, needs improvement in the next version
 
     * **numberOfShaleLayers** [-] (3 to 30) - number of shale layers in the
       system (default: 3); *linked to Stratigraphy*. The shale units must be
       separated by an aquifer.
 
-    * **shaleThickness** [|m|] (1 to 3000) - thickness of shale layers (default:
+    * **reservoirThickness** [|m|] (1 to 1600) - thickness of reservoir (default: 30);
+      *linked to Stratigraphy*. 
+           Nate, is this set to the same of that of the reservoir model coupled?
+
+    * **shaleThickness** [|m|] (50 to 2150) - thickness of shale layers (default:
       250); *linked to Stratigraphy*. Thickness of shale layer 1, for example,
       can be defined by **shale1Thickness**; otherwise, shale layers for which
       the thickness is not defined will be assigned a default thickness.
 
-    * **aquiferThickness** [|m|] (1 to 1600) - thickness of aquifers (default: 100);
+    * **aquiferThickness** [|m|] (20 to 250) - thickness of aquifers (default: 100);
       *linked to Stratigraphy*. Thickness of aquifer 1, for example, can be defined
       by **aquifer1Thickness**; otherwise, aquifers for which the thickness
       is not defined will be assigned a default thickness.
 
-    * **reservoirThickness** [|m|] (1 to 1600) - thickness of reservoir (default: 30);
-      *linked to Stratigraphy*.
+    * **aquiferPorosity** [-] (0.1 to 0.5) - porosity of aquifers (default: 0.2).
+      Porosity of aquifer 1, for example, can be defined by **aquifer1porosity**; 
+      otherwise, aquifers for which the porosity is not defined will be assigned a default thickness.
+          
+    * **salinity** [|kg/kg|] (1e-4 to 0.015) - initial salinity of aquifers (default: 0.01).
+      Current version applies the same salinity over all aquifers. 
+          SB, needs improvement in the next version
 
+    * **tempGrad** [|C/km|] (24 to 32) - initial salinity of aquifers (default: 25).
+      Current version applies the same salinity over all aquifers. 
+          SB, needs improvement in the next version
+      
     * **datumPressure** [|Pa|] (80,000 to 300,000) - pressure at the top of the
       system (default: 101,325); *linked to Stratigraphy*
 
-    The possible outputs from the Multisegmented Wellbore component are
+    The possible outputs from the AI Multisegmented Wellbore component are
     leakage rates of |CO2| and brine to each of the aquifers in the system and
     atmosphere. The names of the observations are of the form:
 
@@ -297,7 +273,7 @@ class MultisegmentedWellbore(ComponentModel):
     """
     def __init__(self, name, parent, useDLmodel=None):
         """
-        Constructor method of MultisegmentedWellbore class
+        Constructor method of AIMultisegmentedWellbore class
 
         :param name: name of component model
         :type name: str
@@ -306,7 +282,7 @@ class MultisegmentedWellbore(ComponentModel):
             belongs to
         :type parent: SystemModel object
 
-        :returns: MultisegmentedWellbore class object
+        :returns: AIMultisegmentedWellbore class object
         """
         # Set up keyword arguments of the 'model' method provided by the system model
         model_kwargs = {'time_point': 365.25, 'time_step': 365.25}   # default value of 365.25 days
@@ -315,7 +291,7 @@ class MultisegmentedWellbore(ComponentModel):
                          model_kwargs=model_kwargs)
 
         # Add type attribute
-        self.class_type = 'MultisegmentedWellbore'
+        self.class_type = 'AIMultisegmentedWellbore'
 
         # Set default parameters of the component model
         self.add_default_par('numberOfShaleLayers', value=3)
@@ -323,17 +299,17 @@ class MultisegmentedWellbore(ComponentModel):
         self.add_default_par('aquiferThickness', value=100.0)
         self.add_default_par('reservoirThickness', value=30.0)
         self.add_default_par('logWellPerm', value=-13.0)
-        self.add_default_par('logAquPerm', value=-12.0)
+        self.add_default_par('logAquPerm', value=-13.0)
         self.add_default_par('datumPressure', value=101325.0)
-        self.add_default_par('brineDensity', value=1000.0)
-        self.add_default_par('CO2Density', value=479.0)
-        self.add_default_par('brineViscosity', value=2.535e-3)
-        self.add_default_par('CO2Viscosity', value=3.95e-5)
+        self.add_default_par('brineDensity', value=1000.0) # not in use
+        self.add_default_par('CO2Density', value=479.0)  # not in use
+        self.add_default_par('brineViscosity', value=2.535e-3)  # not in use
+        self.add_default_par('CO2Viscosity', value=3.95e-5)  # not in use
         self.add_default_par('aquBrineResSaturation', value=0.0)
         self.add_default_par('compressibility', value=5.1e-11)
-        self.add_default_par('wellRadius', value=0.05)
-        self.add_default_par('salinity', value=0.05) # initial salinity
-        self.add_default_par('tempGrad', value=25.) # C/m
+        self.add_default_par('wellRadius', value=0.03)
+        self.add_default_par('salinity', value=0.01) # initial salinity
+        self.add_default_par('tempGrad', value=25.) # C/km
         ## new
         self.add_default_par('useDLmodel', useDLmodel)
         self.add_default_par('aquiferPorosity', value=0.2) ## new
@@ -343,26 +319,26 @@ class MultisegmentedWellbore(ComponentModel):
         # Define dictionary of boundaries
         self.pars_bounds = dict()
         self.pars_bounds['numberOfShaleLayers'] = [3, 30]
-        self.pars_bounds['shaleThickness'] = [1.0, 3000.0]
-        self.pars_bounds['aquiferThickness'] = [1.0, 1600.0]
+        self.pars_bounds['shaleThickness'] = [50, 2150.0]
+        self.pars_bounds['aquiferThickness'] = [20,250.0]
         self.pars_bounds['reservoirThickness'] = [1.0, 1600.0]
-        self.pars_bounds['logWellPerm'] = [-101.0, -9.0]
-        self.pars_bounds['logAquPerm'] = [-17.0, -9.0]
+        self.pars_bounds['logWellPerm'] = [-101.0, -12.3]
+        self.pars_bounds['logAquPerm'] = [-16.0, -12.3]
         self.pars_bounds['datumPressure'] = [8.0e+4, 3.0e+5]
-        self.pars_bounds['brineDensity'] = [900.0, 1400.0]
-        self.pars_bounds['CO2Density'] = [20.0, 1000.0]
-        self.pars_bounds['brineViscosity'] = [1.0e-4, 5.0e-3]
-        self.pars_bounds['CO2Viscosity'] = [1.0e-6, 1.5e-4]
+        self.pars_bounds['brineDensity'] = [900.0, 1400.0]  # not in use
+        self.pars_bounds['CO2Density'] = [20.0, 1000.0]  # not in use
+        self.pars_bounds['brineViscosity'] = [1.0e-4, 5.0e-3]  # not in use
+        self.pars_bounds['CO2Viscosity'] = [1.0e-6, 1.5e-4]  # not in use
         self.pars_bounds['aquBrineResSaturation'] = [0.0, 0.99]
         self.pars_bounds['compressibility'] = [1.0e-13, 1.0e-8]
-        self.pars_bounds['wellRadius'] = [0.01, 0.5]
-        self.pars_bounds['salinity'] = [0., 0.1]
-        self.pars_bounds['tempGrad'] = [18., 32.]
-        ## new - need confirmation
+        self.pars_bounds['wellRadius'] = [0.03, 0.042]
+        self.pars_bounds['salinity'] = [1e-4, 0.015]
+        self.pars_bounds['tempGrad'] = [24., 32.]
+        
         self.pars_bounds['UseDLmodel'] = [0, 1] 
         self.pars_bounds['aquiferPorosity'] = [0.1, 0.5] 
-        self.pars_bounds['logAquiferHPerm'] = [-15, -11] 
-        self.pars_bounds['logAquiferVPerm'] = [-15, -11] 
+        self.pars_bounds['logAquiferHPerm'] = [-14, -12] 
+        self.pars_bounds['logAquiferVPerm'] = [-15, -12.3] 
 
         # By default, the smallest number of aquifers the system can have is 2,
         # so we add two accumulators by default. Extra will be added as needed,
@@ -378,10 +354,10 @@ class MultisegmentedWellbore(ComponentModel):
             self.add_accumulator('pressure_shaleBot'+str(i+1), sim=0.0)
             self.add_accumulator('pressure_shaleTop'+str(i+1), sim=0.0)
             
-        # Initiate solution object
+        # Initiate solution object - Nate, this needs to be changed.
         componentPath0 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         componentPath = os.path.join(componentPath0,'components','wellbore',
-                                     'ai_multisegmented','shale_mar2023_models') 
+                                     'ai_multisegmented','shale_feb2024_models') 
         
         componentPath2 = os.path.join(componentPath0,'components','wellbore',
                                      'ai_multisegmented','aquifer_nov2023_models') 
@@ -390,13 +366,13 @@ class MultisegmentedWellbore(ComponentModel):
         self.FluidModels = FluidModels(componentPath)
         
         if useDLmodel == 1:
-            self.DLModels = DLCaprockSegmentModels(componentPath)
+            self.DLModels1 = DLCaprockSegmentModels(componentPath)
             self.DLModels2 = DLAquiferSegmentModels(componentPath2)
         else:
-            self.DLModels = None
+            self.DLModels1 = None
             self.DLModels2 = None
             
-        debug_msg = 'MultisegmentedWellbore component created with name {}'.format(name)
+        debug_msg = 'AIMultisegmentedWellbore component created with name {}'.format(name)
         logging.debug(debug_msg)
 
     def check_input_parameters(self, p):
@@ -411,7 +387,7 @@ class MultisegmentedWellbore(ComponentModel):
 
         for key, val in p.items():
             warn_msg = ''.join([
-                'Parameter {} of MultisegmentedWellbore component {} ',
+                'Parameter {} of AIMultisegmentedWellbore component {} ',
                 'is out of boundaries.']).format(key, self.name)
             if key.startswith('shale') and key.endswith('Thickness'):
                 if (val < self.pars_bounds['shaleThickness'][0]) or (
@@ -517,9 +493,14 @@ class MultisegmentedWellbore(ComponentModel):
                 self.add_accumulator('pressure_shaleBot'+str(i+3), sim=0.0)
                 self.add_accumulator('pressure_shaleTop'+str(i+3), sim=0.0)
             
+            self.add_accumulator('dl_inputarray1', sim=0.0)
+            self.add_accumulator('dl_inputarray1_minus_one', sim=0.0)
+            self.add_accumulator('dl_inputarray1_minus_two', sim=0.0)
+            
             self.add_accumulator('dl_inputarray2', sim=0.0)
             self.add_accumulator('dl_inputarray2_minus_one', sim=0.0)
             self.add_accumulator('dl_inputarray2_minus_two', sim=0.0)
+            
             self.add_accumulator('n_timestep', sim=0.0)
                 
             self.num_accumulators = nSL - 1
@@ -545,6 +526,10 @@ class MultisegmentedWellbore(ComponentModel):
             self.prevCO2Mass = 0.0
             self.prevBrineMass = 0.0
             
+            self.accumulators['dl_inputarray1'].sim = dict()
+            self.accumulators['dl_inputarray1_minus_one'].sim = dict()
+            self.accumulators['dl_inputarray1_minus_two'].sim = dict()
+            
             self.accumulators['dl_inputarray2'].sim = dict()
             self.accumulators['dl_inputarray2_minus_one'].sim = dict()
             self.accumulators['dl_inputarray2_minus_two'].sim = dict()
@@ -562,13 +547,6 @@ class MultisegmentedWellbore(ComponentModel):
         inputParameters.logAquiferHPerm = np.ones((nSL-1))
         inputParameters.logAquiferVPerm = np.ones((nSL-1))
         
-        # if 'brineResSaturation' in actual_p:
-        #     inputParameters.aquBrineResSaturation = \
-        #         actual_p['aquBrineResSaturation']*np.ones((nSL))
-        # else:
-        #     inputParameters.aquBrineResSaturation = \
-        #         actual_p['brineResSaturation']*np.zeros((nSL))
-
         # Set up shale, aquifer and reservoir thickness parameters
         for i in range(nSL):
             nm = 'shale{}Thickness'.format(i+1)
@@ -660,9 +638,13 @@ class MultisegmentedWellbore(ComponentModel):
             inputParameters.pressureShaleBot_prev[i] = (
                 self.accumulators['pressure_shaleBot{}'.format(i+1)].sim)
         
-        inputParameters.dlinput_minthree = self.accumulators['dl_inputarray2_minus_two'].sim
-        inputParameters.dlinput_mintwo = self.accumulators['dl_inputarray2_minus_one'].sim
-        inputParameters.dlinput_minone = self.accumulators['dl_inputarray2'].sim
+        inputParameters.dl1input_minthree = self.accumulators['dl_inputarray1_minus_two'].sim
+        inputParameters.dl1input_mintwo = self.accumulators['dl_inputarray1_minus_one'].sim
+        inputParameters.dl1input_minone = self.accumulators['dl_inputarray1'].sim
+        
+        inputParameters.dl2input_minthree = self.accumulators['dl_inputarray2_minus_two'].sim
+        inputParameters.dl2input_mintwo = self.accumulators['dl_inputarray2_minus_one'].sim
+        inputParameters.dl2input_minone = self.accumulators['dl_inputarray2'].sim
         inputParameters.timeStep = self.accumulators['n_timestep'].sim
         
         inputParameters.pressureShaleBot_prev[0] = pressure     
@@ -696,6 +678,10 @@ class MultisegmentedWellbore(ComponentModel):
             self.accumulators['pressure_shaleBot{}'.format(i+1)].sim = sol.pressureShaleBot_prev[i] # saving for only effective shale (excluding top shale)
             self.accumulators['pressure_shaleTop{}'.format(i+1)].sim = sol.pressureShaleTop_prev[i] # saving for only effective shale (excluding top shale)
          
+        self.accumulators['dl_inputarray1_minus_two'].sim = self.accumulators['dl_inputarray1_minus_one'].sim
+        self.accumulators['dl_inputarray1_minus_one'].sim = self.accumulators['dl_inputarray1'].sim 
+        self.accumulators['dl_inputarray1'].sim = sol.inputarray1
+        
         self.accumulators['dl_inputarray2_minus_two'].sim = self.accumulators['dl_inputarray2_minus_one'].sim
         self.accumulators['dl_inputarray2_minus_one'].sim = self.accumulators['dl_inputarray2'].sim 
         self.accumulators['dl_inputarray2'].sim = sol.inputarray2
@@ -736,10 +722,12 @@ def read_data(filename):
 
 
 if __name__ == "__main__":
+        
     try:
-        from openiam import AnalyticalReservoir
+        from openiam.components.analytical_reservoir_component import AnalyticalReservoir
     except ImportError as err:
         print('Unable to load IAM class module: {}'.format(err))
+                  
     import matplotlib.pyplot as plt
     __spec__ = None
 
@@ -752,13 +740,10 @@ if __name__ == "__main__":
     num_years = 50
     time_array = 365.25*np.arange(0, num_years+1)
 
-    # delta_time = 5
-    # time_array = np.arange(0,365.25*num_years,delta_time)
-
     sm_model_kwargs = {'time_array': time_array} # time is given in days
 
     # Create system model
-    sm = SystemModel(model_kwargs=sm_model_kwargs)
+    sm = iam_bc.SystemModel(model_kwargs=sm_model_kwargs)
 
     # Add reservoir component
     res = sm.add_component_model_object(AnalyticalReservoir(
@@ -766,10 +751,10 @@ if __name__ == "__main__":
 
     # Add parameters of reservoir component model
     res.add_par('injRate', min=1e-5, max=1e+2, value=0.0185, vary=False)
-    res.add_par('reservoirRadius', min=500.0, max=1000000, value=10000.0, vary=False)
-    res.add_par('reservoirThickness', min=10.0, max=150., value=50.0, vary=False)
+    res.add_par('reservoirRadius', min=500.0, max=1000000, value=100000.0, vary=False)
+    res.add_par('reservoirThickness', min=10.0, max=150., value=30.0, vary=False)
     res.add_par('logResPerm', min=-16.0, max=-9.0, value=-13.69897, vary=False)
-    res.add_par('reservoirPorosity', min=0.01, max=0.5, value=0.25, vary=False)
+    res.add_par('reservoirPorosity', min=0.01, max=0.5, value=0.15, vary=False)
 
     res.add_par('shaleThickness', value=970.0, vary=False)
     res.add_par('aquiferThickness', value=30.0, vary=False)
@@ -792,22 +777,22 @@ if __name__ == "__main__":
     res.add_obs('mass_CO2_reservoir')
 
     # Add multisegmented wellbore component
-    ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms',
+    ms = sm.add_component_model_object(AIMultisegmentedWellbore(name='ms',
                                                               parent=sm,
                                                               useDLmodel=True))
-    ms.add_par('wellRadius', min=0.01, max=0.2, value=0.15)
+    ms.add_par('wellRadius', min=0.01, max=0.2, value=0.03)
 
     ms.add_par('numberOfShaleLayers', value=5, vary=False)
     ms.add_par('shale1Thickness', min=1.0, max=200, value=100.0)
     ms.add_par('shale2Thickness', min=1.0, max=200, value=100.0)
     ms.add_par('shale3Thickness', min=1.0, max=200, value=100.0)
-    ms.add_par('shale4Thickness', min=1.0, max=200, value=100.0)
-    ms.add_par('shale5Thickness', min=1.0, max=2500, value=2450.0)
+    ms.add_par('shale4Thickness', min=1.0, max=200, value=400.0)
+    ms.add_par('shale5Thickness', min=1.0, max=2500, value=2150.0)
 
-    ms.add_par('logWell1Perm', min=-16, max=-9, value=-12)
-    ms.add_par('logWell2Perm', min=-16, max=-9, value=-12)
-    ms.add_par('logWell3Perm', min=-16, max=-9, value=-12)
-    ms.add_par('logWell4Perm', min=-16, max=-9, value=-12)
+    ms.add_par('logWell1Perm', min=-16, max=-9, value=-13)
+    ms.add_par('logWell2Perm', min=-16, max=-9, value=-13)
+    ms.add_par('logWell3Perm', min=-16, max=-9, value=-13)
+    ms.add_par('logWell4Perm', min=-16, max=-9, value=-13)
     ms.add_par('logWell5Perm', min=-101, max=-9, value=-100)
 
     ms.add_par('aquifer1Thickness', min=1.0, max=200., value=30.0)
@@ -815,10 +800,10 @@ if __name__ == "__main__":
     ms.add_par('aquifer3Thickness', min=1.0, max=200., value=30.0)
     ms.add_par('aquifer4Thickness', min=1.0, max=200., value=30.0)
 
-    ms.add_par('logAqu1Perm', min=-16, max=-9, value=-12)
-    ms.add_par('logAqu2Perm', min=-16, max=-9, value=-12)
-    ms.add_par('logAqu3Perm', min=-16, max=-9, value=-12)
-    ms.add_par('logAqu4Perm', min=-16, max=-9, value=-12)
+    ms.add_par('logAqu1Perm', min=-16, max=-9, value=-13)
+    ms.add_par('logAqu2Perm', min=-16, max=-9, value=-13)
+    ms.add_par('logAqu3Perm', min=-16, max=-9, value=-13)
+    ms.add_par('logAqu4Perm', min=-16, max=-9, value=-13)
 
     ms.add_par('aqu1BrineResSaturation', min=0.0, max=0.99, value=0.18)
     ms.add_par('aqu2BrineResSaturation', min=0.0, max=0.99, value=0.4)
@@ -830,15 +815,15 @@ if __name__ == "__main__":
     ms.add_par('aquifer3Porosity', min=0.0, max=0.99, value=0.2)
     ms.add_par('aquifer4Porosity', min=0.0, max=0.99, value=0.1)
     
-    ms.add_par('logAquifer1HPerm', min=-16, max=-9, value=-11)
-    ms.add_par('logAquifer2HPerm', min=-16, max=-9, value=-12)
-    ms.add_par('logAquifer3HPerm', min=-16, max=-9, value=-13)
-    ms.add_par('logAquifer4HPerm', min=-16, max=-9, value=-14)
+    ms.add_par('logAquifer1HPerm', min=-16, max=-9, value=-12.5)
+    ms.add_par('logAquifer2HPerm', min=-16, max=-9, value=-13.0)
+    ms.add_par('logAquifer3HPerm', min=-16, max=-9, value=-13.5)
+    ms.add_par('logAquifer4HPerm', min=-16, max=-9, value=-14.0)
     
-    ms.add_par('logAquifer1VPerm', min=-16, max=-9, value=-11)
-    ms.add_par('logAquifer2VPerm', min=-16, max=-9, value=-11)
-    ms.add_par('logAquifer3VPerm', min=-16, max=-9, value=-11)
-    ms.add_par('logAquifer4VPerm', min=-16, max=-9, value=-11)
+    ms.add_par('logAquifer1VPerm', min=-16, max=-9, value=-14)
+    ms.add_par('logAquifer2VPerm', min=-16, max=-9, value=-14)
+    ms.add_par('logAquifer3VPerm', min=-16, max=-9, value=-14)
+    ms.add_par('logAquifer4VPerm', min=-16, max=-9, value=-14)
 
     # Add linked parameters: common to both components
     ms.add_par_linked_to_par('reservoirThickness',
@@ -891,6 +876,7 @@ if __name__ == "__main__":
         pressure = sm.collect_observations_as_time_series(res,'pressure')
         CO2saturation = sm.collect_observations_as_time_series(res,'CO2saturation')
         mass_CO2_reservoir = sm.collect_observations_as_time_series(res,'mass_CO2_reservoir')
+        
         CO2_aquifer1 = sm.collect_observations_as_time_series(ms,'CO2_aquifer1')
         CO2_aquifer2 = sm.collect_observations_as_time_series(ms,'CO2_aquifer2')
         CO2_aquifer3 = sm.collect_observations_as_time_series(ms,'CO2_aquifer3')
@@ -911,156 +897,188 @@ if __name__ == "__main__":
         print('Forward run is done. ')
 
         if isPlottingOn:
-            # Plot results
-            label_size = 13
-            font_size = 16
-            ticks_size = 12
-            line_width = 1
-            fig = plt.figure(figsize=(13, 12))
+           # Plot results
+           label_size = 13
+           font_size = 16
+           ticks_size = 12
+           line_width = 1
+           fig = plt.figure(figsize=(13, 12))
 
-            ax = fig.add_subplot(331)
-            plt.plot(time_array/365.25, CO2_aquifer1,
-                     color='steelblue', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Leakage of CO$_2$: aquifer 1', fontsize=font_size)
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.13, 0.5)
+           ax = fig.add_subplot(331)
+           plt.plot(time_array/365.25, CO2_aquifer1,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Leakage of CO$_2$: aquifer 1', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
 
-            ax = fig.add_subplot(332)
-            plt.plot(time_array/365.25, CO2_aquifer2,
-                     color='steelblue', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Leakage of CO$_2$: aquifer 2', fontsize=font_size)
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.13, 0.5)
-            
-            ax = fig.add_subplot(333)
-            plt.plot(time_array/365.25, CO2_aquifer3,
-                     color='steelblue', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Leakage of CO$_2$: aquifer 3', fontsize=font_size)
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.13, 0.5)
+           ax = fig.add_subplot(332)
+           plt.plot(time_array/365.25, CO2_aquifer2,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Leakage of CO$_2$: aquifer 2', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
+           
+           ax = fig.add_subplot(333)
+           plt.plot(time_array/365.25, CO2_aquifer3,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Leakage of CO$_2$: aquifer 3', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
 
-            ax = fig.add_subplot(334)
-            plt.plot(time_array/365.25, brine_aquifer1,
-                     color='rosybrown', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Leakage of brine: aquifer 1', fontsize=font_size)
-            plt.tight_layout()
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.14, 0.5)
+           ax = fig.add_subplot(334)
+           plt.plot(time_array/365.25, brine_aquifer1,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Leakage of brine: aquifer 1', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
 
-            ax = fig.add_subplot(335)
-            plt.plot(time_array/365.25, brine_aquifer2,
-                     color='rosybrown', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Leakage of brine: aquifer 2', fontsize=font_size)
-            plt.tight_layout()
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.14, 0.5)
-            
-            ax = fig.add_subplot(336)
-            plt.plot(time_array/365.25, brine_aquifer3,
-                     color='rosybrown', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Leakage of brine: aquifer 3', fontsize=font_size)
-            plt.tight_layout()
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.14, 0.5)
+           ax = fig.add_subplot(335)
+           plt.plot(time_array/365.25, brine_aquifer2,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Leakage of brine: aquifer 2', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
+           
+           ax = fig.add_subplot(336)
+           plt.plot(time_array/365.25, brine_aquifer3,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Leakage of brine: aquifer 3', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
 
-            fig.subplots_adjust(
-                left=0.1, top=0.95, right=0.95, bottom=0.05, wspace=0.22)
+           fig.subplots_adjust(
+               left=0.1, top=0.95, right=0.95, bottom=0.05, wspace=0.22)
 
-            # to_save_png = False
-            if to_save_png:
-                plt.savefig('MSWObservationsCombinedPlotVsTime.jpeg', dpi=300)
-                print('"MSWObservationsCombinedPlotVsTime.jpeg" successfully saved.')
-                
-            fig = plt.figure(figsize=(13, 12))
+           # to_save_png = False
+           if to_save_png:
+               plt.savefig('MSWObservationsCombinedPlotVsTime.jpeg', dpi=300)
+               print('"MSWObservationsCombinedPlotVsTime.jpeg" successfully saved.')
+               
+           fig = plt.figure(figsize=(13, 12))
 
-            ax = fig.add_subplot(331)
-            plt.plot(time_array/365.25, CO2_aquifer1-CO2_aquifer2,
-                     color='steelblue', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Net leakage of CO$_2$: aquifer 1', fontsize=font_size)
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.13, 0.5)
+           ax = fig.add_subplot(331)
+           plt.plot(time_array/365.25, CO2_aquifer1-CO2_aquifer2,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Net leakage of CO$_2$: aquifer 1', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
 
-            ax = fig.add_subplot(332)
-            plt.plot(time_array/365.25, CO2_aquifer2-CO2_aquifer3,
-                     color='steelblue', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Net leakage of CO$_2$: aquifer 2', fontsize=font_size)
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.13, 0.5)
-            
-            ax = fig.add_subplot(333)
-            plt.plot(time_array/365.25, CO2_aquifer3,
-                     color='steelblue', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Net leakage of CO$_2$: aquifer 3', fontsize=font_size)
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.13, 0.5)
+           ax = fig.add_subplot(332)
+           plt.plot(time_array/365.25, CO2_aquifer2-CO2_aquifer3,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Net leakage of CO$_2$: aquifer 2', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
+           
+           ax = fig.add_subplot(333)
+           plt.plot(time_array/365.25, CO2_aquifer3,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Net leakage of CO$_2$: aquifer 3', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
 
-            ax = fig.add_subplot(334)
-            plt.plot(time_array/365.25, brine_aquifer1-brine_aquifer2,
-                     color='rosybrown', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Net leakage of brine: aquifer 1', fontsize=font_size)
-            plt.tight_layout()
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.14, 0.5)
+           ax = fig.add_subplot(334)
+           plt.plot(time_array/365.25, brine_aquifer1-brine_aquifer2,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Net leakage of brine: aquifer 1', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
 
-            ax = fig.add_subplot(335)
-            plt.plot(time_array/365.25, brine_aquifer2-brine_aquifer3,
-                     color='rosybrown', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Net leakage of brine: aquifer 2', fontsize=font_size)
-            plt.tight_layout()
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.14, 0.5)
-            
-            ax = fig.add_subplot(336)
-            plt.plot(time_array/365.25, brine_aquifer3,
-                     color='rosybrown', linewidth=line_width)
-            plt.xlabel('Time, years', fontsize=label_size)
-            plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
-            plt.title(r'Net leakage of brine: aquifer 3', fontsize=font_size)
-            plt.tight_layout()
-            plt.tick_params(labelsize=ticks_size)
-            plt.xlim([0, 50])
-            ax.get_yaxis().set_label_coords(-0.14, 0.5)
+           ax = fig.add_subplot(335)
+           plt.plot(time_array/365.25, brine_aquifer2-brine_aquifer3,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Net leakage of brine: aquifer 2', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
+           
+           ax = fig.add_subplot(336)
+           plt.plot(time_array/365.25, brine_aquifer3,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Net leakage rates, kg/s', fontsize=label_size)
+           plt.title(r'Net leakage of brine: aquifer 3', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
 
-            fig.subplots_adjust(
-                left=0.1, top=0.95, right=0.95, bottom=0.05, wspace=0.22)
+           fig.subplots_adjust(
+               left=0.1, top=0.95, right=0.95, bottom=0.05, wspace=0.22)
 
-            # to_save_png = False
-            if to_save_png:
-                plt.savefig('MSWObservationsCombinedPlotVsTime2.jpeg', dpi=300)
-                print('"MSWObservationsCombinedPlotVsTime2.jpeg" successfully saved.')    
+           # to_save_png = False
+           if to_save_png:
+               plt.savefig('MSWObservationsCombinedPlotVsTime2.jpeg', dpi=300)
+               print('"MSWObservationsCombinedPlotVsTime2.jpeg" successfully saved.')  
+               
+           # Pressure and Saturation - Reservoir    
+           fig = plt.figure(figsize=(3.0, 6))
+
+           ax = fig.add_subplot(211)
+           plt.plot(time_array/365.25, pressure*1e-6,
+                    color='steelblue', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('Pressure, MPa', fontsize=label_size)
+           plt.title(r'Reservoir Pressure at the well', fontsize=font_size)
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.13, 0.5)
+
+           ax = fig.add_subplot(212)
+           plt.plot(time_array/365.25, brine_aquifer1-brine_aquifer2,
+                    color='rosybrown', linewidth=line_width)
+           plt.xlabel('Time, years', fontsize=label_size)
+           plt.ylabel('CO2 saturation', fontsize=label_size)
+           plt.title(r'Reservoir CO2 Saturation at the well', fontsize=font_size)
+           plt.tight_layout()
+           plt.tick_params(labelsize=ticks_size)
+           plt.xlim([0, 50])
+           ax.get_yaxis().set_label_coords(-0.14, 0.5)
+
+           fig.subplots_adjust(
+               left=0.1, top=0.95, right=0.95, bottom=0.05, wspace=0.22)
+
+           # to_save_png = False
+           if to_save_png:
+               plt.savefig('ReservoirPressureCO2saturation.jpeg', dpi=300)
+               print('"ReservoirPressureCO2saturation.jpeg" successfully saved.')      
 
     else:
 

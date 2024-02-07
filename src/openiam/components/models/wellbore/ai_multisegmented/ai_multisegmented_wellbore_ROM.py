@@ -30,14 +30,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from multisegmented import units
 
 import pandas as pd
-import pickle
-from pickle import load
+# import pickle
+# from pickle import load
 import time
-from sklearn.svm import SVR
-from sklearn.model_selection import train_test_split
-import autokeras as ak
-import tensorflow as tf
-from tensorflow.keras.models import load_model
+# from sklearn.svm import SVR
+# from sklearn.model_selection import train_test_split
+# import autokeras as ak
+# import tensorflow as tf
+# from tensorflow.keras.models import load_model
 
 class Parameters():
     """ Parameters class for multisegmented wellbore ROM."""
@@ -103,7 +103,11 @@ class Parameters():
         
         self.SaltMassFrac = None
         self.useDLmodel = None
-        
+
+        self.inputarray1 = None
+        self.dl1input_minthree = None
+        self.dl1input_mintwo = None
+        self.dl1input_minone = None        
         self.inputarray2 = None
         self.dlinput_minthree = None
         self.dlinput_mintwo = None
@@ -111,7 +115,7 @@ class Parameters():
 
 class Solution():
     """ Solution class for multisegmented wellbore ROM."""
-    def __init__(self,parameters,FluidModels=None,DLModels=None,
+    def __init__(self,parameters,FluidModels=None,DLModels1=None,
                  DLModels2=None):
         """ Create an instance of the Solution class."""
 
@@ -160,7 +164,7 @@ class Solution():
         self.CO2DensityShale = None
         
         self.FluidModels = FluidModels
-        self.DLModels = DLModels
+        self.DLModels1 = DLModels1
         self.DLModels2 = DLModels2
 
     def get_depth_for_pressure(self):
@@ -423,34 +427,24 @@ class Solution():
         self.CO2LeakageRates   = self.CO2Q*self.CO2DensityShale # mass rate        
         self.brineLeakageRates = self.brineQ*self.brineDensityShale # mass rate
         
-     
         if self.parameters.useDLmodel == 1:
             
-            # shale segment - single step AK
-            inputarray = {'TopDepth':self.depth[1],
-                          'BottomDepth':self.depth[1]+self.parameters.shaleThickness[0],
-                          'Sg_bot': self.interface[0]/self.thicknessH[0],
-                          'WellRadius': self.parameters.wellRadius,
-                          'Salinity': self.parameters.SaltMassFrac[0],
-                          'PbotMPa': self.parameters.pressure, # LUT
-                          'ShaleThickness': self.parameters.shaleThickness[0],
-                          'WellPermeability':self.parameters.shalePermeability[0]}
-
-            CO2_LeakRate,CO2_Saturation,Brine_LeakRate = self.get_LeakRates(inputarray)
-            # CO2_LeakRate,CO2_Saturation = self.get_LeakRates(inputarray)
-            
-            self.CO2LeakageRates[0] = CO2_LeakRate
-            self.brineLeakageRates[0] = Brine_LeakRate
-            # self.brineLeakageRates[0] = 0
-            
-        ##
-        ##            
-            # aquifer+shale segment - time series RF
             if self.timeStep >= 4: # due to look back = 3
+                # Caprock segment
+                features = self.dataprocessing4tsmodel_caproock(
+                                                self.parameters.dl1input_minthree,
+                                                self.parameters.dl1input_mintwo,
+                                                self.parameters.dl1input_minone)
+                
+                self.CO2LeakageRates[0] = self.DLModels1.model_rf_qC.predict(features)  
+                self.brineLeakageRates[0] = self.DLModels1.model_rf_qB.predict(features)
+                CO2_Saturation = self.DLModels1.model_rf_sC.predict(features)  
+
+                # Aquifer segment
                 features = self.dataprocessing4tsmodel(
-                                                self.parameters.dlinput_minthree,
-                                                self.parameters.dlinput_mintwo,
-                                                self.parameters.dlinput_minone)
+                                                self.parameters.dl2input_minthree,
+                                                self.parameters.dl2input_mintwo,
+                                                self.parameters.dl2input_minone)
            
                 qB_pred = self.DLModels2.model_rf_qB.predict(features)  
                 qC_pred = self.DLModels2.model_rf_qC.predict(features)  
@@ -458,8 +452,6 @@ class Solution():
             
                 self.brineLeakageRates[1:-1] = qB_pred # excluding bottom aqu and atm
                 self.CO2LeakageRates[1:-1] = qC_pred # excluding bottom aqu and atm
-        ##
-        ##
         
         for j in range(1,self.nSL):
             self.CO2LeakageRates[j] = np.minimum(self.CO2LeakageRates[j-1],self.CO2LeakageRates[j])    
@@ -481,58 +473,167 @@ class Solution():
         for j in range(self.nSL-1):
             self.CO2SaturationAq[j] = self.interface[j+1]/self.thicknessH[j+1]
         
-        ##
-        ##            
         if (self.parameters.useDLmodel == 1) & (self.timeStep >= 4):
-            self.CO2SaturationAq[1:] = SC_pred
-        ##
-        ##
-            
-        # to prevent saturation of the overlying aquifer is less than the below
-        if self.parameters.useDLmodel == 1:
+            self.CO2SaturationAq[1:] = CO2_Saturation
             self.CO2SaturationAq[0] = np.minimum(CO2_Saturation,self.CO2SaturationAq[0])
             
         for j in range(1,self.nSL-1):
             self.CO2SaturationAq[j] = np.minimum(self.CO2SaturationAq[j-1],self.CO2SaturationAq[j]) 
             
+        # Build inputarray for the next time step for shale segment model
+        self.inputarray1 = {'TopDepth':self.depth[1],
+                        'BottomDepth':self.depth[1]+self.parameters.shaleThickness[0],
+                        'Sg_bot': self.interface[0]/self.thicknessH[0],
+                        'WellRadius': self.parameters.wellRadius,
+                        'Salinity': self.parameters.SaltMassFrac[0],
+                        'PbotMPa': self.parameters.pressure*1e-6, # LUT
+                        'ShaleThickness': self.parameters.shaleThickness[0],
+                        'WellPermeability':self.parameters.shalePermeability[0]}
+        
         # Build inputarray for the next time step for aquifer segment model
         self.inputarray2 = {
-                       'BottomDepth':np.array([self.depth[ii+1]+self.thicknessH[ii+1] for ii in range(len(self.depth)-1)]),
-                       'MidDepth':np.array([self.depth[ii+1] for ii in range(len(self.depth)-1)]),
-                       'TopDepth':np.array([self.depth[ii+1]-self.parameters.shaleThickness[ii+1] for ii in range(len(self.depth)-1)]),
-                       'ShaleThickness': self.parameters.shaleThickness[1:],
+                        'BottomDepth':np.array([self.depth[ii+1]+self.thicknessH[ii+1] for ii in range(len(self.depth)-1)]),
+                        'MidDepth':np.array([self.depth[ii+1] for ii in range(len(self.depth)-1)]),
+                        'TopDepth':np.array([self.depth[ii+1]-self.parameters.shaleThickness[ii+1] for ii in range(len(self.depth)-1)]),
+                        'ShaleThickness': self.parameters.shaleThickness[1:],
+         
+                        'PbotMPa': self.pressureShaleTop_prev[:-1]*1e-6, # aquifer bottom
+                        'Sg_bot': np.array(self.CO2SaturationAq[:-1]), 
+                        'LeakRateCO2,kg/s': self.CO2LeakageRates[:-1], # excluding release to atm
+                        'LeakRateBrine,kg/s': self.brineLeakageRates[:-1], # excluding release to atm
+                        'LeakAqCumMassCO2,kg':  self.CO2Mass, 
+                        'LeakAqCumMassBrine,kg': self.brineMass,
+                        'simtime,days': timePoint,
+                        'timespan,days': timeSpan,
+                        'nStep': self.timeStep,
+                        'Salinity': np.array([self.parameters.SaltMassFrac[ii+1] for ii in range(len(self.depth)-1)]), 
+                        
+                        'WellRadius': self.parameters.wellRadius,
+                        'aquiferWellPermeability':self.parameters.aquiferPermeability,
+                        'shaleWellPermeability':self.parameters.shalePermeability[1:],
+                        
+                        'AquPoro': self.parameters.aquiferPorosity,
+                        'PermHAq': self.parameters.logAquiferHPerm,
+                        'PermVAq': self.parameters.logAquiferVPerm,
+                        
+                        'Brine_top,kg/s': self.brineLeakageRates[1:-1],
+                        'CO2_top,kg/s': self.CO2LeakageRates[1:-1],
+                        'SCO_top': self.CO2SaturationAq[1:],
+                        }
+       
+    def dataprocessing4tsmodel_caproock(self,inputarray_minthree,
+                                   inputarray_mintwo,inputarray_minone):
+           
+                def makingFeatures(FluidModels,inputarray):
+                    
+                    # Feature processing for DL model prediction
+                    Temp_surface     = 15 #C
+                    Press_surface    = 101352.9 #Pa
+                    Press_grad       = 9.785602 # kPa/m
+             
+                    TopDepth = inputarray['TopDepth']
+                    BottomDepth  = inputarray['BottomDepth']
+                    Sg_bot  = inputarray['Sg_bot']
+                    WellRadius = inputarray['WellRadius']
+                    Salinity = inputarray['Salinity']
+                    PbotMPa = inputarray['PbotMPa']
+                    ShaleThickness = inputarray['ShaleThickness']
+                    WellPermeability = inputarray['WellPermeability']
+            
+                    features = pd.DataFrame(np.zeros((1,33)),
+                                            columns=['T_bot,C', 'Pavg_bot,MPa', 'Sg_bot', 'rhoG_bot,kg/m3', 'rhoL_bot,kg/m3',
+                                                     'visG_bot,Pa-s', 'visL_bot,Pa-s', 'Pavg_top,MPa', 'rhoG_top,kg/m3',
+                                                     'rhoL_top,kg/m3', 'shaleDepth,m', 'shaleThickness,m', 'shalePerm,mD',
+                                                     'TempGrad,C/km', 'TopDepth,m', 'Pavg,bot-top', 'Pavg-Pini,bot',
+                                                     'Salinity', 'WellRadius,m', 'Sb_bot', 'temp_top,C', 'visG_top,Pa-s',
+                                                     'visL_top,Pa-s', 'gammaB', 'gammaC', 'hydCondtopB', 'hydCondbotB',
+                                                     'hydCondRatioB', 'hydCondtopC', 'hydCondbotC', 'hydCondRatioC',
+                                                     'mobRatiotop', 'mobRatiobot'])
+                    
+                    features["TempGrad,C/km"] = self.parameters.tempGrad
+                    features['TopDepth,m'] = TopDepth
+                   
+                    features['Sg_bot'] = Sg_bot
+                    features['Sg_bot'] = features['Sg_bot'].where(features['Sg_bot']> 0.01, 0.0)
+                    features['Sb_bot'] = 1.0-features['Sg_bot'].copy()
+                    
+                    features['WellRadius,m'] = WellRadius # need to check currently 0.15
+                
+                    features["T_bot,C"]   = BottomDepth*features["TempGrad,C/km"]*1e-3+Temp_surface
+                    features["Pavg_bot,MPa"] = PbotMPa
+                
+                    features["temp_top,C"]   = features['TopDepth,m']*features["TempGrad,C/km"]*1e-3+Temp_surface
+                    features["Pavg_top,MPa"] = features['TopDepth,m']*Press_grad*1e-3 + Press_surface*1e-6 # hydrostatic 
+                   
+                    features["Salinity"] = Salinity
+                   
+                    # bottom
+                    BottomCO2 = FluidModels.CO2Model(features["T_bot,C"],features["Pavg_bot,MPa"])
+                    BottomBrine = FluidModels.BrineModel(features["T_bot,C"],features["Pavg_bot,MPa"],features["Salinity"])
+                   
+                    # top
+                    TopCO2 = FluidModels.CO2Model(features["temp_top,C"],features["Pavg_top,MPa"])
+                    TopBrine = FluidModels.BrineModel(features["temp_top,C"],features["Pavg_top,MPa"],features["Salinity"])
+                   
+                    features["rhoG_bot,kg/m3"] = BottomCO2[:,0] 
+                    features["visG_bot,Pa-s"] =  BottomCO2[:,1] 
+                   
+                    features["rhoL_bot,kg/m3"] = BottomBrine[:,0]
+                    features["visL_bot,Pa-s"] = BottomBrine[:,1]
+                   
+                    features["rhoG_top,kg/m3"] = TopCO2[:,0]
+                    features["visG_top,Pa-s"] = TopCO2[:,1]
+                   
+                    features["rhoL_top,kg/m3"] = TopBrine[:,0]
+                    features["visL_top,Pa-s"] = TopBrine[:,1] 
+                   
+                    features['shaleDepth,m'] = BottomDepth
+                    features["shaleThickness,m"] = ShaleThickness 
+                   
+                    features['Pavg,bot-top']  = features['Pavg_bot,MPa']- features['Pavg_top,MPa']
+                    features['Pavg-Pini,bot'] = features['Pavg_bot,MPa'] - (0.1013529 + BottomDepth*0.009785602) 
+                   
+                    shaleBrineden = (features["rhoL_bot,kg/m3"]+features["rhoL_top,kg/m3"])*0.5
+                    features['gammaB'] = (features['Pavg_bot,MPa']- features['Pavg_top,MPa'])*1e6/(shaleBrineden*9.785602*features["shaleThickness,m"])
+                    
+                    shaleCO2den = (features["rhoG_bot,kg/m3"]+features["rhoG_top,kg/m3"])*0.5
+                    features['gammaC']  = features["Pavg,bot-top"]*1e6/(shaleCO2den*9.785602*features["shaleThickness,m"])
+                    
+                    features['shalePerm,mD'] = WellPermeability*1e15
+                    features['shalePerm,mD'] = np.log10(features['shalePerm,mD'])
+                   
+                    shalePerm = (10.0**(features['shalePerm,mD']))*1e-15
+                    hydCondtopB = shalePerm*features["rhoL_top,kg/m3"]*9.785602/features["visL_top,Pa-s"]
+                    hydCondbotB = shalePerm*features["rhoL_bot,kg/m3"]*9.785602/features["visL_bot,Pa-s"]
+                    features['hydCondtopB'] = np.log10(hydCondtopB) 
+                    features['hydCondbotB'] = np.log10(hydCondbotB) 
+                    features['hydCondRatioB'] = hydCondtopB/hydCondbotB
+                
+                    hydCondtopC = shalePerm*features["rhoG_top,kg/m3"]*9.785602/features["visG_top,Pa-s"]
+                    hydCondbotC = shalePerm*features["rhoG_bot,kg/m3"]*9.785602/features["visG_bot,Pa-s"]
+                    features['hydCondtopC'] = np.log10(hydCondtopC) 
+                    features['hydCondbotC'] = np.log10(hydCondbotC) 
+                    features['hydCondRatioC'] = hydCondtopC/hydCondbotC
+                
+                    mobilityRatiotop = (features["rhoG_top,kg/m3"]/features["visG_top,Pa-s"])/(features["rhoL_top,kg/m3"]/features["visL_top,Pa-s"])
+                    mobilityRatiobot = (features["rhoG_bot,kg/m3"]/features["visG_bot,Pa-s"])/(features["rhoL_bot,kg/m3"]/features["visL_bot,Pa-s"])
+                    features['mobRatiotop'] = np.log10(mobilityRatiotop)
+                    features['mobRatiobot'] = np.log10(mobilityRatiobot)
+                
+                    return features 
+                
+                # For only bottom layer
+                feature_minthree = makingFeatures(self.FluidModels,inputarray_minthree)
+                feature_mintwo = makingFeatures(self.FluidModels,inputarray_mintwo)
+                fefature_mieone = makingFeatures(self.FluidModels,inputarray_minone)
         
-                       'PbotMPa': self.pressureShaleTop_prev[:-1]*1e-6, # aquifer bottom
-                       'Sg_bot': np.array(self.CO2SaturationAq[:-1]), 
-                       'LeakRateCO2,kg/s': self.CO2LeakageRates[:-1], # excluding release to atm
-                       'LeakRateBrine,kg/s': self.brineLeakageRates[:-1], # excluding release to atm
-                       'LeakAqCumMassCO2,kg':  self.CO2Mass, 
-                       'LeakAqCumMassBrine,kg': self.brineMass,
-                       'simtime,days': timePoint,
-                       'timespan,days': timeSpan,
-                       'nStep': self.timeStep,
-                       'Salinity': np.array([self.parameters.SaltMassFrac[ii+1] for ii in range(len(self.depth)-1)]), 
-                       
-                       'WellRadius': self.parameters.wellRadius,
-                       'aquiferWellPermeability':self.parameters.aquiferPermeability,
-                       'shaleWellPermeability':self.parameters.shalePermeability[1:],
-                       
-                       'AquPoro': self.parameters.aquiferPorosity,
-                       'PermHAq': self.parameters.logAquiferHPerm,
-                       'PermVAq': self.parameters.logAquiferVPerm,
-                       
-                       'Brine_top,kg/s': self.brineLeakageRates[1:-1],
-                       'CO2_top,kg/s': self.CO2LeakageRates[1:-1],
-                       'SCO_top': self.CO2SaturationAq[1:],
-                       }
-        a=1
-
+                feature_window_layers = np.concatenate([feature_minthree, feature_mintwo, fefature_mieone], axis=1)
+                    
+                return feature_window_layers
+            
     def dataprocessing4tsmodel(self,inputarray_minthree,
                                inputarray_mintwo,inputarray_minone):
        
-            # print('number of aquifer: {}'.format(int(self.nSL-1)))
-            # print('number of prediction/output: {}'.format(int(self.nSL-1-1)))
-            
             def makingFeatures(FluidModels,inputarray,nPred):
             
                 # Feature processing for DL model prediction
@@ -705,231 +806,6 @@ class Solution():
                     feature_window_layers = np.concatenate([feature_window_layers, feature_window_layer_i], axis=0)
            
             return feature_window_layers
-        
-            # # Prediction using DL models
-            # # CO2 leak rate
-            # if Sg_bot != 0:
-            #      # Classification
-            #      features_trans = self.DLModels.x_scaler_CC.transform(features)
-            #      target_trans = self.DLModels.model_CC(features_trans,training=False)
-            #      target_pred = self.DLModels.y_scaler_CC.inverse_transform(target_trans)
-                 
-            #      target_pred[target_pred >= 0.5] = 1
-            #      target_pred[target_pred < 0.5] = 0    
-         
-            #      if target_pred == 0:
-            #          target_pred_R = 0.0
-            #          target_pred_S = 0.0
-                    
-            #      else:
-            #          # Regression
-            #          features_trans = self.DLModels.x_scaler_CR.transform(features)
-            #          target_trans_R = self.DLModels.model_CR(features_trans,training=False)
-            #          target_pred_R = self.DLModels.y_scaler_CR.inverse_transform(target_trans_R) # log10(kg/s)
-            #          target_pred_R = 10**target_pred_R[0][0] # (kg/s)     
-         
-            #          # Saturation
-            #          features_trans = self.DLModels.x_scaler_SR.transform(features)
-            #          target_trans_S = self.DLModels.model_SR(features_trans,training=False)
-            #          target_pred_S = self.DLModels.y_scaler_SR.inverse_transform(target_trans_S)
-            #          target_pred_S = max(0,target_pred_S[0][0])
-            #          target_pred_S = min(1,target_pred_S)
-            # else:
-            #     target_pred_R = 0.0
-            #     target_pred_S = 0.0
-                    
-            # if target_pred_S == 1.0:
-            #     target_pred_BR =0.0
-            # # else:
-            # #     # Brine leak rate
-            # #     # Classification
-            # #     features_trans = self.DLModels.x_scaler_BC.transform(features)
-            # #     target_trans_BC = self.DLModels.model_BC(features_trans,training=False)
-            # #     target_pred_BC = self.DLModels.y_scaler_BC.inverse_transform(target_trans_BC)
-            # #     target_pred_BC = np.argmax(target_pred_BC,axis=-1)
-               
-            # #     # Regression 
-            # #     if target_pred_BC == 0:
-            # #         features_trans = self.DLModels.x_scaler_BRN.transform(features)
-            # #         target_trans_BN = self.DLModels.model_BRN(features_trans,training=False)
-            # #         target_pred_BR = self.DLModels.y_scaler_BRN.inverse_transform(target_trans_BN)
-            # #         target_pred_BR = -1*(10**target_pred_BR) # (kg/s)   
-                   
-            # #     elif target_pred_BC == 1:
-            # #         features_trans = self.DLModels.x_scaler_BRS.transform(features)
-            # #         target_trans_BS = self.DLModels.model_BRS(features_trans,training=False)
-            # #         target_pred_BR = self.DLModels.y_scaler_BRS.inverse_transform(target_trans_BS)
-            # #         target_pred_BR = +1*(10**target_pred_BR) # (kg/s)   
-                  
-            # #     elif target_pred_BC == 2:
-            # #         features_trans = self.DLModels.x_scaler_BRL.transform(features)
-            # #         target_trans_BL = self.DLModels.model_BRL(features_trans,training=False)
-            # #         target_pred_BR = self.DLModels.y_scaler_BRL.inverse_transform(target_trans_BL)
-            # #         target_pred_BR = +1*(10**target_pred_BR) # (kg/s)    
-                
-            # # return target_pred_R, target_pred_S, target_pred_BR
-            # return target_pred_R, target_pred_S
-        
-    
-    def get_LeakRates(self,inputarray):
-       
-            # Feature processing for DL model prediction
-            Temp_surface     = 15 #C
-            Press_surface    = 101352.9 #Pa
-            Press_grad       = 9.785602 # kPa/m
-     
-            TopDepth = inputarray['TopDepth']
-            BottomDepth  = inputarray['BottomDepth']
-            Sg_bot  = inputarray['Sg_bot']
-            WellRadius = inputarray['WellRadius']
-            Salinity = inputarray['Salinity']
-            PbotMPa = inputarray['PbotMPa']
-            ShaleThickness = inputarray['ShaleThickness']
-            WellPermeability = inputarray['WellPermeability']
-    
-            features = pd.DataFrame(np.zeros((1,33)),
-                                    columns=['T_bot,C', 'Pavg_bot,MPa', 'Sg_bot', 'rhoG_bot,kg/m3', 'rhoL_bot,kg/m3',
-                                             'visG_bot,Pa-s', 'visL_bot,Pa-s', 'Pavg_top,MPa', 'rhoG_top,kg/m3',
-                                             'rhoL_top,kg/m3', 'shaleDepth,m', 'shaleThickness,m', 'shalePerm,mD',
-                                             'TempGrad,C/km', 'TopDepth,m', 'Pavg,bot-top', 'Pavg-Pini,bot',
-                                             'Salinity', 'WellRadius,m', 'Sb_bot', 'temp_top,C', 'visG_top,Pa-s',
-                                             'visL_top,Pa-s', 'gammaB', 'gammaC', 'hydCondtopB', 'hydCondbotB',
-                                             'hydCondRatioB', 'hydCondtopC', 'hydCondbotC', 'hydCondRatioC',
-                                             'mobRatiotop', 'mobRatiobot'])
-           
-            features["TempGrad,C/km"] = self.parameters.tempGrad
-            features['TopDepth,m'] = TopDepth
-           
-            features['Sg_bot'] = Sg_bot
-            features['Sg_bot'] = features['Sg_bot'].where(features['Sg_bot']> 0.01, 0.0)
-            features['Sb_bot'] = 1.0-features['Sg_bot'].copy()
-            
-            features['WellRadius,m'] = WellRadius # need to check currently 0.15
-        
-            features["T_bot,C"]   = BottomDepth*features["TempGrad,C/km"]*1e-3+Temp_surface
-            features["Pavg_bot,MPa"] = PbotMPa*1e-6
-        
-            features["temp_top,C"]   = features['TopDepth,m']*features["TempGrad,C/km"]*1e-3+Temp_surface
-            features["Pavg_top,MPa"] = features['TopDepth,m']*Press_grad*1e-3 + Press_surface*1e-6 # hydrostatic 
-           
-            features["Salinity"] = Salinity
-           
-            # bottom
-            BottomCO2 = self.FluidModels.CO2Model(features["T_bot,C"],features["Pavg_bot,MPa"])
-            BottomBrine = self.FluidModels.BrineModel(features["T_bot,C"],features["Pavg_bot,MPa"],features["Salinity"])
-           
-            # top
-            TopCO2 = self.FluidModels.CO2Model(features["temp_top,C"],features["Pavg_top,MPa"])
-            TopBrine = self.FluidModels.BrineModel(features["temp_top,C"],features["Pavg_top,MPa"],features["Salinity"])
-           
-            features["rhoG_bot,kg/m3"] = BottomCO2[:,0] 
-            features["visG_bot,Pa-s"] =  BottomCO2[:,1] 
-           
-            features["rhoL_bot,kg/m3"] = BottomBrine[:,0]
-            features["visL_bot,Pa-s"] = BottomBrine[:,1]
-           
-            features["rhoG_top,kg/m3"] = TopCO2[:,0]
-            features["visG_top,Pa-s"] = TopCO2[:,1]
-           
-            features["rhoL_top,kg/m3"] = TopBrine[:,0]
-            features["visL_top,Pa-s"] = TopBrine[:,1] 
-           
-            features['shaleDepth,m'] = BottomDepth
-            features["shaleThickness,m"] = ShaleThickness 
-           
-            features['Pavg,bot-top']  = features['Pavg_bot,MPa']- features['Pavg_top,MPa']
-            features['Pavg-Pini,bot'] = features['Pavg_bot,MPa'] - (0.1013529 + BottomDepth*0.009785602) 
-           
-            shaleBrineden = (features["rhoL_bot,kg/m3"]+features["rhoL_top,kg/m3"])*0.5
-            features['gammaB'] = (features['Pavg_bot,MPa']- features['Pavg_top,MPa'])*1e6/(shaleBrineden*9.785602*features["shaleThickness,m"])
-            
-            shaleCO2den = (features["rhoG_bot,kg/m3"]+features["rhoG_top,kg/m3"])*0.5
-            features['gammaC']  = features["Pavg,bot-top"]*1e6/(shaleCO2den*9.785602*features["shaleThickness,m"])
-            
-            features['shalePerm,mD'] = WellPermeability*1e15
-            features['shalePerm,mD'] = np.log10(features['shalePerm,mD'])
-           
-            shalePerm = (10.0**(features['shalePerm,mD']))*1e-15
-            hydCondtopB = shalePerm*features["rhoL_top,kg/m3"]*9.785602/features["visL_top,Pa-s"]
-            hydCondbotB = shalePerm*features["rhoL_bot,kg/m3"]*9.785602/features["visL_bot,Pa-s"]
-            features['hydCondtopB'] = np.log10(hydCondtopB) 
-            features['hydCondbotB'] = np.log10(hydCondbotB) 
-            features['hydCondRatioB'] = hydCondtopB/hydCondbotB
-        
-            hydCondtopC = shalePerm*features["rhoG_top,kg/m3"]*9.785602/features["visG_top,Pa-s"]
-            hydCondbotC = shalePerm*features["rhoG_bot,kg/m3"]*9.785602/features["visG_bot,Pa-s"]
-            features['hydCondtopC'] = np.log10(hydCondtopC) 
-            features['hydCondbotC'] = np.log10(hydCondbotC) 
-            features['hydCondRatioC'] = hydCondtopC/hydCondbotC
-        
-            mobilityRatiotop = (features["rhoG_top,kg/m3"]/features["visG_top,Pa-s"])/(features["rhoL_top,kg/m3"]/features["visL_top,Pa-s"])
-            mobilityRatiobot = (features["rhoG_bot,kg/m3"]/features["visG_bot,Pa-s"])/(features["rhoL_bot,kg/m3"]/features["visL_bot,Pa-s"])
-            features['mobRatiotop'] = np.log10(mobilityRatiotop)
-            features['mobRatiobot'] = np.log10(mobilityRatiobot)
-           
-            # Prediction using DL models
-            # CO2 leak rate
-            if Sg_bot != 0:
-                 # Classification
-                 features_trans = self.DLModels.x_scaler_CC.transform(features)
-                 target_trans = self.DLModels.model_CC(features_trans,training=False)
-                 target_pred = self.DLModels.y_scaler_CC.inverse_transform(target_trans)
-                 
-                 target_pred[target_pred >= 0.5] = 1
-                 target_pred[target_pred < 0.5] = 0    
-         
-                 if target_pred == 0:
-                     target_pred_R = 0.0
-                     target_pred_S = 0.0
-                    
-                 else:
-                     # Regression
-                     features_trans = self.DLModels.x_scaler_CR.transform(features)
-                     target_trans_R = self.DLModels.model_CR(features_trans,training=False)
-                     target_pred_R = self.DLModels.y_scaler_CR.inverse_transform(target_trans_R) # log10(kg/s)
-                     target_pred_R = 10**target_pred_R[0][0] # (kg/s)     
-         
-                     # Saturation
-                     features_trans = self.DLModels.x_scaler_SR.transform(features)
-                     target_trans_S = self.DLModels.model_SR(features_trans,training=False)
-                     target_pred_S = self.DLModels.y_scaler_SR.inverse_transform(target_trans_S)
-                     target_pred_S = max(0,target_pred_S[0][0])
-                     target_pred_S = min(1,target_pred_S)
-            else:
-                target_pred_R = 0.0
-                target_pred_S = 0.0
-                    
-            if target_pred_S == 1.0:
-                target_pred_BR =0.0
-            else:
-                # Brine leak rate
-                # Classification
-                features_trans = self.DLModels.x_scaler_BC.transform(features)
-                target_trans_BC = self.DLModels.model_BC(features_trans,training=False)
-                target_pred_BC = self.DLModels.y_scaler_BC.inverse_transform(target_trans_BC)
-                target_pred_BC = np.argmax(target_pred_BC,axis=-1)
-               
-                # Regression 
-                if target_pred_BC == 0:
-                    features_trans = self.DLModels.x_scaler_BRN.transform(features)
-                    target_trans_BN = self.DLModels.model_BRN(features_trans,training=False)
-                    target_pred_BR = self.DLModels.y_scaler_BRN.inverse_transform(target_trans_BN)
-                    target_pred_BR = -1*(10**target_pred_BR) # (kg/s)   
-                   
-                elif target_pred_BC == 1:
-                    features_trans = self.DLModels.x_scaler_BRS.transform(features)
-                    target_trans_BS = self.DLModels.model_BRS(features_trans,training=False)
-                    target_pred_BR = self.DLModels.y_scaler_BRS.inverse_transform(target_trans_BS)
-                    target_pred_BR = +1*(10**target_pred_BR) # (kg/s)   
-                  
-                elif target_pred_BC == 2:
-                    features_trans = self.DLModels.x_scaler_BRL.transform(features)
-                    target_trans_BL = self.DLModels.model_BRL(features_trans,training=False)
-                    target_pred_BR = self.DLModels.y_scaler_BRL.inverse_transform(target_trans_BL)
-                    target_pred_BR = +1*(10**target_pred_BR) # (kg/s)    
-                
-            return target_pred_R, target_pred_S, target_pred_BR
-            # return target_pred_R, target_pred_S
         
     def get_mobility_for_shales(self):
         """ Calculate mobility parameter for brine and CO2 in the shale layers."""
