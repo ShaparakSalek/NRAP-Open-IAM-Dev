@@ -247,7 +247,7 @@ class Workflow_Page(tk.Frame):
             return curr_ind
             # End of method
 
-        def evaluate_workflow(conn, aqName, tabControl, workflowName,
+        def evaluate_workflow(conn, aqName, wftabControl, workflowName,
                               workflowType, connection_menu,
                               workflowSetupFrame, controller,
                               dyn_data, controls):
@@ -261,24 +261,27 @@ class Workflow_Page(tk.Frame):
 
             if 'reservoir' in workflow_components:
                 reservoirName.set((reservoirCompName.get()+'1').replace(" ", ""))
+                reservoirCompName.set((reservoirCompName.get()).replace(" ", ""))
                 component_list['reservoir'] = [reservoirName,
                                                reservoirCompName]
 
             if 'wellbore' in workflow_components:
                 wellboreName.set((wellboreCompName.get()+'1').replace(" ", ""))
+                wellboreCompName.set((wellboreCompName.get()).replace(" ", ""))
                 component_list['wellbore'] = [wellboreName, wellboreCompName]
 
             if 'aquifer' in workflow_components:
                 aquiferName.set((aquiferCompName.get()+'1').replace(" ", ""))
+                aquiferCompName.set((aquiferCompName.get()).replace(" ", ""))
                 component_list['aquifer'] = [aquiferName, aquiferCompName]
 
             wf_type = workflowType.get()
             if wf_type == 'Area of Review':
                 workflowType.set('AoR')
 
-            component_list[workflowType.get()] = [workflowName, workflowType]
+            component_list['Workflow'] = [workflowName, workflowType]
 
-            self.controller.add_workflow(conn, aqName, tabControl,
+            self.controller.add_workflow(conn, aqName, wftabControl,
                                          connection_menu, workflowSetupFrame,
                                          controller, dyn_data, controls,
                                          component_list)
@@ -472,24 +475,24 @@ class Workflow_Page(tk.Frame):
         '''
 
         # Create the notebook to handle all tabs in the Workflow page
-        tabControl = ttk.Notebook(self, width=APP_SIZE[0] - 70, name='workflow_notebook')
+        wftabControl = ttk.Notebook(self, width=APP_SIZE[0] - 70, name='workflow_notebook')
 
         # # TODO Commented out for now as it's not working quite as needed
-        # tabControl = Autoresized_Notebook(self)
+        # wftabControl = Autoresized_Notebook(self)
 
         style = ttk.Style()
         current_theme = style.theme_use()
         style.theme_settings(
             current_theme, {"TNotebook.Tab": {"configure": {"padding": [20, 5]}}})
 
-        self.controller.tabControl = tabControl
+        self.controller.wftabControl = wftabControl
 
         # SET UP MODEL TAB AND CONTENT OF SYSTEM MODEL 
 
-        modelTab = ttk.Frame(tabControl, padding=10, name='modelTab')
+        modelTab = ttk.Frame(wftabControl, padding=10, name='modelTab')
         modelFrame = ttk.Frame(modelTab, padding=10, name='model_frame')
-        tabControl.add(modelTab, text="Model")
-        tabControl.pack(expand=1, fill="both", padx=10, pady=5)
+        wftabControl.add(modelTab, text="Model")
+        wftabControl.pack(expand=1, fill="both", padx=10, pady=5)
 
         if componentVars['simName'].get() == '':
             componentVars['simName'].set('Default')
@@ -814,7 +817,7 @@ class Workflow_Page(tk.Frame):
         nextButton = ttk.Button(descriptionFrame,
                                 text='Stratigraphy',
                                 width=BUTTON_WIDTH,
-                                command=lambda: tabControl.select(
+                                command=lambda: wftabControl.select(
                                     '.!frame.!workflow_page.workflow_notebook.stratigraphy_frame'),
                                 name="nextpage1_button")
         nextButton.grid(row=0, column=6, padx=5, pady=15, sticky='w')
@@ -823,7 +826,7 @@ class Workflow_Page(tk.Frame):
             'Switch to the Stratigraphy tab, the second step of the setup.')
 
         # SET UP STRATIGRAPHY TAB
-        new_tab = ttk.Frame(tabControl, padding=10, name='stratigraphy_tab')
+        new_tab = ttk.Frame(wftabControl, padding=10, name='stratigraphy_tab')
 
         self.controller.strata_scanv = tk.Canvas(new_tab, relief=tk.SUNKEN, name="strata_canvas")
         self.controller.strata_scanv.config(width=TAB_SIZE[0], height=TAB_SIZE[1])
@@ -842,8 +845,8 @@ class Workflow_Page(tk.Frame):
 
         self.controller.strata_scanv.create_window((10, 0), window=stratigraphyTab, anchor='nw')
 
-        tabControl.add(new_tab, text="Stratigraphy")
-        tabControl.pack(expand=1, fill="both")
+        wftabControl.add(new_tab, text="Stratigraphy")
+        wftabControl.pack(expand=1, fill="both")
 
         # Add all widgets for stratigraphy setup
         strata_tab.add_widgets(self.controller, stratigraphyTab, self.toolTip)
@@ -864,7 +867,7 @@ class Workflow_Page(tk.Frame):
         # nextButton2 = ttk.Button(descriptionFrame2,
         #                          text='Add Workflow',
         #                          width=BUTTON_WIDTH,
-        #                          command=lambda: tabControl.select(
+        #                          command=lambda: wftabControl.select(
         #                              '.!frame.!workflow_page.workflow_notebook.workflow_frame'),
         #                          name='nextpage2_button')
         # nextButton2.grid(row=0, column=6, padx=5, pady=15, sticky='w')
@@ -873,9 +876,9 @@ class Workflow_Page(tk.Frame):
         #     'Switch to the Add Workflow tab, the third step of the setup.')
 
         # SET UP WORKFLOW TAB
-        addWorkflowTab = ttk.Frame(tabControl, padding=10, name='workflow_tab')
-        tabControl.add(addWorkflowTab, text="Add Workflow")
-        tabControl.pack(expand=1, fill="both")
+        addWorkflowTab = ttk.Frame(wftabControl, padding=10, name='workflow_tab')
+        wftabControl.add(addWorkflowTab, text="Add Workflow")
+        wftabControl.pack(expand=1, fill="both")
         addWorkflowFrame = ttk.Frame(addWorkflowTab, padding=10, name='addWorkflow_frame')
         addWorkflowFrame.pack(expand=1, fill="both", anchor=tk.NW)
 
@@ -919,12 +922,12 @@ class Workflow_Page(tk.Frame):
         connection_menu = tk.OptionMenu(addWorkflowFrame,
                                         self.controller.connection,
                                         'Auto')
-        tabControl.connection_menu = connection_menu
-        tabControl.connection_menu.connection = self.controller.connection
+        wftabControl.connection_menu = connection_menu
+        wftabControl.connection_menu.connection = self.controller.connection
 
         # Set up frame to hold workflow-specific widgets
         workflowSetupFrame = ttk.Frame(addWorkflowFrame, name='workflowSetup_frame')
-        tabControl.workflowSetupFrame = workflowSetupFrame
+        wftabControl.workflowSetupFrame = workflowSetupFrame
         workflowSetupFrame.grid(
             row=2, column=0, columnspan=3, sticky='w')
 
@@ -933,7 +936,7 @@ class Workflow_Page(tk.Frame):
                                        text="Add Workflow",
                                        width=BUTTON_WIDTH,
                                        command=lambda: [evaluate_workflow(
-                                           self.controller.connection, aquiferLayer, tabControl,
+                                           self.controller.connection, aquiferLayer, wftabControl,
                                            workflowName, self.controller.workflowType, connection_menu,
                                            workflowSetupFrame, self.controller, self.dyn_data_vars, {}),
                                            addWorkflowButton.state(["disabled"])],
@@ -976,4 +979,4 @@ class Workflow_Page(tk.Frame):
 
         # Run the evaluate_workflow function based on current workflow
         # if focus changes to another tab and then back to workflows
-        tabControl.bind('<<NotebookTabChanged>>', on_tab_change)
+        wftabControl.bind('<<NotebookTabChanged>>', on_tab_change)

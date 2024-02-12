@@ -47,7 +47,8 @@ from openiam.gu_interface.cmpnts_tabs import (
     src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
     cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
     aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
-    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, locations)
+    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, locations,
+    load_workflow)
 from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
 from openiam.components.iam_base_classes import IAM_DIR
@@ -152,21 +153,21 @@ class NRAPOpenIAM(tk.Tk):
                     # Change critical pressure setup of workflow and, if necessary, OpenWellbore component
                     if d[choice]['Parameters']['CriticalPressureMPa']:
                         d[choice]['Parameters']['CriticalPressureMPa'] = 'Calculated'
-                        if self.component_list['wellbore'][1].get() == 'Open Wellbore':
+                        if self.component_list['wellbore'][1].get() == 'OpenWellbore':
                             d['OpenWellbore1']['Controls']['critPressureApproach'] = True
                             d['OpenWellbore1']['Parameters'].pop('critPressure')
                     else:
                         crit_press = float(d[choice]['Parameters']['CriticalPressureMPa_no_calc'])
                         d[choice]['Parameters']['CriticalPressureMPa'] = crit_press
-                        if self.component_list['wellbore'][1].get() == 'Open Wellbore':
+                        if self.component_list['wellbore'][1].get() == 'OpenWellbore':
                             d['OpenWellbore1']['Controls']['critPressureApproach'] = True
                             d['OpenWellbore1']['Controls']['enforceCritPressure'] = True
                             d['OpenWellbore1']['Parameters']['critPressure']['value'] = crit_press*(10**6)
                     d[choice]['Parameters'].pop('CriticalPressureMPa_no_calc')
 
                     # Change brine density of components if necessary
-                    if self.component_list['reservoir'][1].get() == 'Analytical Reservoir' and \
-                      self.component_list['wellbore'][1].get() in ['Open Wellbore', 'Multisegmented Wellbore']:
+                    if self.component_list['reservoir'][1].get() == 'AnalyticalReservoir' and \
+                      self.component_list['wellbore'][1].get() in ['OpenWellbore', 'MultisegmentedWellbore']:
                         brine_density = float(d[choice]['Parameters']['BrineDensity'])
                         d[choice]['Parameters']['BrineDensity'] = brine_density
                         d[componentChoices[0]]['Parameters']['brineDensity']['value'] = brine_density
@@ -568,27 +569,65 @@ class NRAPOpenIAM(tk.Tk):
         for component in componentChoices:
             del componentVars[component]
 
-            self.tabControl.connection_menu.children['menu'].delete(0, 'end')
+            if "Workflow" in data.keys():
+                self.wftabControl.connection_menu.children['menu'].delete(0, 'end')
 
-            for c in connectionsDictionary:
-                self.tabControl.connection_menu.children['menu'].add_command(
-                    label=c, command=lambda con=c: \
-                        self.tabControl.connection_menu.connection.set(con))
+                for c in connectionsDictionary:
+                    self.wftabControl.connection_menu.children['menu'].add_command(
+                        label=c, command=lambda con=c: \
+                            self.wftabControl.connection_menu.connection.set(con))
 
-            for tab in self.tabControl.tabs():
-                if self.tabControl.tab(tab, option="text") == component:
-                    self.tabControl.forget(tab)
+                for tab in self.wftabControl.tabs():
+                    if self.wftabControl.tab(tab, option="text") == component:
+                        self.wftabControl.forget(tab)
 
-        i = len(componentChoices)-1
+            else:
+                self.tabControl.connection_menu.children['menu'].delete(0, 'end')
+
+                for c in connectionsDictionary:
+                    self.tabControl.connection_menu.children['menu'].add_command(
+                        label=c, command=lambda con=c: \
+                            self.tabControl.connection_menu.connection.set(con))
+
+                for tab in self.tabControl.tabs():
+                    if self.tabControl.tab(tab, option="text") == component:
+                        self.tabControl.forget(tab)
+
+        i = max((len(componentChoices), len(componentTypeDictionary), len(connectionsDictionary), len(connections)))
         while i >= 0:
-            componentChoices.pop(i)
-            componentTypeDictionary.pop(i)
-            connectionsDictionary.pop(i)
-            connections.pop(i)
+            try:
+                componentChoices.pop(i)
+            except:
+                pass
+
+            try:
+                componentTypeDictionary.pop(i)
+            except:
+                pass
+
+            try:
+                connectionsDictionary.pop(i)
+            except:
+                pass
+
+            try:
+                connections.pop(i)
+            except:
+                pass
+
             i = i - 1
 
+        # i = len(componentChoices)-1
+        # while i >= 0:
+        #     componentChoices.pop(i)
+        #     componentTypeDictionary.pop(i)
+        #     connectionsDictionary.pop(i)
+        #     connections.pop(i)
+        #     i = i - 1
+
         connectionTypes = []
-        connections[0] = 'Dynamic Parameters'
+        connections.append('Dynamic Parameters')
+        #connections[0] = 'Dynamic Parameters'
 
         # Setup Model Tab variables
         self.process_model_data(data)
@@ -610,130 +649,143 @@ class NRAPOpenIAM(tk.Tk):
 
         # Set connection menu command
         # tabControl.connection_menu is defined in OpenIAM_Page.py file
-        # Its purpose is to handle connections between components within the same
+        # wftabControl.connection_menu is defined in Workflow_Page.py file
+        # Their purpose is to handle connections between components within the same
         # system model
         for c in ckeys:
-            self.tabControl.connection_menu.children['menu'].add_command(
-                label=c, command=lambda con=c: \
-                    self.tabControl.connection_menu.connection.set(con))
+            if "Workflow" in data.keys():
+                self.wftabControl.connection_menu.children['menu'].add_command(
+                    label=c, command=lambda con=c: \
+                        self.wftabControl.connection_menu.connection.set(con))
+            else:
+                self.tabControl.connection_menu.children['menu'].add_command(
+                    label=c, command=lambda con=c: \
+                        self.tabControl.connection_menu.connection.set(con))
+
+        if "Workflow" in data.keys():
+            load_workflow.workflow_init(self, data)
 
         # Process connections and dynamic input
         for key in ckeys:
-            connection_name = data[key]['connection']
-            try:
-                aquiferName = data[key]['AquiferName']
-            except KeyError:
-                try:
-                    aquiferName = data[key]['LeakTo']
-                except KeyError:
-                    aquiferName = 'none'
 
-            try:
-                controls = data[key]['Controls']
-            except KeyError:
-                controls = {}
-
-            if connection_name == 'Dynamic Parameters':
-                if (data[key]['type'].find('Wellbore') != -1) or (
-                        data[key]['type'].find('FaultFlow') != -1) or (
-                            data[key]['type'].find('Seal') != -1):
-                    dp_keys = ['pressure', 'CO2saturation']
-                if data[key]['type'].find('Aquifer') != -1:
-                    if data[key]['type'].find('Generic') != -1:
-                        dp_keys = ['brine_mass', 'co2_mass']
-                    else:
-                        dp_keys = ['brine_rate', 'co2_rate', 'brine_mass', 'co2_mass']
-                if data[key]['type'].find('Atm') != -1:
-                    dp_keys = ['co2_leakrate']
-
-                dyn_data = []
-                for dp_key in dp_keys:
-                    # Check whether list was provided
-                    inp_data = data[key]['DynamicParameters'][dp_key]
-                    if isinstance(inp_data, list):
-                        dyn_data.append(", ".join(
-                            str(item) for item in inp_data))
-                    # Check whether string was provided
-                    elif isinstance(inp_data, str):
-                        inp_data_file_path = os.path.join(IAM_DIR, inp_data)
-                        if os.path.isfile(inp_data_file_path):
-                            dyn_data.append(inp_data)
-                        else:
-                            msg = ''.join([
-                                'Path to the file provided as ',
-                                'a source of dynamic data is not valid.'])
-                            raise Warning(msg)
+            if 'Workflow' in data.keys():
+                pass
             else:
-                dyn_data = ['1, ']
+                connection_name = data[key]['connection']
+                try:
+                    aquiferName = data[key]['AquiferName']
+                except KeyError:
+                    try:
+                        aquiferName = data[key]['LeakTo']
+                    except KeyError:
+                        aquiferName = 'none'
 
-            # Add component, component tab with widgets and call initial setup
-            self.add_component(
-                connection_name, aquiferName, self.tabControl, key,
-                data[key]['type'], self.tabControl.connection_menu,
-                self.tabControl.componentsSetupFrame, self, dyn_data, controls)
+                try:
+                    controls = data[key]['Controls']
+                except KeyError:
+                    controls = {}
 
-            # Call additional widgets setup for selected components
-            if data[key]['type'] in ['SimpleReservoir', 'AnalyticalReservoir',
-                                     'GenericReservoir']:
-                locations.load_obs_locations_data(data[key], key)
+                if connection_name == 'Dynamic Parameters':
+                    if (data[key]['type'].find('Wellbore') != -1) or (
+                            data[key]['type'].find('FaultFlow') != -1) or (
+                            data[key]['type'].find('Seal') != -1):
+                        dp_keys = ['pressure', 'CO2saturation']
+                    if data[key]['type'].find('Aquifer') != -1:
+                        if data[key]['type'].find('Generic') != -1:
+                            dp_keys = ['brine_mass', 'co2_mass']
+                        else:
+                            dp_keys = ['brine_rate', 'co2_rate', 'brine_mass', 'co2_mass']
+                    if data[key]['type'].find('Atm') != -1:
+                        dp_keys = ['co2_leakrate']
 
-            if data[key]['type'] in ['TheisReservoir']:
-                locations.load_obs_locations_data(data[key], key)
-                locations.load_theis_inj_times_rates_data(data[key], key)
-
-            if data[key]['type'] == 'AtmosphericROM':
-                for key_arg in ['x_receptor', 'y_receptor']:
-                    kwarg_data = ", ".join(str(item) for item in data[key][key_arg])
-                    componentVars[key][key_arg].set(kwarg_data)
-
-            if data[key]['type'] in ['MultisegmentedWellbore', 'OpenWellbore',
-                                     'CementedWellbore', 'CementedWellboreWR',
-                                     'GeneralizedFlowRate']:
-                locations.load_locations_data(self, data[key], key)
-
-            if data[key]['type'] == 'LookupTableReservoir':
-                locations.load_obs_locations_data(data[key], key)
-
-                code, msg = lutr_tab.finish_load_setup(self, data[key], key)
-                if code == 0:
-                    self.frames[OpenIAM_Page].tkraise()
-                    messagebox.showerror("Error", msg)
-                    break
-                continue
-
-            if data[key]['type'] == 'PlumeStability':
-                code, msg = psa_tab.finish_load_setup(self, data[key], key)
-                if code == 0:
-                    self.frames[OpenIAM_Page].tkraise()
-                    messagebox.showerror("Error", msg)
-                    break
-                continue
-
-            for output in data[key]['Outputs']:
-                if data[key]['type'] == 'MultisegmentedWellbore':
-                    if not output in componentVars[key]['outputs']:
-                        # Add missing variable
-                        componentVars[key]['outputs'][output] = BooleanVar()
-                    componentVars[key]['outputs'][output].set(1)
-                elif data[key]['type'] == 'GeneralizedFlowRate':
-                    if 'CO2_aquifer' in output:
-                        componentVars[key]['outputs']['CO2_aquifer'].set(1)
-                    if 'brine_aquifer' in output:
-                        componentVars[key]['outputs']['brine_aquifer'].set(1)
+                    dyn_data = []
+                    for dp_key in dp_keys:
+                        # Check whether list was provided
+                        inp_data = data[key]['DynamicParameters'][dp_key]
+                        if isinstance(inp_data, list):
+                            dyn_data.append(", ".join(
+                                str(item) for item in inp_data))
+                        # Check whether string was provided
+                        elif isinstance(inp_data, str):
+                            inp_data_file_path = os.path.join(IAM_DIR, inp_data)
+                            if os.path.isfile(inp_data_file_path):
+                                dyn_data.append(inp_data)
+                            else:
+                                msg = ''.join([
+                                    'Path to the file provided as ',
+                                    'a source of dynamic data is not valid.'])
+                                raise Warning(msg)
                 else:
-                    componentVars[key][output].set(1)
+                    dyn_data = ['1, ']
 
-            # For compatibility with older versions of GUI files before change of the
-            # parameter name brineResSaturation to aquBrineResSaturation
-            if data[key]['type'] == 'MultisegmentedWellbore':
-                if 'brineResSaturation' in data[key]['Parameters']:
-                    if isinstance(data[key]['Parameters']['brineResSaturation'], dict):
-                        data[key]['Parameters']['aquBrineResSaturation'] = \
-                            data[key]['Parameters']['brineResSaturation'].copy()
+                # Add component, component tab with widgets and call initial setup
+                self.add_component(
+                    connection_name, aquiferName, self.tabControl, key,
+                    data[key]['type'], self.tabControl.connection_menu,
+                    self.tabControl.componentsSetupFrame, self, dyn_data, controls)
+
+                # Call additional widgets setup for selected components
+                if data[key]['type'] in ['SimpleReservoir', 'AnalyticalReservoir',
+                                         'GenericReservoir']:
+                    locations.load_obs_locations_data(data[key], key)
+
+                if data[key]['type'] in ['TheisReservoir']:
+                    locations.load_obs_locations_data(data[key], key)
+                    locations.load_theis_inj_times_rates_data(data[key], key)
+
+                if data[key]['type'] == 'AtmosphericROM':
+                    for key_arg in ['x_receptor', 'y_receptor']:
+                        kwarg_data = ", ".join(str(item) for item in data[key][key_arg])
+                        componentVars[key][key_arg].set(kwarg_data)
+
+                if data[key]['type'] in ['MultisegmentedWellbore', 'OpenWellbore',
+                                         'CementedWellbore', 'CementedWellboreWR',
+                                         'GeneralizedFlowRate']:
+                    locations.load_locations_data(self, data[key], key)
+
+                if data[key]['type'] == 'LookupTableReservoir':
+                    locations.load_obs_locations_data(data[key], key)
+
+                    code, msg = lutr_tab.finish_load_setup(self, data[key], key)
+                    if code == 0:
+                        self.frames[OpenIAM_Page].tkraise()
+                        messagebox.showerror("Error", msg)
+                        break
+                    continue
+
+                if data[key]['type'] == 'PlumeStability':
+                    code, msg = psa_tab.finish_load_setup(self, data[key], key)
+                    if code == 0:
+                        self.frames[OpenIAM_Page].tkraise()
+                        messagebox.showerror("Error", msg)
+                        break
+                    continue
+
+                for output in data[key]['Outputs']:
+                    if data[key]['type'] == 'MultisegmentedWellbore':
+                        if not output in componentVars[key]['outputs']:
+                            # Add missing variable
+                            componentVars[key]['outputs'][output] = BooleanVar()
+                        componentVars[key]['outputs'][output].set(1)
+                    elif data[key]['type'] == 'GeneralizedFlowRate':
+                        if 'CO2_aquifer' in output:
+                            componentVars[key]['outputs']['CO2_aquifer'].set(1)
+                        if 'brine_aquifer' in output:
+                            componentVars[key]['outputs']['brine_aquifer'].set(1)
                     else:
-                        data[key]['Parameters']['aquBrineResSaturation'] = \
-                            data[key]['Parameters']['brineResSaturation']
-                    data[key]['Parameters'].pop('brineResSaturation')
+                        componentVars[key][output].set(1)
+
+                # For compatibility with older versions of GUI files before change of the
+                # parameter name brineResSaturation to aquBrineResSaturation
+                if data[key]['type'] == 'MultisegmentedWellbore':
+                    if 'brineResSaturation' in data[key]['Parameters']:
+                        if isinstance(data[key]['Parameters']['brineResSaturation'], dict):
+                            data[key]['Parameters']['aquBrineResSaturation'] = \
+                                data[key]['Parameters']['brineResSaturation'].copy()
+                        else:
+                            data[key]['Parameters']['aquBrineResSaturation'] = \
+                                data[key]['Parameters']['brineResSaturation']
+                        data[key]['Parameters'].pop('brineResSaturation')
 
             # Get parameters data
             pkeys = data[key]['Parameters'].keys()
@@ -875,7 +927,14 @@ class NRAPOpenIAM(tk.Tk):
             if data[key]['type'] == 'OpenWellbore':
                 ow_tab.process_crit_pressure_approach_pars(self, data[key], key)
 
-        frame = self.frames[OpenIAM_Page]
+            # Some workflow parameters require processing after all other
+            # preprocessing steps
+            load_workflow.load_workflow(self, data)
+
+        if 'Workflow' in data.keys():
+            frame = self.frames[Workflow_Page]
+        else:
+            frame = self.frames[OpenIAM_Page]
         frame.tkraise()
 
     def process_model_data(self, data):
@@ -1272,12 +1331,13 @@ class NRAPOpenIAM(tk.Tk):
             aquiferName.set(aqName.get())
         except:
             dyn_data_vars = []
+            tabControl.add(newTab, text=compName)
             componentType.set(compType)
             connection_menu.connection.set(conn)
 
             for _, dyn_data_el in enumerate(dyn_data):
                 dyn_data_vars.append(StringVar())
-                inp_data_file_path = os.path.join(CODE_DIR, dyn_data_el)
+                inp_data_file_path = os.path.join(IAM_DIR, dyn_data_el)
                 if os.path.isfile(inp_data_file_path):
                     dyn_data_vars[-1].set(dyn_data_el)
                 else:
@@ -1390,10 +1450,11 @@ class NRAPOpenIAM(tk.Tk):
                 "Error", "You must enter a unique name for each component model.")
             return
 
-    def add_workflow(self, conn, aqName, tabControl,
+    def add_workflow(self, conn, aqName, wftabControl,
                      connection_menu, workflowSetupFrame,
                      controller, dyn_data,
                      controls, component_list):
+
         """
         Add component models from workflow.
 
@@ -1410,19 +1471,19 @@ class NRAPOpenIAM(tk.Tk):
         if 'reservoir' in component_list.keys():
             compName = component_list['reservoir'][0]
             compType = component_list['reservoir'][1]
-            self.add_component(conn, aqName, tabControl, compName, compType,
+            self.add_component(conn, aqName, wftabControl, compName, compType,
                                connection_menu, workflowSetupFrame,
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-            if 'AoR' in component_list.keys():
+            if component_list['Workflow'][1].get() == 'AoR':
 
                 # Set output from reservoir to be pressure and CO2 saturation
                 componentVars[compName.get()]['pressure'].set(1)
                 componentVars[compName.get()]['CO2saturation'].set(1)
 
                 # Get all widgets for reservoir outputs (can be rewritten when frames/widgets are renames)
-                get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                get_widgets = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
                                                       + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
                                                       + '.' + compName.get().lower() + '_tabType').winfo_children()[-1].winfo_children()
 
@@ -1440,7 +1501,7 @@ class NRAPOpenIAM(tk.Tk):
                     brine_framenum = 4
 
                 # Disable observation location input for reservoir tab (taken care on the AoR Workflow tab)
-                for each in tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
+                for each in wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
                                               + compName.get().lower() + '_canvas' + '.' + compName.get().lower()
                                               + '_tabType' + '.!frame' + str(res_xy_framenum)
                                               + '.!frame').winfo_children():
@@ -1448,7 +1509,7 @@ class NRAPOpenIAM(tk.Tk):
                         each.configure(state='disabled')
 
                 if compName.get() == 'AnalyticalReservoir1':
-                    brine_disable = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
+                    brine_disable = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.' + compName.get().lower() + '.'
                                                             + compName.get().lower() + '_canvas' + '.' + compName.get().lower()
                                                             + '_tabType' + '.!frame' + str(brine_framenum)).winfo_children()
                     for each in brine_disable:
@@ -1457,22 +1518,23 @@ class NRAPOpenIAM(tk.Tk):
         if 'wellbore' in component_list.keys():
             compName = component_list['wellbore'][0]
             compType = component_list['wellbore'][1]
-            self.add_component(conn, aqName, tabControl, compName, compType,
+            self.add_component(conn, aqName, wftabControl, compName, compType,
                                connection_menu, workflowSetupFrame,
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-            if 'AoR' in component_list.keys():
+            if component_list['Workflow'][1].get() == 'AoR':
                 componentVars[compName.get()]['connection'].set(component_list['reservoir'][0].get())
 
-                get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                get_widgets = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
                                                       + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
                                                       + '.' + compName.get().lower() + '_tabType').winfo_children()
 
+
                 # Disable Number of wellbores, Wellbore locations, and Use random wells options
-                if compType.get() == "Open Wellbore":
+                if compType.get() == "OpenWellbore":
                     loc_disable = [10, 11]
-                elif compType.get() == "Multisegmented Wellbore":
+                elif compType.get() == "MultisegmentedWellbore":
                     loc_disable = [11, 12]
                 else:
                     loc_disable = [5, 6]
@@ -1486,7 +1548,7 @@ class NRAPOpenIAM(tk.Tk):
                             for entry in tmp.winfo_children():
                                 entry.configure(state='disabled')
 
-                if compType.get() == 'Open Wellbore':
+                if compType.get() == 'OpenWellbore':
                     # Set the aquifer to leak to from the chosen aquifer
                     componentVars[compName.get()]['LeakTo'].set(aqName.get())
 
@@ -1507,7 +1569,7 @@ class NRAPOpenIAM(tk.Tk):
                     # Set Output Options for AoR Output and Disable All Output Options
                     co2_aq = 'CO2_aquifer' + str(aqName.get()[-1])
                     brine_aq = 'brine_aquifer' + str(aqName.get()[-1])
-                    if compType.get() == 'Multisegmented Wellbore':
+                    if compType.get() == 'MultisegmentedWellbore':
                         componentVars[compName.get()]['outputs'][co2_aq].set(1)
                         componentVars[compName.get()]['outputs'][brine_aq].set(1)
 
@@ -1525,15 +1587,15 @@ class NRAPOpenIAM(tk.Tk):
         if 'aquifer' in component_list.keys():
             compName = component_list['aquifer'][0]
             compType = component_list['aquifer'][1]
-            self.add_component(conn, aqName, tabControl, compName, compType,
+            self.add_component(conn, aqName, wftabControl, compName, compType,
                                connection_menu, workflowSetupFrame,
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-            if 'AoR' in component_list.keys():
+            if component_list['Workflow'][1].get() == 'AoR':
                 componentVars[compName.get()]['connection'].set(component_list['wellbore'][0].get())
 
-                get_widgets = tabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
+                get_widgets = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
                                                       + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
                                                       + '.' + compName.get().lower() + '_tabType').winfo_children()
 
@@ -1551,13 +1613,13 @@ class NRAPOpenIAM(tk.Tk):
                     if type(each) is tk.Checkbutton:
                         each.configure(state='disabled')
 
-        if 'AoR' in component_list.keys():
-            compName = component_list['AoR'][0]
-            compType = component_list['AoR'][1]
-            self.add_component(conn, aqName, tabControl, compName, compType,
-                               connection_menu, workflowSetupFrame,
-                               controller, dyn_data, controls,
-                               menu_type='workflow')
+        # Add workflow component
+        compName = component_list['Workflow'][0]
+        compType = component_list['Workflow'][1]
+        self.add_component(conn, aqName, wftabControl, compName, compType,
+                           connection_menu, workflowSetupFrame,
+                           controller, dyn_data, controls,
+                           menu_type='workflow')
 
     @staticmethod
     def get_scroll_region(cmpnt_type):

@@ -49,7 +49,7 @@ AOR_OBSERVATIONS = []
 
 AOR_OBSERVATIONS_SETUP = {}
 
-brineDensityWellbores = ['Open Wellbore', 'Multisegmented Wellbore']
+brineDensityWellbores = ['OpenWellbore', 'MultisegmentedWellbore']
 
 
 def disable_injection_location_widgets(controller, frame):
@@ -257,8 +257,8 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip, *args):
     controller.setvar(name='.'.join([cmpnt_nm, 'CriticalPressureMPa', 'frame']), value=par_frames['CriticalPressureMPa'])
 
     # Brine Density Entry
-    if controller.component_list['reservoir'][1].get() == 'Analytical Reservoir' and \
-        controller.component_list['wellbore'][1].get() in brineDensityWellbores:
+    if controller.component_list['reservoir'][1].get().replace(" ", "") == 'AnalyticalReservoir' and \
+        controller.component_list['wellbore'][1].get().replace(" ", "") in brineDensityWellbores:
 
         ind += 1
         componentVars[cmpnt_nm]['Params']['BrineDensity'] = StringVar()
@@ -368,7 +368,7 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip, *args):
     inj_site_plot_checkbox.grid(row=0, column=1, sticky='w', padx=5)
     inj_well_frame.checkbox_variable = componentVars[cmpnt_nm]['Params']['PlotInjectionSites']
 
-    if controller.component_list['reservoir'][1].get() == 'Lookup Table Reservoir':
+    if controller.component_list['reservoir'][1].get().replace(" ", "") == 'LookupTableReservoir':
         inj_well_label_text = "Injection well location(s):"
         arg_labels = ['x-coordinate(s) [m]:', 'y-coordinate(s) [m]:']
         tool_tip_text = ''.join([
