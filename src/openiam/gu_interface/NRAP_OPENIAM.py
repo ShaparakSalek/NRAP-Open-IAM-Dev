@@ -669,7 +669,11 @@ class NRAPOpenIAM(tk.Tk):
         for key in ckeys:
 
             if 'Workflow' in data.keys():
-                pass
+                if data[key]['type'] == 'LookupTableReservoir':
+                    continue
+                else:
+                    pass
+
             else:
                 connection_name = data[key]['connection']
                 try:
@@ -787,7 +791,6 @@ class NRAPOpenIAM(tk.Tk):
                                 data[key]['Parameters']['brineResSaturation']
                         data[key]['Parameters'].pop('brineResSaturation')
 
-            # Get parameters data
             pkeys = data[key]['Parameters'].keys()
             for pkey in pkeys:
                 if pkey not in ['pressure', 'CO2saturation', 'brine_rate',

@@ -94,38 +94,41 @@ def workflow_init(controller, data):
                             controller.wftabControl.workflowSetupFrame, controller,
                             [], {}, component_list)
 
+    for key in ckeys:
+        # Call additional widgets setup for selected components
+        if data[key]['type'] in ['AnalyticalReservoir', 'LookupTableReservoir']:
+            locations.load_obs_locations_data(data[key], key)
+
+            if data[key]['type'] == 'LookupTableReservoir':
+                code, msg = lutr_tab.finish_load_setup(controller, data[key], key)
+                if code == 0:
+                    controller.frames[Workflow_Page].tkraise()
+                    messagebox.showerror("Error", msg)
+                    break
+                continue
+
+        # For compatibility with older versions of GUI files before change of the
+        # parameter name brineResSaturation to aquBrineResSaturation
+        if data[key]['type'] == 'MultisegmentedWellbore':
+            if 'brineResSaturation' in data[key]['Parameters']:
+                if isinstance(data[key]['Parameters']['brineResSaturation'], dict):
+                    data[key]['Parameters']['aquBrineResSaturation'] = \
+                        data[key]['Parameters']['brineResSaturation'].copy()
+                else:
+                    data[key]['Parameters']['aquBrineResSaturation'] = \
+                        data[key]['Parameters']['brineResSaturation']
+                data[key]['Parameters'].pop('brineResSaturation')
+
+
 def load_workflow(controller, data):
     ckeys = data['ModelParams']['Components'] + ['Workflow']
     resvar = controller.component_list['reservoir'][0].get()
     wellvar = controller.component_list['wellbore'][0].get()
 
+    print(data['Workflow'])
     if data['Workflow']['type'] == 'AoR':
 
         for key in ckeys:
-            # Call additional widgets setup for selected components
-            if data[key]['type'] in ['AnalyticalReservoir', 'LookupTableReservoir']:
-                locations.load_obs_locations_data(data[key], key)
-
-                if data[key]['type'] == 'LookupTableReservoir':
-                    code, msg = lutr_tab.finish_load_setup(controller, data[key], key)
-                    if code == 0:
-                        controller.frames[Workflow_Page].tkraise()
-                        messagebox.showerror("Error", msg)
-                        break
-                    continue
-
-            # For compatibility with older versions of GUI files before change of the
-            # parameter name brineResSaturation to aquBrineResSaturation
-            if data[key]['type'] == 'MultisegmentedWellbore':
-                if 'brineResSaturation' in data[key]['Parameters']:
-                    if isinstance(data[key]['Parameters']['brineResSaturation'], dict):
-                        data[key]['Parameters']['aquBrineResSaturation'] = \
-                            data[key]['Parameters']['brineResSaturation'].copy()
-                    else:
-                        data[key]['Parameters']['aquBrineResSaturation'] = \
-                            data[key]['Parameters']['brineResSaturation']
-                    data[key]['Parameters'].pop('brineResSaturation')
-
             # Set up Workflow tab
 
             # Load figure resolution
@@ -176,6 +179,7 @@ def load_workflow(controller, data):
             componentVars['Workflow']['Params']['PlotInjectionSites'].set(plotInjSites)
 
             if resvar == 'LookupTableReservoir1':
+                inj_names = ['InjectionCoordx', 'InjectionCoordy']
                 coord_names = ['xCoordinates', 'yCoordinates']
-                for n in coord_names:
-                    componentVars['Workflow'][n].set(data['Workflow'][n])
+                for n in range(len(coord_names)):
+                    componentVars['Workflow'][coord_names[n]].set(data['Workflow']['Options'][inj_names[n]])
