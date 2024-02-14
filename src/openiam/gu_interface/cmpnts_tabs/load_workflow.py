@@ -125,7 +125,6 @@ def load_workflow(controller, data):
     resvar = controller.component_list['reservoir'][0].get()
     wellvar = controller.component_list['wellbore'][0].get()
 
-    print(data['Workflow'])
     if data['Workflow']['type'] == 'AoR':
 
         for key in ckeys:
