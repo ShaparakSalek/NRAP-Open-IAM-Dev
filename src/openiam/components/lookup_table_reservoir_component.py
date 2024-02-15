@@ -1000,7 +1000,8 @@ class LookupTableReservoir(iam_bc.ComponentModel):
             try:
                 out['initial_pressure'] = self.initial_pressure
             except AttributeError:
-                out['initial_pressure'] = interpr(init_time_point)['pressure']
+                self.initial_pressure = interpr(init_time_point)['pressure']
+                out['initial_pressure'] = self.initial_pressure
         else:
             if self.num_points == 1:
                 interpr_out = interpr(

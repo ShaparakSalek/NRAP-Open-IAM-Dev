@@ -236,7 +236,7 @@ class Variable():
     def spreading(self, thresh):
         # Calculate spreading in primary and secondary directions
         dldt = self.plume_spreads_dt(thresh)
-        # Calclulate primary and secondary angles
+        # Calculate primary and secondary angles
         angles = self.plume_angles(thresh)
         # Find indices for max spreading coefficient
         maxind = np.argmax(np.abs(dldt), axis=1)

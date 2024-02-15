@@ -68,16 +68,18 @@ class PlumeStability(iam_bc.ComponentModel):
 
     Possible observations from the Plume Stability component are
 
-    * **{obs}_areas** - area of the plume above the predefined threshold
+    * **{obs}_areas** [|m^2|] - area of the plume above the predefined threshold
 
-    * **{obs}_areas_dt** - change in the area of the plume above the predefined threshold
+    * **{obs}_areas_dt** [|m^2/y|] - change in the area of the plume above
+      the predefined threshold
 
-    * **{obs}_mobility** - velocity of centroid of the plume above the predefined threshold
+    * **{obs}_mobility** [|m/y|] - velocity of centroid of the plume above
+      the predefined threshold
 
     * **{obs}_mobility_angles** - angles/direction at which the centroid of the plume
       above the predefined threshold is changing
 
-    * **{obs}_spreading** - longitudinal dispersion of the plume above
+    * **{obs}_spreading** [|m/y|] - longitudinal dispersion of the plume above
       the predefined threshold along its direction of maximum elongation
 
     * **{obs}_spreading_angles** - angles/direction at which the dispersion
@@ -469,7 +471,7 @@ class PlumeStability(iam_bc.ComponentModel):
 
         # By default, interpolation is not required
         to_interpolate = False
-        # By default, time points are defined by data set time poins
+        # By default, time points are defined by data set time points
         time_array = self.time_points
 
         # Check that parent system model has time array defined

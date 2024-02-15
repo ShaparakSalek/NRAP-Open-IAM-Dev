@@ -1,11 +1,11 @@
 # OpenIAM Control File Example 60c
 #
-# This example is similar to control file example 60a, but it includes more reservoir 
-# simulation data from the Kimerlina data set. In example 60a, only the data for one 
-# simulation was used (the file name in the first row of the parameters_and_filenames.csv 
-# file) because the index parameter was specified as 1. Here, all 54 simulations are 
-# used by having indices of 1 to 54. The 'Weights' are all equal to 1, so each simulation 
-# receives an equal weighting. The incorporation of data from multiple reservoir 
+# This example is similar to control file example 60a, but it includes more reservoir
+# simulation data from the Kimberlina data set. In example 60a, only the data for one
+# simulation was used (the file name in the first row of the parameters_and_filenames.csv
+# file) because the index parameter was specified as 1. Here, all 54 simulations are
+# used by having indices of 1 to 54. The 'Weights' are all equal to 1, so each simulation
+# receives an equal weighting. The incorporation of data from multiple reservoir
 # simulations can improve the incorporation of uncertainty in a Bowtie figure.
 #
 # The use of the LookupTableReservoir in this example requires the additional
@@ -63,17 +63,17 @@ LUTR1:
     ParameterFilename: parameters_and_filenames.csv
     Parameters:
         index:      # Here, all 54 simulations are used, with all having the same weight
-            Values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 
-                     10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
-                     20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
-                     30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 
-                     40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 
+            Values: [1, 2, 3, 4, 5, 6, 7, 8, 9,
+                     10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                     20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                     30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                     40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
                      50, 51, 52, 53, 54]
-            Weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 
-                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+            Weights: [1, 1, 1, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                       1, 1, 1, 1, 1]
     Outputs: [pressure,
               CO2saturation]

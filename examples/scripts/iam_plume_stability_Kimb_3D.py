@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # For multiprocessing in Spyder
     __spec__ = None
 
-    datafolder = os.sep.join(['..', '..', 'source', 'components', 'reservoir',
+    datafolder = os.sep.join(['..', '..', 'data', 'reservoir',
                               'lookuptables', 'Kimb_54_sims'])
     if not os.path.exists(os.sep.join([datafolder, 'Reservoir_data_sim01.csv'])):
         msg = ''.join(['\nKimberlina data set can be downloaded ',
@@ -38,8 +38,8 @@ if __name__ == '__main__':
                        'Check this example description for more information.'])
         print(msg)
 
-    dP_thresh = 1.e6   # Overpressure threshold [Pa]
-    S_thresh = 0.01    # CO2 saturation threshold [m^3/m^3]
+    dP_thresh = 1.0e6   # Overpressure threshold [Pa]
+    S_thresh = 0.01     # CO2 saturation threshold [m^3/m^3]
 
     # Read file with time points data
     _, time_points = read_time_points(False, datafolder, 'time_points.csv')
