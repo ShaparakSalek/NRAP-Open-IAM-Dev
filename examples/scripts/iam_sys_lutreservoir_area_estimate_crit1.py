@@ -113,6 +113,7 @@ if __name__ == "__main__":
     # Add observations of the component
     for obs_nm in ['pressure_front', 'plume_extent', 'delineated_area']:
         aest.add_grid_obs(obs_nm, constr_type='array', output_dir=output_directory)
+        aest.add_grid_obs('max_'+obs_nm, constr_type='array', output_dir=output_directory)
 
     # Run system model using current values of its parameters
     sm.forward()
@@ -134,6 +135,8 @@ if __name__ == "__main__":
         aest, 'plume_extent', output_directory, rlzn_number=0)
     delineated_area = sm.collect_gridded_observations_as_time_series(
         aest, 'delineated_area', output_directory, rlzn_number=0)
+    max_delineated_area = sm.collect_gridded_observations_as_time_series(
+        aest, 'max_delineated_area', output_directory, rlzn_number=0)
 
     # Get x and y
     plt.close('all')
@@ -187,12 +190,20 @@ if __name__ == "__main__":
     ax6.set_ylim(ymin, ymax)
 
     # Plot delineated area at the end of simulation
-    fig7, ax7 = data_scatter_plot(
+    fig7a, ax7a = data_scatter_plot(
         x, y, delineated_area[t_ind, :],
         title='Delineated area at t = {} years'.format(t_ind),
         cbar_label='', cmap='binary', vmin=0, vmax=1)
-    ax7.set_xlim(xmin, xmax)
-    ax7.set_ylim(ymin, ymax)
+    ax7a.set_xlim(xmin, xmax)
+    ax7a.set_ylim(ymin, ymax)
+
+    # Plot max delineated area at the end of simulation
+    fig7b, ax7b = data_scatter_plot(
+        x, y, max_delineated_area[t_ind, :],
+        title='Maximum delineated area at t = {} years'.format(t_ind),
+        cbar_label='', cmap='binary', vmin=0, vmax=1)
+    ax7b.set_xlim(xmin, xmax)
+    ax7b.set_ylim(ymin, ymax)
 
     # Plot pressure
     fig8, ax8 = plt.subplots(figsize=(8, 8))

@@ -1753,7 +1753,6 @@ class ComponentModel():
                           currently supports 'npz' (default), 'csv', and 'npy'
         :type save_type: str
 
-
         :param index: indices of time points at which observations values are
             of interest; index is a str('all') if all points should be saved, or
             is an array-like object if only selected point(s) is (are) to be

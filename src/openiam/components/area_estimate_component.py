@@ -10,6 +10,8 @@ except ImportError as err:
     print('Unable to load NRAP-Open-IAM base classes module: {}'.format(err))
 
 
+AE_OBSERVATIONS = ['pressure_front', 'plume_extent', 'delineated_area']
+
 PARAMETERS_GROUPS =  {
     1: ['delta_pressure_threshold', 'saturation_threshold'],
     2: ['saturation_threshold', 'aquifer_pressure',
@@ -202,7 +204,7 @@ class AreaEstimate(iam_bc.ComponentModel):
         :returns: AreaEstimate class object
         """
         # Set up keyword arguments of the 'model' method provided by the system model
-        model_kwargs = {'time_point': 365.25, 'time_step': 365.25}   # default value of 365.25 days
+        model_kwargs = {'time_point': 365.25}   # default value of 365.25 days
 
         super().__init__(name, parent, model=self.simulation_model,
                          model_kwargs=model_kwargs)
@@ -239,6 +241,11 @@ class AreaEstimate(iam_bc.ComponentModel):
         self.pars_bounds['aquifer_depth'] = [1, 1500]
         self.pars_bounds['reservoir_depth'] = [500, 10000]
         self.pars_bounds['aquifer_pressure'] = [1.0e+5, 6.0e+7]
+
+        # Add accumulators to keep track of intermediate plume locations
+        for obs_nm in AE_OBSERVATIONS:
+            self.add_accumulator(obs_nm, sim=0.0)
+            self.add_accumulator('max_'+obs_nm, sim=0.0)
 
         debug_msg = 'AreaEstimate component created with name {}'.format(name)
         logging.debug(debug_msg)
@@ -352,7 +359,24 @@ class AreaEstimate(iam_bc.ComponentModel):
             out = DELINEATION_FUNCTION[self.criteria](
                 params, pressure, CO2saturation, initial_pressure)
 
-        out['area'] = out['delineated_area']*self.cell_size
+        # Update accumulators related to the current time point
+        for obs_nm in AE_OBSERVATIONS:
+            self.accumulators[obs_nm].sim = out[obs_nm]
+
+        # Update accumulators
+        time_index = np.where(self._parent.time_array==time_point)[0][0]
+        if time_index == 0:
+            for obs_nm in AE_OBSERVATIONS:
+                self.accumulators['max_'+obs_nm].sim = out[obs_nm]
+                out['max_'+obs_nm] = out[obs_nm]
+        else:
+            for obs_nm in AE_OBSERVATIONS:
+                self.accumulators['max_'+obs_nm].sim = np.logical_or(
+                    self.accumulators['max_'+obs_nm].sim, out[obs_nm])
+                out['max_'+obs_nm] = self.accumulators['max_'+obs_nm].sim
+
+        out['area'] = np.sum(out['delineated_area']*self.cell_size)
+        out['max_area'] = np.sum(out['max_delineated_area']*self.cell_size)
 
         # Return dictionary of outputs
         return out
