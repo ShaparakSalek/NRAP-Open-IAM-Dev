@@ -317,6 +317,9 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
         self.DLModels1 = None
         self.DLModels2 = None
         
+        # This is always updated in simulation_model()
+        self.FluidModels = None
+        
         debug_msg = 'MultisegmentedWellboreAI component created with name {}'.format(name)
         logging.debug(debug_msg)
 
@@ -649,20 +652,15 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
             self.DLModels1 = DLCaprockSegmentModels(self.componentPath)
             self.DLModels2 = DLAquiferSegmentModels(self.componentPath2)
         
-        # Fluid Model - this object should not be stored in the component (e.g., 
-        # self.FluidModelsObj = FluidModels(self.componentPath)). Even though 
-        # doing that in the __init__() function would improve model run times, 
-        # storing this object in the component causes errors whenever pickle is 
-        # used. Pickle is used at the end of output.py (during output processing), 
-        # so an error could occur at the end of a model run. During a stochastic 
-        # simulation, however, pickle is used during the multiprocessing steps in 
-        # matk - in that instance, the simulation simply cannot run. So although 
-        # loading the object during each model run slows down the simulation, it 
-        # prevents such errors.
-        FluidModelsObj = FluidModels(self.componentPath)
+        # This object should not be stored in the component during the __init__() 
+        # function. Doing so causes errors whenever pickle is used ("TypeError: 
+        # cannot pickle 'module' object"). During a stochastic simulation, pickle 
+        # is used during the multiprocessing steps in matk. 
+        if self.FluidModels is None:
+            self.FluidModels = FluidModels(self.componentPath)
         
         # Create solution object
-        sol = mswrom.Solution(inputParameters, FluidModelsObj, 
+        sol = mswrom.Solution(inputParameters, self.FluidModels, 
                               self.DLModels1, self.DLModels2)
         
         # Find solution corresponding to the inputParameters

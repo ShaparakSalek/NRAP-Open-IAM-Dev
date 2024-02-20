@@ -1179,6 +1179,12 @@ def clean_components(yaml_data):
             cmpnt_obj.y_scaler_s = None
             cmpnt_obj.model_s = None
             continue
+            
+        elif yaml_data[cmpnt_nm]['Type'] == 'MultisegmentedWellboreAI':
+            cmpnt_obj.FluidModels = None
+            cmpnt_obj.DLModels1 = None
+            cmpnt_obj.DLModels2 = None
+            continue
 
 
 if __name__ == "__main__":

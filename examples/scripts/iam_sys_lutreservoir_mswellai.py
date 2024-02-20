@@ -1,8 +1,8 @@
 """
-Example illustrates simple linking of lookup table reservoir and multisegmented
-wellbore component.
+Example illustrates the linking of a Lookup Table Reservoir component and a 
+Multisegmented Wellbore AI component.
 
-This example requires the additional Kimberlina data set.
+This example requires the Kimberlina data set.
 Kimberlina data set (pressure-in-pa-kimb-54-sims.zip or
 Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following places:
 1. https://edx.netl.doe.gov/dataset/phase-iii-nrap-open-iam
@@ -11,11 +11,19 @@ Pressure_In_Pa_Kimb_54_sims.zip) can be downloaded from one of the following pla
 The downloaded data set should be placed here:
     data/reservoir/lookuptables/Kimb_54_sims
 
+To run this example, the files for the Multisegmented Wellbore AI component must also be 
+downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
+large (about 7.2 GB). The two files can be downloaded from these links:
+    http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
+    http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
+
+The zipped files must then be unzipped, with the resulting folders placed into this directory:
+    src/openiam/components/models/wellbore/multisegmented_ai
+
 Example of run:
-$ python iam_sys_lutreservoir_mswell.py
+$ python iam_sys_lutreservoir_mswellai.py
 """
 
-import sys
 import os
 import logging
 import numpy as np
@@ -24,7 +32,7 @@ import matplotlib.pyplot as plt
 from openiam.components.iam_base_classes import SystemModel
 from openiam.components.reservoir_data_interpolator import ReservoirDataInterpolator
 from openiam.components.lookup_table_reservoir_component import LookupTableReservoir
-from openiam.components.multisegmented_wellbore_component import MultisegmentedWellbore
+from openiam.components.multisegmented_wellbore_ai_component import MultisegmentedWellboreAI
 
 
 if __name__ == '__main__':
@@ -97,20 +105,21 @@ if __name__ == '__main__':
     ltres.add_obs_to_be_linked('CO2saturation')
 
     # Add multisegmented wellbore component
-    ms = sm.add_component_model_object(MultisegmentedWellbore(name='ms', parent=sm))
+    ms = sm.add_component_model_object(MultisegmentedWellboreAI(name='ms', parent=sm))
 
     # Add parameters of multisegmented wellbore component
-    ms.add_par('wellRadius', min=0.01, max=0.02, value=0.015)
+    ms.add_par('useDLmodel', value=1, vary=False)
+    ms.add_par('wellRadius', min=0.03, max=0.042, value=0.035)
     ms.add_par('numberOfShaleLayers', value=4, vary=False)
     ms.add_par('shale1Thickness', value=200., vary=False)
     ms.add_par('shale2Thickness', value=550., vary=False)
     ms.add_par('shale3Thickness', value=400., vary=False)
     ms.add_par('shale4Thickness', value=400., vary=False)
     ms.add_par('aquifer1Thickness', value=150., vary=False)
-    ms.add_par('aquifer2Thickness', value=720., vary=False)
-    ms.add_par('aquifer3Thickness', value=400., vary=False)
+    ms.add_par('aquifer2Thickness', value=200., vary=False)
+    ms.add_par('aquifer3Thickness', value=250., vary=False)
     ms.add_par('reservoirThickness', value=400., vary=False)
-    ms.add_par('logWellPerm', min=-14.0, max=-11.0, value=-13.0)
+    ms.add_par('logWellPerm', min=-15.0, max=-12.0, value=-13.5)
 
     # Add keyword arguments linked to the output provided by reservoir model
     ms.add_kwarg_linked_to_obs('pressure', ltres.linkobs['pressure'])
@@ -130,6 +139,7 @@ if __name__ == '__main__':
     print('------------------------------------------------------------------')
     print('                  Forward method illustration ')
     print('------------------------------------------------------------------')
+    
     # Collect pressure and saturation observations
     pressure = sm.collect_observations_as_time_series(ltres, 'pressure')
     saturation = sm.collect_observations_as_time_series(ltres, 'CO2saturation')
