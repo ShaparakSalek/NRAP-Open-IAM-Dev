@@ -427,12 +427,22 @@ def process_output(yaml_data, model_data, output_list, out_dir, sm, s, analysis,
             timefile = os.path.join(out_dir, 'csv_files', 'time_series.csv')
             np.savetxt(timefile, time_array / 365.25, fmt='%.12e',
                        delimiter=',', header='Time (years)')
-
+    
     try:
         # No need to save pickled output for script runs
         not_yaml = yaml_data['not_yaml']
     except KeyError:
-        if to_generate_comb_output:
-            outfile = os.path.join(out_dir, 'combined_output.pkl')
-            with open(outfile, 'wb') as output_dump:
-                pickle.dump(yaml_data, output_dump)
+        try:
+            if to_generate_comb_output:
+                outfile = os.path.join(out_dir, 'combined_output.pkl')
+                with open(outfile, 'wb') as output_dump:
+                    pickle.dump(yaml_data, output_dump)
+        except:
+            err_msg = ''.join([
+                'During output processing, the simulation attempted to make a ', 
+                'combined output .pkl file. This option is set with the ', 
+                'GenerateCombOutputFile entry in the ModelParams section of a ', 
+                '.yaml file (the default option is True). The combined output ', 
+                '.pkl file could not be produced.'])
+            logging.error(err_msg)
+            pass

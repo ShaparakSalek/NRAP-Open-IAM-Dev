@@ -10,8 +10,8 @@ from .components.reservoir_data_interpolator import ReservoirDataInterpolator
 from .components.lookup_table_reservoir_component import LookupTableReservoir
 from .components.cemented_wellbore_component import CementedWellbore
 from .components.cemented_wellbore_wr_component import CementedWellboreWR
-from .components.ai_multisegmented_wellbore_component import AIMultisegmentedWellbore
 from .components.multisegmented_wellbore_component import MultisegmentedWellbore
+from .components.multisegmented_wellbore_ai_component import MultisegmentedWellboreAI
 from .components.open_wellbore_component import OpenWellbore
 from .components.kimberlina_wellbore_component import KimberlinaWellbore
 from .components.hydrocarbon_leakage_component import HydrocarbonLeakage
@@ -64,8 +64,8 @@ __all__ = ['IAM_DIR',
            'LookupTableReservoir',
            'CementedWellbore',
            'CementedWellboreWR',
-           'AIMultisegmentedWellbore',
            'MultisegmentedWellbore',
+           'MultisegmentedWellboreAI',
            'OpenWellbore',
            'KimberlinaWellbore',
            'HydrocarbonLeakage',

@@ -1,24 +1,11 @@
 """
-The module contains the solution class for the multisegmented_well_model.
+The module contains the solution class for the Multisegmented Wellbore AI 
+Component.
 
-    ## Nate can you revise below?
-    (as-is) 
-    The solution is based on the Celia et al., 2011 paper
-    "Field-scale application of a semi-analytical model
-    for estimation of CO2 and brine leakage along old wells".
+The model is based on the work of Baek et al.(:cite:'BaekEtAl2021b', :cite:'BaekEtAl2023').
 
-    Author: Veronika S. Vasylkivska
-    Date: 06/25/2015
-    
-    (to-be) The model is based on work of Baek et al.(2021, 2023)
-    "NRAP-Open-IAM Multisegmented Wellbore Reduced-Order Model (2021,PNNL-32364)",
-    "Enabling site-specific well leakage risk estimation during geologic carbon
-    sequestration using a modular deep-learning-based wellbore leakage model 
-    (2023,Int.J.Greenh.GasControl.126:103903)" 
-    
-    Author: Seunghwan Baek and Veronika S. Vasylkivska
-    Date: 1/1/2024
-    
+Author: Seunghwan Baek, Veronika S. Vasylkivska, and Nate Mitchell
+Date: 1/1/2024
 """
 import logging
 import os
@@ -26,18 +13,14 @@ import sys
 import numpy as np
 import scipy.special as scm
 from scipy.interpolate import interp1d
+import warnings
+import pandas as pd
+import time
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from multisegmented import units
 
-import pandas as pd
-# import pickle
-# from pickle import load
-import time
-# from sklearn.svm import SVR
-# from sklearn.model_selection import train_test_split
-# import autokeras as ak
-# import tensorflow as tf
-# from tensorflow.keras.models import load_model
 
 class Parameters():
     """ Parameters class for multisegmented wellbore ROM."""
@@ -115,7 +98,7 @@ class Parameters():
 
 class Solution():
     """ Solution class for multisegmented wellbore ROM."""
-    def __init__(self,parameters,FluidModels=None,DLModels1=None,
+    def __init__(self, parameters, FluidModels=None, DLModels1=None,
                  DLModels2=None):
         """ Create an instance of the Solution class."""
 
@@ -166,6 +149,10 @@ class Solution():
         self.FluidModels = FluidModels
         self.DLModels1 = DLModels1
         self.DLModels2 = DLModels2
+    
+    def update_parameters(self, parameters):
+        """ Update the parameter object """
+        self.parameters = parameters
 
     def get_depth_for_pressure(self):
         """ Calculate depth of all layers for the pressure calculations."""
@@ -207,31 +194,35 @@ class Solution():
 
     def get_fluidProps(self, pressure):   
     
-        temp_grad = self.parameters.tempGrad*1e-3 #C/m
+        temp_grad = self.parameters.tempGrad * 1e-3 #C/m
         SaltMassFrac = self.parameters.SaltMassFrac
         
-        depth = self.depth - self.thicknessH*0.5 
+        depth = self.depth - self.thicknessH * 0.5 
             
         Temp = depth*temp_grad + 14.7
         
         # Condi_brine = np.zeros((self.nSL,3))        
         # Condi_CO2 = np.zeros((self.nSL,2))
         
-        features = pd.DataFrame(np.zeros((self.nSL,3)),columns=['P,MPa','T,C','Salinity'])
-        features.loc[:,'P,MPa'] = pressure/1e+6
+        features = pd.DataFrame(np.zeros((self.nSL,3)),columns=['P,MPa', 'T,C', 'Salinity'])
+        features.loc[:,'P,MPa'] = pressure / 1e+6
         features.loc[:,'T,C'] = Temp
         features.loc[:,'Salinity'] = SaltMassFrac
         
-        TempCO2 = self.FluidModels.CO2Model(features["T,C"],features["P,MPa"])
+        TempCO2 = self.FluidModels.CO2Model(features["T,C"], features["P,MPa"])
         self.CO2DensityAquifer = TempCO2[:,0]
         self.CO2ViscosityAquifer = TempCO2[:,1]
 
-        TempBrine = self.FluidModels.BrineModel(features["T,C"],features["P,MPa"],features["Salinity"])
+        TempBrine = self.FluidModels.BrineModel(
+            features["T,C"], features["P,MPa"], features["Salinity"])
         self.brineDensityAquifer = TempBrine[:,0]
         self.brineViscosityAquifer = TempBrine[:,1] # unit taken care
         
-        TempBrine2 = self.FluidModels.BrineModel(features["T,C"],features["P,MPa"]+1,features["Salinity"])
-        self.brinecfAquifer  = -2/(self.brineDensityAquifer+TempBrine2[:,0])*(self.brineDensityAquifer-TempBrine2[:,0])/(1*1e6) # 1/Pa
+        TempBrine2 = self.FluidModels.BrineModel(
+            features["T,C"], features["P,MPa"] + 1, features["Salinity"])
+        self.brinecfAquifer  = -2 / (
+            self.brineDensityAquifer+TempBrine2[:,0]) * (
+                self.brineDensityAquifer - TempBrine2[:,0]) / (1 * 1e6) # 1/Pa
         
     def setup_initial_conditions(self):
         """ Setup initial conditions at the abandoned well."""
@@ -247,9 +238,11 @@ class Solution():
         # Setup initial hydrostatic pressure
         # datumPressure is atmospheric pressure or some reference pressure
         # at the top of the upper shale layer
-        pressGrad = 0.009785602*1e+6 # hydrostatic, Pa/m
-        self.initialPressure = self.parameters.datumPressure + self.depth*pressGrad
-        pressureTopReservoir = self.parameters.datumPressure + (self.depth-self.thicknessH)*pressGrad
+        pressGrad = 0.009785602 * 1e+6 # hydrostatic, Pa/m
+        self.initialPressure = self.parameters.datumPressure + (
+            self.depth * pressGrad)
+        pressureTopReservoir = self.parameters.datumPressure + (
+            (self.depth - self.thicknessH) * pressGrad)
         self.iniTopPressure  = pressureTopReservoir
 
         self.CO2SaturationAq = np.zeros(self.nSL-1)
@@ -281,25 +274,30 @@ class Solution():
 
         for ind in range(self.nSL):
             CO2RelPermAq[ind] = np.minimum((
-                1-Sres[ind]), self.interface[ind]/self.thicknessH[ind])
-            brineRelPermAq[ind] = 1/(1-Sres[ind])*(
-                1-Sres[ind]-CO2RelPermAq[ind])
+                1-Sres[ind]), self.interface[ind] / self.thicknessH[ind])
+            
+            if (1 - Sres[ind]) == 0:
+                brineRelPermAq[ind] = 0
+            else:
+                brineRelPermAq[ind] = (1 / (1 - Sres[ind])) * (
+                    1 - Sres[ind] - CO2RelPermAq[ind])
 
-        self.CO2MobilityAq = CO2RelPermAq/self.CO2ViscosityAquifer
-        self.brineMobilityAq = brineRelPermAq/self.brineViscosityAquifer
+        self.CO2MobilityAq = CO2RelPermAq / self.CO2ViscosityAquifer
+        self.brineMobilityAq = brineRelPermAq / self.brineViscosityAquifer
                 
-        self.effectiveMobility = (self.interface*self.CO2MobilityAq+(
-            self.thicknessH-self.interface)*self.brineMobilityAq)/self.thicknessH
+        self.effectiveMobility = ((self.interface * self.CO2MobilityAq) + (
+            (self.thicknessH - self.interface) * self.brineMobilityAq)
+            ) / self.thicknessH
 
         # For use in well functions
         for ind in range(0, self.nSL):
             if self.interface[ind] == 0:
-                self.effectiveMobility[ind] = 1/self.brineViscosityAquifer[ind]
+                self.effectiveMobility[ind] = 1 / self.brineViscosityAquifer[ind]
 
     def find(self):
         """ Find solution of the ROM corresponding to the provided parameters."""
         timeSpan = self.parameters.timeSpan # days *units.day()
-        timeSpan_sec = self.parameters.timeSpan*units.day()
+        timeSpan_sec = self.parameters.timeSpan * units.day()
         timePoint = self.parameters.timePoint
         self.parameters.timeStep += 1 # starts from zero
         self.timeStep = self.parameters.timeStep
@@ -320,8 +318,8 @@ class Solution():
         StartingIdx = 1
 
         # tridiagonal (N-1)*(N-1) (N: # of aquifers including the bottom reservoir =  self.nSL)
-        AA = np.zeros((self.nSL-StartingIdx, self.nSL-StartingIdx))
-        BB = np.zeros(self.nSL-StartingIdx) # vector (N-1)*1
+        AA = np.zeros((self.nSL - StartingIdx, self.nSL - StartingIdx))
+        BB = np.zeros(self.nSL - StartingIdx) # vector (N-1)*1
 
         # Calculate coefficients of Darcy equation for each aquifer for the matrix build-up
         # Refer to the document for the detailed information
@@ -331,7 +329,8 @@ class Solution():
         WV = self.WV_aquifer()
         
         pressGrad = 0.009785602*1e+6 # hydrostatic, Pa/m  = 9.792 kPa/m
-        self.initialAvePressure = self.parameters.datumPressure + (self.depth-self.thicknessH*0.5)*pressGrad
+        self.initialAvePressure = self.parameters.datumPressure + (
+            self.depth - (self.thicknessH * 0.5)) * pressGrad
 
         for ind in range(StartingIdx, self.nSL):
 
@@ -357,8 +356,9 @@ class Solution():
                 # Top reservoir, not averaged, pressure from LUT
                 ReservoirTopPressure = self.parameters.pressure
 
-                AA[ind-StartingIdx, ind-StartingIdx] = 1+WV[ind]*C_below-WV[ind]*C_zero
-                AA[ind-StartingIdx, ind+1-StartingIdx] = WV[ind]*C_zero
+                AA[ind-StartingIdx, ind-StartingIdx] = 1 + (
+                    WV[ind] * C_below) - (WV[ind] * C_zero)
+                AA[ind-StartingIdx, ind+1-StartingIdx] = WV[ind] * C_zero
 
                 BB[ind-StartingIdx] = WV[ind]*(-C_below*F_zero-G_below+C_zero*F_zero+\
                     C_zero*F_above-G_zero-C_below*ReservoirTopPressure) +self.initialAvePressure[ind]
@@ -366,20 +366,26 @@ class Solution():
             elif ind == (self.nSL-1): # aquifer N (top)
                 DatumPressure = self.parameters.datumPressure
 
-                AA[ind-StartingIdx, ind-1-StartingIdx] = -WV[ind]*C_below
-                AA[ind-StartingIdx, ind-StartingIdx] = 1+WV[ind]*C_below-WV[ind-1]*C_zero
+                AA[ind-StartingIdx, ind-1-StartingIdx] = -WV[ind] * C_below
+                AA[ind-StartingIdx, ind-StartingIdx] = 1 + (
+                    WV[ind] * C_below) - (WV[ind-1] * C_zero)
 
-                BB[ind-StartingIdx] = WV[ind-1]*(-C_below*F_below-C_below*F_zero-\
-                    G_below+C_zero*F_zero-G_zero-C_zero*DatumPressure)+self.initialAvePressure[ind] 
+                BB[ind-StartingIdx] = WV[ind-1] * (
+                    (-C_below * F_below) - (C_below * F_zero) - G_below + 
+                    (C_zero * F_zero) - G_zero - (C_zero * DatumPressure)
+                    ) + self.initialAvePressure[ind] 
 
             else: # aquifer3 to aquifer N-1 (intermediate)
 
-                AA[ind-StartingIdx, ind-1-StartingIdx] = -WV[ind]*C_below
-                AA[ind-StartingIdx, ind-StartingIdx] = 1+WV[ind]*C_below-WV[ind]*C_zero
-                AA[ind-StartingIdx, ind+1-StartingIdx] = WV[ind]*C_zero
+                AA[ind-StartingIdx, ind-1-StartingIdx] = -WV[ind] * C_below
+                AA[ind-StartingIdx, ind-StartingIdx] = 1 + (
+                    WV[ind] * C_below) - (WV[ind] * C_zero)
+                AA[ind-StartingIdx, ind+1-StartingIdx] = WV[ind] * C_zero
 
-                BB[ind-StartingIdx] = WV[ind]*(-C_below*F_below-C_below*F_zero-\
-                    G_below+C_zero*F_zero+C_zero*F_above-G_zero)+self.initialAvePressure[ind] 
+                BB[ind-StartingIdx] = WV[ind] * (
+                    (-C_below * F_below) - (C_below * F_zero) - G_below + 
+                    (C_zero * F_zero) + (C_zero * F_above) - G_zero
+                    ) + self.initialAvePressure[ind] 
 
         # Calculate coupled pressure of each aquifer as solution of linear system
         # Vertically averaged delta pressure (compared to the initial values) at each aquifer
@@ -389,10 +395,10 @@ class Solution():
         if (StartingIdx == 1): # LUT coupled 
             
             Pbot = Pave + FF[StartingIdx:] 
-            Pbot = np.append(self.initialPressure[0],Pbot) # inclusion of the bottom layer of the storage reservoir pressure
+            Pbot = np.append(self.initialPressure[0], Pbot) # inclusion of the bottom layer of the storage reservoir pressure
 
             Ptop = Pave - FF[StartingIdx:] 
-            Ptop = np.append(ReservoirTopPressure,Ptop) # inclusion of the top layer of the storage reservoir pressure from LUT
+            Ptop = np.append(ReservoirTopPressure, Ptop) # inclusion of the top layer of the storage reservoir pressure from LUT
           
             # checked ok
             self.pressureShaleBot_prev = Ptop[0:] 
@@ -405,13 +411,15 @@ class Solution():
             deltaP[0:self.nSL-1] = Ptop[0:self.nSL-1] - Pbot[1:self.nSL]                
             deltaP[self.nSL-1]   = Ptop[self.nSL-1] - self.parameters.datumPressure
 
-        DarcyCoefCO2      = self.parameters.flowArea*self.parameters.shalePermeability*self.CO2MobilityShale #*Sres_i #self.parameters.CO2saturation
-        DarcyCoefCO2Shale = DarcyCoefCO2*(1/self.parameters.shaleThickness)
-        GravityCO2Shale   = DarcyCoefCO2*self.CO2DensityShale*self.g
+        DarcyCoefCO2      = (self.parameters.flowArea * self.parameters.shalePermeability 
+                             * self.CO2MobilityShale)
+        DarcyCoefCO2Shale = DarcyCoefCO2 * (1 / self.parameters.shaleThickness)
+        GravityCO2Shale   = DarcyCoefCO2 * self.CO2DensityShale * self.g
         
-        DarcyCoefBrine      = self.parameters.flowArea*self.parameters.shalePermeability*self.brineMobilityShale #*(1.-Sres_i) #(1.-self.parameters.CO2saturation)
-        DarcyCoefBrineShale = DarcyCoefBrine*(1/self.parameters.shaleThickness)        
-        GravityBrineShale   = DarcyCoefBrine*self.brineDensityShale*self.g        
+        DarcyCoefBrine      = (self.parameters.flowArea * self.parameters.shalePermeability 
+                               * self.brineMobilityShale)
+        DarcyCoefBrineShale = DarcyCoefBrine * (1 / self.parameters.shaleThickness)        
+        GravityBrineShale   = DarcyCoefBrine * self.brineDensityShale * self.g        
                 
         # Inflow volumetric rate along shale layers = inflow volumetric rate into the aquifer above the shale layer
         self.CO2Q   = np.zeros(self.nSL)
@@ -424,17 +432,17 @@ class Solution():
         self.CO2LeakageRates = np.zeros(self.nSL)
         self.brineLeakageRates = np.zeros(self.nSL)
 
-        self.CO2LeakageRates   = self.CO2Q*self.CO2DensityShale # mass rate        
-        self.brineLeakageRates = self.brineQ*self.brineDensityShale # mass rate
+        self.CO2LeakageRates   = self.CO2Q * self.CO2DensityShale # mass rate        
+        self.brineLeakageRates = self.brineQ * self.brineDensityShale # mass rate
         
         if self.parameters.useDLmodel == 1:
             
             if self.timeStep >= 4: # due to look back = 3
                 # Caprock segment
                 features = self.dataprocessing4tsmodel_caproock(
-                                                self.parameters.dl1input_minthree,
-                                                self.parameters.dl1input_mintwo,
-                                                self.parameters.dl1input_minone)
+                    self.parameters.dl1input_minthree, 
+                    self.parameters.dl1input_mintwo, 
+                    self.parameters.dl1input_minone)
                 
                 self.CO2LeakageRates[0] = self.DLModels1.model_rf_qC.predict(features)  
                 self.brineLeakageRates[0] = self.DLModels1.model_rf_qB.predict(features)
@@ -442,9 +450,9 @@ class Solution():
 
                 # Aquifer segment
                 features = self.dataprocessing4tsmodel(
-                                                self.parameters.dl2input_minthree,
-                                                self.parameters.dl2input_mintwo,
-                                                self.parameters.dl2input_minone)
+                    self.parameters.dl2input_minthree, 
+                    self.parameters.dl2input_mintwo, 
+                    self.parameters.dl2input_minone)
            
                 qB_pred = self.DLModels2.model_rf_qB.predict(features)  
                 qC_pred = self.DLModels2.model_rf_qC.predict(features)  
@@ -454,50 +462,59 @@ class Solution():
                 self.CO2LeakageRates[1:-1] = qC_pred # excluding bottom aqu and atm
         
         for j in range(1,self.nSL):
-            self.CO2LeakageRates[j] = np.minimum(self.CO2LeakageRates[j-1],self.CO2LeakageRates[j])    
-            self.CO2LeakageRates[j] = np.maximum(0,self.CO2LeakageRates[j])    
+            self.CO2LeakageRates[j] = np.minimum(self.CO2LeakageRates[j-1], 
+                                                 self.CO2LeakageRates[j])
+            self.CO2LeakageRates[j] = np.maximum(0, self.CO2LeakageRates[j])    
         
         # Update CO2 cumulative mass in each aquifer (not including the bottom reservoir)
         self.CO2Mass = self.CO2Mass + (       
-            self.CO2LeakageRates[0:self.nSL-1]-self.CO2LeakageRates[1:self.nSL])*timeSpan_sec
+            self.CO2LeakageRates[0:self.nSL-1] 
+            - self.CO2LeakageRates[1:self.nSL]) * timeSpan_sec
             
-        self.CO2Mass = np.maximum(self.CO2Mass, np.zeros(self.nSL-1))
+        self.CO2Mass = np.maximum(self.CO2Mass, np.zeros(self.nSL - 1))
 
         # Update brine cumulative mass in each aquifer (not including the bottom reservoir)
         self.brineMass = self.brineMass + (
-            self.brineLeakageRates[0:self.nSL-1]-self.brineLeakageRates[1:self.nSL])*timeSpan_sec
+            self.brineLeakageRates[0:self.nSL-1] 
+            - self.brineLeakageRates[1:self.nSL]) * timeSpan_sec
         
-        self.brineMass = np.maximum(self.brineMass, np.zeros(self.nSL-1))
+        self.brineMass = np.maximum(self.brineMass, np.zeros(self.nSL - 1))
 
         self.get_interface()
         for j in range(self.nSL-1):
-            self.CO2SaturationAq[j] = self.interface[j+1]/self.thicknessH[j+1]
+            self.CO2SaturationAq[j] = self.interface[j+1] / self.thicknessH[j+1]
         
         if (self.parameters.useDLmodel == 1) & (self.timeStep >= 4):
             self.CO2SaturationAq[1:] = CO2_Saturation
-            self.CO2SaturationAq[0] = np.minimum(CO2_Saturation,self.CO2SaturationAq[0])
+            self.CO2SaturationAq[0] = np.minimum(CO2_Saturation, 
+                                                 self.CO2SaturationAq[0])
             
         for j in range(1,self.nSL-1):
-            self.CO2SaturationAq[j] = np.minimum(self.CO2SaturationAq[j-1],self.CO2SaturationAq[j]) 
+            self.CO2SaturationAq[j] = np.minimum(self.CO2SaturationAq[j-1], 
+                                                 self.CO2SaturationAq[j]) 
             
         # Build inputarray for the next time step for shale segment model
         self.inputarray1 = {'TopDepth':self.depth[1],
-                        'BottomDepth':self.depth[1]+self.parameters.shaleThickness[0],
-                        'Sg_bot': self.interface[0]/self.thicknessH[0],
+                        'BottomDepth':self.depth[1] + self.parameters.shaleThickness[0],
+                        'Sg_bot': self.interface[0] / self.thicknessH[0],
                         'WellRadius': self.parameters.wellRadius,
                         'Salinity': self.parameters.SaltMassFrac[0],
-                        'PbotMPa': self.parameters.pressure*1e-6, # LUT
+                        'PbotMPa': self.parameters.pressure * 1e-6, # LUT
                         'ShaleThickness': self.parameters.shaleThickness[0],
                         'WellPermeability':self.parameters.shalePermeability[0]}
         
         # Build inputarray for the next time step for aquifer segment model
         self.inputarray2 = {
-                        'BottomDepth':np.array([self.depth[ii+1]+self.thicknessH[ii+1] for ii in range(len(self.depth)-1)]),
-                        'MidDepth':np.array([self.depth[ii+1] for ii in range(len(self.depth)-1)]),
-                        'TopDepth':np.array([self.depth[ii+1]-self.parameters.shaleThickness[ii+1] for ii in range(len(self.depth)-1)]),
+                        'BottomDepth':np.array([self.depth[ii+1] + self.thicknessH[ii+1] 
+                                                for ii in range(len(self.depth)-1)]),
+                        'MidDepth':np.array([self.depth[ii+1] 
+                                             for ii in range(len(self.depth) - 1)]),
+                        'TopDepth':np.array([self.depth[ii+1] 
+                                             - self.parameters.shaleThickness[ii+1] 
+                                             for ii in range(len(self.depth) - 1)]),
                         'ShaleThickness': self.parameters.shaleThickness[1:],
          
-                        'PbotMPa': self.pressureShaleTop_prev[:-1]*1e-6, # aquifer bottom
+                        'PbotMPa': self.pressureShaleTop_prev[:-1] * 1e-6, # aquifer bottom
                         'Sg_bot': np.array(self.CO2SaturationAq[:-1]), 
                         'LeakRateCO2,kg/s': self.CO2LeakageRates[:-1], # excluding release to atm
                         'LeakRateBrine,kg/s': self.brineLeakageRates[:-1], # excluding release to atm
@@ -506,7 +523,8 @@ class Solution():
                         'simtime,days': timePoint,
                         'timespan,days': timeSpan,
                         'nStep': self.timeStep,
-                        'Salinity': np.array([self.parameters.SaltMassFrac[ii+1] for ii in range(len(self.depth)-1)]), 
+                        'Salinity': np.array([self.parameters.SaltMassFrac[ii+1] 
+                                              for ii in range(len(self.depth)-1)]), 
                         
                         'WellRadius': self.parameters.wellRadius,
                         'aquiferWellPermeability':self.parameters.aquiferPermeability,
@@ -540,40 +558,57 @@ class Solution():
                     ShaleThickness = inputarray['ShaleThickness']
                     WellPermeability = inputarray['WellPermeability']
             
-                    features = pd.DataFrame(np.zeros((1,33)),
-                                            columns=['T_bot,C', 'Pavg_bot,MPa', 'Sg_bot', 'rhoG_bot,kg/m3', 'rhoL_bot,kg/m3',
-                                                     'visG_bot,Pa-s', 'visL_bot,Pa-s', 'Pavg_top,MPa', 'rhoG_top,kg/m3',
-                                                     'rhoL_top,kg/m3', 'shaleDepth,m', 'shaleThickness,m', 'shalePerm,mD',
-                                                     'TempGrad,C/km', 'TopDepth,m', 'Pavg,bot-top', 'Pavg-Pini,bot',
-                                                     'Salinity', 'WellRadius,m', 'Sb_bot', 'temp_top,C', 'visG_top,Pa-s',
-                                                     'visL_top,Pa-s', 'gammaB', 'gammaC', 'hydCondtopB', 'hydCondbotB',
-                                                     'hydCondRatioB', 'hydCondtopC', 'hydCondbotC', 'hydCondRatioC',
-                                                     'mobRatiotop', 'mobRatiobot'])
+                    features = pd.DataFrame(
+                        np.zeros((1, 33)), 
+                        columns=[
+                            'T_bot,C', 'Pavg_bot,MPa', 'Sg_bot', 'rhoG_bot,kg/m3', 
+                            'rhoL_bot,kg/m3', 'visG_bot,Pa-s', 'visL_bot,Pa-s', 
+                            'Pavg_top,MPa', 'rhoG_top,kg/m3', 'rhoL_top,kg/m3', 
+                            'shaleDepth,m', 'shaleThickness,m', 'shalePerm,mD', 
+                            'TempGrad,C/km', 'TopDepth,m', 'Pavg,bot-top', 
+                            'Pavg-Pini,bot', 'Salinity', 'WellRadius,m', 'Sb_bot', 
+                            'temp_top,C', 'visG_top,Pa-s', 'visL_top,Pa-s', 
+                            'gammaB', 'gammaC', 'hydCondtopB', 'hydCondbotB', 
+                            'hydCondRatioB', 'hydCondtopC', 'hydCondbotC', 
+                            'hydCondRatioC', 'mobRatiotop', 'mobRatiobot'])
                     
                     features["TempGrad,C/km"] = self.parameters.tempGrad
                     features['TopDepth,m'] = TopDepth
                    
                     features['Sg_bot'] = Sg_bot
-                    features['Sg_bot'] = features['Sg_bot'].where(features['Sg_bot']> 0.01, 0.0)
+                    features['Sg_bot'] = features['Sg_bot'].where(
+                        features['Sg_bot'] > 0.01, 0.0)
                     features['Sb_bot'] = 1.0-features['Sg_bot'].copy()
                     
                     features['WellRadius,m'] = WellRadius # need to check currently 0.15
                 
-                    features["T_bot,C"]   = BottomDepth*features["TempGrad,C/km"]*1e-3+Temp_surface
+                    features["T_bot,C"]   = (
+                        (BottomDepth * features["TempGrad,C/km"] * 1e-3) 
+                        + Temp_surface)
                     features["Pavg_bot,MPa"] = PbotMPa
                 
-                    features["temp_top,C"]   = features['TopDepth,m']*features["TempGrad,C/km"]*1e-3+Temp_surface
-                    features["Pavg_top,MPa"] = features['TopDepth,m']*Press_grad*1e-3 + Press_surface*1e-6 # hydrostatic 
+                    features["temp_top,C"]   = (
+                        (features['TopDepth,m'] * features["TempGrad,C/km"] * 1e-3) 
+                        + Temp_surface)
+                    features["Pavg_top,MPa"] = (
+                        (features['TopDepth,m'] * Press_grad * 1e-3) 
+                        + (Press_surface * 1e-6)) # hydrostatic 
                    
                     features["Salinity"] = Salinity
                    
                     # bottom
-                    BottomCO2 = FluidModels.CO2Model(features["T_bot,C"],features["Pavg_bot,MPa"])
-                    BottomBrine = FluidModels.BrineModel(features["T_bot,C"],features["Pavg_bot,MPa"],features["Salinity"])
+                    BottomCO2 = FluidModels.CO2Model(
+                        features["T_bot,C"], features["Pavg_bot,MPa"])
+                    BottomBrine = FluidModels.BrineModel(
+                        features["T_bot,C"], features["Pavg_bot,MPa"], 
+                        features["Salinity"])
                    
                     # top
-                    TopCO2 = FluidModels.CO2Model(features["temp_top,C"],features["Pavg_top,MPa"])
-                    TopBrine = FluidModels.BrineModel(features["temp_top,C"],features["Pavg_top,MPa"],features["Salinity"])
+                    TopCO2 = FluidModels.CO2Model(
+                        features["temp_top,C"], features["Pavg_top,MPa"])
+                    TopBrine = FluidModels.BrineModel(
+                        features["temp_top,C"], features["Pavg_top,MPa"], 
+                        features["Salinity"])
                    
                     features["rhoG_bot,kg/m3"] = BottomCO2[:,0] 
                     features["visG_bot,Pa-s"] =  BottomCO2[:,1] 
@@ -590,33 +625,54 @@ class Solution():
                     features['shaleDepth,m'] = BottomDepth
                     features["shaleThickness,m"] = ShaleThickness 
                    
-                    features['Pavg,bot-top']  = features['Pavg_bot,MPa']- features['Pavg_top,MPa']
-                    features['Pavg-Pini,bot'] = features['Pavg_bot,MPa'] - (0.1013529 + BottomDepth*0.009785602) 
+                    features['Pavg,bot-top']  = (
+                        features['Pavg_bot,MPa'] - features['Pavg_top,MPa'])
+                    features['Pavg-Pini,bot'] = (
+                        features['Pavg_bot,MPa'] - (
+                            0.1013529 + BottomDepth * 0.009785602))
                    
-                    shaleBrineden = (features["rhoL_bot,kg/m3"]+features["rhoL_top,kg/m3"])*0.5
-                    features['gammaB'] = (features['Pavg_bot,MPa']- features['Pavg_top,MPa'])*1e6/(shaleBrineden*9.785602*features["shaleThickness,m"])
+                    shaleBrineden = (features["rhoL_bot,kg/m3"] 
+                                     + features["rhoL_top,kg/m3"]) * 0.5
+                    features['gammaB'] = (
+                        (features['Pavg_bot,MPa'] - features['Pavg_top,MPa']) 
+                        * 1e6) / (shaleBrineden * 9.785602 * features["shaleThickness,m"])
                     
-                    shaleCO2den = (features["rhoG_bot,kg/m3"]+features["rhoG_top,kg/m3"])*0.5
-                    features['gammaC']  = features["Pavg,bot-top"]*1e6/(shaleCO2den*9.785602*features["shaleThickness,m"])
+                    shaleCO2den = (features["rhoG_bot,kg/m3"] 
+                                   + features["rhoG_top,kg/m3"]) * 0.5
                     
-                    features['shalePerm,mD'] = WellPermeability*1e15
+                    features['gammaC']  = (features["Pavg,bot-top"] * 1e6) / (
+                        shaleCO2den * 9.785602 * features["shaleThickness,m"])
+                    
+                    features['shalePerm,mD'] = WellPermeability * 1e15
                     features['shalePerm,mD'] = np.log10(features['shalePerm,mD'])
                    
-                    shalePerm = (10.0**(features['shalePerm,mD']))*1e-15
-                    hydCondtopB = shalePerm*features["rhoL_top,kg/m3"]*9.785602/features["visL_top,Pa-s"]
-                    hydCondbotB = shalePerm*features["rhoL_bot,kg/m3"]*9.785602/features["visL_bot,Pa-s"]
+                    shalePerm = (10.0 ** (features['shalePerm,mD'])) * 1e-15
+                    
+                    hydCondtopB = (shalePerm * features["rhoL_top,kg/m3"] 
+                                   * (9.785602 / features["visL_top,Pa-s"]))
+                    hydCondbotB = (shalePerm * features["rhoL_bot,kg/m3"] 
+                                   * (9.785602 / features["visL_bot,Pa-s"]))
+                    
                     features['hydCondtopB'] = np.log10(hydCondtopB) 
                     features['hydCondbotB'] = np.log10(hydCondbotB) 
                     features['hydCondRatioB'] = hydCondtopB/hydCondbotB
                 
-                    hydCondtopC = shalePerm*features["rhoG_top,kg/m3"]*9.785602/features["visG_top,Pa-s"]
-                    hydCondbotC = shalePerm*features["rhoG_bot,kg/m3"]*9.785602/features["visG_bot,Pa-s"]
+                    hydCondtopC = (shalePerm * features["rhoG_top,kg/m3"] 
+                                   * (9.785602 / features["visG_top,Pa-s"]))
+                    hydCondbotC = (shalePerm * features["rhoG_bot,kg/m3"] 
+                                   * (9.785602 / features["visG_bot,Pa-s"]))
+                    
                     features['hydCondtopC'] = np.log10(hydCondtopC) 
                     features['hydCondbotC'] = np.log10(hydCondbotC) 
                     features['hydCondRatioC'] = hydCondtopC/hydCondbotC
                 
-                    mobilityRatiotop = (features["rhoG_top,kg/m3"]/features["visG_top,Pa-s"])/(features["rhoL_top,kg/m3"]/features["visL_top,Pa-s"])
-                    mobilityRatiobot = (features["rhoG_bot,kg/m3"]/features["visG_bot,Pa-s"])/(features["rhoL_bot,kg/m3"]/features["visL_bot,Pa-s"])
+                    mobilityRatiotop = (
+                        (features["rhoG_top,kg/m3"] / features["visG_top,Pa-s"]) 
+                        / (features["rhoL_top,kg/m3"] / features["visL_top,Pa-s"]))
+                    mobilityRatiobot = (
+                        (features["rhoG_bot,kg/m3"] / features["visG_bot,Pa-s"]) 
+                        / (features["rhoL_bot,kg/m3"] / features["visL_bot,Pa-s"]))
+                    
                     features['mobRatiotop'] = np.log10(mobilityRatiotop)
                     features['mobRatiobot'] = np.log10(mobilityRatiobot)
                 
@@ -627,7 +683,8 @@ class Solution():
                 feature_mintwo = makingFeatures(self.FluidModels,inputarray_mintwo)
                 fefature_mieone = makingFeatures(self.FluidModels,inputarray_minone)
         
-                feature_window_layers = np.concatenate([feature_minthree, feature_mintwo, fefature_mieone], axis=1)
+                feature_window_layers = np.concatenate(
+                    [feature_minthree, feature_mintwo, fefature_mieone], axis=1)
                     
                 return feature_window_layers
             
@@ -666,71 +723,107 @@ class Solution():
                 features['MidDepth,m'] = inputarray['MidDepth'][nPred]
                 features['TopDepth,m'] = inputarray['TopDepth'][nPred]
                 
-                features['AquThickness,m'] = (inputarray['BottomDepth']-inputarray['MidDepth'])[nPred]
+                features['AquThickness,m'] = (inputarray['BottomDepth'] 
+                                              - inputarray['MidDepth'])[nPred]
                 features['AquPoro'] = inputarray['AquPoro'][nPred]
                 features['Salinity'] = inputarray['Salinity'][nPred]
                 
-                features['PermHAq,mD'] = (np.log10(10**inputarray['PermHAq']*1e15))[nPred]
-                features['PermVAq,mD'] = (np.log10(10**inputarray['PermVAq']*1e15))[nPred]
-                features['PermWAq,mD'] =  (np.log10(inputarray['aquiferWellPermeability']*1e15))[nPred]
+                features['PermHAq,mD'] = (np.log10(
+                    10 ** inputarray['PermHAq'] * 1e15))[nPred]
+                features['PermVAq,mD'] = (np.log10(
+                    10 ** inputarray['PermVAq'] * 1e15))[nPred]
+                features['PermWAq,mD'] =  (np.log10(
+                    inputarray['aquiferWellPermeability'] * 1e15))[nPred]
                 features['AqWellRadius,m'] = inputarray['WellRadius']
                 features['ShaThickness,m'] = inputarray['ShaleThickness'][nPred]
                 
-                features['PermWSh,mD'] =  (np.log10(inputarray['shaleWellPermeability']*1e15))[nPred]
+                features['PermWSh,mD'] =  (np.log10(
+                    inputarray['shaleWellPermeability'] * 1e15))[nPred]
                 features['ShWellRadius,m'] = inputarray['WellRadius']
                 features['TempGrad,C/km'] = self.parameters.tempGrad
                 
                 # Top
-                features['temp_top,C'] = features['TopDepth,m']*features["TempGrad,C/km"]*1e-3+Temp_surface
-                features['Pavg_top,MPa'] = features['TopDepth,m']*Press_grad*1e-3 + Press_surface*1e-6
+                features['temp_top,C'] = (
+                    (features['TopDepth,m'] * features["TempGrad,C/km"] * 1e-3) 
+                    + Temp_surface)
+                features['Pavg_top,MPa'] = (
+                    (features['TopDepth,m'] * Press_grad * 1e-3) 
+                    + (Press_surface * 1e-6))
                 # features["Pavg_bot,MPa"] = inputarray['PbotMPa']*1e-6 # dynamic
                 
-                Temp3 = FluidModels.CO2Model(features["temp_top,C"],features["Pavg_top,MPa"])
+                Temp3 = FluidModels.CO2Model(features["temp_top,C"], 
+                                             features["Pavg_top,MPa"])
                 features["rhoG_top,kg/m3"] = Temp3[:,0]
                 features["visG_top,Pa-s"] = Temp3[:,1]
                 
-                Temp2 = FluidModels.BrineModel(features["temp_top,C"],features["Pavg_top,MPa"],features["Salinity"])
+                Temp2 = FluidModels.BrineModel(features["temp_top,C"], 
+                                               features["Pavg_top,MPa"], 
+                                               features["Salinity"])
                 features["rhoL_top,kg/m3"] = Temp2[:,0]
                 features["visL_top,Pa-s"] = Temp2[:,1]
                 
                 # Mid
-                features["temp_mid,C"]   = features['MidDepth,m']*features["TempGrad,C/km"]*1e-3+Temp_surface
-                features["Pavg_mid,MPa"] = features['MidDepth,m']*Press_grad*1e-3 + Press_surface*1e-6
+                features["temp_mid,C"]   = (
+                    (features['MidDepth,m'] * features["TempGrad,C/km"] * 1e-3) 
+                    + Temp_surface)
+                features["Pavg_mid,MPa"] = (
+                    (features['MidDepth,m'] * Press_grad * 1e-3) 
+                    + Press_surface * 1e-6)
                 
-                Temp4 = FluidModels.CO2Model(features["temp_mid,C"],features["Pavg_mid,MPa"])
+                Temp4 = FluidModels.CO2Model(features["temp_mid,C"], 
+                                             features["Pavg_mid,MPa"])
                 features["rhoG_mid,kg/m3"] = Temp4[:,0]
                 features["visG_mid,Pa-s"] = Temp4[:,1]
                 
-                Temp5 = FluidModels.BrineModel(features["temp_mid,C"],features["Pavg_mid,MPa"],features["Salinity"])
+                Temp5 = FluidModels.BrineModel(features["temp_mid,C"], 
+                                               features["Pavg_mid,MPa"], 
+                                               features["Salinity"])
                 features["rhoL_mid,kg/m3"] = Temp5[:,0]
                 features["visL_mid,Pa-s"] = Temp5[:,1]
                 
                 # Bottom
-                features["temp_bot,C"]   = features['AquBotDepth,m']*features["TempGrad,C/km"]*1e-3+Temp_surface
-                features["Pavg_bot,MPa"] = features['AquBotDepth,m']*Press_grad*1e-3 + Press_surface*1e-6
+                features["temp_bot,C"]   = (
+                    (features['AquBotDepth,m'] * features["TempGrad,C/km"] * 1e-3) 
+                    + Temp_surface)
+                features["Pavg_bot,MPa"] = (
+                    (features['AquBotDepth,m'] * Press_grad * 1e-3 ) 
+                    + Press_surface * 1e-6)
                 
                 # inputarray['PbotMPa'][nPred]
                 
-                Temp3 = FluidModels.CO2Model(features["temp_bot,C"],features["Pavg_bot,MPa"])
+                Temp3 = FluidModels.CO2Model(features["temp_bot,C"], 
+                                             features["Pavg_bot,MPa"])
                 features["rhoG_bot,kg/m3"] = Temp3[:,0]
                 features["visG_bot,Pa-s"] = Temp3[:,1]
                 
-                Temp2 = FluidModels.BrineModel(features["temp_bot,C"],features["Pavg_bot,MPa"],features["Salinity"])
+                Temp2 = FluidModels.BrineModel(features["temp_bot,C"], 
+                                               features["Pavg_bot,MPa"], 
+                                               features["Salinity"])
                 features["rhoL_bot,kg/m3"] = Temp2[:,0]
                 features["visL_bot,Pa-s"] = Temp2[:,1]
                 
-                features['PermRatio_AqH_AqV'] = features['PermHAq,mD']/features['PermVAq,mD']
-                features['PermRatio_AqH_AqW'] = np.log10(10**features['PermHAq,mD']/10**features['PermWAq,mD'])
-                features['PermRatio_AqV_AqW'] = np.log10(10**features['PermVAq,mD']/10**features['PermWAq,mD'])
-                features['PermRatio_AqH_ShW'] = np.log10(10**features['PermHAq,mD']/10**features['PermWSh,mD'])
-                features['PermRatio_AqV_ShW'] = np.log10(10**features['PermVAq,mD']/10**features['PermWSh,mD'])
-                features['PermRatio_AqW_ShW'] = np.log10(10**features['PermWAq,mD']/10**features['PermWSh,mD'])
+                features['PermRatio_AqH_AqV'] = (features['PermHAq,mD'] 
+                                                 / features['PermVAq,mD'])
+                features['PermRatio_AqH_AqW'] = np.log10(
+                    (10 ** features['PermHAq,mD']) / (10 ** features['PermWAq,mD']))
+                features['PermRatio_AqV_AqW'] = np.log10(
+                    (10 ** features['PermVAq,mD']) / (10 ** features['PermWAq,mD']))
+                features['PermRatio_AqH_ShW'] = np.log10(
+                    (10 ** features['PermHAq,mD']) / (10 ** features['PermWSh,mD']))
+                features['PermRatio_AqV_ShW'] = np.log10(
+                    (10 ** features['PermVAq,mD']) / (10 ** features['PermWSh,mD']))
+                features['PermRatio_AqW_ShW'] = np.log10(
+                    (10 ** features['PermWAq,mD']) / (10 ** features['PermWSh,mD']))
                 
-                features['depthRatio1'] = features['AquBotDepth,m']/features['TopDepth,m']
-                features['depthRatio2'] = features['AquBotDepth,m']/features['MidDepth,m']
+                features['depthRatio1'] = (
+                    features['AquBotDepth,m'] / features['TopDepth,m'])
+                features['depthRatio2'] = (
+                    features['AquBotDepth,m'] / features['MidDepth,m'])
                 
-                features['Pavg,bot-top'] = features['Pavg_bot,MPa']- features['Pavg_top,MPa']
-                features['Pavg-Pini,bot'] = features['Pavg_bot,MPa'] - (0.1013529+features['AquBotDepth,m']*0.009785602) 
+                features['Pavg,bot-top'] = (
+                    features['Pavg_bot,MPa'] - features['Pavg_top,MPa'])
+                features['Pavg-Pini,bot'] = features['Pavg_bot,MPa'] - (
+                    0.1013529 + features['AquBotDepth,m'] * 0.009785602) 
                 
                 features['LeakRateCO2,kg/s'] = inputarray['LeakRateCO2,kg/s'][nPred]
                 features['LeakRateBrine,kg/s'] = inputarray['LeakRateBrine,kg/s'][nPred]
@@ -741,31 +834,51 @@ class Solution():
                 features['Sg_bot'] = np.maximum(inputarray['Sg_bot'][nPred],0.01)
                 features['Sb_bot'] = 1.0-features['Sg_bot']
                 
-                shaleBrineden = ((features["rhoL_bot,kg/m3"]+features["rhoL_mid,kg/m3"])*0.5)
-                gammaB = (features['Pavg_bot,MPa']- features['Pavg_mid,MPa'])*1e6/(shaleBrineden*9.785602*features["AquThickness,m"])
+                shaleBrineden = ((features["rhoL_bot,kg/m3"] + features["rhoL_mid,kg/m3"]) 
+                                 * 0.5)
+                gammaB = (
+                    ((features['Pavg_bot,MPa'] - features['Pavg_mid,MPa']) * 1e6) 
+                    / (shaleBrineden * 9.785602 * features["AquThickness,m"]))
                 
-                shaleBrineden2 = (features["rhoL_bot,kg/m3"]+features["rhoL_top,kg/m3"])*0.5
-                gammaB2 = (features['Pavg_bot,MPa']- features['Pavg_top,MPa'])*1e6/(shaleBrineden2*9.785602*(features["AquThickness,m"]+features["ShaThickness,m"]))
+                shaleBrineden2 = (features["rhoL_bot,kg/m3"] 
+                                  + features["rhoL_top,kg/m3"]) * 0.5
+                gammaB2 = (
+                    ((features['Pavg_bot,MPa'] - features['Pavg_top,MPa']) * 1e6) 
+                    / (shaleBrineden2 * 9.785602 * (
+                        features["AquThickness,m"] + features["ShaThickness,m"])))
                 
-                shaleCO2den = (features["rhoG_bot,kg/m3"]+features["rhoG_mid,kg/m3"])*0.5
-                gammaC =(features['Pavg_bot,MPa']- features['Pavg_mid,MPa'])*1e6/(shaleCO2den*9.785602*features["AquThickness,m"])
+                shaleCO2den = (features["rhoG_bot,kg/m3"] 
+                               + features["rhoG_mid,kg/m3"]) * 0.5
+                gammaC = (
+                    ((features['Pavg_bot,MPa'] - features['Pavg_mid,MPa']) * 1e6) 
+                    / (shaleCO2den * 9.785602 * features["AquThickness,m"]))
                 
-                shaleCO2den2 = (features["rhoG_bot,kg/m3"]+features["rhoG_top,kg/m3"])*0.5
-                gammaC2 =(features['Pavg_bot,MPa']- features['Pavg_top,MPa'])*1e6/(shaleCO2den2*9.785602*(features["AquThickness,m"]+features["ShaThickness,m"]))
+                shaleCO2den2 = (features["rhoG_bot,kg/m3"] 
+                                + features["rhoG_top,kg/m3"]) * 0.5
+                gammaC2 = (
+                    ((features['Pavg_bot,MPa'] - features['Pavg_top,MPa']) * 1e6) 
+                    / (shaleCO2den2 * 9.785602 * (
+                        features["AquThickness,m"] + features["ShaThickness,m"])))
     
                 features['gammaB'] = gammaB
                 features['gammaC'] = gammaC
                 features['gammaB2'] = gammaB2
                 features['gammaC2'] = gammaC2
                 
-                shalePerm = (10.0**(features['PermWSh,mD']))*1e-15
-                hydCondtopB = shalePerm*features["rhoL_top,kg/m3"]*9.785602/features["visL_top,Pa-s"]
-                hydCondmidB = shalePerm*features["rhoL_mid,kg/m3"]*9.785602/features["visL_mid,Pa-s"]
-                hydCondbotB = shalePerm*features["rhoL_bot,kg/m3"]*9.785602/features["visL_bot,Pa-s"]
+                shalePerm = (10.0 ** (features['PermWSh,mD'])) * 1e-15
+                hydCondtopB = (shalePerm * features["rhoL_top,kg/m3"] 
+                               * 9.785602 / features["visL_top,Pa-s"])
+                hydCondmidB = (shalePerm  *features["rhoL_mid,kg/m3"] 
+                               * 9.785602 / features["visL_mid,Pa-s"])
+                hydCondbotB = (shalePerm * features["rhoL_bot,kg/m3"] 
+                               * 9.785602 / features["visL_bot,Pa-s"])
                 
-                hydCondtopC = shalePerm*features["rhoG_top,kg/m3"]*9.785602/features["visG_top,Pa-s"]
-                hydCondmidC = shalePerm*features["rhoG_mid,kg/m3"]*9.785602/features["visG_mid,Pa-s"]
-                hydCondbotC = shalePerm*features["rhoG_bot,kg/m3"]*9.785602/features["visG_bot,Pa-s"]
+                hydCondtopC = ((shalePerm * features["rhoG_top,kg/m3"] * 9.785602) 
+                               / features["visG_top,Pa-s"])
+                hydCondmidC = ((shalePerm * features["rhoG_mid,kg/m3"] * 9.785602) 
+                               / features["visG_mid,Pa-s"])
+                hydCondbotC = ((shalePerm * features["rhoG_bot,kg/m3"] * 9.785602) 
+                               / features["visG_bot,Pa-s"])
     
                 features['hydCondtopB'] = np.log10(hydCondtopB) 
                 features['hydCondtopC'] = np.log10(hydCondtopC) 
@@ -777,9 +890,15 @@ class Solution():
                 features['hydCondRatio3B'] = hydCondtopB/hydCondmidB
                 features['hydCondRatio3C'] = hydCondtopC/hydCondmidC
                 
-                mobilityRatiotop = (features["rhoG_top,kg/m3"]/features["visG_top,Pa-s"])/(features["rhoL_top,kg/m3"]/features["visL_top,Pa-s"])
-                mobilityRatiomid = (features["rhoG_mid,kg/m3"]/features["visG_mid,Pa-s"])/(features["rhoL_mid,kg/m3"]/features["visL_mid,Pa-s"])
-                mobilityRatiobot = (features["rhoG_bot,kg/m3"]/features["visG_bot,Pa-s"])/(features["rhoL_bot,kg/m3"]/features["visL_bot,Pa-s"])
+                mobilityRatiotop = (
+                    (features["rhoG_top,kg/m3"] / features["visG_top,Pa-s"]) 
+                    / (features["rhoL_top,kg/m3"] / features["visL_top,Pa-s"]))
+                mobilityRatiomid = (
+                    (features["rhoG_mid,kg/m3"] / features["visG_mid,Pa-s"]) 
+                    / (features["rhoL_mid,kg/m3"] / features["visL_mid,Pa-s"]))
+                mobilityRatiobot = (
+                    (features["rhoG_bot,kg/m3"] / features["visG_bot,Pa-s"]) 
+                    / (features["rhoL_bot,kg/m3"] / features["visL_bot,Pa-s"]))
     
                 features['mobRatiotop'] = np.log10(mobilityRatiotop)
                 features['mobRatiomid'] = np.log10(mobilityRatiomid)
@@ -794,16 +913,21 @@ class Solution():
                 return features 
             
             for nPred in range(self.nSL-2):
-                feature_minthree = makingFeatures(self.FluidModels,inputarray_minthree,nPred)
-                feature_mintwo = makingFeatures(self.FluidModels,inputarray_mintwo,nPred)
-                fefature_mieone = makingFeatures(self.FluidModels,inputarray_minone,nPred)
+                feature_minthree = makingFeatures(
+                    self.FluidModels, inputarray_minthree, nPred)
+                feature_mintwo = makingFeatures(
+                    self.FluidModels, inputarray_mintwo, nPred)
+                fefature_mieone = makingFeatures(
+                    self.FluidModels, inputarray_minone, nPred)
         
-                feature_window_layer_i = np.concatenate([feature_minthree, feature_mintwo, fefature_mieone], axis=1)
+                feature_window_layer_i = np.concatenate([
+                    feature_minthree, feature_mintwo, fefature_mieone], axis=1)
                 
                 if nPred == 0:
                     feature_window_layers = feature_window_layer_i.copy()
                 else:
-                    feature_window_layers = np.concatenate([feature_window_layers, feature_window_layer_i], axis=0)
+                    feature_window_layers = np.concatenate(
+                        [feature_window_layers, feature_window_layer_i], axis=0)
            
             return feature_window_layers
         
@@ -816,12 +940,13 @@ class Solution():
 
         for ind in range(0, self.nSL):
             if self.interface[ind] > 0:
-                CO2RelPermShale[ind] = min(1-Sres[ind],
-                                           self.interface[ind]/self.thicknessH[ind])
-                brineRelPermShale[ind] = 1/(1-Sres[ind])*(1-Sres[ind]-CO2RelPermShale[ind])
+                CO2RelPermShale[ind] = min(
+                    1 - Sres[ind], self.interface[ind] / self.thicknessH[ind])
+                brineRelPermShale[ind] = (
+                    1 / (1 - Sres[ind])) * (1 - Sres[ind] - CO2RelPermShale[ind])
             elif ind == self.nSL-1: # last shale is dummy
-                CO2RelPermShale[ind] = min(1-Sres[ind],
-                                        self.interface[ind]/self.thicknessH[ind])
+                CO2RelPermShale[ind] = min(
+                    1-Sres[ind], self.interface[ind] / self.thicknessH[ind])
 
         CO2ViscosityShale = np.zeros(self.nSL)
         brineViscosityShale = np.ones(self.nSL)
@@ -832,11 +957,15 @@ class Solution():
                 CO2ViscosityShale[ii] = self.CO2ViscosityAquifer[ii]
                 brineViscosityShale[ii] = self.brineViscosityAquifer[ii]
             else:
-                CO2ViscosityShale[ii] = (self.CO2ViscosityAquifer[ii]+self.CO2ViscosityAquifer[ii+1])*0.5
-                brineViscosityShale[ii] = (self.brineViscosityAquifer[ii]+self.brineViscosityAquifer[ii+1])*0.5
+                CO2ViscosityShale[ii] = (
+                    self.CO2ViscosityAquifer[ii] + self.CO2ViscosityAquifer[ii+1]
+                    ) * 0.5
+                brineViscosityShale[ii] = (
+                    self.brineViscosityAquifer[ii] + self.brineViscosityAquifer[ii+1]
+                    ) * 0.5
                                                 
-        self.CO2MobilityShale = CO2RelPermShale/CO2ViscosityShale
-        self.brineMobilityShale = brineRelPermShale/brineViscosityShale
+        self.CO2MobilityShale = CO2RelPermShale / CO2ViscosityShale
+        self.brineMobilityShale = brineRelPermShale / brineViscosityShale
 
     def find_lambda(self):
         """ Calculate lambda constant."""
@@ -871,21 +1000,27 @@ class Solution():
         for j in range(1, self.nSL):
 
             if self.CO2Mass[j-1] > 0:
-                x = 2*np.pi*(self.thicknessH[j])*(1-Sres[j])*1.0*(
-                    self.parameters.wellRadius**2)/self.CO2Mass[j-1]
-
-                if x < 2/self.Lambda[j]:
-                    tempInterface = (1-Sres[j])*self.thicknessH[j]
-
-                elif x >= 2*self.Lambda[j]:
+                x = 2 * np.pi * (self.thicknessH[j]) * (1 - Sres[j]) * 1.0 * (
+                    self.parameters.wellRadius ** 2) / self.CO2Mass[j - 1]
+                
+                # ADDED THIS
+                warnings.simplefilter("error", RuntimeWarning)
+                
+                try:
+                    if x < 2/self.Lambda[j]:
+                        tempInterface = (1 - Sres[j]) * self.thicknessH[j]
+                    
+                    elif x >= 2*self.Lambda[j]:
+                        tempInterface = 0.
+                    else:
+                        tempInterface = (1 / (self.Lambda[j] - 1)) * (
+                            np.sqrt(2 * self.Lambda[j] / x) - 1) * self.thicknessH[j]
+                except:
                     tempInterface = 0.
-                else:
-                    tempInterface = 1/(self.Lambda[j]-1)*(
-                        np.sqrt(2*self.Lambda[j]/x)-1)*self.thicknessH[j]
 
-                self.interface[j] = min([tempInterface,
-                                         (1-Sres[j])*self.thicknessH[j],
-                                         self.interface[j-1]])
+                self.interface[j] = min(
+                    [tempInterface, (1 - Sres[j]) * self.thicknessH[j], 
+                     self.interface[j - 1]])
 
     def CC_shale(self):
 
@@ -895,7 +1030,7 @@ class Solution():
         CO2MobilityShale = self.CO2MobilityShale
         brineMobilityShale = self.brineMobilityShale
 
-        CC = PermWellShale/ShaleThickness*(CO2MobilityShale+brineMobilityShale)
+        CC = (PermWellShale / ShaleThickness) * (CO2MobilityShale + brineMobilityShale)
 
         return CC
 
@@ -913,14 +1048,19 @@ class Solution():
                 self.CO2DensityShale[ii] = self.CO2DensityAquifer[ii]
                 self.brineDensityShale[ii] = self.brineDensityAquifer[ii]
             else:
-                self.CO2DensityShale[ii] = (self.CO2DensityAquifer[ii]+self.CO2DensityAquifer[ii+1])*0.5
-                self.brineDensityShale[ii] = (self.brineDensityAquifer[ii]+self.brineDensityAquifer[ii+1])*0.5
-                
-                
+                self.CO2DensityShale[ii] = (
+                    self.CO2DensityAquifer[ii] + self.CO2DensityAquifer[ii + 1]
+                    ) * 0.5
+                self.brineDensityShale[ii] = (
+                    self.brineDensityAquifer[ii] + self.brineDensityAquifer[ii + 1]
+                    ) * 0.5
+        
         CO2MobilityShale = self.CO2MobilityShale
         brineMobilityShale = self.brineMobilityShale
 
-        GG = PermWellShale*gg*(CO2MobilityShale*self.CO2DensityShale+brineMobilityShale*self.brineDensityShale)
+        GG = PermWellShale * gg * (
+            (CO2MobilityShale * self.CO2DensityShale) 
+            + (brineMobilityShale * self.brineDensityShale))
 
         return GG
 
@@ -934,34 +1074,50 @@ class Solution():
 
         AquiferThickness = self.thicknessH
 
-        FF = AquiferThickness/2*gg*(SCO2*CO2Density+(1-SCO2)*brineDensity)
+        FF = (AquiferThickness / 2) * gg * (
+            SCO2 * CO2Density+(1 - SCO2) * brineDensity)
 
         return FF
 
     def WV_aquifer(self):
 
-        SCO2 = self.interface*(1/self.thicknessH)
+        SCO2 = self.interface * (1 / self.thicknessH)
 
         CO2MobilityAq = self.CO2MobilityAq
         brineMobilityAq = self.brineMobilityAq
 
-        EffMobility = SCO2*CO2MobilityAq+(1-SCO2)*brineMobilityAq
+        EffMobility = SCO2 * CO2MobilityAq + (1 - SCO2) * brineMobilityAq
 
         cf_ave = self.parameters.compressibility
 
-        tt = self.parameters.timePoint*units.day()
-        EffTime = 0.92*tt
+        tt = self.parameters.timePoint * units.day()
+        EffTime = 0.92 * tt
 
         rw = self.parameters.wellRadius
+        
         # Reservoir perm not defined separately
-        PermAquiferHor = np.append(self.parameters.aquiferPermeability[0],
+        PermAquiferHor = np.append(self.parameters.aquiferPermeability[0], 
                                    self.parameters.aquiferPermeability)
+        
+        denominator = (4 * EffMobility * PermAquiferHor * EffTime)
+        uLeak = np.zeros((len(denominator)))
+        for i in range(len(denominator)):
+            if denominator[i] == 0:
+                uLeak[i] = 0
+            else:
+                uLeak[i] = ((rw ** 2) * cf_ave) / denominator[i]
 
-        uLeak = rw**2*cf_ave/(4*EffMobility*PermAquiferHor*EffTime)
         GLeak = well_function(uLeak)
 
         AquiferThickness = self.thicknessH
-        WV = GLeak/(4*np.pi*EffMobility*AquiferThickness*PermAquiferHor)
+        
+        denominator = (4 * np.pi * EffMobility * AquiferThickness * PermAquiferHor)
+        WV = np.zeros((len(denominator)))
+        for i in range(len(denominator)):
+            if denominator[i] == 0:
+                WV[i] = 0
+            else:
+                WV[i] = GLeak[i] / denominator[i]
 
         return WV
 
@@ -983,10 +1139,32 @@ def well_function(x):
     W = np.zeros(len(x))
     for i, u in list(enumerate(x)):
         if u <= 1.0:
-            W[i] = (-0.577216-np.log(u)+u-u**2/(2*scm.factorial(2))+
-                    u**3/(3*scm.factorial(3))-u**4/(4*scm.factorial(4))+
-                    u**5/(5*scm.factorial(5))-u**6/(6*scm.factorial(6))+
-                    u**7/(7*scm.factorial(7))-u**8/(8*scm.factorial(8)))
+            demoninators = [
+                (2 * scm.factorial(2)), (3 * scm.factorial(3)), 
+                (4 * scm.factorial(4)), (5 * scm.factorial(5)), 
+                (6 * scm.factorial(6)), (7 * scm.factorial(7)), 
+                (8 * scm.factorial(8))]
+            
+            if 0 in demoninators:
+                W[i] = np.inf
+            else:
+                # Use this statement to catch cases where np.log(u) encounters 
+                # an issue (divide by zero in log) - this way, the warning is 
+                # not printed.
+                warnings.simplefilter("error", RuntimeWarning)
+                try:
+                    W[i] = (-0.577216 - np.log(u) + u 
+                            - (u ** 2 / (2 * scm.factorial(2))) 
+                            + (u ** 3 / (3 * scm.factorial(3))) 
+                            - (u ** 4 /(4 * scm.factorial(4))) 
+                            + (u ** 5 / (5 * scm.factorial(5))) 
+                            - (u ** 6 / (6 * scm.factorial(6))) 
+                            + (u ** 7 / (7 * scm.factorial(7))) 
+                            - (u ** 8 / (8 * scm.factorial(8))))
+                except:
+                    # For cases where np.log(u) encounters an error (divide by zero in log)
+                    W[i] = np.inf
+            
         elif u <= 9:
             uu = np.linspace(1.0, 9.0, num=9)
             Wu = np.array([0.219, 0.049, 0.013, 0.0038, 0.0011,

@@ -35,7 +35,8 @@ class GenericAquifer(iam_bc.ComponentModel):
     the mass fraction of |CO2| and salt on a 100x10 radial grid surrounding the
     leaky well and outputs these as gridded observations.  The model also predicts
     the volume and dimensions of aquifer where pore water concentrations exceed
-    specified threshold values of dissolved |CO2| and salt.
+    specified threshold values of dissolved |CO2| and salt. Further information 
+    can be found in :cite:`Bacon2022`.
 
     The Generic Aquifer model is a machine learning regression model fitted to the
     results of STOMP-CO2E-R multiphase flow and reactive transport simulations of

@@ -20,8 +20,8 @@ class MultisegmentedWellbore(iam_bc.ComponentModel):
     """
     The Multisegmented Wellbore component estimates the leakage rates of brine and
     |CO2| along wells in the presence of overlying aquifers or thief zones.
-    The model is based on work of Nordbotten et al.,
-    :cite:`N2009`. Further reading can be found in :cite:`N2011a`.
+    The model is based on work of Nordbotten et al., :cite:`N2009`. Further 
+    reading can be found in :cite:`N2011a` and :cite:'BaekEtAl2021b'.
 
     The model is focused on flow across relatively large distances and does not take
     into account discrete features of the flow paths such as fractures, cracks,
@@ -36,10 +36,8 @@ class MultisegmentedWellbore(iam_bc.ComponentModel):
     multiphase version of Darcy’s law to represent flow along a leaky well.
 
     In the NRAP-Open-IAM control file, the type name for the Multisegmented
-    Wellbore component is ``MultisegmentedWellbore``. The description
-    of the component's parameters are provided below. Names of the component
-    parameters coincide with those used by ``model`` method of the
-    ``MultisegmentedWellbore`` class.
+    Wellbore component is ``MultisegmentedWellbore``. Descriptions of the 
+    component's parameters are provided below.
 
     * **logWellPerm** [|log10| |m^2|] (-101 to -9) - logarithm of well permeability
       along shale layer (default: -13). Logarithm of well permeability along shale 3,
@@ -107,11 +105,11 @@ class MultisegmentedWellbore(iam_bc.ComponentModel):
     * **mass_CO2_aquifer1**, **mass_CO2_aquifer2**,..., **mass_CO2_aquiferN** [|kg|]
       - mass of the |CO2| leaked into the aquifer.
 
-    For control file examples using the Multisegmented Wellbore, see *ControlFile_ex2*, 
-    *ControlFile_ex3*, *ControlFile_ex8a*, *ControlFile_ex24*, *ControlFile_ex31f*, 
-    and *ControlFile_ex39a*. For script examples, see *iam_sys_reservoir_mswell_2aquifers.py*, 
-    *iam_sys_lutstrata_reservoir_mswell.py*, and 
-    *iam_sys_reservoir_mswell_futuregen_ttfdplot_dipping_strata.py*.
+    For control file examples using the Multisegmented Wellbore component, see 
+    *ControlFile_ex2*, *ControlFile_ex3*, *ControlFile_ex8a*, *ControlFile_ex24*, 
+    *ControlFile_ex31f*, and *ControlFile_ex39a*. For script examples, see 
+    *iam_sys_reservoir_mswell_2aquifers.py*, *iam_sys_lutstrata_reservoir_mswell.py*, 
+    and *iam_sys_reservoir_mswell_futuregen_ttfdplot_dipping_strata.py*.
     """
     def __init__(self, name, parent):
         """

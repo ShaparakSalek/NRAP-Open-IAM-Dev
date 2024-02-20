@@ -1,36 +1,53 @@
 # OpenIAM Control File Example 51b
 #
-# This example illustrates the setup of an LHS run (Latin Hypercube Sampling)
-# for a system model with analytical reservoir component providing pressure and
-# CO2 saturation inputs for cemented wellbore components.
-# The setup is standard in a sense that aquifer 1 (deeper one) is a thief zone
-# while aquifer 2 (under shale 3) is a shallow aquifer.
-# The example also illustrates the setup for a random placement of wells within
-# a specified domain (inputs under the 'RandomLocDomain' entry').
+# This example illustrates a system model with an analytical reservoir component 
+# providing pressure and CO2 saturation inputs for a Multisegmented Wellbore AI component. 
+# The Multisegmented Wellbore AI component is a machine learning model with a robust 
+# performance. It's conceptualization is similar to the Multisegmented Wellbore component, but 
+# the Multisegmented Wellbore component is an analytical model.
+#
+# This example uses four wellbore locations. Two are entered with specific x and y coordinates 
+# (under 'Locations'), while two are generated within a specified domain (under 'RandomLocDomain'). 
+# The specified locations will be the first two locations (component names ending with '_000' and '001'), 
+# while the random locations will be the last two locations (component names ending with '_002' and '_003').
+# In the TimeSeries plots provided, the component names are entered under 'Subplot' - the subplot title 
+# for each location are specified with the component names.
+#
+# Because this model uses 4 wellbore locations and using the machine learning models is computationally 
+# demanding, the useDLmodel parameter is set to 0. The Multisegmented Wellbore AI results are therefore 
+# derived from analytical modeling.
+#
+# To run this example, one of the files for the Multisegmented Wellbore AI component must be 
+# downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
+# large. The two files can be downloaded from these links:
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
+#
+# Because useDLmodel is set to 0 here, only the file from the first link is required (about 2 GB). Although  
+# the results are based on analytical modeling in this case, the file is still required to calculate 
+# fluid properties. The second file (about 5.2 GB) is required if useDLmodel is set to 1.
+#
+# The zipped file must then be unzipped, with the resulting folder placed into this directory:
+#     src/openiam/components/models/wellbore/multisegmented_ai
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex51b.yaml
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex51a.yaml
 #
 # Last Modified: June, 2023
 #-------------------------------------------------
 ModelParams:
     EndTime: 25
     TimeStep: 1.0
-    Analysis:
-        type: lhs
-        siz: 32
-        seed: 456
-    Components: [Reservoir, Wellbore]
+    Analysis: forward
+    Components: [Reservoir, MSWellboreAI]
     OutputDirectory: output/output_ex51b_{datetime}
     Logging: Error
 #-------------------------------------------------
 Stratigraphy:
-    numberOfShaleLayers:
-        vary: False
-        value: 3
+    numberOfShaleLayers: 3
     shale1Thickness: 500.0
     shale2Thickness: 450.0
-    shale3Thickness: 9.6
+    shale3Thickness: 50.0
     aquifer1Thickness: 55.0
     aquifer2Thickness: 45.0
     reservoirThickness: 75.0
@@ -41,34 +58,33 @@ Reservoir:
         coordx: 0
         coordy: 0
     Parameters:
-        injRate:
-            min: 0.9
-            max: 1.8
-            value: 1.3
-        logResPerm:
-            min: -13.0
-            max: -12.0
-            value: -12.5
-        reservoirRadius: 1000
+        brineDensity: 1100
+        injRate: 1.5
+        logResPerm: -12.5
+        reservoirRadius: 2000
     Outputs: [pressure,
               CO2saturation]
 #-------------------------------------------------
-Wellbore:
-    Type: CementedWellbore
+MSWellboreAI:
+    Type: MultisegmentedWellboreAI
     Connection: Reservoir
-    Number: 2
-    # Random well locations are generated once per set of simulations
+    Number: 4
+    Locations:
+        coordx: [500, 1000]
+        coordy: [500, 1000]
     RandomLocDomain:
-        xmin: 350
-        xmax: 650
-        ymin: 200
-        ymax: 700
+        xmin: 100
+        xmax: 2000
+        ymin: 100
+        ymax: 2000
     Parameters:
-        logWellPerm:
-            min: -13.8
-            max: -11.0
-            value: -12.9
-        logThiefPerm: -13.0
+        useDLmodel: 0          # 0 or 1 - using 1 can be computationally demanding
+        brineDensity: 1100     # should match the value used for the AnalyticalReservoir
+        logWell1Perm: -14.0    # shale 1
+        logAqu1Perm: -12.0     # aquifer 1
+        logWell2Perm: -15.0    # shale 2
+        logAqu2Perm: -13.0     # aquifer 2
+        logWell3Perm: -16.0    # shale 3
         wellRadius: 0.04
     Outputs: [CO2_aquifer1,
               CO2_aquifer2,
@@ -78,46 +94,58 @@ Wellbore:
 #-------------------------------------------------
 Plots:
     PressurePlot:
-        TimeSeriesStats: [pressure]
+        TimeSeries: [pressure]
         Subplot:
             NumCols: 2
             Use: True
-            Reservoir_000.pressure: 'Pressure at random well 1'
-            Reservoir_001.pressure: 'Pressure at random well 2'
+            Reservoir_000.pressure: 'Pressure, known location 1'
+            Reservoir_001.pressure: 'Pressure, known location 2'
+            Reservoir_002.pressure: 'Pressure, random location 1'
+            Reservoir_003.pressure: 'Pressure, random location 2'
         Title: Reservoir Pressure
     SaturationPlot:
-        TimeSeriesStats: [CO2saturation]
+        TimeSeries: [CO2saturation]
         Subplot:
             NumCols: 2
             Use: True
-            Reservoir_000.CO2saturation: 'CO$_2$ saturation at random well 1'
-            Reservoir_001.CO2saturation: 'CO$_2$ saturation at random well 2'
+            Reservoir_000.CO2saturation: 'CO$_2$ saturation, known location 1'
+            Reservoir_001.CO2saturation: 'CO$_2$ saturation, known location 2'
+            Reservoir_002.CO2saturation: 'CO$_2$ saturation, random location 1'
+            Reservoir_003.CO2saturation: 'CO$_2$ saturation, random location 2'
         Title: Reservoir CO2 saturation
     CO2Leakage1:
-        TimeSeriesStats: [CO2_aquifer1]
+        TimeSeries: [CO2_aquifer1]
         Subplot:
             NumCols: 2
             Use: True
-            Wellbore_000.CO2_aquifer1: 'Leakage to thief zone, random well 1'
-            Wellbore_001.CO2_aquifer1: 'Leakage to thief zone, random well 2'
+            MSWellboreAI_000.CO2_aquifer1: 'Leakage to thief zone, known well 1'
+            MSWellboreAI_001.CO2_aquifer1: 'Leakage to thief zone, known well 2'
+            MSWellboreAI_002.CO2_aquifer1: 'Leakage to thief zone, random well 1'
+            MSWellboreAI_003.CO2_aquifer1: 'Leakage to thief zone, random well 2'
     BrineLeakage1:
-        TimeSeriesStats: [brine_aquifer1]
+        TimeSeries: [brine_aquifer1]
         Subplot:
             NumCols: 2
             Use: True
-            Wellbore_000.brine_aquifer1: 'Leakage to thief zone, random well 1'
-            Wellbore_001.brine_aquifer1: 'Leakage to thief zone, random well 2'
+            MSWellboreAI_000.brine_aquifer1: 'Leakage to thief zone, known well 1'
+            MSWellboreAI_001.brine_aquifer1: 'Leakage to thief zone, known well 2'
+            MSWellboreAI_002.brine_aquifer1: 'Leakage to thief zone, random well 1'
+            MSWellboreAI_003.brine_aquifer1: 'Leakage to thief zone, random well 2'
     CO2Leakage2:
-        TimeSeriesStats: [CO2_aquifer2]
+        TimeSeries: [CO2_aquifer2]
         Subplot:
             NumCols: 2
             Use: True
-            Wellbore_000.CO2_aquifer2: 'Leakage to aquifer, random well 1'
-            Wellbore_001.CO2_aquifer2: 'Leakage to aquifer, random well 2'
+            MSWellboreAI_000.CO2_aquifer2: 'Leakage to aquifer, known well 1'
+            MSWellboreAI_001.CO2_aquifer2: 'Leakage to aquifer, known well 2'
+            MSWellboreAI_002.CO2_aquifer2: 'Leakage to aquifer, random well 1'
+            MSWellboreAI_003.CO2_aquifer2: 'Leakage to aquifer, random well 2'
     BrineLeakage2:
-        TimeSeriesStats: [brine_aquifer2]
+        TimeSeries: [brine_aquifer2]
         Subplot:
             NumCols: 2
             Use: True
-            Wellbore_000.brine_aquifer2: 'Leakage to aquifer, random well 1'
-            Wellbore_001.brine_aquifer2: 'Leakage to aquifer, random well 2'
+            MSWellboreAI_000.brine_aquifer2: 'Leakage to aquifer, known well 1'
+            MSWellboreAI_001.brine_aquifer2: 'Leakage to aquifer, known well 2'
+            MSWellboreAI_002.brine_aquifer2: 'Leakage to aquifer, random well 1'
+            MSWellboreAI_003.brine_aquifer2: 'Leakage to aquifer, random well 2'
