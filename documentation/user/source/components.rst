@@ -52,6 +52,11 @@ Multisegmented Wellbore Component
 
 .. automodule:: openiam.base.MultisegmentedWellbore
 
+Multisegmented Wellbore AI Component
+=================================
+
+.. automodule:: openiam.base.MultisegmentedWellboreAI
+
 Cemented Wellbore Component
 ===========================
 
