@@ -36,7 +36,8 @@ class OpenWellbore(iam_bc.ComponentModel):
     table is populated using T2Well/ECO2N Ver. 1.0 :cite:`RN1900`, which treats
     the non-isothermal flow of |CO2| and brine up an open wellbore, allows for the
     phase transition of |CO2| from supercritical to gaseous, with Joule-Thompson
-    cooling, and considers exsolution of |CO2| from the brine phase.
+    cooling, and considers exsolution of |CO2| from the brine phase. Further 
+    information can be found in :cite:`BaconEtAl2021`.
 
     By default, when used within the control file interface the Open Wellbore
     is connected to the upper aquifer (e.g., aquifer 2 if there are 2 aquifers
@@ -323,7 +324,8 @@ class OpenWellbore(iam_bc.ComponentModel):
 
     def connect_with_system(self, component_data, name2obj_dict, *args, **kwargs):
         """
-        Code to add open wellbore to system model for control file interface.
+        Code to add the Open Wellbore to the system model for the control file 
+        interface.
 
         :param component_data: Dictionary of component data including 'Connection'
         :type component_data: dict

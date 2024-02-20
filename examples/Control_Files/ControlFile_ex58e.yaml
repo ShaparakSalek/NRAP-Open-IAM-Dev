@@ -1,0 +1,98 @@
+# OpenIAM Control File Example 58e
+#
+# This example is similar to control file example 58b - it demonstrates the 
+# LeakageAssessment workflow, but unlike example 58b it uses the Multisegmented 
+# Wellbore AI component. The useDLmodel parameter is set to 1, allowing the 
+# machine learning models to be used for leakage calculations.
+#
+# To run this example, the files for the Multisegmented Wellbore AI component must be 
+# downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
+# large (about 7.2 GB). The two files can be downloaded from these links:
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
+#
+# The zipped files must then be unzipped, with the resulting folders placed into this directory:
+#     src/openiam/components/models/wellbore/multisegmented_ai
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex58b.yaml
+#
+# Last Modified: September, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20
+    TimeStep: 1.0
+    Analysis:
+        type: lhs
+        siz: 30
+    Components: []
+    OutputDirectory: 'output/output_ex58e_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 250.0
+    shale2Thickness:
+        vary: False
+        value: 250.0
+    shale3Thickness:
+        vary: False
+        value: 250.0
+    aquifer1Thickness:
+        vary: False
+        value: 100.0
+    aquifer2Thickness:
+        vary: False
+        value: 100.0
+    reservoirThickness:
+        vary: False
+        value: 30.0
+#-------------------------------------------------
+Workflow:
+    Type: LeakageAssessment
+    Options:
+        PlotType: TimeSeriesStats      # Options are TimeSeries, TimeSeriesStats, or TimeSeriesAndStats
+        FigureDPI: 300
+        Subplot:
+            Use: True
+            NumCols: 2
+        FigureSize: [14, 8]            # the default TimeSeriesStats FigureSize is [13, 8], so the figures produced will be wider at [14, 8]
+        FigureName: Name.tiff          # Because the LeakageAssessment workflow produces multiple figures, only the .tiff extension from this input will be used
+        ReservoirComponentType: AnalyticalReservoir
+        ReservoirOptions:
+            InjectionWell:
+                coordx: 0
+                coordy: 0
+            Parameters:
+                injRate: 0.5
+                reservoirRadius: 3000  # The wellbore locations used should not be beyond the radius of the AnalyticalReservoir
+                logResPerm:
+                    min: -14.0
+                    max: -13.0
+                    value: -13.5
+                brineDensity: 1100
+                brineResSaturation: 0.075
+        WellboreComponentType: MultisegmentedWellboreAI
+        WellboreOptions:
+            Locations:                 # Locations input is required when using the LeakageAssessment Workflow
+                coordx: [1000, 1500]
+                coordy: [1000, 1500]
+            Parameters:
+                useDLmodel: 1          # 0 or 1
+                wellRadius: 0.04
+                logWellPerm:
+                    min: -14.0
+                    max: -13.0
+                    value: -13.5
+                logAquPerm:
+                    min: -13.5
+                    max: -12.5
+                    value: -13.0
+                brineDensity: 1100
+        AquiferName: aquifer1

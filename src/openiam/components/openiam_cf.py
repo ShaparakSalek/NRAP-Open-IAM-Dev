@@ -37,10 +37,10 @@ from openiam.cf_interface.plots import process_plots
 from openiam.cf_interface.output import process_output
 from openiam.cf_interface.text import system_model_to_text, component_models_to_text
 from openiam.cf_interface.strata import (get_comp_types_strata_pars,
-                                          get_comp_types_strata_obs,
-                                          initialize_strata,
-                                          process_spatially_variable_strata,
-                                          get_strat_param_dict_for_link)
+                                         get_comp_types_strata_obs,
+                                         initialize_strata,
+                                         process_spatially_variable_strata,
+                                         get_strat_param_dict_for_link)
 
 from openiam.cf_interface.examples_data import GUI_EXAMPLES, CFI_EXAMPLES
 from openiam.cf_interface import workflow
@@ -90,6 +90,7 @@ pathway_components = ['LookupTableReservoir',
                       'GenericReservoir',
                       'TheisReservoir',
                       'MultisegmentedWellbore',
+                      'MultisegmentedWellboreAI',
                       'CementedWellbore',
                       'CementedWellboreWR',
                       'OpenWellbore',
@@ -109,6 +110,7 @@ reservoir_components = ['LookupTableReservoir',
                         'TheisReservoir']
 
 wellbore_components = ['MultisegmentedWellbore',
+                       'MultisegmentedWellboreAI',
                        'CementedWellbore',
                        'CementedWellboreWR',
                        'OpenWellbore',
@@ -611,10 +613,11 @@ def main(yaml_filename, binary_file=False):
         # Make model connections
         if 'Connection' in component_data:
             connection = None
+
             try:
                 connection = name2obj_dict[component_data['Connection']]
             except KeyError:
-                pass
+                pass   
 
             if hasattr(components[-1], 'system_inputs'):
                 for sinput in components[-1].system_inputs:
@@ -1111,7 +1114,8 @@ def set_system_params(yaml_data, component, component_name, name2obj_dict):
     types_strata_obs = get_comp_types_strata_obs()
 
     if yaml_data[component_name]['Type'] in [
-            'SimpleReservoir', 'AnalyticalReservoir', 'MultisegmentedWellbore']:
+            'SimpleReservoir', 'AnalyticalReservoir', 'MultisegmentedWellbore', 
+            'MultisegmentedWellboreAI']:
         if 'numberOfShaleLayers' in strat_comp.pars:
             connect = strat_comp.pars
         elif 'numberOfShaleLayers' in strat_comp.deterministic_pars:
@@ -1174,6 +1178,12 @@ def clean_components(yaml_data):
             cmpnt_obj.x_scaler_s = None
             cmpnt_obj.y_scaler_s = None
             cmpnt_obj.model_s = None
+            continue
+            
+        elif yaml_data[cmpnt_nm]['Type'] == 'MultisegmentedWellboreAI':
+            cmpnt_obj.FluidModels = None
+            cmpnt_obj.DLModels1 = None
+            cmpnt_obj.DLModels2 = None
             continue
 
 

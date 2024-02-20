@@ -50,21 +50,14 @@ Stratigraphy:
 AnalyticalReservoir1:
     Type: AnalyticalReservoir
     Parameters:
-        injRate:
-            vary: False
-            value: 0.05
-        logResPerm:
-            vary: False
-            value: -13.5
-        reservoirRadius:
-            value: 75000
-            vary: False
-        brineResSaturation:
-            value: 0.175
-            vary: False
-        brineDensity:
-            value: 1075
-            vary: False
+        injRate: 0.05
+        logResPerm: -13.5
+        reservoirRadius: 75000
+        brineResSaturation: 0.175
+        brineDensity: 1075
+        CO2Density: 775.0
+        brineViscosity: 3.0e-5
+        CO2Viscosity: 6.6e-5
     Outputs: [pressure, CO2saturation]
 #-------------------------------------------------
 MultisegmentedWellbore1:
@@ -84,7 +77,7 @@ MultisegmentedWellbore1:
         logAqu1Perm: -13.5
         logAqu2Perm: -13.5
         logWellPerm: -15.0
-        brineDensity: 1075
+        brineDensity: 1075     # should match the AnalyticalReservoir's brineDensity
         CO2Density: 775.0
         brineViscosity: 1.0e-4
         CO2Viscosity: 6.6e-5

@@ -1,0 +1,165 @@
+# OpenIAM Control File Example 31g
+#
+# This example demonstrates the use of the AoR plot type in a simulation
+# using a MultisegmentedWellboreAI component.
+#
+# The AoR plot Pressure_Plot_CritP_Calc uses a calculated critical pressure.
+# Because the MultisegmentedWellboreAI component has a brine density parameter
+# (brineDensity), that parameter value will be used when calculated the
+# critical pressure. In contrast, the AoR plot Pressure_Plot_CritP_Given
+# uses a specified critical pressure (CriticalPressureMPa: 15.5).
+#
+# The 'useDLmodel' parameter controls whether the Multisegmented Wellbore AI component uses the 
+# machine learning models (1: yes, 0: no). Using these models can be computationally demanding, 
+# and the intensity of this demand increases with the number of wellbore locations used. Because 
+# a large number of wellbores are typically used in AoR plots, using the machine learning models 
+# of the Multisegmented Wellbore AI component ('useDLmodel' set to 1) can require a relatively 
+# powerful computer. For more details, see control file example 51a.
+# 
+# To run this example, one of the files for the Multisegmented Wellbore AI component must be 
+# downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
+# large. The two files can be downloaded from these links:
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
+#
+# Because useDLmodel is set to 0 here, only the file from the first is required (about 2 GB). Although  
+# the results are based on analytical modeling in this case, the file is still required to calculate 
+# fluid properties. The second file (about 5.2 GB) is required if useDLmodel is set to 1.
+#
+# The zipped file must then be unzipped, with the resulting folder placed into this directory:
+#     src/openiam/components/models/wellbore/multisegmented_ai
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex31g.yaml
+#
+# Last Modified: August, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 20
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [AnalyticalReservoir1, MultisegmentedWellboreAI1, GenericAquifer1]
+    OutputDirectory: 'output/output_ex31g_{datetime}'
+    GenerateOutputFiles: False
+    GenerateCombOutputFile: False
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers:
+        vary: False
+        value: 3
+    shale1Thickness:
+        vary: False
+        value: 200
+    shale2Thickness:
+        vary: False
+        value: 200
+    shale3Thickness:
+        vary: False
+        value: 200
+    aquifer1Thickness:
+        vary: False
+        value: 80
+    aquifer2Thickness:
+        vary: False
+        value: 80
+    reservoirThickness:
+        vary: False
+        value: 100
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    Parameters:
+        injRate: 1
+        logResPerm: -12.0
+        reservoirRadius: 13000
+        brineResSaturation: 0.01
+        brineDensity: 1010
+        CO2Density: 775.0
+        brineViscosity: 3.0e-4
+        CO2Viscosity: 6.6e-5
+    Outputs: [pressure, CO2saturation]
+#-------------------------------------------------
+MultisegmentedWellboreAI1:
+    Type: MultisegmentedWellboreAI
+    Connection: AnalyticalReservoir1
+    Number: 16   # 4*4
+    Locations:
+        grid:
+            xmin: -10000
+            xmax: 10000
+            xsize: 4
+            ymin: -10000
+            ymax: 10000
+            ysize: 4
+    Parameters:
+        useDLmodel: 0           # 0 or 1 - using 1 can be computationally demanding, and a computer may not have enough memory
+        wellRadius: 0.04
+        logWell1Perm: -12.0     # shale 1
+        logAqu1Perm: -14.0      # aquifer 1
+        logWell2Perm: -16.0     # shale 2
+        logAqu2Perm: -15.5      # aquifer 2
+        logWell3Perm: -16.0     # shale 3
+        brineDensity: 1010
+        CO2Density: 775.0
+        brineViscosity: 1.0e-3
+        CO2Viscosity: 6.6e-5
+    Outputs: [CO2_aquifer1, CO2_aquifer2,
+              brine_aquifer1, brine_aquifer2]
+#-------------------------------------------------
+GenericAquifer1:
+    Type: GenericAquifer
+    Connection: MultisegmentedWellboreAI1
+    AquiferName: aquifer1
+    Parameters:
+        por: 0.1
+        log_permh: -14.0
+        log_aniso: 0.3
+        dissolved_salt_threshold: 0.01
+        dissolved_co2_threshold: 0.01
+        aquifer_salinity: 0.0075
+    Outputs: [Dissolved_CO2_volume, Dissolved_salt_volume]
+#-------------------------------------------------
+Plots:
+    Pressure:
+        TimeSeries: [pressure]
+        Subplot:
+            Use: False
+    CO2_Saturation:
+        TimeSeries: [CO2saturation]
+        Subplot:
+            Use: False
+    Brine_Leakage:
+        TimeSeries: [brine_aquifer1]
+        Subplot:
+            Use: False
+    CO2_Leakage:
+        TimeSeries: [CO2_aquifer1]
+        Subplot:
+            Use: False
+    Salt_Plume_Volume:
+        TimeSeries: [Dissolved_salt_volume]
+        Subplot:
+            Use: False
+    CO2_Plume_Volumes:
+        TimeSeries: [Dissolved_CO2_volume]
+        Subplot:
+            Use: False
+    AoR_Pressure:
+        AoR: [pressure]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+        CriticalPressureMPa: Calculated     # calculated with the brineDensity parameter of the MultisegmentedWellboreAI component
+    AoR_CO2saturation:
+        AoR: [CO2saturation]
+    AoR_Aquifer_CO2_Impact:
+        AoR: [Dissolved_CO2_volume]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True
+    AoR_Aquifer_Salt_Impact:
+        AoR: [Dissolved_salt_volume]
+        PlotInjectionSites: True
+        FigureDPI: 200
+        SaveCSVFiles: True

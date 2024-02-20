@@ -49,9 +49,9 @@ AOR_RESERVOIR_COMPONENTS = ['LookupTableReservoir', 'SimpleReservoir',
                             'AnalyticalReservoir', 'GenericReservoir',
                             'TheisReservoir']
 
-AOR_WELLBORE_COMPONENTS = ['OpenWellbore', 'MultisegmentedWellbore',
-                           'CementedWellbore', 'CementedWellboreWR',
-                           'GeneralizedFlowRate']
+AOR_WELLBORE_COMPONENTS = ['OpenWellbore', 'MultisegmentedWellbore', 
+                           'MultisegmentedWellboreAI', 'CementedWellbore', 
+                           'CementedWellboreWR', 'GeneralizedFlowRate']
 
 AOR_AQUIFER_COMPONENTS = ['FutureGen2Aquifer', 'FutureGen2AZMI', 'GenericAquifer',
                           'DeepAlluviumAquifer']
@@ -619,6 +619,7 @@ def get_AoR_results(x_loc, output_names, sm, s, output_list, yaml_data,
                 if critPressureInput == 'Calculated' and isinstance(
                         output_component, (iam_base.OpenWellbore,
                                            iam_base.MultisegmentedWellbore,
+                                           iam_base.MultisegmentedWellboreAI,
                                            iam_base.CementedWellbore,
                                            iam_base.CementedWellboreWR,
                                            iam_base.GeneralizedFlowRate)):

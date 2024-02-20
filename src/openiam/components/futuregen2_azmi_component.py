@@ -32,7 +32,10 @@ class FutureGen2AZMI(iam_bc.ComponentModel):
     (|CO2|) and brine leakage from the |CO2| storage reservoir
     at the FutureGen 2.0 site might have on overlying aquifers or monitoring units.
     The model predicts the size of “impact plumes” according to five metrics:
-    pH, total dissolved solids (TDS), pressure, dissolved |CO2| and temperature.
+    pH, total dissolved solids (TDS), pressure, dissolved |CO2| and temperature. 
+    This component is similar to the FutureGen 2.0 Aquifer component model, but 
+    that model depicts more shallow aquifers while this compoent depicts deeper 
+    aquifers. Further information can be found in :cite:`Bacon2021`.
 
     The FutureGen 2.0 AZMI model is a regression model fitted to the results of
     STOMP-CO2E-R multiphase flow and reactive transport simulations of |CO2| and
