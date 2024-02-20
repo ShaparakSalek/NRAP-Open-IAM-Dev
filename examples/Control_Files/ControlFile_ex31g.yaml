@@ -11,8 +11,10 @@
 #
 # The 'useDLmodel' parameter controls whether the Multisegmented Wellbore AI component uses the 
 # machine learning models (1: yes, 0: no). Using these models can be computationally demanding, 
-# and the intensity of this demand increases with the number of wellbore locations used. For more 
-# details, see control file example 51a.
+# and the intensity of this demand increases with the number of wellbore locations used. Because 
+# a large number of wellbores are typically used in AoR plots, using the machine learning models 
+# of the Multisegmented Wellbore AI component ('useDLmodel' set to 1) can require a relatively 
+# powerful computer. For more details, see control file example 51a.
 # 
 # To run this example, one of the files for the Multisegmented Wellbore AI component must be 
 # downloaded. The files are not included in the download of NRAP-Open-IAM because they are 

@@ -161,8 +161,8 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
       1 or 0 (``True`` or ``False``).
     
     The possible outputs from the AI Multisegmented Wellbore component are 
-    leakage rates of |CO2| and brine to each of the aquifers in the system and 
-    atmosphere. The names of the observations are of the form:
+    leakage rates of |CO2| and brine to each of the aquifers in the system as 
+    well as the atmosphere. The names of the observations are of the form:
 
     * **CO2_aquifer1**, **CO2_aquifer2**,..., **CO2_atm** [|kg/s|] -
       |CO2| leakage rates
@@ -178,7 +178,8 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
       
     For control file examples using the Multisegmented Wellbore AI component, see 
     *ControlFile_ex31g*, *ControlFile_ex51a* to *ControlFile_ex51c*, and 
-    *ControlFile_ex58d*.
+    *ControlFile_ex58e*. For script examples, see *iam_sys_strata_reservoir_mswellai_genericaquifer.py* 
+    and *iam_sys_lutreservoir_mswellai.py*.
     """
     def __init__(self, name, parent, useDLmodel=False):
         """
