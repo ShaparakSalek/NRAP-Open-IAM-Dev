@@ -1,0 +1,106 @@
+# OpenIAM Control File Example
+#
+# This example demonstrates the use of the 'AccumulateLeakage' option with 
+# a MultisegmentedWellboreAI component. Although that component type can produce 
+# the cumulative masses of CO2 and brine ('mass_CO2_aquifer#' and 'mass_brine_aquifer#'), 
+# those metrics are automatically calculated and saved when 'AccumulateLeakage: True' is 
+# entered in the section for a wellbore component. The output names do not need to be 
+# entered under 'Outputs'. If GenerateOutputFiles is True in the ModelParams section, 
+# the leaked masses will be saved to .csv files. The names of the .csv files will combine the 
+# wellbore components name, the term 'AdapterAquifer#' (where '#' is an aquifer index), and then 
+# a location index (e.g., '_000' for the first location, '_001' for the second, etc.). The 
+# leaked masses can also be included in the the 'Plots' section, as shown here. Note that this 
+# example was made to be similar to the script example 
+# iam_sys_strata_reservoir_mswellai_genericaquifer.py (although without the GenericAquifer component).
+#
+# To run this example, the files for the MultisegmentedWellboreAI component must be 
+# downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
+# large (about 7.2 GB). The two files can be downloaded from these links:
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
+#
+# The zipped files must then be unzipped, with the resulting folders placed into this directory:
+#     src/openiam/components/models/wellbore/multisegmented_ai
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex48b.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [Reservoir, Wellbore]
+    OutputDirectory: 'output/output_ex48b_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    reservoirThickness: 31
+    shale1Thickness: 322
+    aquifer1Thickness: 51
+    shale2Thickness: 216
+    aquifer2Thickness: 45
+    shale3Thickness: 67
+    aquifer3Thickness: 142
+    shale4Thickness: 156
+    aquifer4Thickness: 22
+    shale5Thickness: 54
+#-------------------------------------------------
+Reservoir:
+    Type: AnalyticalReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Parameters:
+        injRate: 0.33
+        logResPerm: -13.5
+        reservoirPorosity: 0.175
+        reservoirRadius: 10000
+        brineResSaturation: 0.05
+        brineDensity: 1050
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+Wellbore:
+    Type: MultisegmentedWellboreAI
+    Connection: Reservoir
+    Number: 1
+    AccumulateLeakage: True
+    Locations:
+        coordx: 3535.35
+        coordy: 3535.35
+    Parameters:
+        useDLmodel: 1
+        wellRadius: 0.04
+        logWell1Perm: -12.5
+        logAqu1Perm: -13.5
+        logWell2Perm: -15.5
+        logAqu2Perm: -13.5
+        logWell3Perm: -15.5
+        logAqu3Perm: -13.5
+        logWell4Perm: -15.5
+        logAqu4Perm: -13.5
+        logWell5Perm: -15.5
+        brineDensity: 1050
+    Outputs: [CO2_aquifer1, CO2_aquifer2, CO2_aquifer3, CO2_aquifer4, CO2_atm, 
+              brine_aquifer1, brine_aquifer2, brine_aquifer3, brine_aquifer4, brine_atm]
+#-------------------------------------------------
+Plots:
+    StratCol:
+        StratigraphicColumn:
+    Reservoir_Conditions:
+        TimeSeries: [pressure, CO2saturation]
+    Brine_Leakage_Rates:
+        TimeSeries: [brine_aquifer1, brine_aquifer2, brine_aquifer3, brine_aquifer4]
+    CO2_Leakage_Rates:
+        TimeSeries: [CO2_aquifer1, CO2_aquifer2, CO2_aquifer3, CO2_aquifer4]
+    Cumulative_Brine_Leakage:
+        TimeSeries: [mass_brine_aquifer1, mass_brine_aquifer2, mass_brine_aquifer3, mass_brine_aquifer4]
+    Cumulative_CO2_Leakage:
+        TimeSeries: [mass_CO2_aquifer1, mass_CO2_aquifer2, mass_CO2_aquifer3, mass_CO2_aquifer4]
+

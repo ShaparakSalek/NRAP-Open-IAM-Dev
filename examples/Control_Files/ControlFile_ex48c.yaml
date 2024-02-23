@@ -1,0 +1,167 @@
+# OpenIAM Control File Example 48c
+#
+# This example is similar examplpe 48b, but it uses more wellbore locations. 
+# Like 48b, this example demonstrates the use of the 'AccumulateLeakage' option with 
+# a MultisegmentedWellboreAI component. Because five wellbore locations are used here, 
+# the plots are set up to handle only one metric each and the use of subplots is disabled. 
+# If multiple metrics (e.g., 'mass_brine_aquifer1' and 'mass_brine_aquifer2') were 
+# combined in one plot, the plot could become visually unclear.
+#
+# In this example, only aquifer 1 receives leakage.
+#
+# Because this model uses 5 wellbore locations and using the machine learning models is computationally 
+# demanding, the useDLmodel parameter is set to 0. The Multisegmented Wellbore AI results are therefore 
+# derived from analytical modeling.
+
+# To run this example, one of the files for the Multisegmented Wellbore AI component must be 
+# downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
+# large. The two files can be downloaded from these links:
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
+#     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
+
+# Because useDLmodel is set to 0 here, only the file from the first link is required (about 2 GB). Although  
+# the results are based on analytical modeling in this case, the file is still required to calculate 
+# fluid properties. The second file (about 5.2 GB) is required if useDLmodel is set to 1.
+
+# The zipped file must then be unzipped, with the resulting folder placed into this directory:
+#     src/openiam/components/models/wellbore/multisegmented_ai
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [Reservoir, Wellbore]
+    OutputDirectory: 'output/output_ex48c_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    reservoirThickness: 31
+    shale1Thickness: 322
+    aquifer1Thickness: 51
+    shale2Thickness: 216
+    aquifer2Thickness: 45
+    shale3Thickness: 67
+    aquifer3Thickness: 142
+    shale4Thickness: 156
+    aquifer4Thickness: 22
+    shale5Thickness: 54
+#-------------------------------------------------
+Reservoir:
+    Type: AnalyticalReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Parameters:
+        injRate: 0.33
+        logResPerm: -13.5
+        reservoirPorosity: 0.175
+        reservoirRadius: 10000
+        brineResSaturation: 0.05
+        brineDensity: 1050
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+Wellbore:
+    Type: MultisegmentedWellboreAI
+    Connection: Reservoir
+    Number: 5
+    AccumulateLeakage: True
+    Locations:
+        coordx: [3535.53, 4242.64, 4949.75, 5656.85, 6363.96]
+        coordy: [3535.53, 4242.64, 4949.75, 5656.85, 6363.96]
+    Parameters:
+        useDLmodel: 0
+        wellRadius: 0.04
+        logWell1Perm: -12.5
+        logAqu1Perm: -13.5
+        logWell2Perm: -15.5
+        logAqu2Perm: -13.5
+        logWell3Perm: -15.5
+        logAqu3Perm: -13.5
+        logWell4Perm: -15.5
+        logAqu4Perm: -13.5
+        logWell5Perm: -15.5
+        brineDensity: 1050
+    Outputs: [CO2_aquifer1, CO2_aquifer2, CO2_aquifer3, CO2_aquifer4, CO2_atm, 
+              brine_aquifer1, brine_aquifer2, brine_aquifer3, brine_aquifer4, brine_atm]
+#-------------------------------------------------
+Plots:
+    Reservoir_Pressure:
+        TimeSeries: [pressure]
+        Subplot:
+            Use: False
+    Reservoir_Conditions:
+        TimeSeries: [CO2saturation]
+        Subplot:
+            Use: False
+    Brine_Leakage_Rates_Aq1:
+        TimeSeries: [brine_aquifer1]
+        Subplot:
+            Use: False
+    Brine_Leakage_Rates_Aq2:
+        TimeSeries: [brine_aquifer2]
+        Subplot:
+            Use: False
+    Brine_Leakage_Rates_Aq3:
+        TimeSeries: [brine_aquifer3]
+        Subplot:
+            Use: False
+    Brine_Leakage_Rates_Aq4:
+        TimeSeries: [brine_aquifer4]
+        Subplot:
+            Use: False
+    CO2_Leakage_Rates_Aq1:
+        TimeSeries: [CO2_aquifer1]
+        Subplot:
+            Use: False
+    CO2_Leakage_Rates_Aq2:
+        TimeSeries: [CO2_aquifer2]
+        Subplot:
+            Use: False
+    CO2_Leakage_Rates_Aq3:
+        TimeSeries: [CO2_aquifer3]
+        Subplot:
+            Use: False
+    CO2_Leakage_Rates_Aq4:
+        TimeSeries: [CO2_aquifer4]
+        Subplot:
+            Use: False
+    Brine_Cumulative_Leakage_Aq1:
+        TimeSeries: [mass_brine_aquifer1]
+        Subplot:
+            Use: False
+    Brine_Cumulative_Leakage_Aq2:
+        TimeSeries: [mass_brine_aquifer2]
+        Subplot:
+            Use: False
+    Brine_Cumulative_Leakage_Aq3:
+        TimeSeries: [mass_brine_aquifer3]
+        Subplot:
+            Use: False
+    Brine_Cumulative_Leakage_Aq4:
+        TimeSeries: [mass_brine_aquifer4]
+        Subplot:
+            Use: False
+    CO2_Cumulative_Leakage_Aq1:
+        TimeSeries: [mass_CO2_aquifer1]
+        Subplot:
+            Use: False
+    CO2_Cumulative_Leakage_Aq2:
+        TimeSeries: [mass_CO2_aquifer2]
+        Subplot:
+            Use: False
+    CO2_Cumulative_Leakage_Aq3:
+        TimeSeries: [mass_CO2_aquifer3]
+        Subplot:
+            Use: False
+    CO2_Cumulative_Leakage_Aq4:
+        TimeSeries: [mass_CO2_aquifer4]
+        Subplot:
+            Use: False
+

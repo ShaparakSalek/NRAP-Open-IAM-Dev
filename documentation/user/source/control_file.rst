@@ -64,7 +64,7 @@ That is, if there is a need to keep all results from re-running an NRAP-Open-IAM
 the ``{datetime}`` keyword will easily facilitate this; if re-running an
 NRAP-Open-IAM case should overwrite previous results, the ``{datetime}`` keyword should be
 omitted. In the output folder, NRAP-Open-IAM places a copy of the input file, a folder
-("csv_files") containing all outputs from the component models written to .csv files,
+("csv_files") containing all outputs from the component models written to ``.csv`` files,
 and files for all of the plots created.
 
 The keyword ``Logging`` defines what level of logging information is written out
@@ -81,8 +81,8 @@ the highest importance.
 The ``GenerateOutputFiles``, ``GenerateCombOutputFile``, and ``GenerateStatFiles`` control
 the types of output files saved. Each of these entries can be set to ``True`` or ``False``;
 if any of these entries are not provided, the default setting is ``True``. If ``GenerateOutputFiles``
-is ``True``, the simulation will save results to .csv files. Each component output will be
-saved to its own .csv file. If ``GenerateCombOutputFile`` is ``True``, all simulation results
+is ``True``, the simulation will save results to ``.csv`` files. Each component output will be
+saved to its own ``.csv`` file. If ``GenerateCombOutputFile`` is ``True``, all simulation results
 will be saved to one file. If the analysis type is ``forward``, the file is called
 ``simulation_results.csv``. If the analysis type is ``lhs`` or ``parstudy``, the file is called
 ``output_realizations.csv`` and the parameter values used are saved to another file called
@@ -254,6 +254,14 @@ Note that when using a ``LookupTableReservoir`` component, the wellbore location
 must occur in the domain contained within the files used for the Lookup Table
 Reservoir component. If any wellbore locations fall outside of the ``x`` and ``y`` values
 covered in that file, the simulation will encounter an error.
+
+Some wellbore components can produce the cumulative masses of |CO2| and brine leaked 
+to aquifers (e.g., outputs like **mass_CO2_aquifer1** and **mass_brine_aquifer2**), 
+while some cannot. For example, the ``OpenWellbore`` component can produce leakage rates, 
+but not leaked masses. In the control file interface, cumulative leaked masses from any 
+type of wellbore component will be calculated if ``AccumulateLeakage : True`` is included 
+in the wellbore component's section of the *.yaml* control file. These outputs can then 
+be saved to ``.csv`` files or used in plots (see *ControlFile_ex48a.yaml*).
 
 Different components can take different entries in a control file. For example, the
 ``InjectionWell`` entry works with an ``AnalyticalReservoir`` component, but not a

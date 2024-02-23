@@ -21,8 +21,6 @@ Example of run:
 $ python iam_sys_strata_reservoir_openwell_genericaquifer.py
 """
 
-import sys
-import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
@@ -56,7 +54,7 @@ if __name__ == '__main__':
     if selected_aquifer_num < 0 or selected_aquifer_num > (len(aquifer_thicknesses) - 1):
         err_msg = ''.join([
             'The selected_aquifer_num variable was set to {}. '.format(selected_aquifer_num),
-            'This variable can only range from o to {}. '.format(len(aquifer_thicknesses) - 1),
+            'This variable can only range from 0 to {}. '.format(len(aquifer_thicknesses) - 1),
             'Due to this issue, the simulation cannot continue.'])
         raise KeyError(err_msg)
 

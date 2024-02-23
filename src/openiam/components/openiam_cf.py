@@ -40,7 +40,8 @@ from openiam.cf_interface.strata import (get_comp_types_strata_pars,
                                          get_comp_types_strata_obs,
                                          initialize_strata,
                                          process_spatially_variable_strata,
-                                         get_strat_param_dict_for_link)
+                                         get_strat_param_dict_for_link, 
+                                         get_default_num_shale_layers)
 
 from openiam.cf_interface.examples_data import GUI_EXAMPLES, CFI_EXAMPLES
 from openiam.cf_interface import workflow
@@ -115,6 +116,18 @@ wellbore_components = ['MultisegmentedWellbore',
                        'CementedWellboreWR',
                        'OpenWellbore',
                        'GeneralizedFlowRate']
+
+wellbore_components_single_receptor = ['OpenWellbore']
+
+wellbore_components_two_receptors = ['CementedWellbore', 
+                                     'CementedWellboreWR']
+
+wellbore_components_many_receptors = ['MultisegmentedWellbore', 
+                                      'MultisegmentedWellboreAI']
+
+# Option to create additional RateToMassAdapters to calculate and save cumulative 
+# leaked masses from wellbore components.
+DEFAULT_ACCUMULATE_LEAKAGE = False
 
 # Components accepting dynamic inputs as scalar
 single_input_aquifer_components = ['AlluviumAquifer',
@@ -256,6 +269,8 @@ def main(yaml_filename, binary_file=False):
     sm = iam_base.SystemModel(model_kwargs=sm_model_kwargs)
 
     strata, sm, strata_type = initialize_strata(yaml_data, sm)
+    
+    strata_data = yaml_data[strata_type]
 
     # These lists indicate the stratigraphy component types that offer thicknesses
     # and depths as parameters or as observations.
@@ -378,9 +393,18 @@ def main(yaml_filename, binary_file=False):
     # and 2nd element is name of aquifer to which the leakage rates should be output
     # adapters are components needed to link aquifer components to wellbores
     ad_connect = []
+    
+    # ad_connect_2 is the same, but it is not used to connect with aquifer components.
+    # It is used to produce cumulative leaked masses for the wellbore components, 
+    # allowing the masses to be saved. These are considered 'extra adapters'.
+    ad_connect_2 = []
+    
     # List of all the final components of the system model
     comp_list2 = []
-
+    
+    # extra adapters, added to comp_list2 after all other components
+    extra_adapter_comps = []
+    
     # Dictionary of system model collectors
     # collectors is a dictionary with keys being names of inputs coming from
     # observations of 'connection' components (mainly wellbore) and having
@@ -401,6 +425,10 @@ def main(yaml_filename, binary_file=False):
         if comp_data['Type'] in wellbore_components:
             locations = process_wellbore_locations(
                 comp_data, comp_model, locations)
+            
+            ad_connect_2, extra_adapter_comps, path_list = handle_extra_adapters(
+                comp_model, comp_data, ad_connect_2, extra_adapter_comps, path_list, 
+                strata, strata_type, strata_data)
 
         if comp_data['Type'] in reservoir_components:
             locations, inj_well_locations = process_reservoir_locations(
@@ -440,16 +468,21 @@ def main(yaml_filename, binary_file=False):
                         'argument': sci[sinput],
                         'data': []}
         comp_list2.append(comp_model)
+    
+    for extra_adapter in extra_adapter_comps:
+        # If extra adapters are used, append them after other components
+        comp_list2.append(extra_adapter)
 
     debug_msg = ''.join(["Updated component list with adapters {}.\n",
                          "List of adapters {}.\nPath list {}."]).format(
                              comp_list2, ad_connect, path_list)
     logging.debug(debug_msg)
-
+    
     # Create component list with all pathways
     comps = comp_list2
     comp_list = []
     num_adapters = 0
+    num_extra_adapters = 0
     adapters = {}
     for comp_model in comps:  # go over all components in the components list
         if comp_model in path_list:  # reservoir, wellbore or aquifer (except carbonate)
@@ -458,8 +491,14 @@ def main(yaml_filename, binary_file=False):
                     yaml_data, comp_list, adapters, ad_connect,
                     locations, num_adapters)
                 continue  # proceed to the next component in "comps" list
+            
+            if comp_model == 'extraAdapter':
+                num_extra_adapters = process_adapter(
+                    yaml_data, comp_list, adapters, ad_connect_2,
+                    locations, num_extra_adapters, extra_adapter=True)
+                continue  # proceed to the next component in "comps" list
 
-            # If comp_model is not an adapter get its data
+            # If comp_model is not an adapter, get its data
             comp_data = yaml_data[comp_model]
 
             # For reservoir components providing output for other components
@@ -478,7 +517,6 @@ def main(yaml_filename, binary_file=False):
                 process_aquifer(yaml_data, comp_list, comp_data,
                                 comp_model, locations)
                 continue
-
 
         else:  # if comp_model is not in the path_list
             # For components not in the path_list
@@ -509,8 +547,6 @@ def main(yaml_filename, binary_file=False):
         name2obj_dict = {'strata': strata, 'strata_type': strata_type}
     elif strata_type in types_strata_obs:
         name2obj_dict = {'strata': '', 'strata_type': strata_type}
-
-    strata_data = yaml_data[strata_type]
 
     # Create dictionary of component models with outputs and lists of output names
     output_list = {}
@@ -798,43 +834,62 @@ def process_print_system_options(model_data, sm, out_dir, analysis):
 
 
 def process_adapter(yaml_data, comp_list, adapters, ad_connect, locations,
-                    prev_num_adapters):
+                    prev_num_adapters, extra_adapter=False):
     """
     Add adapter components to yaml data based on presence of wellbore
-    and aquifer components.
+    and aquifer components. If extra_adapter is True, the adapter component is 
+    not used to provide masses to an aquifer component. Instead, it is used only 
+    to calculate and save the cumulative leakage masses.
     """
-    # ad_connect is a list of pairs
-    # where 1st element is names of wellbores (to be linked to adapters),
-    # and 2nd element is name of aquifer to which the leakage rates should be output
-    # adapters are components needed to link aquifer components to wellbores
+    # ad_connect is a list of pairs where the 1st element is names of wellbores 
+    # (to be linked to adapters), and the 2nd element is name of aquifer to which 
+    # the leakage rates should be output.
+    # Adapters are components needed to link aquifer components to wellbores.
     # ad_connect_name_base is possibly a list of connections
     # Remove the first element from the list and return it
     ad_connect_name_base = ad_connect.pop(0)
+    
     # Index to keep track of the total number of adapters
     ad_ind = prev_num_adapters
-    # Since adapter through aquifer can be connected to
-    # several groups of wells
-    # connect_cmpnt represents a particular group of wells
-    # ad_connect_name_base[0] is a list of wellbore components
-    # which provide input for adapters
-    # ad_connect_name_base[1] is a name of aquifer to which
+    
+    # Since adapter through aquifer can be connected to several groups of 
+    # wells, connect_cmpnt represents a particular group of wells.
+    # ad_connect_name_base[0] is a list of wellbore components which provide 
+    # input for adapters. ad_connect_name_base[1] is a name of aquifer to which 
     # leakage rates are of interest
     for connect_cmpnt in ad_connect_name_base[0]:
         # Depending on the number of wells in the given group
         for ind in range(locations[connect_cmpnt]['number']):
-            ad_name = 'adapter_{0:03}'.format(ad_ind)
+            
+            if extra_adapter:
+                ad_name = connect_cmpnt + 'AdapterA{}'.format(
+                    ad_connect_name_base[1][1:]) + '_{0:03}'.format(ind)
+                
+                # Ouputs are saved for extra adapters
+                extra_adapter_outputs = ['mass_brine_' + ad_connect_name_base[1], 
+                                         'mass_CO2_' + ad_connect_name_base[1]]
+            else:
+                ad_name = 'adapter_{0:03}'.format(ad_ind)
+                
             # ad_connect_name is name of (wellbore) component
             # from which output will be requested
             ad_connect_name = connect_cmpnt + '_{0:03}'.format(ind)
+            
             # Save information about adapter component in the yaml_data dictionary
             # where information about other components is saved as well
             yaml_data[ad_name] = {'Type': 'RateToMassAdapter',
                                   'Connection': ad_connect_name,
                                   'AquiferName': ad_connect_name_base[1]}
+            
+            if extra_adapter:
+                yaml_data[ad_name]['Outputs'] = extra_adapter_outputs
+            
             # Save information about adapter component in adapters dictionary
             adapters[ad_name] = yaml_data[ad_name]
+            
             # Add adapters to the component list
             comp_list.append(ad_name)
+            
             # Increase count index for adapters
             ad_ind = ad_ind + 1
 
@@ -1153,6 +1208,68 @@ def set_system_params(yaml_data, component, component_name, name2obj_dict):
                 component.add_par_linked_to_obs(sparam, strat_comp.linkobs[sparam])
 
     return component
+
+
+def handle_extra_adapters(comp_model, comp_data, ad_connect_2, extra_adapter_comps, 
+                          path_list, strata, strata_type, strata_data):
+    """
+    Checks if the wellbore component has been set up to have RateToMassAdapter 
+    components made to calculate and save cumulative leakage masses (brine and CO2). 
+    If enabled, these adapters are separate from the adapters that provide masses 
+    to aquifer components. These adapters ('extraAdapter') are used to save 
+    the cumulative leaked masses - such results are not saved by the adapters 
+    used to link wellbore and aquifer components.
+    """
+    accumulate_leakage = comp_data.get('AccumulateLeakage', 
+                                       DEFAULT_ACCUMULATE_LEAKAGE)
+    
+    if accumulate_leakage:
+        types_strata_pars = get_comp_types_strata_pars()
+        types_strata_obs = get_comp_types_strata_obs()
+        
+        if strata_type in types_strata_pars:
+            sparam = 'numberOfShaleLayers'
+            connect = get_strat_param_dict_for_link(sparam, strata)
+            
+            numberOfShaleLayers = connect[sparam]
+            
+        elif strata_type in types_strata_obs:
+            numberOfShaleLayers = get_default_num_shale_layers(strata_type, strata_data)
+        
+        if comp_data['Type'] in wellbore_components_single_receptor:
+            if 'LeakTo' in comp_data:
+                if comp_data['LeakTo'] in ['atmosphere', 'Atmosphere']:
+                    # RateToMassAdapter does not currently produce masses for the atmosphere
+                    receptor_names = []
+                else:
+                    receptor_names = [comp_data['LeakTo']]
+            else:
+                receptor_names = ['aquifer{}'.format(numberOfShaleLayers - 1)]
+            
+        elif comp_data['Type'] in wellbore_components_two_receptors:
+            if 'ThiefZone' in comp_data:
+                thief_zone = comp_data['ThiefZone'].lower()
+            else:
+                thief_zone = 'aquifer1'
+            
+            if 'LeakTo' in comp_data:
+                leak_to = comp_data['LeakTo'].lower()
+            else:
+                leak_to = 'aquifer2'
+            
+            receptor_names = [thief_zone, leak_to]
+        
+        elif comp_data['Type'] in wellbore_components_many_receptors:
+            receptor_names = ['aquifer{}'.format(unitNum + 1) 
+                             for unitNum in range(numberOfShaleLayers - 1)]
+        
+        for receptor in receptor_names:
+            connections = np.array([comp_model]).flatten()
+            ad_connect_2.append([connections, receptor])
+            extra_adapter_comps.append('extraAdapter')
+            path_list.append('extraAdapter')
+    
+    return ad_connect_2, extra_adapter_comps, path_list
 
 
 def clean_components(yaml_data):

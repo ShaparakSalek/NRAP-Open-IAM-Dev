@@ -31,13 +31,9 @@ Example of run:
 $ python iam_sys_strata_reservoir_mswellai_genericaquifer.py
 """
 
-import sys
-import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-
-sys.path.insert(0, os.sep.join(['..', '..', 'source']))
 
 from openiam.components.iam_base_classes import SystemModel
 from openiam.components.stratigraphy_component import Stratigraphy
@@ -58,16 +54,16 @@ if __name__ == '__main__':
     
     numberOfShaleLayers = 5
     reservoir_thickness = 31
-    shale_thicknesses = [322, 216, 67, 156, 34]
-    aquifer_thicknesses = [51, 45, 142, 12]
+    shale_thicknesses = [322, 216, 67, 156, 54] # shales 1 through 5
+    aquifer_thicknesses = [51, 45, 142, 22]     # aquifers 1 through 4
     
-    # The simulation will focus on the brine and CO2 leakage into this aquifer
+    # The simulation will focus on the plumes in this aquifer
     selected_aquifer_num = 1
     
     if selected_aquifer_num < 0 or selected_aquifer_num > (len(aquifer_thicknesses) - 1):
         err_msg = ''.join([
             'The selected_aquifer_num variable was set to {}. '.format(selected_aquifer_num), 
-            'This variable can only range from o to {}. '.format(len(aquifer_thicknesses) - 1), 
+            'This variable can only range from 0 to {}. '.format(len(aquifer_thicknesses) - 1), 
             'Due to this issue, the simulation cannot continue.'])
         raise KeyError(err_msg)
     
@@ -151,26 +147,32 @@ if __name__ == '__main__':
     ms.add_par('useDLmodel', value=1, vary=False)
     ms.add_par('wellRadius', value=0.04, vary=False)
     ms.add_par('logWell1Perm', value=-12.5, vary=False) # perm. for shale 1
-    ms.add_par('logAqu1Perm', value=-13.5, vary=False) # perm. for aquifer 1
+    ms.add_par('logAqu1Perm', value=-13.5, vary=False)  # perm. for aquifer 1
     ms.add_par('logWell2Perm', value=-15.5, vary=False) # perm. for shale 2
-    ms.add_par('logAqu2Perm', value=-13.5, vary=False) # perm. for aquifer 2
+    ms.add_par('logAqu2Perm', value=-13.5, vary=False)  # perm. for aquifer 2
     ms.add_par('logWell3Perm', value=-15.5, vary=False) # perm. for shale 3
+    ms.add_par('logAqu3Perm', value=-13.5, vary=False)  # perm. for aquifer 3
+    ms.add_par('logWell4Perm', value=-15.5, vary=False) # perm. for shale 4
+    ms.add_par('logAqu4Perm', value=-13.5, vary=False)  # perm. for aquifer 4
+    ms.add_par('logWell5Perm', value=-15.5, vary=False) # perm. for shale 5
     
     # Add linked parameters: common to stratigraphy and wellbore components
     ms.add_par_linked_to_par('numberOfShaleLayers',
                              strata.deterministic_pars['numberOfShaleLayers'])
-    ms.add_par_linked_to_par('shale1Thickness', 
-                             strata.deterministic_pars['shale1Thickness'])
-    ms.add_par_linked_to_par('shale2Thickness', 
-                             strata.deterministic_pars['shale2Thickness'])
-    ms.add_par_linked_to_par('shale3Thickness', 
-                             strata.deterministic_pars['shale3Thickness'])
-    ms.add_par_linked_to_par('aquifer1Thickness', 
-                             strata.deterministic_pars['aquifer1Thickness'])
-    ms.add_par_linked_to_par('aquifer2Thickness', 
-                             strata.deterministic_pars['aquifer2Thickness'])
+    
+    for unit_num in range(1, numberOfShaleLayers + 1):
+        ms.add_par_linked_to_par('shale{}Thickness'.format(unit_num), 
+                                 strata.deterministic_pars[
+                                     'shale{}Thickness'.format(unit_num)])
+        
+        if unit_num < numberOfShaleLayers:
+            ms.add_par_linked_to_par('aquifer{}Thickness'.format(unit_num), 
+                                     strata.deterministic_pars[
+                                         'aquifer{}Thickness'.format(unit_num)])
+    
     ms.add_par_linked_to_par('reservoirThickness', 
                              strata.deterministic_pars['reservoirThickness'])
+    
     ms.add_par_linked_to_par('datumPressure', strata.default_pars['datumPressure'])
     
     # Add linked parameters: common to stratigraphy and wellbore components
@@ -180,43 +182,49 @@ if __name__ == '__main__':
     ms.add_kwarg_linked_to_obs('pressure', ares.linkobs['pressure'])
     ms.add_kwarg_linked_to_obs('CO2saturation', ares.linkobs['CO2saturation'])
     
-    # Add observations of multisegmented wellbore component model
-    ms.add_obs_to_be_linked('CO2_aquifer1')
-    ms.add_obs_to_be_linked('CO2_aquifer2')
-    ms.add_obs_to_be_linked('brine_aquifer1')
-    ms.add_obs_to_be_linked('brine_aquifer2')
-    ms.add_obs_to_be_linked('mass_CO2_aquifer1')
-    ms.add_obs_to_be_linked('mass_CO2_aquifer2')
+    # Add observations of multisegmented wellbore component AI model
+    for unit_num in range(1, numberOfShaleLayers):
+        ms.add_obs_to_be_linked('brine_aquifer{}'.format(unit_num))
+        ms.add_obs_to_be_linked('CO2_aquifer{}'.format(unit_num))
+        
+        ms.add_obs('brine_aquifer{}'.format(unit_num))
+        ms.add_obs('CO2_aquifer{}'.format(unit_num))
+    
     ms.add_obs_to_be_linked('brine_atm')
     ms.add_obs_to_be_linked('CO2_atm')
     
-    ms.add_obs('brine_aquifer1')
-    ms.add_obs('CO2_aquifer1')
-    ms.add_obs('brine_aquifer2')
-    ms.add_obs('CO2_aquifer2')
+    ms.add_obs('brine_atm')
+    ms.add_obs('CO2_atm')
     
     # Add adapter that transforms leakage rates to accumulated mass
     adapt = sm.add_component_model_object(
         RateToMassAdapter(name='adapt', parent=sm))
     
-    adapt.add_kwarg_linked_to_collection('CO2_aquifer1',
-        [ms.linkobs['CO2_aquifer1'], ms.linkobs['CO2_aquifer2']])
-    adapt.add_kwarg_linked_to_collection('CO2_aquifer2',
-        [ms.linkobs['CO2_aquifer2'], ms.linkobs['CO2_atm']])
     adapt.add_kwarg_linked_to_collection('brine_aquifer1',
         [ms.linkobs['brine_aquifer1'], ms.linkobs['brine_aquifer2']])
     adapt.add_kwarg_linked_to_collection('brine_aquifer2',
-        [ms.linkobs['brine_aquifer2'], ms.linkobs['brine_atm']])
+        [ms.linkobs['brine_aquifer2'], ms.linkobs['brine_aquifer3']])
+    adapt.add_kwarg_linked_to_collection('brine_aquifer3',
+        [ms.linkobs['brine_aquifer3'], ms.linkobs['brine_aquifer4']])
+    adapt.add_kwarg_linked_to_collection('brine_aquifer4',
+        [ms.linkobs['brine_aquifer4'], ms.linkobs['brine_atm']])
     
-    adapt.add_obs_to_be_linked('mass_CO2_aquifer1')
-    adapt.add_obs_to_be_linked('mass_CO2_aquifer2')
-    adapt.add_obs_to_be_linked('mass_brine_aquifer1')
-    adapt.add_obs_to_be_linked('mass_brine_aquifer2')
+    adapt.add_kwarg_linked_to_collection('CO2_aquifer1',
+        [ms.linkobs['CO2_aquifer1'], ms.linkobs['CO2_aquifer2']])
+    adapt.add_kwarg_linked_to_collection('CO2_aquifer2',
+        [ms.linkobs['CO2_aquifer2'], ms.linkobs['CO2_aquifer3']])
+    adapt.add_kwarg_linked_to_collection('CO2_aquifer3',
+        [ms.linkobs['CO2_aquifer3'], ms.linkobs['CO2_aquifer4']])
+    adapt.add_kwarg_linked_to_collection('CO2_aquifer4',
+        [ms.linkobs['CO2_aquifer4'], ms.linkobs['CO2_atm']])
     
-    adapt.add_obs('mass_CO2_aquifer1')
-    adapt.add_obs('mass_brine_aquifer1')
-    adapt.add_obs('mass_CO2_aquifer2')
-    adapt.add_obs('mass_brine_aquifer2')
+    # Add observations of RateToMassAdapter model
+    for unit_num in range(1, numberOfShaleLayers):
+        adapt.add_obs_to_be_linked('mass_brine_aquifer{}'.format(unit_num))
+        adapt.add_obs_to_be_linked('mass_CO2_aquifer{}'.format(unit_num))
+        
+        adapt.add_obs('mass_brine_aquifer{}'.format(unit_num))
+        adapt.add_obs('mass_CO2_aquifer{}'.format(unit_num))
     
     # Add the generic aquifer component
     genaq = sm.add_component_model_object(GenericAquifer(name='genaq', parent=sm))
@@ -260,15 +268,29 @@ if __name__ == '__main__':
     pressure = sm.collect_observations_as_time_series(ares, 'pressure')
     CO2saturation = sm.collect_observations_as_time_series(ares, 'CO2saturation')
     
-    brine_aquifer = sm.collect_observations_as_time_series(
-        ms, 'brine_aquifer{}'.format(selected_aquifer_num))
-    CO2_aquifer = sm.collect_observations_as_time_series(
-        ms, 'CO2_aquifer{}'.format(selected_aquifer_num))
+    brine_aquifer1 = sm.collect_observations_as_time_series(ms, 'brine_aquifer1')
+    CO2_aquifer1 = sm.collect_observations_as_time_series(ms, 'CO2_aquifer1')
     
-    mass_brine_aquifer = sm.collect_observations_as_time_series(
-        adapt, 'mass_brine_aquifer{}'.format(selected_aquifer_num))
-    mass_CO2_aquifer = sm.collect_observations_as_time_series(
-        adapt, 'mass_CO2_aquifer{}'.format(selected_aquifer_num))
+    brine_aquifer2 = sm.collect_observations_as_time_series(ms, 'brine_aquifer2')
+    CO2_aquifer2 = sm.collect_observations_as_time_series(ms, 'CO2_aquifer2')
+    
+    brine_aquifer3 = sm.collect_observations_as_time_series(ms, 'brine_aquifer3')
+    CO2_aquifer3 = sm.collect_observations_as_time_series(ms, 'CO2_aquifer3')
+    
+    brine_aquifer4 = sm.collect_observations_as_time_series(ms, 'brine_aquifer4')
+    CO2_aquifer4 = sm.collect_observations_as_time_series(ms, 'CO2_aquifer4')
+    
+    mass_brine_aquifer1 = sm.collect_observations_as_time_series(adapt, 'mass_brine_aquifer1')
+    mass_CO2_aquifer1 = sm.collect_observations_as_time_series(adapt, 'mass_CO2_aquifer1')
+    
+    mass_brine_aquifer2 = sm.collect_observations_as_time_series(adapt, 'mass_brine_aquifer2')
+    mass_CO2_aquifer2 = sm.collect_observations_as_time_series(adapt, 'mass_CO2_aquifer2')
+    
+    mass_brine_aquifer3 = sm.collect_observations_as_time_series(adapt, 'mass_brine_aquifer3')
+    mass_CO2_aquifer3 = sm.collect_observations_as_time_series(adapt, 'mass_CO2_aquifer3')
+    
+    mass_brine_aquifer4 = sm.collect_observations_as_time_series(adapt, 'mass_brine_aquifer4')
+    mass_CO2_aquifer4 = sm.collect_observations_as_time_series(adapt, 'mass_CO2_aquifer4')
     
     Dissolved_salt_volume = sm.collect_observations_as_time_series(
         genaq, 'Dissolved_salt_volume')
@@ -308,77 +330,178 @@ if __name__ == '__main__':
     plt.suptitle('Reservoir Conditions Over Time', fontsize=titlefontsize, fontweight='bold')
     
     ax = plt.subplot(1,2,1)
-    ax.plot(time_array_years, pressure, linewidth=linewidth_ref, color='C0')
+    ax.plot(time_array_years, pressure, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
     ax.set_ylabel('Pressure (Pa)', fontsize=axisfontsize, fontweight='bold')
-    ax.ticklabel_format(style='sci', axis='y',
-                        scilimits=(0, 0), useMathText='True')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
     
     ax = plt.subplot(1,2,2)
-    ax.plot(time_array_years, CO2saturation, linewidth=linewidth_ref, color='C1')
+    ax.plot(time_array_years, CO2saturation, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
     ax.set_ylabel('CO$_2$ Saturation', fontsize=axisfontsize, fontweight='bold')
     
-    # Leakage Rates
+    # Brine Leakage Rates
     plt.figure(2, figsize=figsize, dpi=dpi_ref)
     
-    plt.suptitle('Leakage Rates to Aquifer {}'.format(selected_aquifer_num), 
-                 fontsize=titlefontsize, fontweight='bold')
+    plt.suptitle('Brine Leakage Rates', fontsize=titlefontsize, fontweight='bold')
     
-    ax = plt.subplot(1,2,1)
-    ax.plot(time_array_years, brine_aquifer, linewidth=linewidth_ref, color='C2')
+    ax = plt.subplot(2,2,1)
+    ax.plot(time_array_years, brine_aquifer1, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_ylabel('Brine Leakage Rate (kg/s)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 1', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,2)
+    ax.plot(time_array_years, brine_aquifer2, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 2', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,3)
+    ax.plot(time_array_years, brine_aquifer3, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
     ax.set_ylabel('Brine Leakage Rate (kg/s)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 3', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,4)
+    ax.plot(time_array_years, brine_aquifer4, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
+    ax.set_ylabel('Brine Leakage Rate (kg/s)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 4', fontsize=axisfontsize, fontweight='bold')
+    
+    # CO2 Leakage Rates
+    plt.figure(3, figsize=figsize, dpi=dpi_ref)
+    
+    plt.suptitle('CO$_2$ Leakage Rates', fontsize=titlefontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,1)
+    ax.plot(time_array_years, CO2_aquifer1, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_ylabel('CO$_2$ Leakage Rate (kg/s)', fontsize=axisfontsize, fontweight='bold')
     ax.ticklabel_format(style='sci', axis='y',
                         scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 1', fontsize=axisfontsize, fontweight='bold')
     
-    ax = plt.subplot(1,2,2)
-    ax.plot(time_array_years, CO2_aquifer, linewidth=linewidth_ref, color='C3')
+    ax = plt.subplot(2,2,2)
+    ax.plot(time_array_years, CO2_aquifer2, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 2', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,3)
+    ax.plot(time_array_years, CO2_aquifer3, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
     ax.set_ylabel('CO$_2$ Leakage Rate (kg/s)', fontsize=axisfontsize, fontweight='bold')
-    ax.ticklabel_format(style='sci', axis='y',
-                        scilimits=(0, 0), useMathText='True')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 3', fontsize=axisfontsize, fontweight='bold')
     
-    # Leaked Masses
-    plt.figure(3, figsize=figsize, dpi=dpi_ref)
+    ax = plt.subplot(2,2,4)
+    ax.plot(time_array_years, CO2_aquifer4, linewidth=linewidth_ref)
     
-    plt.suptitle('Cumulative Leakage to Aquifer {}'.format(selected_aquifer_num), 
-                 fontsize=titlefontsize, fontweight='bold')
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 4', fontsize=axisfontsize, fontweight='bold')
     
-    ax = plt.subplot(1,2,1)
-    ax.plot(time_array_years, mass_brine_aquifer, linewidth=linewidth_ref, color='C2')
+    # Leaked Brine Masses
+    plt.figure(4, figsize=figsize, dpi=dpi_ref)
+    
+    plt.suptitle('Cumulative Brine Leakage', fontsize=titlefontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,1)
+    ax.plot(time_array_years, mass_brine_aquifer1, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 1', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,2)
+    ax.plot(time_array_years, mass_brine_aquifer2, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 2', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,3)
+    ax.plot(time_array_years, mass_brine_aquifer3, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
     ax.set_ylabel('Leaked Brine Mass (kg)', fontsize=axisfontsize, fontweight='bold')
-    ax.ticklabel_format(style='sci', axis='y',
-                        scilimits=(0, 0), useMathText='True')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 3', fontsize=axisfontsize, fontweight='bold')
     
-    ax = plt.subplot(1,2,2)
-    ax.plot(time_array_years, mass_CO2_aquifer, linewidth=linewidth_ref, color='C3')
+    ax = plt.subplot(2,2,4)
+    ax.plot(time_array_years, mass_brine_aquifer4, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 4', fontsize=axisfontsize, fontweight='bold')
+    
+    # Leaked CO2 Masses
+    plt.figure(5, figsize=figsize, dpi=dpi_ref)
+    
+    plt.suptitle('Cumulative CO$_2$ Leakage', fontsize=titlefontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,1)
+    ax.plot(time_array_years, mass_CO2_aquifer1, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_ylabel('Leaked CO$_2$ Mass (kg)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 1', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,2)
+    ax.plot(time_array_years, mass_CO2_aquifer2, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 2', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,3)
+    ax.plot(time_array_years, mass_CO2_aquifer3, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
     ax.set_ylabel('Leaked CO$_2$ Mass (kg)', fontsize=axisfontsize, fontweight='bold')
-    ax.ticklabel_format(style='sci', axis='y',
-                        scilimits=(0, 0), useMathText='True')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 3', fontsize=axisfontsize, fontweight='bold')
+    
+    ax = plt.subplot(2,2,4)
+    ax.plot(time_array_years, mass_CO2_aquifer4, linewidth=linewidth_ref)
+    
+    ax.grid(alpha=grid_alpha_val)
+    ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText='True')
+    ax.set_title('Aquifer 4', fontsize=axisfontsize, fontweight='bold')
     
     # Plume Volumes
-    plt.figure(4, figsize=figsize, dpi=dpi_ref)
+    plt.figure(6, figsize=figsize, dpi=dpi_ref)
     
     plt.suptitle('Impacts on Aquifer {}'.format(selected_aquifer_num), 
                  fontsize=titlefontsize, fontweight='bold')
     
     ax = plt.subplot(1,2,1)
-    ax.plot(time_array_years, Dissolved_salt_volume, linewidth=linewidth_ref, color='C4')
+    
+    ax.plot(time_array_years, Dissolved_salt_volume, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
@@ -387,7 +510,8 @@ if __name__ == '__main__':
                         scilimits=(0, 0), useMathText='True')
     
     ax = plt.subplot(1,2,2)
-    ax.plot(time_array_years, Dissolved_CO2_volume, linewidth=linewidth_ref, color='C5')
+    
+    ax.plot(time_array_years, Dissolved_CO2_volume, linewidth=linewidth_ref)
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
@@ -396,7 +520,7 @@ if __name__ == '__main__':
                         scilimits=(0, 0), useMathText='True')
     
     # Plume Dimensions
-    plt.figure(5, figsize=figsize, dpi=dpi_ref)
+    plt.figure(7, figsize=figsize, dpi=dpi_ref)
     
     selected_aquifer_thickness = strata.deterministic_pars[
         'aquifer{}Thickness'.format(selected_aquifer_num)].value
@@ -406,10 +530,11 @@ if __name__ == '__main__':
         fontweight='bold')
     
     ax = plt.subplot(1,2,1)
+    
     ax.plot(time_array_years, Dissolved_salt_dr, linewidth=linewidth_ref, 
-            color='C6', label='Radius')
+            color='C0', label='Radius')
     ax.plot(time_array_years, Dissolved_salt_dz, linewidth=linewidth_ref, 
-            color='C6', linestyle=':', label='Height')
+            color='C1', linestyle=':', label='Height')
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')
@@ -420,10 +545,11 @@ if __name__ == '__main__':
     plt.legend(fontsize=lgndfontsize)
     
     ax = plt.subplot(1,2,2)
+    
     ax.plot(time_array_years, Dissolved_CO2_dr, linewidth=linewidth_ref, 
-            color='C7', label='Radius')
+            color='C0', label='Radius')
     ax.plot(time_array_years, Dissolved_CO2_dz, linewidth=linewidth_ref, 
-            color='C7', linestyle=':', label='Height')
+            color='C1', linestyle=':', label='Height')
     
     ax.grid(alpha=grid_alpha_val)
     ax.set_xlabel('Time (years)', fontsize=axisfontsize, fontweight='bold')

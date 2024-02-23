@@ -128,10 +128,16 @@ class OpenWellbore(iam_bc.ComponentModel):
 
     * **brine_aquifer** and **brine_atm** [|kg/s|] - brine leakage rates.
     
+    Although the Open Wellbore component does not produce cumulative leaked masses, 
+    those results are saved in the control file interface if ``AccumulateLeakage: True`` 
+    is included in the Open Wellbore component's section of a control file 
+    (see *ControlFile_ex48a*).
+    
     For control file examples using the Open Wellbore component, see *ControlFile_ex4a*
     to *ControlFile_ex4b*, *ControlFile_ex9a* to *ControlFile_ex9c*, 
-    *ControlFile_ex32a* to *ControlFile_ex32c*, and *ControlFile_ex55a* to 
-    *ControlFile_ex55d*. For script examples, see *iam_sys_strata_reservoir_openwell_genericaquifer.py*, 
+    *ControlFile_ex32a* to *ControlFile_ex32c*, *ControlFile_ex48a*, and 
+    *ControlFile_ex55a* to *ControlFile_ex55d*. For script examples, see 
+    *iam_sys_strata_reservoir_openwell_genericaquifer.py*, 
     *iam_sys_lutstrata_reservoir_openwell.py*, *iam_sys_reservoir_openwell_futuregen_aor_plot.py*,  
     and *iam_sys_strata_reservoir_openwell_genericaquifer_5locs.py*.
     

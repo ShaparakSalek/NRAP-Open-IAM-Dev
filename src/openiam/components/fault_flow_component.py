@@ -283,7 +283,7 @@ class FaultFlow(iam_bc.ComponentModel):
     (e.g., CO2_aquifer_segm1) to the output of the Fault Flow component.
 
     For control file examples using the Fault Flow component, see *ControlFile_ex17*, 
-    *ControlFile_ex18*, and *ControlFile_ex48* to *ControlFile_ex50*. For script 
+    *ControlFile_ex18*, and *ControlFile_ex49a* to *ControlFile_ex50*. For script 
     examples, see the examples at the end of *fault_flow_component.py*.
 
     """

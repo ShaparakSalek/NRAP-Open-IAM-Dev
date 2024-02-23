@@ -1,0 +1,90 @@
+# OpenIAM Control File Example 48a
+#
+# This example demonstrates the use of the 'AccumulateLeakage' option with 
+# an OpenWellbore component. The OpenWellbore component does not produce 
+# cumulative brine and CO2 masses leaked into the targeted aquifer (specified 
+# with the 'LeakTo' entry) or the atmosphere. By including 'AccumulateLeakage: True' 
+# in the OpenWellbore component's section, however, the cumulative masses will 
+# be calculated and saved in .csv files (if GenerateOutputFiles is True in the ModelParams section). 
+# The names of the .csv files will combine the wellbore components name, a term describing the 
+# receptor (either 'AdapterAquifer#' (where '#' is an aquifer index) or 'AdapterAtmosphere'), 
+# and then a location index (e.g., '_000' for the first location, '_001' for the second, etc.). 
+# For example, this example will produce files called 'OpenWellbore1AdapterAquifer2_000.csv' and 
+# 'OpenWellbore1AdapterAtmosphere_000.csv'. The leaked masses can also be included in the the 
+# 'Plots' section, as shown here. Note that this example was made to be similar to the script example 
+# iam_sys_strata_reservoir_openwell_genericaquifer.py (although without the GenericAquifer component).
+#
+# To run this file, use the command (\ for Windows / for Mac or Linux):
+#  python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex48a.yaml
+#
+# Last Modified: June, 2023
+#-------------------------------------------------
+ModelParams:
+    EndTime: 50
+    TimeStep: 1.0
+    Analysis: forward
+    Components: [AnalyticalReservoir1, OpenWellbore1]
+    OutputDirectory: 'output/output_ex48a_{datetime}'
+    GenerateOutputFiles: True
+    GenerateCombOutputFile: False
+    GenerateLocationsFiles: True
+    Logging: Debug
+#-------------------------------------------------
+Stratigraphy:
+    numberOfShaleLayers: 5
+    reservoirThickness: 31
+    shale1Thickness: 322
+    aquifer1Thickness: 51
+    shale2Thickness: 216
+    aquifer2Thickness: 45
+    shale3Thickness: 67
+    aquifer3Thickness: 142
+    shale4Thickness: 156
+    aquifer4Thickness: 12
+    shale5Thickness: 34
+#-------------------------------------------------
+AnalyticalReservoir1:
+    Type: AnalyticalReservoir
+    InjectionWell:
+        coordx: 0
+        coordy: 0
+    Parameters:
+        injRate: 0.1
+        logResPerm: -12.5
+        reservoirPorosity: 0.175
+        reservoirRadius: 2500
+        brineResSaturation: 0.05
+        brineDensity: 1050
+    Outputs: [pressure,
+              CO2saturation]
+#-------------------------------------------------
+OpenWellbore1:
+    Type: OpenWellbore
+    Connection: AnalyticalReservoir1
+    Number: 1
+    LeakTo: aquifer2
+    AccumulateLeakage: True
+    Locations:
+        coordx: 353.53
+        coordy: 353.53
+    Controls:
+        critPressureApproach: True
+        enforceCritPressure: False
+    Parameters:
+        wellRadius: 0.035
+        logReservoirTransmissivity: -10.0
+        logAquiferTransmissivity: -10.0
+        brineSalinity: 0.1
+        brineDensity: 1050
+    Outputs: [CO2_aquifer, CO2_atm, 
+              brine_aquifer, brine_atm]
+#-------------------------------------------------
+Plots:
+    StratCol:
+        StratigraphicColumn:
+    ReservoirConditions:
+        TimeSeries: [pressure, CO2saturation]
+    Aquifer_Leakage_Rates:
+        TimeSeries: [brine_aquifer, CO2_aquifer]
+    Aquifer_Leaked_Masses:
+        TimeSeries: [mass_brine_aquifer2, mass_CO2_aquifer2]

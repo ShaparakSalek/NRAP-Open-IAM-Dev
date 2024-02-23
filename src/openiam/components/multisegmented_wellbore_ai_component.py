@@ -177,9 +177,10 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
       - mass of the brine leaked into the aquifer.
       
     For control file examples using the Multisegmented Wellbore AI component, see 
-    *ControlFile_ex31g*, *ControlFile_ex51a* to *ControlFile_ex51c*, and 
-    *ControlFile_ex58e*. For script examples, see *iam_sys_strata_reservoir_mswellai_genericaquifer.py* 
-    and *iam_sys_lutreservoir_mswellai.py*.
+    *ControlFile_ex31g*, *ControlFile_ex48b*, *ControlFile_ex48c*, *ControlFile_ex51a* 
+    to *ControlFile_ex51c*, and *ControlFile_ex58e*. For script examples, see 
+    *iam_sys_strata_reservoir_mswellai_genericaquifer.py* and 
+    *iam_sys_lutreservoir_mswellai.py*.
     """
     def __init__(self, name, parent, useDLmodel=False):
         """
@@ -230,7 +231,7 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
         self.pars_bounds = dict()
         self.pars_bounds['numberOfShaleLayers'] = [3, 30]
         self.pars_bounds['shaleThickness'] = [50, 2150.0]
-        self.pars_bounds['aquiferThickness'] = [20,250.0]
+        self.pars_bounds['aquiferThickness'] = [20, 250.0]
         self.pars_bounds['reservoirThickness'] = [1.0, 1600.0]
         self.pars_bounds['logWellPerm'] = [-101.0, -12.3]
         self.pars_bounds['logAquPerm'] = [-16.0, -12.3]

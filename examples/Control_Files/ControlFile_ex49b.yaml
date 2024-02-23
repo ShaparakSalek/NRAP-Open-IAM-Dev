@@ -1,19 +1,19 @@
-# OpenIAM Control File Example 49
+# OpenIAM Control File Example 49b
 #
 # This example demonstrates the use of the FaultFlow component.
 # Note that the example was made to be similar to test_case2()
 # within fault_flow_component.py.
 #
 # To run this file, use the command (\ for Windows / for Mac or Linux):
-#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex49.yaml
+#   python ../../src/openiam/components/openiam_cf.py --file ControlFile_ex49b.yaml
 #
 # Last Modified: June, 2023
-
+#-------------------------------------------------
 ModelParams:
-    TimePoints: 'examples/Control_Files/input_data/ex49/time_points.csv'
+    TimePoints: 'examples/Control_Files/input_data/ex49b/time_points.csv'
     Analysis: forward
     Components: [FaultFlow1]
-    OutputDirectory: output/output_ex49_{datetime}
+    OutputDirectory: output/output_ex49b_{datetime}
     Logging: Debug
 #-------------------------------------------------
 Stratigraphy:

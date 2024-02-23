@@ -1107,7 +1107,7 @@ type are defined relative to x-coordinates and y-coordinates. For example, the
 and ``FaultFlow`` components.
 
 The ``GriddedMetric`` plot type has two required entries: ``ComponentNameList`` and
- and ``MetricName``. Both are described above.
+``MetricName``. Both are described above.
 
 The ``GriddedMetric`` plot type has the following optional entries: ``Realization``,
 ``TimeList``, ``PlotInjectionSites``, ``InjectionCoordx``, ``InjectionCoordy``,

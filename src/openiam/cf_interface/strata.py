@@ -1,13 +1,11 @@
 """
 Created: September 9th, 2022
-Last modified: November 29th, 2023
+Last modified: February 21st, 2024
 
 Authors: Nate Mitchell, Veronika Vasylkivska
 Leidos supporting NETL
 """
 
-import sys
-import os
 import logging
 import numpy as np
 from matplotlib.colors import is_color_like
@@ -16,6 +14,12 @@ from openiam.components.stratigraphy_component import Stratigraphy
 from openiam.components.dipping_stratigraphy_component import DippingStratigraphy
 from openiam.components.lookup_table_stratigraphy_component import LookupTableStratigraphy
 import openiam.cf_interface.commons as cfi_commons
+
+# Update this dictionary if the components are changed or new stratigraphy components are added 
+DEFAULT_NUM_SHALE_LAYERS_DICT = {
+    'Stratigraphy': 3, 'DippingStratigraphy': 3, 'LookupTableStratigraphy': 3}
+
+DEFAULT_NUM_SHALE_LAYERS = 3
 
 # Functions in this file are used to generate the colors, alpha values, and
 # labels for different units.
@@ -267,6 +271,30 @@ def get_strata_type_from_yaml(yaml_data):
         comp_type = 'Stratigraphy'
 
     return comp_type
+
+
+def get_default_num_shale_layers(strata_type, strata_data):
+    """
+    Although each stratigraphy component has a method that returns the number of 
+    shale layers, that method is meant to be used after the component has been 
+    set up (i.e., after the connect_with_system() method). This function returns 
+    the number of shale layers for a component before the component has been set 
+    up. The number is returned after checking the input provided for the stratigraphy 
+    component in the yaml_data dictionary.
+    """
+    numberOfShaleLayers = DEFAULT_NUM_SHALE_LAYERS_DICT.get(
+        strata_type, DEFAULT_NUM_SHALE_LAYERS)
+    
+    if 'Parameters' in strata_data:
+        if 'numberOfShaleLayers' in strata_data['Parameters']:
+            if isinstance(strata_data['Parameters']['numberOfShaleLayers'], dict):
+                if 'value' in strata_data['Parameters']['numberOfShaleLayers']:
+                    numberOfShaleLayers = strata_data[
+                        'Parameters']['numberOfShaleLayers']['value']
+            else:
+                numberOfShaleLayers = strata_data['Parameters']['numberOfShaleLayers']
+    
+    return numberOfShaleLayers
 
 
 def get_strata_info_from_component(strata_comp):
