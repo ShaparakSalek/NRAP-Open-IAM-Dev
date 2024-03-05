@@ -331,21 +331,28 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip, *args):
                     componentVars[cmpnt_nm]['Locations']['grid'][arg_names[n]].set("-50")
                 else:
                     componentVars[cmpnt_nm]['Locations']['grid'][arg_names[n]].set("50")
+                grid_bounds = {'lower_bound': None,
+                               'upper_bound': None,
+                               'discrete_bounds': None}
             else:
                 componentVars[cmpnt_nm]['Locations']['grid'][arg_names[n]] = IntVar()
                 componentVars[cmpnt_nm]['Locations']['grid'][arg_names[n]].set(2)
+                grid_bounds = {'lower_bound': 1,
+                               'upper_bound': 100,
+                               'discrete_bounds': None}
 
             coords_labels.append(ttk.Label(
                 well_loc_coords_frame, text=arg_labels[n], width=LABEL_WIDTH))
 
-            coords_fields.append(tk.Entry(
-                well_loc_coords_frame,
-                width=2*DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                textvariable=componentVars[cmpnt_nm]['Locations']['grid'][arg_names[n]]))
+            coords_fields.append(ParameterEntry(well_loc_coords_frame,
+                                                arg_names[n],
+                                                componentVars[cmpnt_nm]['Locations']['grid'][arg_names[n]],
+                                                2 * DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+                                                tool_tip,
+                                                tool_tip_text.format(loc_type[l], coords[r]),
+                                                **grid_bounds))
             coords_labels[-1].grid(row=n, column=0, pady=5, padx=40, sticky='e')
             coords_fields[-1].grid(row=n, column=1, pady=5, sticky='w')
-            tool_tip.bind(coords_fields[-1],
-                          tool_tip_text.format(loc_type[l], coords[r]))
     well_loc_frame.coords_fields = coords_fields
 
     # Injection well control
@@ -395,13 +402,16 @@ def add_widgets(controller, tab, cmpnt_nm, cmpnt_type, tool_tip, *args):
             coords_labels.append(ttk.Label(
                 inj_well_coords_frame, text=arg_labels[r], width=LABEL_WIDTH))
 
-            coords_fields.append(tk.Entry(
-                inj_well_coords_frame,
-                width=2*DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
-                textvariable=componentVars[cmpnt_nm][arg_names[r]]))
+            coords_fields.append(ParameterEntry(inj_well_coords_frame,
+                                                arg_names[r],
+                                                componentVars[cmpnt_nm][arg_names[r]],
+                                                2 * DISTRIBUTION_ARG_TEXTFIELD_WIDTH,
+                                                tool_tip,
+                                                tool_tip_text.format(coords[r]),
+                                                lower_bound=None,
+                                                upper_bound=None,
+                                                discrete_bounds=None))
             coords_labels[-1].grid(row=r, column=0, pady=5, padx=40, sticky='e')
             coords_fields[-1].grid(row=r, column=1, pady=5, sticky='w')
-            tool_tip.bind(coords_fields[-1],
-                          tool_tip_text.format(coords[r]))
         inj_well_frame.coords_fields = coords_fields
         disable_injection_location_widgets(controller, inj_well_frame)

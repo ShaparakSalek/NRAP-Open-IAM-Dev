@@ -35,6 +35,10 @@ class ParameterEntry(tk.Entry):
             self.lower_bound = lower_bound
             self.upper_bound = upper_bound
             self.discrete_bounds = None
+        else:
+            self.lower_bound = None
+            self.upper_bound = None
+            self.discrete_bounds = None
 
         # Validation command
         vcmd = (self.master.register(self.validate), "%P")
@@ -79,29 +83,32 @@ class ParameterEntry(tk.Entry):
 
             if values:
                 if self.discrete_bounds is None:
-                    for value in values:
-                        if value < self.lower_bound:
-                            value_is_valid = 0
-                            if ('discrete_bounds_msg' in self.kwargs) and (
-                                    self.kwargs['discrete_bounds_msg'][0] != ''):
-                                self.tool_tip.bind(
-                                    self, self.kwargs['discrete_bounds_msg'][0])
-                            else:
-                                self.tool_tip.bind(self, ''.join([
-                                    "The parameter value(s) must not be less ",
-                                    "than {}."]).format(self.lower_bound))
-                            break
-                        if value > self.upper_bound:
-                            value_is_valid = 0
-                            if ('discrete_bounds_msg' in self.kwargs) and (
-                                    self.kwargs['discrete_bounds_msg'][1] != ''):
-                                self.tool_tip.bind(
-                                    self, self.kwargs['discrete_bounds_msg'][1])
-                            else:
-                                self.tool_tip.bind(self, ''.join([
-                                    "The parameter value(s) must not be greater ",
-                                    "than {}."]).format(self.upper_bound))
-                            break
+                    if self.lower_bound is None and self.upper_bound is None:
+                        value_is_valid = 1
+                    else:
+                        for value in values:
+                            if value < self.lower_bound:
+                                value_is_valid = 0
+                                if ('discrete_bounds_msg' in self.kwargs) and (
+                                        self.kwargs['discrete_bounds_msg'][0] != ''):
+                                    self.tool_tip.bind(
+                                        self, self.kwargs['discrete_bounds_msg'][0])
+                                else:
+                                    self.tool_tip.bind(self, ''.join([
+                                        "The parameter value(s) must not be less ",
+                                        "than {}."]).format(self.lower_bound))
+                                break
+                            if value > self.upper_bound:
+                                value_is_valid = 0
+                                if ('discrete_bounds_msg' in self.kwargs) and (
+                                        self.kwargs['discrete_bounds_msg'][1] != ''):
+                                    self.tool_tip.bind(
+                                        self, self.kwargs['discrete_bounds_msg'][1])
+                                else:
+                                    self.tool_tip.bind(self, ''.join([
+                                        "The parameter value(s) must not be greater ",
+                                        "than {}."]).format(self.upper_bound))
+                                break
                 else:
                     if len(np.unique(values)) < len(values):
                         value_is_valid = 0

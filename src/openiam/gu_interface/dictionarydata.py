@@ -159,9 +159,11 @@ COMPONENT_TYPES = [
 # Workflows available in the current version of GUI for NRAP-Open-IAM
 WORKFLOW_TYPES = [
     'Area of Review',
+    'Time to First Detection'
     ]
 
-WORKFLOW_COMPONENTS = {'Area of Review': ['reservoir', 'wellbore', 'aquifer']}
+WORKFLOW_COMPONENTS = {'Area of Review': ['reservoir', 'wellbore', 'aquifer'],
+                       'Time to First Detection': ['reservoir', 'wellbore', 'aquifer']}
 
 # Types of processing/plotting analysis and/or capabilities available for a given simulation
 # Plotting is default and available for all simulations

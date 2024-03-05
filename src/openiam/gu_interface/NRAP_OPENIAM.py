@@ -47,8 +47,8 @@ from openiam.gu_interface.cmpnts_tabs import (
     src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
     cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
     aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
-    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, locations,
-    load_workflow)
+    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, TTFD_wf_tab,
+    locations, load_workflow)
 from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
 from openiam.components.iam_base_classes import IAM_DIR
@@ -132,13 +132,24 @@ class NRAPOpenIAM(tk.Tk):
             d[choice] = read_tab_pars(choice)
 
             if choice == 'Workflow':
-                for key in componentVars[choice]['Params'].keys():
-                    d[choice]['Parameters'][key] = componentVars[choice]['Params'][key].get()
-
                 # Change case of type
                 d[choice]['Type'] = d[choice].pop('type')
 
                 if d[choice]['Type'] == 'AoR':
+                    for key in componentVars[choice]['Params'].keys():
+                        d[choice]['Parameters'][key] = componentVars[choice]['Params'][key].get()
+                elif d[choice]['Type'] == 'TTFD':
+                    for key in componentVars[choice]['Params'].keys():
+                        if key != "MonitoringLocations":
+                            d[choice]['Parameters'][key] = componentVars[choice]['Params'][key].get()
+                        else:
+                            d[choice]['Parameters'][key] = {}
+                            for key2 in ['coordx', 'coordy', 'coordz', 'HorizontalWindow', 'VerticalWindow']:
+                                curr_val = componentVars[choice]['Params'][key][key2].get()
+                                curr_val = self.process_str(curr_val)
+                                d[choice]['Parameters'][key][key2] = curr_val
+
+                if d[choice]['Type'] == 'AoR' or d[choice]['Type'] == 'TTFD':
 
                     # Set up injection locations for plots if provided
                     if 'InjectionLocations' in d[choice].keys():
@@ -174,7 +185,6 @@ class NRAPOpenIAM(tk.Tk):
                         d[componentChoices[1]]['Parameters']['brineDensity']['value'] = brine_density
                         d[choice]['Parameters'].pop('BrineDensity')
 
-
                     # Change wellbore number and location information
                     # Number of wellbores
                     d[self.component_list['wellbore'][0].get()]['number'] = d[choice]['Number']
@@ -183,7 +193,6 @@ class NRAPOpenIAM(tk.Tk):
                     # Location of wellbores
                     d[self.component_list['wellbore'][0].get()]['Locations'] = d[choice]['WellboreLocations']
                     d[choice].pop('WellboreLocations')
-
 
                 continue
 
@@ -264,7 +273,7 @@ class NRAPOpenIAM(tk.Tk):
             # Enable automatic plot setup
             d['Workflow']['Options']['AutomatePlotsSetup'] = True
 
-            if d['Workflow']['Type'] == 'AoR':
+            if d['Workflow']['Type'] == 'AoR' or d['Workflow']['Type'] == 'TTFD':
                 d['Workflow']['Options']['ReservoirComponentType'] = componentTypeDictionary[0]
                 d['Workflow']['Options']['WellboreComponentType'] = componentTypeDictionary[1]
                 d['Workflow']['Options']['AquiferComponentType'] = componentTypeDictionary[2]
@@ -936,6 +945,17 @@ class NRAPOpenIAM(tk.Tk):
 
         if 'Workflow' in data.keys():
             frame = self.frames[Workflow_Page]
+
+            # Disable "Add Workflow" button and option menu
+            self.wftabControl.nametowidget(
+                '.!frame.!workflow_page.workflow_notebook.workflow_tab.addWorkflow_frame.addWorkflow_button') \
+                .configure(state='disabled')
+            self.wftabControl.nametowidget(
+                '.!frame.!workflow_page.workflow_notebook.workflow_tab.addWorkflow_frame.!optionmenu') \
+                .configure(state='disabled')
+
+
+
         else:
             frame = self.frames[OpenIAM_Page]
         frame.tkraise()
@@ -1186,7 +1206,10 @@ class NRAPOpenIAM(tk.Tk):
             self.component_list={}
             tabControl.nametowidget(
                 '.!frame.!workflow_page.workflow_notebook.workflow_tab.addWorkflow_frame') \
-                .winfo_children()[-1].state(["!disabled"])
+                .winfo_children()[-1].configure(state='active')
+            tabControl.nametowidget(
+                '.!frame.!workflow_page.workflow_notebook.workflow_tab.addWorkflow_frame.!optionmenu') \
+                .configure(state='active')
 
             for tab in self.workflow_tabs:
                 self.remove_component(tab, tabControl, connection_menu, menu_type='workflow')
@@ -1474,12 +1497,13 @@ class NRAPOpenIAM(tk.Tk):
         if 'reservoir' in component_list.keys():
             compName = component_list['reservoir'][0]
             compType = component_list['reservoir'][1]
+
             self.add_component(conn, aqName, wftabControl, compName, compType,
                                connection_menu, workflowSetupFrame,
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-            if component_list['Workflow'][1].get() == 'AoR':
+            if component_list['Workflow'][1].get() == 'AoR' or component_list['Workflow'][1].get() == 'TTFD':
 
                 # Set output from reservoir to be pressure and CO2 saturation
                 componentVars[compName.get()]['pressure'].set(1)
@@ -1487,8 +1511,9 @@ class NRAPOpenIAM(tk.Tk):
 
                 # Get all widgets for reservoir outputs (can be rewritten when frames/widgets are renames)
                 get_widgets = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
-                                                      + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
-                                                      + '.' + compName.get().lower() + '_tabType').winfo_children()[-1].winfo_children()
+                                                        + compName.get().lower() + '.' + compName.get().lower()
+                                                        + '_canvas' + '.' + compName.get().lower()
+                                                        + '_tabType').winfo_children()[-1].winfo_children()
 
                 # Disable all reservoir outputs (not changeable by user)
                 for each in get_widgets:
@@ -1521,18 +1546,19 @@ class NRAPOpenIAM(tk.Tk):
         if 'wellbore' in component_list.keys():
             compName = component_list['wellbore'][0]
             compType = component_list['wellbore'][1]
+            connection_menu.connection.set(component_list['reservoir'][0].get())
+
             self.add_component(conn, aqName, wftabControl, compName, compType,
                                connection_menu, workflowSetupFrame,
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-            if component_list['Workflow'][1].get() == 'AoR':
+            if component_list['Workflow'][1].get() == 'AoR' or component_list['Workflow'][1].get() == 'TTFD':
                 componentVars[compName.get()]['connection'].set(component_list['reservoir'][0].get())
 
                 get_widgets = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
-                                                      + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
-                                                      + '.' + compName.get().lower() + '_tabType').winfo_children()
-
+                                                        + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
+                                                        + '.' + compName.get().lower() + '_tabType').winfo_children()
 
                 # Disable Number of wellbores, Wellbore locations, and Use random wells options
                 if compType.get() == "OpenWellbore":
@@ -1590,27 +1616,32 @@ class NRAPOpenIAM(tk.Tk):
         if 'aquifer' in component_list.keys():
             compName = component_list['aquifer'][0]
             compType = component_list['aquifer'][1]
+            connection_menu.connection.set(component_list['wellbore'][0].get())
+
             self.add_component(conn, aqName, wftabControl, compName, compType,
                                connection_menu, workflowSetupFrame,
                                controller, dyn_data, controls,
                                menu_type='workflow')
 
-            if component_list['Workflow'][1].get() == 'AoR':
+            if component_list['Workflow'][1].get() == 'AoR' or component_list['Workflow'][1].get() == 'TTFD':
                 componentVars[compName.get()]['connection'].set(component_list['wellbore'][0].get())
-
                 get_widgets = wftabControl.nametowidget('.!frame.!workflow_page.workflow_notebook.'
-                                                      + compName.get().lower() + '.' + compName.get().lower() + '_canvas'
-                                                      + '.' + compName.get().lower() + '_tabType').winfo_children()
+                                                        + compName.get().lower() + '.' + compName.get().lower()
+                                                        + '_canvas' + '.' + compName.get().lower()
+                                                        + '_tabType').winfo_children()
 
                 # disable aquifer selection menu and output options
                 get_widgets[-3].winfo_children()[-1].configure(state='disabled')
 
-                if compName.get() == 'GenericAquifer1':
-                    componentVars[compName.get()]['Dissolved_salt_volume'].set(1)
-                    componentVars[compName.get()]['Dissolved_CO2_volume'].set(1)
-                else:
-                    componentVars[compName.get()]['TDS_volume'].set(1)
-                    componentVars[compName.get()]['pH_volume'].set(1)
+                if component_list['Workflow'][1].get() == 'AoR':
+                    if compName.get() == 'GenericAquifer1':
+                        componentVars[compName.get()]['Dissolved_salt_volume'].set(1)
+                        componentVars[compName.get()]['Dissolved_CO2_volume'].set(1)
+                    else:
+                        componentVars[compName.get()]['TDS_volume'].set(1)
+                        componentVars[compName.get()]['pH_volume'].set(1)
+                elif component_list['Workflow'][1].get() == 'TTFD':
+                    pass
 
                 for each in get_widgets[-1].winfo_children():
                     if type(each) is tk.Checkbutton:
@@ -1619,6 +1650,7 @@ class NRAPOpenIAM(tk.Tk):
         # Add workflow component
         compName = component_list['Workflow'][0]
         compType = component_list['Workflow'][1]
+
         self.add_component(conn, aqName, wftabControl, compName, compType,
                            connection_menu, workflowSetupFrame,
                            controller, dyn_data, controls,
@@ -1654,6 +1686,7 @@ class NRAPOpenIAM(tk.Tk):
             'PlumeStability': (0, 0, 0, 1300),
             'ChemicalWellSealing': (0, 0, 0, 800),
             'AoR': (0, 0, 0, 800),
+            'TTFD': (0, 0, 0, 1000),
             }
 
         # The component type can contain spaces and parentheses so we remove
@@ -1692,6 +1725,7 @@ class NRAPOpenIAM(tk.Tk):
             'PlumeStability': psa_tab.read_tab_vars,
             'ChemicalWellSealing': cws_tab.read_tab_vars,
             'AoR': AOR_wf_tab.read_tab_vars,
+            'TTFD': TTFD_wf_tab.read_tab_vars
             }
 
         # The component type can contain spaces and parentheses so we remove
@@ -1731,6 +1765,7 @@ class NRAPOpenIAM(tk.Tk):
             'PlumeStability': psa_tab.add_widgets,
             'ChemicalWellSealing': cws_tab.add_widgets,
             'AoR': AOR_wf_tab.add_widgets,
+            'TTFD': TTFD_wf_tab.add_widgets,
             }
 
         # The component type can contain spaces and parentheses, so we remove
@@ -1958,6 +1993,24 @@ class NRAPOpenIAM(tk.Tk):
 
         return tabControl
 
+    def process_str(self, x):
+        try:
+            try:
+                # check to see if string is integer
+                x = int(x)
+            except:
+                # check to see if string is float
+                x = float(x)
+        except:
+            # check to see if string is list of integers
+            c = x.split(',')
+            x = []
+            for each in c:
+                try:
+                    x.append(int(each.strip("'[,]")))
+                except:
+                    x.append(float(each.strip("'[,]")))
+        return x
 
 def ask_exit():
     if messagebox.askokcancel("Exit", "Do you want to close the application?"):

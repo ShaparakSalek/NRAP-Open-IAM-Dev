@@ -278,6 +278,8 @@ class Workflow_Page(tk.Frame):
             wf_type = workflowType.get()
             if wf_type == 'Area of Review':
                 workflowType.set('AoR')
+            elif wf_type == 'Time to First Detection':
+                workflowType.set('TTFD')
 
             component_list['Workflow'] = [workflowName, workflowType]
 
@@ -357,7 +359,7 @@ class Workflow_Page(tk.Frame):
 
             # WORKFLOW PAGE SETUP
             # If the chosen workflow is AoR
-            if workflowType.find('Review') != -1:
+            if workflowType.find('Review') != -1 or workflowType.find('Time') != -1:
 
                 # Get reservoir, wellbore, and aquifer names
                 reservoirCompNames = [n for n in COMPONENT_TYPES if n.find('Reservoir') != -1]
@@ -414,11 +416,11 @@ class Workflow_Page(tk.Frame):
                                            'to use in this workflow.']))
                 wellboreLabel.grid(row=2, column=0, pady=5, padx=5, sticky='w')
                 wellboreMenu.grid(row=2, column=1, pady=5, padx=5, sticky='w')
-                self.dyn_data_vars = [StringVar() for val in range(2)]
-                for ind in range(2):
-                    self.dyn_data_vars[ind].set(WELL_DYN_INPUT_DEFAULTS[ind])
+                #self.dyn_data_vars = [StringVar() for val in range(2)]
+                #for ind in range(2):
+                #    self.dyn_data_vars[ind].set(WELL_DYN_INPUT_DEFAULTS[ind])
 
-                curr_ind = add_widgets_for_dyn_pars('well_fault_seal', 3)
+                #curr_ind = add_widgets_for_dyn_pars('well_fault_seal', 3)
 
                 # Aquifer
                 aquiferLabel = ttk.Label(workflowSetupFrame,
@@ -432,9 +434,12 @@ class Workflow_Page(tk.Frame):
                 self.toolTip.bind(aquiferMenu,
                                   ''.join(['Select which aquifer component ',
                                            'to use in this workflow.']))
-                curr_ind += 1
-                aquiferLabel.grid(row=curr_ind, column=0, pady=5, padx=5, sticky='w')
-                aquiferMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
+                aquiferLabel.grid(row=3, column=0, pady=5, padx=5, sticky='w')
+                aquiferMenu.grid(row=3, column=1, pady=5, padx=5, sticky='w')
+
+                #curr_ind += 1
+                #aquiferLabel.grid(row=curr_ind, column=0, pady=5, padx=5, sticky='w')
+                #aquiferMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
 
                 aquiferLayerLabel = ttk.Label(workflowSetupFrame,
                                               width=SETUP_LABEL_WIDTH,
@@ -447,20 +452,23 @@ class Workflow_Page(tk.Frame):
                 self.toolTip.bind(aquiferLayerMenu,
                                   ''.join(['Select the aquifer layer ',
                                            'to use in this workflow.']))
-                curr_ind += 1
-                aquiferLayerLabel.grid(row=curr_ind, column=0, pady=5, padx=15, sticky='w')
-                aquiferLayerMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
+                aquiferLayerLabel.grid(row=4, column=0, pady=5, padx=5, sticky='w')
+                aquiferLayerMenu.grid(row=4, column=1, pady=5, padx=5, sticky='w')
 
-                if aquiferCompName.get().find('Generic Aquifer') != -1:
-                    self.dyn_data_vars.append([StringVar() for val in range(2)])
-                    for ind in range(2):
-                        self.dyn_data_vars[ind].set(AQUIFER_DYN_INPUT_DEFAULTS[ind + 2])
-                else:
-                    self.dyn_data_vars = [StringVar() for val in range(4)]
-                    for ind in range(4):
-                        self.dyn_data_vars[ind].set(AQUIFER_DYN_INPUT_DEFAULTS[ind])
+                #curr_ind += 1
+                #aquiferLayerLabel.grid(row=curr_ind, column=0, pady=5, padx=15, sticky='w')
+                #aquiferLayerMenu.grid(row=curr_ind, column=1, pady=5, padx=5, sticky='w')
 
-                curr_ind = add_widgets_for_dyn_pars('aquifer', curr_ind + 1, num_of_variables=len(self.dyn_data_vars))
+                # if aquiferCompName.get().find('Generic Aquifer') != -1:
+                #     self.dyn_data_vars.append([StringVar() for val in range(2)])
+                #     for ind in range(2):
+                #         self.dyn_data_vars[ind].set(AQUIFER_DYN_INPUT_DEFAULTS[ind + 2])
+                # else:
+                #     self.dyn_data_vars = [StringVar() for val in range(4)]
+                #     for ind in range(4):
+                #         self.dyn_data_vars[ind].set(AQUIFER_DYN_INPUT_DEFAULTS[ind])
+
+#                 curr_ind = add_widgets_for_dyn_pars('aquifer', curr_ind + 1, num_of_variables=len(self.dyn_data_vars))
 
                 if workflowType.find('Review') != -1:
                     return
@@ -899,6 +907,9 @@ class Workflow_Page(tk.Frame):
         aquiferLayer = StringVar()
         workflowName.set('Workflow')
 
+        # Set dynamic data list
+        self.dyn_data_vars = []
+
         # Provide list of options for workflow selection
         self.controller.workflowType = StringVar()
         self.controller.workflowType.set(WORKFLOW_TYPES[0])
@@ -914,8 +925,8 @@ class Workflow_Page(tk.Frame):
         workflowType_Menu.config(width=SETUP_MENU_WIDTH)
         self.toolTip.bind(workflowType_Menu,
                           'Select the type of workflow you would like to use.')
-        workflowType_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
-        workflowType_Menu.grid(row=1, column=1, pady=5, padx=5, sticky='w')
+        workflowType_label.grid(row=1, column=0, pady=15, padx=5, sticky='w')
+        workflowType_Menu.grid(row=1, column=1, pady=15, padx=5, sticky='w')
 
         # Try adding dummy setup for connection menu for legacy purposes
         # and ease of code integration with existing menus
@@ -941,7 +952,7 @@ class Workflow_Page(tk.Frame):
                                            workflowSetupFrame, self.controller, self.dyn_data_vars, {}),
                                            addWorkflowButton.state(["disabled"])],
                                        name="addWorkflow_button")
-        addWorkflowButton.grid(row=1, column=2, pady=5, padx=5, sticky='nw')
+        addWorkflowButton.grid(row=1, column=2, pady=15, padx=5, sticky='nw')
         self.toolTip.bind(
             addWorkflowButton,
             ''.join(['After workflow is selected, click Add Workflow',
