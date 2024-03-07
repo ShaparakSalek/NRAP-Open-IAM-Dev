@@ -209,6 +209,8 @@ class AreaEstimate(iam_bc.ComponentModel):
         super().__init__(name, parent, model=self.simulation_model,
                          model_kwargs=model_kwargs)
 
+        self.grid_obs_keys = AE_OBSERVATIONS + [f'max_{obs_nm}' for obs_nm in AE_OBSERVATIONS]
+
         # Add type attribute
         self.class_type = 'AreaEstimate'
 

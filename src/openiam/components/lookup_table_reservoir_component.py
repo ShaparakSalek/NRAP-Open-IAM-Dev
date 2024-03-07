@@ -23,7 +23,7 @@ except ImportError as err:
     print('Unable to load matk module: {}'.format(err))
 
 
-LUTR_OBSERVATIONS = ['pressure', 'CO2saturation']
+LUTR_OBSERVATIONS = ['pressure', 'CO2saturation', 'initial_pressure']
 
 
 def find_weights(loc_xyz, triangulation):
