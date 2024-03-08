@@ -826,7 +826,7 @@ class Workflow_Page(tk.Frame):
                                 text='Stratigraphy',
                                 width=BUTTON_WIDTH,
                                 command=lambda: wftabControl.select(
-                                    '.!frame.!workflow_page.workflow_notebook.stratigraphy_frame'),
+                                    '.!frame.!workflow_page.workflow_notebook.stratigraphy_tab'),
                                 name="nextpage1_button")
         nextButton.grid(row=0, column=6, padx=5, pady=15, sticky='w')
         self.toolTip.bind(
