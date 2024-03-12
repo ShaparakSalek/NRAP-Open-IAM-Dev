@@ -132,15 +132,12 @@ class NRAPOpenIAM(tk.Tk):
 
         if componentVars['outputDirectory'].get() == INVALID_OUTPUT_DIR:
             componentVars['outputDirectory'].set(DEFAULT_OUTPUT_DIR)
-        print('componentVars[outputDirectoryGenerate].get(): ', componentVars['outputDirectoryGenerate'].get())
 
         d['ModelParams'] = {}
         if componentVars['outputDirectoryGenerate'].get():
-            print("Line 139")
             d['ModelParams']['OutputDirectory'] = componentVars[
                 'outputDirectory'].get()+'{datetime}'
         else:
-            print("Line 143")
             d['ModelParams']['OutputDirectory'] = componentVars[
                 'outputDirectory'].get()
 
