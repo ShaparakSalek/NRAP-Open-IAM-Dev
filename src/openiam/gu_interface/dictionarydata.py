@@ -138,7 +138,7 @@ COMPONENT_TYPES = [
     # 'Simple Reservoir',
     'Multisegmented Wellbore',
     'Cemented Wellbore',
-    'Cemented Wellbore (WR)',
+    # 'Cemented Wellbore (WR)',
     'Open Wellbore',
     'Generalized Flow Rate',
     'Fault Flow',

@@ -41,7 +41,7 @@ AOR_PARAMETERS_SETUP = {
 # Set AOR Workflow parameters names and value, min, max, second value, mean, std, bounds
 AOR_PARAMETER_VALUES = {
     'FigureDPI': [100, 100, 400, 100, 200, 50, 100, 400],
-    'CriticalPressureMPa': [5.0, 1.0, 25.0, 10.0, 5.0, 0.01, 0.1, 90.0],
+    'CriticalPressureMPa': [10.0, 1.0, 50.0, 10.0, 5.0, 0.01, 0.1, 90.0],
     'BrineDensity': [1000, 900, 1500, 1200, 1200, 150, 900, 1500],
     }
 

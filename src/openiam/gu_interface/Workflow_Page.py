@@ -372,7 +372,6 @@ class Workflow_Page(tk.Frame):
                 # Remove unnecessary reservoirs and wellbores
                 reservoirCompNames.remove('Generic Reservoir')
                 reservoirCompNames.remove('Theis Reservoir')
-                wellboreCompNames.remove('Cemented Wellbore (WR)')
 
                 # Set default reservoir, wellbore, and aquifer
                 reservoirCompName.set(reservoirCompNames[1])

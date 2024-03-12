@@ -39,7 +39,7 @@ AR_PARAMETERS_SETUP = {
     'reservoirPorosity': ["Reservoir porosity [-]:",
                           'reservoir porosity'],
     'reservoirRadius': ["Reservoir radius [m]:",
-                        'reservoir radius'],
+                        'reservoir radius, cannot be smaller\nthan the domain considered (distances between\ninjection sites and leaking wells)'],
     'brineDensity': ["Brine density [kg/m{}]:".format(u'\u00B3'),
                      'brine density'],
     'CO2Density': ["CO{} density [kg/m{}]:".format(u'\u2082', u'\u00B3'),
@@ -60,7 +60,7 @@ AR_PARAMETERS_SETUP = {
 AR_PARAMETER_VALUES = {
     'logResPerm': [-13, -14, -12, -14, -14, 1, -15.3, -12],
     'reservoirPorosity': [0.15, 0.1, 0.2, 0.2, 0.2, 0.09, 0.1, 0.3],
-    'reservoirRadius': [600, 500, 600, 550, 500, 50, 500, 100000],
+    'reservoirRadius': [100000, 500, 600, 550, 500, 50, 500, 100000],
     'brineDensity': [1000, 965, 1100, 1100, 1000, 25, 965, 1195],
     'brineViscosity': [2.535e-4, 3.0e-4, 1.0e-3, 3.0e-4,
                        1.0e-3, 1.0e-4, 2.3e-4, 1.59e-3],

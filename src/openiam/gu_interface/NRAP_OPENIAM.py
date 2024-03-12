@@ -56,6 +56,12 @@ from openiam.components.iam_base_classes import IAM_DIR
 # Save location of source folder in the top level folder
 USER_DIR = os.sep.join([IAM_DIR, 'examples', 'user'])
 
+# If the output directory is left unchanged, it will try to create an output 
+# folder in the src folder. Output should not go there, so assign a default.
+INVALID_OUTPUT_DIR = os.path.join(IAM_DIR, 'src', 'Output')
+
+DEFAULT_OUTPUT_DIR = os.path.join(IAM_DIR, 'output', 'GUI_simulation')
+
 
 class NRAPOpenIAM(tk.Tk):
     """
@@ -114,10 +120,18 @@ class NRAPOpenIAM(tk.Tk):
                 else:
                     fileName = dialog_answer
                 self.user_dir = os.path.dirname(os.path.abspath(fileName))
+            else:
+                # If the dialogue is opened and then cancelled, it will save to 
+                # the gu_interface folder and the file will lack .OpenIAM. This 
+                # statement prevents that outcome.
+                fileName = os.sep.join([USER_DIR, fileName + '.OpenIAM'])
         else:
-            fileName = os.sep.join([USER_DIR, fileName+'.OpenIAM'])
+            fileName = os.sep.join([USER_DIR, fileName + '.OpenIAM'])
 
         self.sim_file = fileName
+
+        if componentVars['outputDirectory'].get() == INVALID_OUTPUT_DIR:
+            componentVars['outputDirectory'].set(DEFAULT_OUTPUT_DIR)
 
         d['ModelParams'] = {}
         if componentVars['outputDirectoryGenerate'].get():
@@ -1141,15 +1155,20 @@ class NRAPOpenIAM(tk.Tk):
 
         try:
             dirname = askdirectory(
-                initialdir=outputDir.get(),
+                initialdir=os.path.join(IAM_DIR, 'output'),
                 title="Choose directory to save outputs")
         except:
             fileDialog.destroy()
         else:
             if dirname != '':
                 outputDir.set(dirname)
+            elif dirname == '':
+                dirname = DEFAULT_OUTPUT_DIR
+                outputDir.set(dirname)
 
             fileDialog.destroy()
+
+            componentVars['outputDirectory'].set(dirname)
 
     @staticmethod
     def choose_file(text_field_var, dialog_title):
@@ -1162,8 +1181,7 @@ class NRAPOpenIAM(tk.Tk):
         fileDialog.withdraw()
         try:
             filename = askopenfilename(
-                initialdir=os.path.dirname(os.path.dirname(os.path.dirname(
-                    os.path.abspath(__file__)))),
+                initialdir=os.path.join(IAM_DIR),
                 title=dialog_title)
         except:
             fileDialog.destroy()

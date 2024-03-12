@@ -14,9 +14,11 @@ from openiam.gu_interface.dictionarydata import (
     MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH,
     SETUP_LABEL_WIDTH, SETUP_ENTRY_WIDTH, SETUP_MENU_WIDTH)
 
+from openiam.components.iam_base_classes import IAM_DIR
 from openiam.gu_interface.cmpnts_tabs import strata_tab
 from openiam.gu_interface.cmpnts_tabs.locations import add_file_input_widgets
 
+DEFAULT_OUTPUT_DIR = os.path.join(IAM_DIR, 'output', 'GUI_simulation')
 
 WELL_DYN_INPUT_SETUP_TEXTS = {
     0: ["Pressure [Pa]:",
@@ -576,9 +578,7 @@ class OpenIAM_Page(tk.Frame):
 
         componentVars['outputDirectory'] = StringVar()
         try:
-            componentVars['outputDirectory'].set(os.path.join(
-                os.path.dirname(os.path.dirname(
-                    os.path.dirname(os.path.abspath(__file__)))), 'Output'))
+            componentVars['outputDirectory'].set(DEFAULT_OUTPUT_DIR)
         except:
             componentVars['outputDirectory'].set('~Documents')
 
