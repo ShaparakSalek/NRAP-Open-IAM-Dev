@@ -1155,7 +1155,7 @@ class NRAPOpenIAM(tk.Tk):
 
         try:
             dirname = askdirectory(
-                initialdir=os.path.join(IAM_DIR, 'output'),
+                initialdir=outputDir.get(),
                 title="Choose directory to save outputs")
         except:
             fileDialog.destroy()
