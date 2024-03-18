@@ -6,7 +6,7 @@ from tkinter import messagebox
 import Pmw
 
 from openiam.gu_interface.dictionarydata import (
-    componentVars, workflowVars, APP_SIZE, TAB_SIZE, aquifers,
+    componentVars, componentChoices, workflowVars, APP_SIZE, TAB_SIZE, aquifers,
     connections, ANALYSIS_TYPES, LOGGING_TYPES, COMPONENT_TYPES,
     WORKFLOW_TYPES, WORKFLOW_COMPONENTS, savedDictionary,
     LABEL_FONT, INSTRUCTIONS_FONT, BUTTON_WIDTH, FILE_ENTRY_WIDTH,
@@ -165,6 +165,9 @@ def disable_time_frame_widgets(frame):
     frame.browse_button.configure(state=frame_state[1 - check_button_state])
 
 
+
+
+
 class Workflow_Page(tk.Frame):
     def __init__(self, parent, controller):
         """
@@ -255,6 +258,17 @@ class Workflow_Page(tk.Frame):
             Adds workflow components to
             the component list.
             """
+
+            # Check to see if components have been added already,
+            # and if not loading a workflow, remove them
+            # if len(componentChoices) != 0 and not controller.file_loaded:
+            #     if "Workflow" in componentChoices:
+            #         print(wftabControl)
+            #     else:
+            #         for tab in componentChoices:
+            #             print(controller.tabControl.tab)
+            #     print()
+            #     # clear_components()
 
             workflow_components = WORKFLOW_COMPONENTS[self.controller.workflowType.get()]
             component_list = {}

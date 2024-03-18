@@ -68,6 +68,11 @@ class NRAPOpenIAM(tk.Tk):
         container.grid(row=0, column=0, sticky='nsew')
         componentVars['simName'] = StringVar()
 
+        # Create flag for communicating if a file is currently being loaded
+        # (Necessary to properly clear components when switching between
+        #  the Components and the Workflows options.)
+        self.file_loaded = False
+
         # Define folder where user files will be saved
         # If None it means no "save" requests were made
         self.user_dir = None
@@ -575,6 +580,9 @@ class NRAPOpenIAM(tk.Tk):
 
         global connectionTypes
 
+        # Change flag for file loading
+        self.file_loaded = True
+
         for component in componentChoices:
             del componentVars[component]
 
@@ -939,11 +947,11 @@ class NRAPOpenIAM(tk.Tk):
             if data[key]['type'] == 'OpenWellbore':
                 ow_tab.process_crit_pressure_approach_pars(self, data[key], key)
 
+        if 'Workflow' in data.keys():
             # Some workflow parameters require processing after all other
             # preprocessing steps
             load_workflow.load_workflow(self, data)
 
-        if 'Workflow' in data.keys():
             frame = self.frames[Workflow_Page]
 
             # Disable "Add Workflow" button and option menu

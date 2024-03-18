@@ -260,7 +260,6 @@ def load_workflow(controller, data):
 
                         get_widgets.winfo_children()[5].winfo_children()[-1].config(state="normal")
                         componentVars['OpenWellbore1']['Params']['brineDensity']['value'].set(brine_density)
-                        get_widgets.winfo_children()[5].winfo_children()[-1].config(state="disabled")
 
 
                     elif 'MultisegmentedWellbore1' in ckeys:
@@ -272,7 +271,6 @@ def load_workflow(controller, data):
 
                         get_widgets.winfo_children()[4].winfo_children()[-1].config(state="normal")
                         componentVars['MultisegmentedWellbore1']['Params']['brineDensity']['value'].set(brine_density)
-                        get_widgets.winfo_children()[4].winfo_children()[-1].config(state="disabled")
 
                 if data['Workflow']['type'] == 'TTFD':
                     # set plume type
