@@ -37,6 +37,7 @@ def process_parameters(component, component_data, name2obj_dict=None):
 
     if ('Parameters' in component_data) and (component_data['Parameters']):
         for key in component_data['Parameters']:
+            
             # The case for "par_name: par_value"
             if not isinstance(component_data['Parameters'][key], dict):
                 component_data['Parameters'][key] = {
@@ -80,6 +81,8 @@ def process_parameters(component, component_data, name2obj_dict=None):
                             unitType=unitType, top_mid_bottom=top_mid_bottom)
 
                         component_data['Parameters'][key]['value'] = depthValue
+                    
+                    check_min_max_vals(component_data['Parameters'], key, component.name)
 
                     component.add_par(key, **component_data['Parameters'][key])
 
@@ -92,10 +95,36 @@ def process_parameters(component, component_data, name2obj_dict=None):
                     component.add_par_linked_to_obs(key, strata_comp.linkobs[value])
 
                 else:
+                    check_min_max_vals(component_data['Parameters'], key, component.name)
                     component.add_par(key, **component_data['Parameters'][key])
 
             else:
+                check_min_max_vals(component_data['Parameters'], key, component.name)
+                
                 component.add_par(key, **component_data['Parameters'][key])
+
+
+def check_min_max_vals(param_dict, key, comp_name):
+    """
+    Checks if the parameter is stochastic. If so, checks if the minimum value is 
+    greater than or equal to the maximum value. If so, raises an error.
+    """
+    stochastic_check = ('min' in param_dict[key] and 'max' in param_dict[key])
+    
+    if stochastic_check:
+        min_val = param_dict[key]['min']
+        max_val = param_dict[key]['max']
+        
+        if min_val >= max_val:
+            err_msg = ''.join([
+                'For the parameter {} of the component {}, the minimum and ', 
+                'maximum values were given as {} and {}, respectively. The ', 
+                'minimum value cannot be greater than or equal to the maximum ', 
+                'value. Check your input.']).format(
+                    key, comp_name, min_val, max_val)
+            
+            logging.error(err_msg)
+            raise KeyError(err_msg)
 
 
 def process_dynamic_inputs(component, component_data, array_like=False,
