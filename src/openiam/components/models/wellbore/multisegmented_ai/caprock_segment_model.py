@@ -23,6 +23,7 @@ class DLCaprockSegmentModels():
         t1 = time.time()
         for TargetVar in TargetVars:
             t0 = time.time()
+            
             if TargetVar == 'BrineRegression':
                 self.model_rf_qB = joblib.load(open(os.path.join(
                     componentPath, TargetVar, 'RFmodel_lb_3_depth_20_132.joblib'), 'rb'))

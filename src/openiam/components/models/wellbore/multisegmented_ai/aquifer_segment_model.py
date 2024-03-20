@@ -26,13 +26,13 @@ class DLAquiferSegmentModels():
         
             if TargetVar == 'BrineRegression':
                 self.model_rf_qB = joblib.load(open(os.path.join(
-                    componentPath, TargetVar, 'RFmodel_lb_3_depth_28_132.joblib'), 'rb'))
+                    componentPath, TargetVar, 'Brine_RF_lb_3_depth_15_132.joblib'), 'rb'))
             elif TargetVar == 'CO2Regression':
                 self.model_rf_qC = joblib.load(open(os.path.join(
-                    componentPath, TargetVar, 'RFmodel_lb_3_depth_24_132.joblib'), 'rb'))
+                    componentPath, TargetVar, 'CO2_RF_lb_3_depth_15_132.joblib'), 'rb'))
             elif TargetVar == 'SaturationRegression':
                 self.model_rf_sC = joblib.load(open(os.path.join(
-                    componentPath, TargetVar, 'RFmodel_lb_3_depth_40_132.joblib'), 'rb'))
+                    componentPath, TargetVar, 'RFmodel_lb_3_depth_13_132.joblib'), 'rb'))
                 
             # print('* loading dl models: {:.0f} secs'.format(time.time()-t0))    
         

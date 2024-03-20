@@ -15,7 +15,7 @@
 #
 # To run this example, the files for the MultisegmentedWellboreAI component must be 
 # downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
-# large (about 7.2 GB). The two files can be downloaded from these links:
+# large (about 2.3 GB). The two files can be downloaded from these links:
 #     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
 #     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
 #

@@ -24,7 +24,7 @@
 #
 # Because useDLmodel is set to 0 here, only the file from the first is required (about 2 GB). Although  
 # the results are based on analytical modeling in this case, the file is still required to calculate 
-# fluid properties. The second file (about 5.2 GB) is required if useDLmodel is set to 1.
+# fluid properties. The second file (about 308 MB) is required if useDLmodel is set to 1.
 #
 # The zipped file must then be unzipped, with the resulting folder placed into this directory:
 #     src/openiam/components/models/wellbore/multisegmented_ai

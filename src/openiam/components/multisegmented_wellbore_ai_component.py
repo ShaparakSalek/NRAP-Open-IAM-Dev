@@ -24,8 +24,8 @@ except ImportError:
     print('\nERROR: Unable to load ROM for AI Multisegmented Wellbore component\n')
     sys.exit()
 
-AQUIFER_FILE_EDX_LINK = 'https://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download'
-SHALE_FILE_EDX_LINK = 'https://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download'
+AQUIFER_FILE_EDX_LINK = 'http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download'
+SHALE_FILE_EDX_LINK = 'http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download'
 
 MODEL_DATA_LOCATION = os.path.join(iam_bc.IAM_DIR, 'src', 'openiam', 'components', 
                                    'models', 'wellbore', 'multisegmented_ai')
@@ -282,10 +282,10 @@ class MultisegmentedWellboreAI(iam_bc.ComponentModel):
                                      'shale_feb2024_models')
         
         componentPath2 = os.path.join(componentPath0, 'components', 'models', 'wellbore', 
-                                      'multisegmented_ai', 'aquifer_nov2023_models')
+                                      'multisegmented_ai', 'aquifer_mar2024_models')
         componentPath2_v2 = os.path.join(componentPath0, 'components', 'models', 'wellbore', 
-                                      'multisegmented_ai', 'aquifer_nov2023_models', 
-                                      'aquifer_nov2023_models')
+                                      'multisegmented_ai', 'aquifer_mar2024_models', 
+                                      'aquifer_mar2024_models')
         
         # Caprock segment model files
         if os.path.exists(componentPath_v2):

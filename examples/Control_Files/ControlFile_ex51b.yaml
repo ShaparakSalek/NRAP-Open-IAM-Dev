@@ -17,15 +17,15 @@
 # demanding, the useDLmodel parameter is set to 0. The Multisegmented Wellbore AI results are therefore 
 # derived from analytical modeling.
 #
-# To run this example, one of the files for the Multisegmented Wellbore AI component must be 
+# To run this example, the files for the Multisegmented Wellbore AI component must be 
 # downloaded. The files are not included in the download of NRAP-Open-IAM because they are 
-# large. The two files can be downloaded from these links:
+# large (about 2.3 GB). The two files can be downloaded from these links:
 #     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/42882a99-a5b0-4d68-8f4c-cad4812358c4/download
 #     http://edx.netl.doe.gov/dataset/42fb2930-7bf5-48d9-821b-d801c6f29f36/resource/8b786e28-0e52-40d4-84b5-23c25dc2d338/download
 #
 # Because useDLmodel is set to 0 here, only the file from the first link is required (about 2 GB). Although  
 # the results are based on analytical modeling in this case, the file is still required to calculate 
-# fluid properties. The second file (about 5.2 GB) is required if useDLmodel is set to 1.
+# fluid properties. The second file (about 308 MB) is required if useDLmodel is set to 1.
 #
 # The zipped file must then be unzipped, with the resulting folder placed into this directory:
 #     src/openiam/components/models/wellbore/multisegmented_ai
