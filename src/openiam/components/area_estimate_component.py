@@ -53,7 +53,7 @@ def simple_delineation(p, pressure, saturation, initial_pressure):
     plume_extent = np.zeros(saturation.shape)
     plume_extent[np.where(saturation > p['saturation_threshold'])] = 1
 
-    delineated_area = np.logical_or(pressure_front, plume_extent)
+    delineated_area = np.logical_or(pressure_front, plume_extent).astype(float)
 
     # Setup dictionary of outputs
     out = {'pressure_front': pressure_front,
@@ -97,7 +97,7 @@ def under_pressurized_case_delineation(p, pressure, saturation, initial_pressure
     plume_extent = np.zeros(saturation.shape)
     plume_extent[np.where(saturation > p['saturation_threshold'])] = 1
 
-    delineated_area = np.logical_or(pressure_front, plume_extent)
+    delineated_area = np.logical_or(pressure_front, plume_extent).astype(float)
 
     # Setup dictionary of outputs
     out = {'pressure_front': pressure_front,
@@ -143,7 +143,7 @@ def hydrostatic_case_delineation(p, pressure, saturation, initial_pressure):
     plume_extent = np.zeros(saturation.shape)
     plume_extent[np.where(saturation > p['saturation_threshold'])] = 1
 
-    delineated_area = np.logical_or(pressure_front, plume_extent)
+    delineated_area = np.logical_or(pressure_front, plume_extent).astype(float)
 
     # Setup dictionary of outputs
     out = {'pressure_front': pressure_front,
@@ -374,7 +374,7 @@ class AreaEstimate(iam_bc.ComponentModel):
         else:
             for obs_nm in AE_OBSERVATIONS:
                 self.accumulators['max_'+obs_nm].sim = np.logical_or(
-                    self.accumulators['max_'+obs_nm].sim, out[obs_nm])
+                    self.accumulators['max_'+obs_nm].sim, out[obs_nm]).astype(float)
                 out['max_'+obs_nm] = self.accumulators['max_'+obs_nm].sim
 
         out['area'] = np.sum(out['delineated_area']*self.cell_size)
