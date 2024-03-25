@@ -48,7 +48,7 @@ from openiam.gu_interface.cmpnts_tabs import (
     cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
     aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
     ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, TTFD_wf_tab,
-    locations, load_workflow)
+    locations, load_workflow, wf_strata_tab)
 from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
 from openiam.components.iam_base_classes import IAM_DIR
@@ -123,6 +123,22 @@ class NRAPOpenIAM(tk.Tk):
             fileName = os.sep.join([USER_DIR, fileName+'.OpenIAM'])
 
         self.sim_file = fileName
+
+        if 'Workflow' in componentChoices:
+            componentVars['endTime'] = componentVars['wf_endTime']
+            componentVars['timeStep'] = componentVars['wf_timeStep']
+            componentVars['timePointsInput'] = componentVars['wf_timePointsInput']
+            componentVars['timePoints'] = componentVars['wf_timePoints']
+            componentVars['analysis']['type'] = componentVars['wf_analysis']['wf_type']
+            componentVars['logging'] = componentVars['wf_logging']
+            componentVars['outputDirectory'] = componentVars['wf_outputDirectory']
+            componentVars['outputDirectoryGenerate'] = componentVars['wf_outputDirectoryGenerate']
+            self.OutputType = self.wf_OutputType
+            self.GenerateOutputFiles = self.wf_GenerateOutputFiles
+            self.GenerateCombOutputFile = self.wf_GenerateCombOutputFile
+            self.GenerateStatFiles = self.wf_GenerateStatFiles
+
+            wf_strata_tab.convert_tab_vars()
 
         d['ModelParams'] = {}
         if componentVars['outputDirectoryGenerate'].get():

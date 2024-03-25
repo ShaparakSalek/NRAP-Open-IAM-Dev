@@ -46,8 +46,8 @@ from openiam.gu_interface.dictionarydata import (
 from openiam.gu_interface.cmpnts_tabs import (
     src_tab, arc_tab, grc_tab, trc_tab, msw_tab, lutr_tab, cw_tab,
     cwwr_tab, ow_tab, gfr_tab, ff_tab, fl_tab, hcl_tab, sh_tab, ca_tab,
-    aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab,
-    ga_tab, atm_tab, psa_tab, strata_tab, cws_tab, AOR_wf_tab, locations)
+    aalf_tab, daa_tab, daaml_tab, fgaq_tab, fgaz_tab, ga_tab, atm_tab, 
+    psa_tab, strata_tab, cws_tab, AOR_wf_tab, locations, wf_strata_tab)
 from openiam.gu_interface.cmpnts_tabs.parameter_entry import ParameterEntry
 
 from openiam.components.iam_base_classes import IAM_DIR
@@ -344,6 +344,30 @@ def load_workflow(controller, data):
                                                                   'addWorkflow_frame.',
                                                                   'addWorkflow_button']))
     add_wf_button.config(state="disabled")
+
+    try:
+        componentVars['wf_timePointsInput'].set(data['ModelParams']['TimePointsInput'])
+        componentVars['wf_timePoints'].set(data['ModelParams']['TimePoints'])
+    except:
+        componentVars['wf_endTime'].set(data['ModelParams']['EndTime'])
+        componentVars['wf_timeStep'].set(data['ModelParams']['TimeStep'])
+        componentVars['wf_timePointsInput'].set(False)
+        componentVars['wf_timePoints'].set('')
+
+    componentVars['wf_analysis']['wf_type'].set(data['ModelParams']['Analysis']['type'])
+    componentVars['wf_logging'].set(data['ModelParams']['Logging'])
+    componentVars['wf_outputDirectory'].set(data['ModelParams']['OutputDirectory'])
+    try:
+        componentVars['wf_outputDirectoryGenerate'].set(data['ModelParams']['OutputDirectoryGenerate'])
+    except:
+        componentVars['wf_outputDirectoryGenerate'].set(False)
+    controller.wf_OutputType.set(data['ModelParams']['OutputType'])
+    controller.wf_GenerateOutputFiles.set(data['ModelParams']['GenerateOutputFiles'])
+    controller.wf_GenerateCombOutputFile.set(data['ModelParams']['GenerateCombOutputFile'])
+    controller.wf_GenerateStatFiles.set(data['ModelParams']['GenerateStatFiles'])
+
+    wf_strata_tab.deconvert_tab_vars()
+
 
 
 

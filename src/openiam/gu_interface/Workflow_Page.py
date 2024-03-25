@@ -15,7 +15,7 @@ from openiam.gu_interface.dictionarydata import (
     MODEL_TAB_ENTRY_WIDTH, MODEL_TAB_MENU_WIDTH, SETUP_LABEL_WIDTH,
     SETUP_ENTRY_WIDTH, SETUP_MENU_WIDTH)
 
-from openiam.gu_interface.cmpnts_tabs import strata_tab
+from openiam.gu_interface.cmpnts_tabs import wf_strata_tab
 from openiam.gu_interface.cmpnts_tabs.locations import add_file_input_widgets
 
 WELL_DYN_INPUT_SETUP_TEXTS = {
@@ -186,8 +186,8 @@ class Workflow_Page(tk.Frame):
         self.dyn_data_vars = []
 
         # initialize dictionaries to hold analysis and strata variables
-        componentVars['analysis'] = {}
-        componentVars['strata'] = {}
+        componentVars['wf_analysis'] = {}
+        componentVars['wf_strata'] = {}
 
         def show_dashboard():
             """
@@ -369,7 +369,7 @@ class Workflow_Page(tk.Frame):
 
             # Format aquifers list
             aquifers = ['aquifer{}'.format(ind) for ind in range(
-                1, componentVars['strata']['Params']['numberOfShaleLayers'].get())]
+                1, componentVars['wf_strata']['wf_Params']['numberOfShaleLayers'].get())]
 
             # WORKFLOW PAGE SETUP
             # If the chosen workflow is AoR
@@ -555,15 +555,15 @@ class Workflow_Page(tk.Frame):
         timeFrame.grid(row=2, column=0, columnspan=6, sticky='w')
 
         # Use end time point and time step
-        componentVars['endTime'] = DoubleVar()
-        componentVars['endTime'].set(50.0)
+        componentVars['wf_endTime'] = DoubleVar()
+        componentVars['wf_endTime'].set(50.0)
         endTime_label = ttk.Label(timeFrame,
                                   text="End time [years]:",
                                   width=MODEL_TAB_LABEL_WIDTH2,
                                   name='endTime_label')
         endTime_txtField = tk.Entry(timeFrame,
                                     width=MODEL_TAB_ENTRY_WIDTH,
-                                    textvariable=componentVars['endTime'],
+                                    textvariable=componentVars['wf_endTime'],
                                     name='endTime_text')
         endTime_label.grid(row=0, column=0, pady=5, padx=5, sticky='w')
         endTime_txtField.grid(row=0, column=1, padx=5, pady=5, sticky='w')
@@ -571,15 +571,15 @@ class Workflow_Page(tk.Frame):
         timeFrame.endtime_label = endTime_label
         timeFrame.endtime_entry = endTime_txtField
 
-        componentVars['timeStep'] = DoubleVar()
-        componentVars['timeStep'].set(1.0)
+        componentVars['wf_timeStep'] = DoubleVar()
+        componentVars['wf_timeStep'].set(1.0)
         timeStep_label = ttk.Label(timeFrame,
                                    text="Time step [years]:",
                                    width=MODEL_TAB_LABEL_WIDTH2,
                                    name='timestep_label')
         timeStep_txtField = tk.Entry(timeFrame,
                                      width=MODEL_TAB_ENTRY_WIDTH,
-                                     textvariable=componentVars['timeStep'],
+                                     textvariable=componentVars['wf_timeStep'],
                                      name='timestep_text')
         timeStep_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
         timeStep_txtField.grid(row=1, column=1, padx=5, pady=5, sticky='w')
@@ -588,14 +588,14 @@ class Workflow_Page(tk.Frame):
         timeFrame.timestep_entry = timeStep_txtField
 
         # Use manual input or file for time points
-        componentVars['timePointsInput'] = BooleanVar()
-        componentVars['timePointsInput'].set(0)
+        componentVars['wf_timePointsInput'] = BooleanVar()
+        componentVars['wf_timePointsInput'].set(0)
         file_input_label = ttk.Label(timeFrame,
                                      text="Use manual or file input for time points:",
                                      width=PARAMETER_LABEL_WIDTH + 10,
                                      name="fileinput_label")
         file_input_checkbox = tk.Checkbutton(timeFrame,
-                                             variable=componentVars['timePointsInput'],
+                                             variable=componentVars['wf_timePointsInput'],
                                              command=lambda: disable_time_frame_widgets(timeFrame),
                                              name="file_input_check")
         file_input_label.grid(row=2, column=0, columnspan=2, pady=5, padx=5, sticky='w')
@@ -603,10 +603,10 @@ class Workflow_Page(tk.Frame):
         self.toolTip.bind(file_input_checkbox, 'Check to use manual or file input for time points.')
         timeFrame.fileinput_label = file_input_label
         timeFrame.fileinput_checkbox = file_input_checkbox
-        timeFrame.checkbox_variable = componentVars['timePointsInput']
+        timeFrame.checkbox_variable = componentVars['wf_timePointsInput']
 
-        componentVars['timePoints'] = StringVar()
-        componentVars['timePoints'].set('')
+        componentVars['wf_timePoints'] = StringVar()
+        componentVars['wf_timePoints'].set('')
         timePoints_label = ttk.Label(timeFrame,
                                      text="Time points [years]:",
                                      width=MODEL_TAB_LABEL_WIDTH2,
@@ -614,7 +614,7 @@ class Workflow_Page(tk.Frame):
         timePoints_label.grid(row=3, column=0, pady=5, padx=5, sticky='w')
         timeFrame.timepoints_label = timePoints_label
         add_file_input_widgets(
-            self.controller, timeFrame, self.toolTip, componentVars['timePoints'],
+            self.controller, timeFrame, self.toolTip, componentVars['wf_timePoints'],
             ''.join(['Enter time points data manually (separated by comma) or ',
                      'provide path to the file containing data.']),
             'Select file containing time points data.',
@@ -627,17 +627,17 @@ class Workflow_Page(tk.Frame):
         self.controller.analysisFrame = tk.Frame(modelFrame, name="analysis_frame")
         self.controller.analysisFrame.grid(row=3, column=0, columnspan=6, sticky='we')
 
-        componentVars['analysis']['type'] = StringVar()
-        componentVars['analysis']['type'].set(ANALYSIS_TYPES[0])
+        componentVars['wf_analysis']['wf_type'] = StringVar()
+        componentVars['wf_analysis']['wf_type'].set(ANALYSIS_TYPES[0])
         analysis_label = ttk.Label(self.controller.analysisFrame,
                                    text="Analysis:",
                                    width=MODEL_TAB_LABEL_WIDTH2,
                                    name="analysis_label")
         analysis_menu = tk.OptionMenu(self.controller.analysisFrame,
-                                      componentVars['analysis']['type'],
+                                      componentVars['wf_analysis']['wf_type'],
                                       *ANALYSIS_TYPES,
                                       command=lambda _: self.controller.set_analysis_type(
-                                          componentVars['analysis']['type'].get()))
+                                          componentVars['wf_analysis']['wf_type'].get()))
         analysis_menu.config(width=MODEL_TAB_MENU_WIDTH)
         analysis_label.grid(row=0, column=0, pady=5, padx=5, sticky='w')
         analysis_menu.grid(row=0, column=1, pady=5, padx=5, sticky='w')
@@ -648,14 +648,14 @@ class Workflow_Page(tk.Frame):
         loggingFrame = ttk.Frame(modelFrame, name='logging_frame')
         loggingFrame.grid(row=4, column=0, columnspan=6, sticky='w')
 
-        componentVars['logging'] = StringVar()
-        componentVars['logging'].set(LOGGING_TYPES[1])
+        componentVars['wf_logging'] = StringVar()
+        componentVars['wf_logging'].set(LOGGING_TYPES[1])
         logging_label = ttk.Label(loggingFrame,
                                   text="Logging:",
                                   width=MODEL_TAB_LABEL_WIDTH2,
                                   name='logging_label')
         logging_Menu = tk.OptionMenu(loggingFrame,
-                                     componentVars['logging'],
+                                     componentVars['wf_logging'],
                                      *LOGGING_TYPES)
         logging_Menu.config(width=MODEL_TAB_MENU_WIDTH)
         logging_label.grid(row=0, column=0, pady=5, padx=5, sticky='w')
@@ -664,13 +664,13 @@ class Workflow_Page(tk.Frame):
                           'Select type of logging for simulation.')
 
         # Set directory for output
-        componentVars['outputDirectory'] = StringVar()
+        componentVars['wf_outputDirectory'] = StringVar()
         try:
-            componentVars['outputDirectory'].set(os.path.join(
+            componentVars['wf_outputDirectory'].set(os.path.join(
                 os.path.dirname(os.path.dirname(
                     os.path.dirname(os.path.abspath(__file__)))), 'Output'))
         except:
-            componentVars['outputDirectory'].set('~Documents')
+            componentVars['wf_outputDirectory'].set('~Documents')
 
         outputFrame1 = ttk.Frame(modelFrame, name='output_dir')
         outputFrame1.grid(row=5, column=0, columnspan=6, sticky='w')
@@ -679,13 +679,13 @@ class Workflow_Page(tk.Frame):
             outputFrame1, text="Output directory:", width=MODEL_TAB_LABEL_WIDTH2)
         outputDirectory_txtField = tk.Entry(outputFrame1,
                                             width=FILE_ENTRY_WIDTH,
-                                            textvariable=componentVars['outputDirectory'],
+                                            textvariable=componentVars['wf_outputDirectory'],
                                             name="outputdir_text")
         outputDirectory_browse = ttk.Button(outputFrame1,
                                             width=BUTTON_WIDTH,
                                             text="Browse",
                                             command=lambda: self.controller.choose_output_dir(
-                                                componentVars['outputDirectory']),
+                                                componentVars['wf_outputDirectory']),
                                             name='outputdir_button')
         outputDirectory_label.grid(row=1, column=0, pady=5, padx=5, sticky='w')
         outputDirectory_txtField.grid(
@@ -702,14 +702,14 @@ class Workflow_Page(tk.Frame):
         outputFrame2.grid(row=6, column=0, columnspan=6, sticky='w')
 
         # Create variables and widgets relevant to generating output files
-        componentVars['outputDirectoryGenerate'] = BooleanVar()
-        componentVars['outputDirectoryGenerate'].set(0)
+        componentVars['wf_outputDirectoryGenerate'] = BooleanVar()
+        componentVars['wf_outputDirectoryGenerate'].set(0)
         outputDirectoryGenerate_label = ttk.Label(outputFrame2,
                                                   text="Generate output directory:",
                                                   width=MODEL_TAB_LABEL_WIDTH1,
                                                   name='make_outputdir_label')
         outputDirectoryGenerate_checkbox = tk.Checkbutton(outputFrame2,
-                                                          variable=componentVars['outputDirectoryGenerate'],
+                                                          variable=componentVars['wf_outputDirectoryGenerate'],
                                                           name="make_outputdir_check")
         outputDirectoryGenerate_label.grid(row=2, column=0, pady=5, padx=5, sticky='w')
         outputDirectoryGenerate_checkbox.grid(row=2, column=1, pady=5, padx=5, sticky='w')
@@ -718,18 +718,18 @@ class Workflow_Page(tk.Frame):
                                    'timestamp for outputs to be saved.']))
 
         # Set orientation for output (column-wise or row-wise)
-        self.controller.OutputType = BooleanVar()
-        self.controller.OutputType.set(True)
+        self.controller.wf_OutputType = BooleanVar()
+        self.controller.wf_OutputType.set(True)
         outputType_label = ttk.Label(outputFrame2,
                                      text="Output orientation:",
                                      name='orientation_label')
         outputType_Selection1 = tk.Radiobutton(outputFrame2,
-                                               variable=self.controller.OutputType,
+                                               variable=self.controller.wf_OutputType,
                                                text="Column-wise",
                                                value=True,
                                                name='column_orientation_check')
         outputType_Selection2 = tk.Radiobutton(outputFrame2,
-                                               variable=self.controller.OutputType,
+                                               variable=self.controller.wf_OutputType,
                                                text="Row-wise",
                                                value=False,
                                                name='row_orientation_check')
@@ -741,19 +741,19 @@ class Workflow_Page(tk.Frame):
         outputType_Selection2.grid(row=3, column=2, pady=5, padx=5, sticky='w')
 
         # Determine whether or not to output files from simulation
-        self.controller.GenerateOutputFiles = BooleanVar()
-        self.controller.GenerateOutputFiles.set(True)
+        self.controller.wf_GenerateOutputFiles = BooleanVar()
+        self.controller.wf_GenerateOutputFiles.set(True)
         GenerateOutputFiles_label = ttk.Label(outputFrame2,
                                               text="Generate Output Files?",
                                               name="gen_outputfiles_label")
         GenerateOutputFiles_Selection1 = tk.Radiobutton(outputFrame2,
-                                                        variable=self.controller.GenerateOutputFiles,
+                                                        variable=self.controller.wf_GenerateOutputFiles,
                                                         text="Yes",
                                                         value=True,
                                                         command=buttons_state,
                                                         name="gen_outputfiles_yes_check")
         GenerateOutputFiles_Selection2 = tk.Radiobutton(outputFrame2,
-                                                        variable=self.controller.GenerateOutputFiles,
+                                                        variable=self.controller.wf_GenerateOutputFiles,
                                                         text="No",
                                                         value=False,
                                                         command=buttons_state,
@@ -766,19 +766,19 @@ class Workflow_Page(tk.Frame):
         GenerateOutputFiles_Selection2.grid(row=4, column=2, pady=5, padx=5, sticky='w')
 
         # Determine whether to output a combined output file (all data from sim in one file)
-        self.controller.GenerateCombOutputFile = BooleanVar()
-        self.controller.GenerateCombOutputFile.set(True)
+        self.controller.wf_GenerateCombOutputFile = BooleanVar()
+        self.controller.wf_GenerateCombOutputFile.set(True)
         GenerateCombOutputFile_label = ttk.Label(outputFrame2,
                                                  text="Generate a Combined Output File?",
                                                  name="gen_combofile_label")
         GenerateCombOutputFile_Selection1 = tk.Radiobutton(outputFrame2,
-                                                           variable=self.controller.GenerateCombOutputFile,
+                                                           variable=self.controller.wf_GenerateCombOutputFile,
                                                            text="Yes",
                                                            value=True,
                                                            state='active',
                                                            name="gen_combofile_yes_check")
         GenerateCombOutputFile_Selection2 = tk.Radiobutton(outputFrame2,
-                                                           variable=self.controller.GenerateCombOutputFile,
+                                                           variable=self.controller.wf_GenerateCombOutputFile,
                                                            text="No",
                                                            value=False,
                                                            state='active',
@@ -793,19 +793,19 @@ class Workflow_Page(tk.Frame):
         GenerateCombOutputFile_Selection2.grid(row=5, column=2, pady=5, padx=5, sticky='w')
 
         # Determine whether to generate a statistics file from simulation
-        self.controller.GenerateStatFiles = BooleanVar()
-        self.controller.GenerateStatFiles.set(True)
+        self.controller.wf_GenerateStatFiles = BooleanVar()
+        self.controller.wf_GenerateStatFiles.set(True)
         GenerateStatFiles_label = ttk.Label(outputFrame2,
                                             text="Generate a Statistics File?",
                                             name="gen_statsfile_label")
         GenerateStatFiles_Selection1 = tk.Radiobutton(outputFrame2,
-                                                      variable=self.controller.GenerateStatFiles,
+                                                      variable=self.controller.wf_GenerateStatFiles,
                                                       text="Yes",
                                                       value=True,
                                                       state='active',
                                                       name="gen_statsfile_yes_radio")
         GenerateStatFiles_Selection2 = tk.Radiobutton(outputFrame2,
-                                                      variable=self.controller.GenerateStatFiles,
+                                                      variable=self.controller.wf_GenerateStatFiles,
                                                       text="No",
                                                       value=False,
                                                       state='active',
@@ -871,7 +871,7 @@ class Workflow_Page(tk.Frame):
         wftabControl.pack(expand=1, fill="both")
 
         # Add all widgets for stratigraphy setup
-        strata_tab.add_widgets(self.controller, stratigraphyTab, self.toolTip)
+        wf_strata_tab.add_widgets(self.controller, stratigraphyTab, self.toolTip)
 
         # # Go to Workflow tab
         # descriptionFrame2 = ttk.Frame(stratigraphyTab, name="nextpage2_frame")
@@ -991,8 +991,9 @@ class Workflow_Page(tk.Frame):
                                   name="cancel_button")
         cancelButton.pack(side='right', padx=10, pady=5)
 
-        for key in componentVars:
-            if key != 'strata':
+        local_vars = [key for key in componentVars if "wf_" in key]
+        for key in local_vars:
+            if key != 'wf_strata':
                 try:
                     savedDictionary[key] = componentVars[key].get()
                 except:
