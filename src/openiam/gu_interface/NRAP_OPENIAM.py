@@ -978,6 +978,9 @@ class NRAPOpenIAM(tk.Tk):
                 '.!frame.!workflow_page.workflow_notebook.workflow_tab.addWorkflow_frame.!optionmenu') \
                 .configure(state='disabled')
 
+            # Disable Enter Parameters button and put into Workflow Mode
+            self.nametowidget(".!frame.!dashboard_page.!frame.!frame.!frame.!button").configure(state='disabled')
+            self.nametowidget(".!frame.!dashboard_page.!frame.!frame.!frame.!button").configure(text='Workflow Mode')
 
 
         else:
@@ -1237,6 +1240,10 @@ class NRAPOpenIAM(tk.Tk):
 
             for tab in self.workflow_tabs:
                 self.remove_component(tab, tabControl, connection_menu, menu_type='workflow')
+
+            self.nametowidget(".!frame.!dashboard_page.!frame.!frame.!frame.!button").configure(state='active')
+            self.nametowidget(".!frame.!dashboard_page.!frame.!frame.!frame.!button").configure(text='Enter Parameters')
+
         else:
             return
 

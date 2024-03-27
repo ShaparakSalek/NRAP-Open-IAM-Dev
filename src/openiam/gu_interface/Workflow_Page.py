@@ -321,6 +321,9 @@ class Workflow_Page(tk.Frame):
 
             component_list['Workflow'] = [workflowName, workflowType]
 
+            controller.nametowidget(".!frame.!dashboard_page.!frame.!frame.!frame.!button").configure(state='disabled')
+            controller.nametowidget(".!frame.!dashboard_page.!frame.!frame.!frame.!button").configure(text='Workflow Mode')
+
             self.controller.add_workflow(conn, aqName, wftabControl,
                                          connection_menu, workflowSetupFrame,
                                          controller, dyn_data, controls,
