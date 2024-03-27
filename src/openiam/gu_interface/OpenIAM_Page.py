@@ -577,8 +577,8 @@ class OpenIAM_Page(tk.Frame):
         componentVars['outputDirectory'] = StringVar()
         try:
             componentVars['outputDirectory'].set(os.path.join(
-                os.path.dirname(os.path.dirname(
-                    os.path.dirname(os.path.abspath(__file__)))), 'Output'))
+                os.path.dirname(os.path.dirname(os.path.dirname(
+                    os.path.dirname(os.path.abspath(__file__))))), 'Output'))
         except:
             componentVars['outputDirectory'].set('~Documents')
 
@@ -609,7 +609,7 @@ class OpenIAM_Page(tk.Frame):
 
         # Create variables and widgets relevant to generating output files
         componentVars['outputDirectoryGenerate'] = BooleanVar()
-        componentVars['outputDirectoryGenerate'].set(0)
+        componentVars['outputDirectoryGenerate'].set(True)
         outputDirectoryGenerate_label = ttk.Label(
             outputFrame2, text="Generate output directory:",
             width=MODEL_TAB_LABEL_WIDTH1)

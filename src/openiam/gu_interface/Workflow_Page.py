@@ -6,8 +6,9 @@ from tkinter import messagebox
 import Pmw
 
 from openiam.gu_interface.dictionarydata import (
-    componentVars, componentChoices, workflowVars, APP_SIZE, TAB_SIZE, aquifers,
-    connections, ANALYSIS_TYPES, LOGGING_TYPES, COMPONENT_TYPES,
+    componentVars, componentChoices, componentTypeDictionary, workflowVars,
+    APP_SIZE, TAB_SIZE, aquifers, connections, connectionsDictionary,
+    ANALYSIS_TYPES, LOGGING_TYPES, COMPONENT_TYPES,
     WORKFLOW_TYPES, WORKFLOW_COMPONENTS, savedDictionary,
     LABEL_FONT, INSTRUCTIONS_FONT, BUTTON_WIDTH, FILE_ENTRY_WIDTH,
     MODEL_TAB_LABEL_WIDTH1, MODEL_TAB_LABEL_WIDTH2,
@@ -259,16 +260,39 @@ class Workflow_Page(tk.Frame):
             the component list.
             """
 
-            # Check to see if components have been added already,
+            # Check to see if components have been added already
+            # outside of the Use Workflows section,
             # and if not loading a workflow, remove them
-            # if len(componentChoices) != 0 and not controller.file_loaded:
-            #     if "Workflow" in componentChoices:
-            #         print(wftabControl)
-            #     else:
-            #         for tab in componentChoices:
-            #             print(controller.tabControl.tab)
-            #     print()
-            #     # clear_components()
+            if len(componentChoices) != 0 and not controller.file_loaded:
+                if "Workflow" in componentChoices:
+                    pass
+                else:
+                    for comp in componentChoices:
+                        index = componentChoices.index(comp)
+                        componentChoices.pop()
+                        del componentVars[comp]
+                        connectionsDictionary.pop(index)
+                        connections.pop(index+1)
+                        try:
+                            d.pop(comp, 'No component found')
+                        except:
+                            pass
+                        connectionTypes = []
+                        componentTypeDictionary.pop(index)
+                        connection_menu.children['menu'].delete(0, 'end')
+
+                        for c in connectionsDictionary:
+                            connectionTypes.append(c)
+                            connection_menu.children['menu'].add_command(
+                                label=c,
+                                command=lambda con=c: connection_menu.connection.set(con))
+
+                        controller.tabControl.select('.!frame.!openiam_page.!notebook.!frame3')
+                        controller.connection.set(connections[0])
+                        controller.componentType.set(COMPONENT_TYPES[0])
+                        for w in controller.tabControl.winfo_children():
+                            if comp in str(w):
+                                w.destroy()
 
             workflow_components = WORKFLOW_COMPONENTS[self.controller.workflowType.get()]
             component_list = {}
@@ -308,7 +332,7 @@ class Workflow_Page(tk.Frame):
             are to be generated.
             """
 
-            s = self.controller.GenerateOutputFiles.get()
+            s = self.controller.wf_GenerateOutputFiles.get()
 
             if s:  # if output files are to be generated
                 for each in self.button_set:
@@ -316,8 +340,8 @@ class Workflow_Page(tk.Frame):
             else:
                 for each in self.button_set:
                     each.config(state='disable')
-                self.controller.GenerateCombOutputFile.set(False)
-                self.controller.GenerateStatFiles.set(False)
+                self.controller.wf_GenerateCombOutputFile.set(False)
+                self.controller.wf_GenerateStatFiles.set(False)
             # End of method
 
         def test_val(inStr, acttyp):
@@ -667,8 +691,8 @@ class Workflow_Page(tk.Frame):
         componentVars['wf_outputDirectory'] = StringVar()
         try:
             componentVars['wf_outputDirectory'].set(os.path.join(
-                os.path.dirname(os.path.dirname(
-                    os.path.dirname(os.path.abspath(__file__)))), 'Output'))
+                os.path.dirname(os.path.dirname(os.path.dirname(
+                    os.path.dirname(os.path.abspath(__file__))))), 'Output'))
         except:
             componentVars['wf_outputDirectory'].set('~Documents')
 
@@ -703,7 +727,7 @@ class Workflow_Page(tk.Frame):
 
         # Create variables and widgets relevant to generating output files
         componentVars['wf_outputDirectoryGenerate'] = BooleanVar()
-        componentVars['wf_outputDirectoryGenerate'].set(0)
+        componentVars['wf_outputDirectoryGenerate'].set(True)
         outputDirectoryGenerate_label = ttk.Label(outputFrame2,
                                                   text="Generate output directory:",
                                                   width=MODEL_TAB_LABEL_WIDTH1,

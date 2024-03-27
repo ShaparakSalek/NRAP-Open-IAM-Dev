@@ -143,7 +143,7 @@ class NRAPOpenIAM(tk.Tk):
         d['ModelParams'] = {}
         if componentVars['outputDirectoryGenerate'].get():
             d['ModelParams']['OutputDirectory'] = componentVars[
-                'outputDirectory'].get()+'{datetime}'
+                'outputDirectory'].get()+'/GUI_simulation_' + '{datetime}'
         else:
             d['ModelParams']['OutputDirectory'] = componentVars[
                 'outputDirectory'].get()
@@ -1263,7 +1263,7 @@ class NRAPOpenIAM(tk.Tk):
 
             cmpnt_to_be_removed = componentChoices.pop(index)
             componentTypeDictionary.pop(index)
-            if menu_type == 'workflow' and len(connectionsDictionary)==0:
+            if menu_type == 'workflow' and len(connectionsDictionary) == 0:
                 pass
             else:
                 connectionsDictionary.pop(index)
